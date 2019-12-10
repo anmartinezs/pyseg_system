@@ -3,7 +3,7 @@
 
 ## TEST
 
-rm -r pyseg-sys/tests/results/
+rm -r pyseg-sys/tests/results/*
 
 ## TUTORIAL exp_ssmb
 
