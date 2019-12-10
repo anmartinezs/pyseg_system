@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><link rel="stylesheet" href="help_report_matlab_files/matlab-report-styles.css" type="text/css" /><script type="text/javascript" language="JavaScript" src="help_report_matlab_files/matlabreports.js"></script><title>Help Report</title></head><body><div class="report-head">Help Report</div><p><div class="report-desc">The Help Report presents a summary view of the help component of your MATLAB files  (<a href="matlab:helpview([docroot '/techdoc/matlab_env/matlab_env.map'], 'matlab_env_help_rpt')">Learn More</a>).</div><table border="0"><tr><td><input type="button" value="Rerun This Report" id="rerunThisReport" onclick="runreport('helprpt(\'/home/amartinez/workspace/mpi/tomosegmemtv/tomosegmemtv_osx/source\',\'dir\')');" /></td><td><input type="button" value="Run Report on Current Folder" id="runReportOnCurrent" onclick="runreport('helprpt');" /></td></tr></table><form method="GET" action="matlab:internal.matlab.codetools.reports.handleForm"><input type="hidden" name="reporttype" value="helprpt" /><table cellspacing="8"><tr><td><input type="checkbox" name="helpSubfunsDisplayMode"  onChange="this.form.submit()" />Show class methods</td><td><input type="checkbox" name="h1DisplayMode"  onChange="this.form.submit()" />Description</td><td><input type="checkbox" name="exampleDisplayMode"  onChange="this.form.submit()" />Examples</td></tr><tr><td><input type="checkbox" name="helpDisplayMode" checked onChange="this.form.submit()" />Show all help</td><td><input type="checkbox" name="seeAlsoDisplayMode" checked onChange="this.form.submit()" />See also</td><td><input type="checkbox" name="copyrightDisplayMode"  onChange="this.form.submit()" />Copyright</td></tr></table></form>Report for folder /home/amartinez/workspace/mpi/tomosegmemtv/tomosegmemtv_osx/source<p><strong>MATLAB File List</strong><br/><table cellspacing="0" cellpadding="2" border="0"><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fangauss.m'))"><span class="mono">angauss</span></a></td><td class="td-linetopleft"><pre>  ANGAUSS  Anisotropic gaussian filtering.
+    INPUT:  
+        Is - Input tomogram
+        s - Gaussian standard deviation 
+        r - Aspect ration in Z axis, if 1 isotropic
+    OUTPUT:
+        S - Filtered output
+ 
+    See also: diff3d
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fangauss.m'),9)">&nbsp;9:</a> See also: diff3d</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fcropt.m'))"><span class="mono">cropt</span></a></td><td class="td-linetopleft"><pre>  CROPT Crop a tomogram, set to zero voxels in the border of the tomogram
+    INPUT:  
+ 		T - input tomogram
+ 		i = [li hi] - range for coodinate i 
+    OUTPUT:
+ 		C - output cropped tomogram
+ 
+    See also: global_analysis
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fcropt.m'),8)">&nbsp;8:</a> See also: global_analysis</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdiff2d.m'))"><span class="mono">diff2d</span></a></td><td class="td-linetopleft"><pre>  DIFF2D  Differentiation in 2D images
+    INPUT:  
+        Is - Input image
+        k - Dimension 1: x-dimension, otherwise: y-dimension
+        h - Step size
+    OUTPUT:
+        D - Output tomogram
+ 
+    See also: diff3d, dtvoting, dtvotinge
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdiff2d.m'),9)">&nbsp;9:</a> See also: diff3d, dtvoting, dtvotinge</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdiff3d.m'))"><span class="mono">diff3d</span></a></td><td class="td-linetopleft"><pre>  DIFF3D  Calculates partial derivative along any dimension in a tomogram.
+    INPUT:  
+        Is - Input tomogram
+        k - 1: x-dimension, 2: y-dimension and otherwise: z-dimension
+    OUTPUT:
+        D - Output tomgram
+ 
+    See also: angauss, eig3dkmex, diff2d
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdiff3d.m'),8)">&nbsp;8:</a> See also: angauss, eig3dkmex, diff2d</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdtvoting.m'))"><span class="mono">dtvoting</span></a></td><td class="td-linetopleft"><pre>  STVOTING  Applies dense 2D tensor voting for ridge detection by steerable filters over 
+            every slice of a tomogram at X, Y and Z axes.
+    INPUT:  
+        E - Input tomogram (foreground dark)
+        s - Scale factor 
+        sg - variance for gaussian prefiltering
+        m - Missing wedge semiangle in Z axis, it tries to prevent missing wedge effects 
+        if less than 0 is disabled 
+        d - Input data; 1- foreground black, otherwise- forecast bright
+        v - If equal to 1 verbose mode activated (disabled by default)
+    OUTPUT:
+        S - Output saliency
+ 
+    See also: steer2dtvoting, dtvotinge
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdtvoting.m'),14)">14:</a> See also: steer2dtvoting, dtvotinge</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdtvotinge.m'))"><span class="mono">dtvotinge</span></a></td><td class="td-linetopleft"><pre>  DTVOTINGE  Applies dense 2D tensor voting by for edge detection by steerable filters over 
+            every slice of a tomogram at X, Y and Z axes.
+    INPUT:  
+        E - Input tomogram
+        s - Scale factor 
+        sg - variance for gaussian prefiltering
+        m - Missing wedge semiangle in Z axis, it tries to prevent missing wedge effects 
+        if less than 0 is disabled 
+        v - If equal to 1 verbose mode activated (disabled by default)
+    OUTPUT:
+        S - Output saliency
+ 
+    See also: steer2dtvoting, dtvoting
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fdtvotinge.m'),13)">13:</a> See also: steer2dtvoting, dtvoting</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Feig3dkmex.m'))"><span class="mono">eig3dkmex</span></a></td><td class="td-linetopleft"><pre>  EIG3DKMEX  Multicore eigenvalues and eigenvectors computation in 3x3 symmetric real tensors 
+             of tomograms
+    INPUT:  
+        Iij - Tomograms with the i, j discrete diferentials, input data must be single and double
+        mode: 1-&gt; analytical (fastest), 2-&gt; hybird (intermediate) ohterwise-&gt; Jacobi 
+        (the most precise)
+    OUTPUT:
+        Lk: the k eigen value ordered by its absolute value (descendant)
+        Vk: the corresponding eigenvector
+ 
+    See also: diff3d, surfaceness
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Feig3dkmex.m'),11)">11:</a> See also: diff3d, surfaceness</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fgetsaliency.m'))"><span class="mono">getsaliency</span></a></td><td class="td-linetopleft"><pre>  GETSALIENCY  Get ridge saliency and its normal
+    INPUT:  
+        E - Input tomogram (foreground bright), input data must be single and double
+        s - smoothing scale
+        mode: 1-&gt; analytical (fastest), 2-&gt; hybird (intermediate) ohterwise-&gt; Jacobi 
+        (the most precise)
+    OUTPUT:
+        S - normal vector field
+        Vi - the i coordinate of the normal vector field
+ 
+    See also: eig3dkmex, nonmaxsup, diff3d, angauss
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fgetsaliency.m'),11)">11:</a> See also: eig3dkmex, nonmaxsup, diff3d, angauss</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fgetsysinfo_mac.m'))"><span class="mono">getsysinfo_mac</span></a></td><td class="td-linetopleft"><pre>  GETSYSINFO_MAC Return system information on MacOS Computers
+    OUTPUT: If error in some output it will be set ot -1
+        c - number of available cores
+        m - memory size
+        l - Cache L2 size
+ 
+    See also:
+ 
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><span style="background: #FFC0C0">No See Also line</span><br/></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fglobal_analysis.m'))"><span class="mono">global_analysis</span></a></td><td class="td-linetopleft"><pre>  GLOBAL_ANALYSIS Perform a simple global analysis for tomogram segmentation, firstly binarizes 
+                  and secondly labels tomogram structures according to their size
+ 
+    INPUT:  
+        M - Input tomogram
+        tv - Binarization threshold
+        c - Voxel connectivity: 6, 8 (default) or 26
+        v - if 1 verbose mode activated
+    OUTPUT:
+        C - Output tomogram with the structures labeled according their size
+ 
+    See also: tomosegmemtv, cropt
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fglobal_analysis.m'),12)">12:</a> See also: tomosegmemtv, cropt</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Flinmap.m'))"><span class="mono">linmap</span></a></td><td class="td-linetopleft"><pre>  LINMAP  Calcultes the parameters for remaping data linearly 
+    INPUT:  
+        li - Lower bound input range for independent variable
+        ui - Upper bound input range for independent variable
+        lo - Lower bound input range for dependent variable
+        uo - Upper bound input range for dependent variable
+    OUTPUT:
+        m - Linear slope
+        c - Linear offset
+ 
+    See also: 
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Flinmap.m'),11)">11:</a> See also: </pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fmembflt_kernel.m'))"><span class="mono">membflt_kernel</span></a></td><td class="td-linetopleft"><pre>  MEMBFLT_KERNEL Kernel code for TOMOSEGMEMTV. Do not call this function directly, call tomosegmemtv instead.
+    INPUT:  
+        I - Input tomogram (foreground dark), input data must be single and double
+        s - Scale factor 
+        t - Membrane thickness factor
+        v - If equal to 1 verbose mode activated (disabled by default)
+        m - If equal to 1 ridge detection (default), otherwise edge detection
+        w - Missing wedge semiangle in Z axis, it tries to prevent missing wedge effects 
+        if less than 0 is disabled 
+        e - Mode for resolving eigenproblem; 1- Fast (default), 2- Intermediate,
+        otherwise- Accurate
+        d - Densification scale factor
+    OUTPUT:
+        F - filtered tomogram with the membranes enhanced, -1 if error
+        Vi - Coordinate i of the normal to membrane
+ 
+    See also: tomosegmemtv
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fmembflt_kernel.m'),17)">17:</a> See also: tomosegmemtv</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fnonmaxsup.m'))"><span class="mono">nonmaxsup</span></a></td><td class="td-linetopleft"><pre>  NONMAXSUP  Ridge centreline detection by non-maximum suppresion criteria
+    INPUT:  
+        I: Input tomogram, input data must be single or double 
+        M: Binary (logical format) mask for improve the speed 
+        Vi: The i coordinate of the major eigenvector
+    OUTPUT:
+        B: binary output
+ 
+    See also: eig3dkmex, surfaceness, getsaliency
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fnonmaxsup.m'),9)">&nbsp;9:</a> See also: eig3dkmex, surfaceness, getsaliency</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fsteer2dtvoting.m'))"><span class="mono">steer2dtvoting</span></a></td><td class="td-linetopleft"><pre>  STEER2DTVOTING  Tensor voting for 2D image by using steerable filters.
+    INPUT:  
+        Is - Input image stickness
+        Io - Input orientation 
+        Wi - Basis filter i in Fourier space
+    OUTPUT:
+        S - Output saliency
+ 
+    See also: dtvoting, dtvotinge
+    
+    AUTHOR: Antonio Martinez-Sanchez
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fsteer2dtvoting.m'),9)">&nbsp;9:</a> See also: dtvoting, dtvotinge</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fsurfaceness.m'))"><span class="mono">surfaceness</span></a></td><td class="td-linetopleft"><pre>  SURFACENESS Enhances local ridges (or edges) with surface shape
+    INPUT:  
+        I - Input tomogram (foreground bright), input data must be single and double
+        s - Scale factor 
+        m - If equal to 1 ridge detection (default), otherwise edge detection
+        e - Mode for resolving eigenproblem; 1- Fast (default), 2- Intermediate,
+        otherwise- Accurate
+        v - If equal to 1 verbose mode activated (disabled by default)
+    OUTPUT:
+        F - filtered tomogram with the membranes enhanced, -1 if error
+        Vi - Coordinate i of the normal to membrane
+ 
+    See also: tomosegmemtv
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Fsurfaceness.m'),13)">13:</a> See also: tomosegmemtv</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Ftomosegmemtv.m'))"><span class="mono">tomosegmemtv</span></a></td><td class="td-linetopleft"><pre>  TOMOSEGMEMTV Centreline detection of plane ridges, membranes (Mac OS version 0.2)
+    INPUT:  
+        I - Input tomogram (foreground dark), all of its dimension must be greater than 3 
+        s - Scale factor 
+        t - Membrane thickness factor
+        v - (optional) If equal to 1 verbose mode activated (disabled by default)
+        m - (optional) If equal to 1 ridge detection (default), otherwise edge detection
+        w - (optional) Missing wedge semiangle in Z axis, it tries to prevent missing wedge effects, 
+        if less than 0 is disabled (default)
+        e - (optional) Mode for resolving eigenproblem; 1- Fast (default), 2- Intermediate,
+        otherwise- Accurate
+        d - (optional) Densification scale factor, by default is 10
+        u - (optional) Memory reduction coeficient if it is less than 1 the input data may be
+        divided in blocks.
+    OUTPUT:
+        If the input format for data are "double" the output will have this format, otherwise
+        will have "single" format
+        F - filtered tomogram with the membranes enhanced
+        Vi - Coordinate i of the normal to membrane
+ 
+    See also: global_analysis, cropt
+    
+    AUTHOR: Antonio Martinez-Sanchez (an.martinez.s.sw@gmail.com)
+    REFERENCES:
+        [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting 
+        for electron tomography. sent to J Struct Biol. (2013)
+<br/></pre><pre><a href="matlab: opentoline(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Ftomosegmemtv.m'),21)">21:</a> See also: global_analysis, cropt</pre></td></tr><tr><td valign="top" class="td-linetop"><a href="matlab: edit(urldecode('%2Fhome%2Famartinez%2Fworkspace%2Fmpi%2Ftomosegmemtv%2Ftomosegmemtv_osx%2Fsource%2Ftomosegmemtv_batch.m'))"><span class="mono">tomosegmemtv_batch</span></a></td><td class="td-linetopleft"><pre>  Script for processing all tomograms in a directory with membflt
+  Author: Antonio Martinez-Sanchez
+<br/></pre><span style="background: #FFC0C0">No See Also line</span><br/></td></tr></table></body></html>

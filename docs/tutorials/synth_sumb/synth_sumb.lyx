@@ -1,0 +1,2675 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+PySeg tutorial: unoriented membranes
+\end_layout
+
+\begin_layout Date
+23.10.2019
+\end_layout
+
+\begin_layout Author
+Antonio Martinez-Sanchez
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+1,*
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+Department of Molecular Structural Biology, Max Planck Institute for Biochemistr
+y, Am Klopferespitz 18, 82152 Martinsried, Germany
+\end_layout
+
+\begin_layout Address
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+E-mail: martinez@biochem.mpg.de
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+This tutorial gives an example that shows the most of PySeg functionalities
+ for processing unoriented membranes, here a script is provided to generate
+ synthetically the input data.
+ A membrane is unoriented, in contrast to oriented, if we don't know what
+ are its inner and outer sides (see Fig X).
+ We use to have unoriented membranes when cryo-ET tomograms has been processed
+ with automated methods for membrane segmentation, like TomoSemMemTV.
+ In general, to orient a membrane is not at all a trivial task in cryo-ET
+ because of the presence of holes in membranes.
+ To orient a membrane, that is to segment with different labels the inner
+ volume and the outer volume, requires of a further, currently manually
+ supervised, processing.
+\end_layout
+
+\begin_layout Standard
+This tutorial has any scientific interest beyond the training of PySeg users.
+ It is strongly recommended not to start the analysis of real experimental
+ data with PySeg before completing successfully this tutorial.
+ Besides having PySeg system installed, this tutorial also requires 
+\begin_inset CommandInset href
+LatexCommand href
+name "TomoSegMemTV"
+target "https://sites.google.com/site/3demimageprocessing/tomosegmemtv"
+literal "false"
+
+\end_inset
+
+ (included in PySeg system package), 
+\begin_inset CommandInset href
+LatexCommand href
+name "Relion"
+target "https://www3.mrc-lmb.cam.ac.uk/relion/index.php?title=Main_Page"
+literal "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "TOM Toolbox "
+target "https://www.biochem.mpg.de/tom"
+literal "false"
+
+\end_inset
+
+ (just for Matlab I/O during membrane segmentation).
+ For results visualization it is required 
+\begin_inset CommandInset href
+LatexCommand href
+name "Chimera"
+target "https://www.cgl.ucsf.edu/chimera/"
+literal "false"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "IMOD"
+target "https://bio3d.colorado.edu/imod/"
+literal "false"
+
+\end_inset
+
+, and 
+\begin_inset CommandInset href
+LatexCommand href
+name "Paraview"
+target "https://www.paraview.org/"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+VERY IMPORTANT: some computer skills are required to follow this tutorial
+ as Python, Matlab and Bash scripts has to be executed and/or edited.
+ The default settings guarantees to obtain a similar results to those presented
+ here, we also encourage the user to play with different input data as well.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/workflow.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The general workflow.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Executing the scripts
+\end_layout
+
+\begin_layout Standard
+To complete this tutorial it is required to execute Python, Matlab and Bash
+ scripts.
+\end_layout
+
+\begin_layout Itemize
+Python scripts (*.py) are executed in the terminal as:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+user@cpu: python script.py
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Matlab scripts (*.m) are executed in the Matlab terminal as:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+>> script.m
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Bash scripts (*.sh) are divided in two categories, (1) which are directly
+ run in the terminal (it requires execution permissions) and (2) which are
+ submitted to a computers cluster:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+user@cpu: ./script.sh 
+\end_layout
+
+\begin_layout Enumerate
+user@cpu: qsub script.sh 
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Synthetic input data
+\end_layout
+
+\begin_layout Standard
+The folder 
+\series bold
+pre
+\series default
+ contains the scripts for input data generation and its segmentation.
+\end_layout
+
+\begin_layout Subsection
+Microsome generation
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:mic"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Python script 
+\series bold
+gen_microsomes.py
+\series default
+ generates a serial of tomograms with a microsome each, here spherical vesicles,
+ with proteins adhered to their membranes.
+ Proteins with different structural models can be used, these proteins are
+ distributed randomly following different patterns: clustered (the last
+ two models), co-localized (third from last with respect the first one)
+ and the rest are randomly distributed.
+ Depending of the number of output tomograms set running this script may
+ take a long time (e.g.
+ 50 tomograms and default settings with 3 processes may take almost one
+ day).
+\end_layout
+
+\begin_layout Standard
+The input parameters are:
+\end_layout
+
+\begin_layout Itemize
+Input/Output:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+out_dir: output directory
+\end_layout
+
+\begin_layout Itemize
+out_stem: stem added to the output generated files
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing parameters:
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Currently the multiprocessing does not work
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mp_npr: number of parallel processes
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Tomogram parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+tm_nt: integer with the number of tomograms to generate
+\end_layout
+
+\begin_layout Itemize
+tm_size: 3-tuple with the tomogram dimesions (in pixels)
+\end_layout
+
+\begin_layout Itemize
+tm_res: pixel resolution (nm/pixel)
+\end_layout
+
+\begin_layout Itemize
+tm_snr_rg: 2-tuple with the range of SNR for the output tomograms
+\end_layout
+
+\begin_layout Itemize
+tm_wedge: wedge angle in degrees (maximum sample tilting)
+\end_layout
+
+\begin_layout Itemize
+tm_wedge_rot: tilting axis rotation in degrees
+\end_layout
+
+\begin_layout Itemize
+tm_bin: tomogram binning factor for segmentation and particle picking (particles
+ for subtomogram averaging will be reconstructed at bin 0)
+\end_layout
+
+\begin_layout Itemize
+tm_rsz: 3-tuple with the sub-volume dimension in pixels for rotating the
+ models.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Microsome parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mc_mbt: microsome membrane thickness in nm
+\end_layout
+
+\begin_layout Itemize
+mc_mbs: membrane lipid layer decay in nm
+\end_layout
+
+\begin_layout Itemize
+mc_ip_min_dst: minimum distance between particles
+\end_layout
+
+\begin_layout Itemize
+mc_1st_crad: radius for clustered random models (the two last ones)
+\end_layout
+
+\begin_layout Itemize
+mc_c_jump_prob: jumping probability for clustered random models
+\end_layout
+
+\begin_layout Itemize
+mc_in_models: averaged distance for co-localized random models
+\end_layout
+
+\begin_layout Itemize
+mc_in_model: tuple with the paths for input models
+\end_layout
+
+\begin_layout Itemize
+mc_avg_nparts: averaged number of particles per tomogram per each model,
+ tuple with the same length as 'mc_in_model'
+\end_layout
+
+\begin_layout Itemize
+mc_3sg_nparts: sigma for Gaussian distribution for the number of particles
+\end_layout
+
+\begin_layout Itemize
+mc_zh: sub-volumes model center
+\end_layout
+
+\begin_layout Itemize
+mc_halo_z: top and bottom halo without with only noise for the output tomograms
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mp_npr: number of parallel processes
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The output of this scripts are:
+\end_layout
+
+\begin_layout Itemize
+Set of tomograms synthetically generated with a microsome each at bin0 and
+ bin2
+\end_layout
+
+\begin_layout Itemize
+STAR file with the paths for the tomograms
+\end_layout
+
+\begin_layout Itemize
+Some additional files for visualization.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/mic.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:mics"
+
+\end_inset
+
+(Top) Structural models used for membrane bound proteins.
+ (Bottom) Tomographic slices of a generated microsome, in bin0 (left) and
+ in bin2 (right).
+ Visualization generated with Chimera and IMOD.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Membrane segmentation
+\end_layout
+
+\begin_layout Standard
+The Matlab script 
+\series bold
+mb_segmentation.m
+\series default
+ segments the membrane of the binning 2 microsome generated in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:mic"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This scripts makes usage of 
+\begin_inset CommandInset href
+LatexCommand href
+name "TomoSemeMemTV"
+target "https://sites.google.com/site/3demimageprocessing/tomosegmemtv"
+literal "false"
+
+\end_inset
+
+ software (package included in PySeg system) and 
+\begin_inset CommandInset href
+LatexCommand href
+name "TOM Toolbox "
+target "https://www.biochem.mpg.de/tom"
+literal "false"
+
+\end_inset
+
+ (not included).
+ TOM Toolbox is just used for tomogram I/O in Matlab, then alternative routines
+ could be used with very little modifications to avoid the necessity of
+ TOM Toolbox.
+\end_layout
+
+\begin_layout Standard
+The input are:
+\end_layout
+
+\begin_layout Itemize
+Input/Output directories:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: STAR file with the tomograms at original resolution (rlnMicrographName
+ column) and its binned 2 counterpart (rlnImageName column).
+\end_layout
+
+\begin_layout Itemize
+dout: Output directory
+\end_layout
+
+\begin_layout Itemize
+out_star: output STAR file where the membrane segmentations (psSegImage
+ column), the binned tomograms and the original tomograms are associated.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+s, d: scale factor for TomoSegMemTV, their values should be the same
+\end_layout
+
+\begin_layout Itemize
+t: membrane thickness factor for TomoSegMemTV
+\end_layout
+
+\begin_layout Itemize
+v, m, w, e, u: advanced TomoSegMemTV parameters, we recommend use the defaults.
+\end_layout
+
+\begin_layout Itemize
+tb: binarization threshold after applying TomoSegMemTv
+\end_layout
+
+\begin_layout Itemize
+mb_ht: membrane half-thickness in pixels
+\end_layout
+
+\begin_layout Itemize
+halo_z: slices to discard (to set zero) on top and bottom of the tomogram
+\end_layout
+
+\begin_layout Itemize
+max_mb_dst: maximum distance to membrane for foreground in the output segmentati
+on (0-background, 1-membrane, 2-foreground)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A segmentation for each microsome at binning 2 resolution, the membrane
+ is labeled as 1, the foreground (here the membrane surroundings) as 2 and
+ the background (the rest) as 0.
+\end_layout
+
+\begin_layout Itemize
+A STAR file associating each segmentation with the corresponding microsome.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/mic_mb_seg.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+3D view of the membrane segmentation (yellow) of a microsome.
+ Visualization generated with Paraview.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Membrane bound densities tracing
+\end_layout
+
+\begin_layout Standard
+The folder 
+\series bold
+tracing
+\series default
+ contains the scripts for tracing the electron dense structures associated
+ to microsome membranes.
+ In addition, it also provides a initial guess for the localization of the
+ membrane bound structures.
+\end_layout
+
+\begin_layout Subsection
+Spatially embedded graph
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+mb_graph_mp.py
+\series default
+ generates a spatially embedded graph for each microsome.
+ This graph traces all electron density structures in the membrane surrounding
+ and also recovers their connectivity.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: The STAR file generated by mb_segmentation.m with the micromoes
+ and their corresponding segmentations.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Graph computation parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+res: pixel size in nm
+\end_layout
+
+\begin_layout Itemize
+s_sig: sigma for preliminary low-pass Gaussian filtering the input density
+ map.
+\end_layout
+
+\begin_layout Itemize
+v_den: graph vertices density (vertex/nm**3) to be achieved within membranes
+ by simplifications.
+ It the initial density (before simplification) is larger then this value
+ can not be achieve and some WARNING messages will be printed, some possible
+ solutions: decrease v_den value, decrease s_sig, try with data at higher
+ resolution.
+\end_layout
+
+\begin_layout Itemize
+ve_ratio: maximum ratio between graph vertices and edges.
+\end_layout
+
+\begin_layout Itemize
+max_len: maximum distance to the segmented membrane to process.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+npr: number of parallel processes
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned graph computation, for the shake of simplicity they are not
+ commented here as they are not required to successfully complete this tutorial.
+\end_layout
+
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A spatially embedded graph for each microsome processed.
+\end_layout
+
+\begin_layout Itemize
+A STAR file as given by mb_segmentation.m but with an additional column with
+ the corresponding graph.
+\end_layout
+
+\begin_layout Itemize
+Some additional files for visualization.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/mic_graph.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:graph"
+
+\end_inset
+
+3D view of the spatially embedded graph.
+ Segmented membrane in transparent yellow, graph vertices embedded in the
+ membrane in red spheres and the rest in blue, graph arcs are displayed
+ in white.
+ Visualization generated with Paraview.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Filaments network
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+mb_fils_network.py
+\series default
+ find the graph filaments associated with the membrane.
+ PySeg is flexible to many definition for filaments but in this tutorial
+ a filament is the shortest path on the graph between a graph vertex (in
+ red in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:graph"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) and the nearest vertex (in blue in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:graph"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) within the membrane.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: the output STAR file of mb_graph_batch.py with the graphs.
+\end_layout
+
+\begin_layout Itemize
+in_sources: an XML with the definition for membrane embedded graph vertices.
+\end_layout
+
+\begin_layout Itemize
+in_targets: an XML with the definition for the vertices not embedded in
+ the membrane.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Geometrical filament parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+g_rg_len: range (2-tuple) for the valid filament geodesic length.
+\end_layout
+
+\begin_layout Itemize
+g_rg_sin: range (2-tuple) for the valid filament sinuosity.
+\end_layout
+
+\begin_layout Itemize
+g_rg_eud: range (2-tuple) for the valid filament Euclidean distance.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned computation, for the shake of simplicity they are not commented
+ here as they are not required to successfully complete this tutorial.
+\end_layout
+
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A filament network for each graph processed.
+\end_layout
+
+\begin_layout Itemize
+A STAR file as given by mb_graph_batch.py but with an additional column with
+ the corresponding filament network.
+\end_layout
+
+\begin_layout Itemize
+Some additional files for visualization.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/mic_fils.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+3D view of the filaments network.
+ Filaments in white and the segmented membrane in transparent yellow.
+ Visualization generated with Paraview.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Particle picking
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+mbu_picking.py
+\series default
+ picks particles from an input list of filament network, with picking we
+ mean the center point selection for the further sub-volume reconstruction.
+ In addition, a initial guess for Tilt and Psi angles (Relion format) is
+ provided, this information is obtained from the membrane normal vector
+ at the picking point.
+ PySeg allows to define different slices (sub-volumes defined with respect
+ to a membrane) from where the picking points are selected, in this tutorial
+ we choose the region in the surroundings of the membrane.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: a STAR file with the filament networks a generated by mb_fils_network.py
+\end_layout
+
+\begin_layout Itemize
+slices_file: an XML file with the slice definition
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Peaks (or particles) configuration:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+peak_th: particles are sorted by their density values, this values sets
+ the percentile with the lowest density value to be discarded.
+\end_layout
+
+\begin_layout Itemize
+peak_ns: radius in nm for scale suppression to reduce particle picking overlappi
+ng.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned computation, for the shake of simplicity they are not commented
+ here as they are not required to successfully complete this tutorial.
+ However, it is important to remark that the parameter 
+\series bold
+norm_proj 
+\series default
+is set to True for projecting all picked point to the membrane surface.
+\end_layout
+
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A STAR file with the picked particles.
+\end_layout
+
+\begin_layout Itemize
+Some additional files for visualization.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/mic_picking.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Membrane bound template-free particle picking.
+ The microsome ground truth (membrane + proteins) generated by gen_microsome.py
+ in blue.
+ The picking center in red and their associated normal in yellow.
+ Visualization generated with Paraview.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Particle reconstruction
+\end_layout
+
+\begin_layout Standard
+The Python script
+\series bold
+ rec_particles.py
+\series default
+ reconstruct a subvolume for each picked particle an a STAR with the reconstruct
+ed particles file Relion compatible.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: a STAR file with particles picked by 
+\series bold
+mbu_picking.py
+\end_layout
+
+\begin_layout Itemize
+in_ctf: the subvolume with CTF.
+\end_layout
+
+\begin_layout Itemize
+in_mask_norm: subvolume mask for gray values normalization (required if
+ '_psSegImage' not in the input STAR)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Particle pre-processing settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+do_bin: resolution ratio between the subvolumes reconstructed and the picking
+ tomograms.
+\end_layout
+
+\begin_layout Itemize
+do_ang_prior: copy the prior angular information from the input STAR file.
+\end_layout
+
+\begin_layout Itemize
+do_ang_rnd: angle for randomization.
+\end_layout
+
+\begin_layout Itemize
+do_noise: add random noise out the mask
+\end_layout
+
+\begin_layout Itemize
+do_use_fg: to select foreground or background to select the random values
+ for noise
+\end_layout
+
+\begin_layout Itemize
+do_norm: do gray value normalization (Relion convention)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing parameters:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mp_npr: number of parallel processes
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A subvolume for each input picked particle.
+\end_layout
+
+\begin_layout Itemize
+A STAR file for indexing the reconstructed subvolumes compatible with Relion.
+\end_layout
+
+\begin_layout Standard
+In addition to rec_particles.py it is also available the script 
+\series bold
+post_rec_particles.py
+\series default
+.
+ The second allows to post-process any already reconstructed list or particles
+ to update the angular prior and randomization information as well as to
+ randomize the gray values out of an input mask, this script will be used
+ later in this tutorial.
+\end_layout
+
+\begin_layout Section
+Unsupervised classification
+\end_layout
+
+\begin_layout Standard
+The folder 
+\series bold
+class
+\series default
+ contains a scripts for unsupervised and deterministic structural classification
+ by Affinity Propagation (AP) algorithm.
+ 
+\end_layout
+
+\begin_layout Subsection
+Membrane alignment
+\end_layout
+
+\begin_layout Standard
+The following Relion script is executed on the terminal to directly reconstruct
+ an initial average that can be used for the further refinement.
+\end_layout
+
+\begin_layout Itemize
+user@cpu: relion_reconstruct --i ../../../../data/tutorials/synth_sumb/rec/particles_rln.
+star --o ../../../../data/tutorials/synth_sumb/rec/dr_particles.mrc --angpix 2.62
+ --maxres 45
+\end_layout
+
+\begin_layout Standard
+The bash script
+\series bold
+ mb_align_all.sh
+\series default
+ is an example how to submit to a cluster of computers a Relion call for
+ improving the alignment with respect the membrane of the picked particles,
+ to do so it applies a constrained search for in-plane angle (prior angular
+ information for Tilt and Psi angles) and C10 symmetry, the symmetry axis
+ is normal to the membrane.
+ This scripts is prepared to be executed in the cluster of the MPI of Biochemist
+ry, so the parameters related with the management of the grid engine and
+ multiprocessing may require modifications depending on the your computing
+ architecture.
+ Here a spherical mask with a radius of 60 pixel is used.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/mb_align.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:mb_align"
+
+\end_inset
+
+(Left) Direct reconstruction.
+ (Right) Average after the membrane alignment.
+ Visualizations generated with IMOD.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:apclass"
+
+\end_inset
+
+Coarse classification
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+plane_align_class.py
+\series default
+ structurally classify the particles previously aligned with respect the
+ membrane, this classification is unsupervised and deterministic.
+ Here we use AP algorithm but the scripts also allows to utilize PCA+Kmeans
+ and PCA+AG (Agglomerative Clustering) instead, contrarily to AP the other
+ require to introduce the final number of classes.
+ Here we only explain the settings for AP.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: a STAR file with particles to classify
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Particles pre-processing:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+pp_mask: mask for focusing the analysis.
+ We recommed to use cylindrical mask as particles will be radially averaged,
+ that can be done in TOM toolbox.
+\end_layout
+
+\begin_layout Itemize
+pp_low_sg: sigma for the Gaussian to low-pass filter the particles.
+\end_layout
+
+\begin_layout Itemize
+pp_3d: activates r-weighting
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+AP settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+ap_pref: usually a negative value, the tendency to create classes increases
+ when this value increases
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+pp_npr: number of parallel processors.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned classification, for the shake of simplicity they are not commented
+ here as they are not required to successfully complete this tutorial.
+\end_layout
+
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A STAR file with the particles for all classes, the class is identified
+ by the column rlnClassNumber.
+\end_layout
+
+\begin_layout Itemize
+A STAR file for each class with only the particles within the class.
+\end_layout
+
+\begin_layout Itemize
+Two folder with a 2D image (radial average) per class:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The class exemplary particle.
+\end_layout
+
+\begin_layout Itemize
+The average of all particles.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Here this script is run two times.
+ Firstly, the purpose is to clean the picked particles by discarding those
+ classes that does not contain a membrane-bound protein (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ap1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) or a membrane (more common in experimental data).
+ Secondly, we classify a STAR file with the survivor classes merged, now
+ we set the mask to focus the analysis to proteins and excluding the membrane
+ contribution (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ap2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), the idea is to classify the particles only considering proteins structural
+ differences.
+ In the first round the input is the particles output STAR file generated
+ in , and in the second one the results of merging the not discarded particles
+ STAR files of the previous round.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/ap_klass_mb.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:ap1"
+
+\end_inset
+
+First AP classification round, red dashed X marks the classes discarded
+ for the next round.
+ Here each class is represented by the average of its particles.
+ Protein localization is mirrored in respect of membrane plane when we compare
+ with Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:mb_align"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/ap_klass_protein.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:ap2"
+
+\end_inset
+
+Second AP classification round, color frames indicate which classes are
+ grouped together (see Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:3dclass"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) based on their structural similarity for further analysis.
+ Here the mask discard the membrane.
+ Class with * seems to represent the same protein as those classes in dark
+ yellow but picked from the other side of the membrane, # shows an example
+ of class potentially not centered properly.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:3dclass"
+
+\end_inset
+
+3D Classification and refinement
+\end_layout
+
+\begin_layout Standard
+Starting from the membrane aligned particles and the classes obtained in
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:apclass"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we use here Relion to refine the structural analysis, the aim is to obtain
+ a 3D density average reconstruction for each protein as well as to finally
+ determine their localization on the tomograms.
+ In rln folder there are available an exemplary set of Relion scripts for
+ being execute on MPI of Biochemistry cluster, therefore depending on your
+ computer architecture or Relion version they may require some modification.
+ The process (see Figure ) is sumarized as:
+\end_layout
+
+\begin_layout Enumerate
+Firstly for each class in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ap2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ we obtain a direct reconstruction by running the script 
+\series bold
+direct_rec_rln.sh
+\end_layout
+
+\begin_layout Enumerate
+We do an initial 3D refinement by submitting to the cluster 
+\series bold
+ref_rln.sh
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+In this example further results can be improved slightly if the particles
+ STAR files obtained before this step are re-reconstructed using the Python
+ script 
+\series bold
+post_rec_particles.py
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+A 3D classification, this process is specific for each protein in 
+\series bold
+class_rln.sh
+\series default
+ you have an initial example.
+\end_layout
+
+\begin_layout Enumerate
+A final 3D refinement for each isolated protein, the script is 
+\series bold
+ref2_rln.sh
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/dr_ap_klass.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:dr_ap"
+
+\end_inset
+
+Direct reconstruction of the classes in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ap2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ (step 2 above).
+ Colored frames match Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ap2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ but protein localization is mirrored in respect the membrane plane.
+ Class with * seems to represent the same protein as those classes in dark
+ yellow but picked from the other side of the membrane, # shows an example
+ of class potentially not centered properly.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/ref_ap_klass.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:ref_ap"
+
+\end_inset
+
+Refinement of the classes in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:ap2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ (step 2 above).
+ Colored frames match Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:dr_ap"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ Class with * indeed represent the same protein as those classes in dark
+ yellow but picked from the other side of the membrane, # shows an example
+ of class not centered properly.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/ref_rln.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:str"
+
+\end_inset
+
+Final structures obtained after grouping AP classes in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:dr_ap"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, afterwards they are 3D classified and refined with Relion (steps 3 and
+ 4 above).
+ Colors match the initial structures used for generating the synthetic data
+ (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:mics"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Protein in dark yellow is mirrored in respect of membrane plane compared
+ to those in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:mics"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Quantitative analysis for organization
+\end_layout
+
+\begin_layout Standard
+The folder 
+\series bold
+stat
+\series default
+ contains some scripts for the statistical analysis of molecular localization
+ distribution on a segmented Volume Of Interest (VOI), here VOIs are the
+ microsome membranes.
+\end_layout
+
+\begin_layout Subsection
+Surface model generation
+\end_layout
+
+\begin_layout Standard
+Now we generate a surface model for each protein in order to consider their
+ shape for volume exclusion during the statistical analysis.
+ In principle we should take as input the final density averages obtained
+ above (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:str"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), however here we take those associated density used to generate the synthetic
+ tomogram in order to easily get rid of the membrane (see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:mics"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), otherwise membrane should be removed manually.
+ The procedure is outlined as:
+\end_layout
+
+\begin_layout Enumerate
+Open in Paraview the density to process (e.g.
+ 4uqj_fit_s3.mrc)
+\end_layout
+
+\begin_layout Enumerate
+Scaling the subvolume using Filter->Transform.
+ Here the input pixel size 2.62 A/px and the picking and segmentation is
+ done at binned twice resolution so the scaling factor is (1/(4*2.62)) =
+ 0.09542.
+ This factor is introduced in the filter in Properties->Scale for X, Y and
+ Z dimensions.
+\end_layout
+
+\begin_layout Enumerate
+Center the structure using Filter->Transform.
+ Here we have a subvolume of X, Y, and Z dimensions 32.50 (coordinate center
+ in (16.25,16.25,16.25)) so in the filter Properties->Translate we set -16.25
+ for X,Y,Z.
+ At the end of this step the center of the sub-volume must be the coordinate
+ (0,0,0).
+\end_layout
+
+\begin_layout Enumerate
+Closed surface generation using Filter->Contour.
+ Here as surface is generated by applying iso-surface on the input density
+ (scalar field) subvolume, here use a single isosurface with value 0.1.
+\end_layout
+
+\begin_layout Enumerate
+(Optional) Surface decimation using Filter->Decimate.
+ It allows to reduce number of triangles to represent the surface, the lower
+ the number of triangles the lower computations are required for moving
+ these surfaces in the next scripts, nevertheless the higher the number
+ the smoother the surface.
+ Here we use a Target Reduction of 0.6.
+\end_layout
+
+\begin_layout Standard
+This procedure has to be repeated for each protein where initial input files
+ are {4uqj,5pe5,5gjv,5kxi,5vai}_fit_s3.mrc.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/model.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Surface model generation with Paraview.
+ (Top-left) Scaling step.
+ (Top-right) Centering.
+ (Bottom-left) Surface generation.
+ (Bottom-right) Triangles decimation.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:org_pre"
+
+\end_inset
+
+Pre-processing
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+ltomos_generator.py
+\series default
+ load the input list of particles and segmentation and generates some intermedia
+te necessary for any further script for statistical analysis.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: A STAR file where each row correspond with a list of particles
+ to process, columns are; the STAR file with particles (here the final products
+ obtained in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:str"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), the surface model, the surface model used in simulations, the pixel size
+ used for segmentation and picking, and the pixel size used for subtomogram
+ averaging.
+\end_layout
+
+\begin_layout Itemize
+in_seg: A STAR file for pairing rlnMicrographName (orginal tomograms) with
+ their corresponding segmenations.
+ In some cases segmentation tomograms correspond only with fractions of
+ the original tomogram, psSegOff{X,Y,Z} indicates the left-front-top coordinate
+ of the segmented tomogram within the original, psSeg{Rot,Tilt,Psi} allows
+ the possibility of rotate the segmentation.
+ Neither psSegOff{X,Y,Z} nor psSeg{Rot,Tilt,Psi} are used in this tutorial.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Segmentation pre-processing:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+sg_lbl: label for the VOI in the segmented tomogram
+\end_layout
+
+\begin_layout Itemize
+sg_pj: if True then particles centers are projected on the VOI surface in
+ case it is not embedded, it is required for processing membranes.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Post-processing:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+pt_ssup: scale suppression, if two particles closer than this distance then
+ one is removed, it allows to get rid of double picked particles.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The outputs of this script are:
+\end_layout
+
+\begin_layout Itemize
+A STAR file for indexing the files required by the scripts for statistical
+ analysis (lists of tomograms, one per protein).
+\end_layout
+
+\begin_layout Itemize
+Some files useful for visualization in Paraview.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/gt_svols.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Surface models (color fit the models showed in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:str"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) placed at their original positions on the microsome at the proper scale.
+ In transparent gray the original synthetic data without distortions (ground
+ truth).
+ In general we can observe a good agreement for the final results obtained
+ and the original ground truth.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Univariate 1st order analysis
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+uni_1st_analysis.py
+\series default
+ carries out a 1st order univariate analysis on the list of tomograms generated
+ in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:org_pre"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ Functions computed are Function G, F and G.
+ For each protein they are computed; separately for each tomogram (microsome),
+ aggregated for the whole dataset.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: A STAR file with the input list of tomograms to process.
+\end_layout
+
+\begin_layout Itemize
+in_wspace: by default None.
+ Optionally it allows to load an already computed workspace, then only the
+ plots are regenerated.
+ This is useful when we want just want to edit the plots and it is not needed
+ to re-compute the statistics.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Analysis settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+ana_res: resolution (nm/px)
+\end_layout
+
+\begin_layout Itemize
+ana_nbins: number of bins for histograms.
+\end_layout
+
+\begin_layout Itemize
+ana_rmax: maximum distance to consider.
+\end_layout
+
+\begin_layout Itemize
+ana_f_npoints: number of random points for Function F.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Simulation settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+p_nsims: number of simulations per tomogram and list of tomograms, the random
+ model used is the Completely Spatially Randomness with Volume exclusion
+ (CSRV).
+\end_layout
+
+\begin_layout Itemize
+p_per: percentile for the intervals of confidence [p_per, 100-p_per]%.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mp_npr: number of parallel processes for simulations.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned analysis, for the shake of simplicity they are not commented
+ here as they are not required to successfully complete this tutorial.
+\end_layout
+
+\begin_layout Standard
+The output of this scripts are:
+\end_layout
+
+\begin_layout Itemize
+For each protein (list of tomograms) an aggregated analysis for the functions
+ demanded.
+\end_layout
+
+\begin_layout Itemize
+For each tomogram (microsome) an analysis separated by proteins of the functions
+ demanded.
+\end_layout
+
+\begin_layout Standard
+VERY IMPORTANT: in this tutorial we do not execute this scripts as this
+ analysis is now well suited for membrane bound proteins, for the moment
+ it does not include the possibility of using geodesic distances among proteins.
+\end_layout
+
+\begin_layout Subsection
+Univariate 2nd order analysis
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+uni_2nd_analysis.py
+\series default
+ carries out a 2nd order univariate analysis on the lists of tomograms generated
+ in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:org_pre"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+ Functions computed are Function L, O and RDF (Radial Distribution Function).
+ For each protein they are computed separately for each tomogram (microsome)
+ and aggregated for the whole dataset.
+ Results obtained here, see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:uni_2nd"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, confirm that proteins with IDs 1 and 3 are significantly clustered but
+ the rest are randomly distributed on the microsome membrane, we know that
+ in advance because the particles of these proteins were intentionally distribut
+ed in clusters when the initial synthetic data were generated.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: A STAR file with the input list of tomograms to process.
+\end_layout
+
+\begin_layout Itemize
+in_wspace: by default None.
+ Optionally it allows to load an already computed workspace, then only the
+ plots are regenerated.
+ This is useful when we want just want to edit the plots and it is not needed
+ to re-compute the statistics.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Analysis settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+ana_res: resolution (nm/px)
+\end_layout
+
+\begin_layout Itemize
+ana_rg: array with the distance to sample
+\end_layout
+
+\begin_layout Itemize
+ana_shell_thick: if None then it is not considered so the Function L is
+ computed, if a value the it sets a the shell thickness to compute Function
+ O instead.
+\end_layout
+
+\begin_layout Itemize
+and_rdf: if True the RDF instead of Function O is computed, not considered
+ if ana_shell_thick=None.
+\end_layout
+
+\begin_layout Itemize
+ana_fmm: if True then Fast Marching Method is used to compute geodesic distances
+, otherwise Euclidean distances are computed.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Simulation settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+p_nsims: number of simulations per tomogram and list of tomograms, the random
+ model used is the Completely Spatially Randomness with Volume exclusion
+ (CSRV).
+\end_layout
+
+\begin_layout Itemize
+p_per: percentile for the intervals of confidence [p_per, 100-p_per]%.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mp_npr: number of parallel processes for simulations and functions computation.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned analysis, for the shake of simplicity they are not commented
+ here as they are not required to successfully complete this tutorial.
+\end_layout
+
+\begin_layout Standard
+The output of this scripts are:
+\end_layout
+
+\begin_layout Itemize
+For each protein (list of tomograms) an aggregated analysis for the functions
+ demanded.
+\end_layout
+
+\begin_layout Itemize
+For each tomogram (microsome) an analysis separated by proteins of the functions
+ demanded.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/uni_2nd.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:uni_2nd"
+
+\end_inset
+
+Some statistics obtained from univariate second order analysis.
+ (Top-left) Averaged density for all tomograms and proteins, their structural
+ model is displayed below of each ID (1, 0, 3, 2, 4), colors do not match
+ with those in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:str"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ because they are assigned arbitrarily by the processing script.
+ (Top-right) Clustering significance, only proteins with IDs 1, 3 show a
+ high p-value beyond the initial transitory phase, the rest are distributed
+ randomly for all scales, color lines match with density bars.
+ (Bottom-row) The Ripley's L function for each protein considering all microsome
+s, color lines match with density bars.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Bivariate 2nd order analysis
+\end_layout
+
+\begin_layout Standard
+The Python script 
+\series bold
+bi_2nd_analysis.py
+\series default
+ carries out a 2nd order bivariate analysis on the lists of tomograms generated
+ in Subsection 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:org_pre"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ with respect a reference list of tomograms.
+ Functions computed are Function L, O and RDF (Radial Distribution Function).
+ For each protein, apart from the reference, they are computed separately
+ for each tomogram (microsome) and aggregated for the whole dataset.
+ Results obtained here, see Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:uni_2nd"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, confirm that protein with IDs 0 (reference) is slightly more correlated
+ with the protein with ID 4 than the rest, we know that in advance because
+ protein particles with ID where located randomly at a random distance to
+ an instance of protein ID, this random distance follow a Gaussian distribution
+ with 
+\begin_inset Formula $\sigma=30$
+\end_inset
+
+ nm.
+\end_layout
+
+\begin_layout Itemize
+Input files:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+in_star: A STAR file with the input list of tomograms to process.
+\end_layout
+
+\begin_layout Itemize
+in_wspace: by default None.
+ Optionally it allows to load an already computed workspace, then only the
+ plots are regenerated.
+ This is useful when we want just want to edit the plots and it is not needed
+ to re-compute the statistics.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Analysis settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+ana_res: resolution (nm/px)
+\end_layout
+
+\begin_layout Itemize
+ana_rg: array with the distance to sample
+\end_layout
+
+\begin_layout Itemize
+ana_shell_thick: if None then it is not considered so the Function L is
+ computed, if a value the it sets a the shell thickness to compute Function
+ O instead.
+\end_layout
+
+\begin_layout Itemize
+and_rdf: if True the RDF instead of Function O is computed, not considered
+ if ana_shell_thick=None.
+\end_layout
+
+\begin_layout Itemize
+ana_fmm: if True then Fast Marching Method is used to compute geodesic distances
+, otherwise Euclidean distances are computed.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Simulation settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+p_nsims: number of simulations per tomogram and list of tomograms, the random
+ model used is the Completely Spatially Randomness with Volume exclusion
+ (CSRV).
+\end_layout
+
+\begin_layout Itemize
+p_per: percentile for the intervals of confidence [p_per, 100-p_per]%.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Multiprocessing settings:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+mp_npr: number of parallel processes for simulations and functions computation.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Advanced settings: the scripts has some advanced settings which allows a
+ fine tuned analysis, for the shake of simplicity they are not commented
+ here as they are not required to successfully complete this tutorial.
+\end_layout
+
+\begin_layout Standard
+The output of this scripts are:
+\end_layout
+
+\begin_layout Itemize
+For each protein (list of tomograms) an aggregated analysis for the functions
+ demanded.
+\end_layout
+
+\begin_layout Itemize
+For each tomogram (microsome) an analysis separated by proteins of the functions
+ demanded.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/bi_2nd.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Some statistics obtained from bivariate second order analysis.
+ (Top-left) The reference protein used (ID 0).
+ (Top-center) Co-localization significance, protein with ID 4 shows a higher
+ significance value than the rest.
+ (Top-left) Ripley's L function for the colocalization of protein ID 4 with
+ respect to protein ID 0, in average the colocalization is consistently
+ higher than the random case but its does not exceed the interval of confidence
+ for any scale.
+ (Bottom-row) The Ripley's L function for the colocalization of the rest
+ of protein with respect protein ID 0.
+ Color lines match with density bars in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:uni_2nd"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and the lines in the top-left panel.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+References
+\end_layout
+
+\begin_layout Standard
+The original reference associated with this software:
+\end_layout
+
+\begin_layout Itemize
+Martinez-Sanchez et al, 
+\begin_inset Quotes eld
+\end_inset
+
+Template-free detection and classification of heterogeneous membrane-bound
+ complexes in cryo-electron tomograms
+\begin_inset Quotes erd
+\end_inset
+
+ accepted in 
+\shape italic
+Nature Methods
+\shape default
+ (pre-print in 
+\begin_inset CommandInset href
+LatexCommand href
+name "bioRxiv"
+target "https://www.biorxiv.org/content/10.1101/413484v1.abstract"
+literal "false"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+A more detailed information about the organization analysis can be found
+ in:
+\end_layout
+
+\begin_layout Itemize
+Martinez-Sanchez et al, 
+\begin_inset Quotes eld
+\end_inset
+
+On to the statistical spatial analysis for cryo-electron tomography
+\begin_inset Quotes erd
+\end_inset
+
+ in preparation
+\end_layout
+
+\end_body
+\end_document

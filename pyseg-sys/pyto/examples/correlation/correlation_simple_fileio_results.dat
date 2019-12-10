@@ -1,0 +1,35 @@
+#
+# Machine: ivo ['Linux', 'x86_64', 'x86_64']
+# Date: Tue Oct 13 16:34:14 2015
+#
+# Input script: correlation_simple_fileio.pyc (Tue Oct 13 16:22:08 2015) $Revision: 1235 $
+# Working directory: /home/vladan/tools_local/pyto/examples
+#
+# Transformation parameters:
+#
+#   - rotation =    0.0
+#   - scale = [ 1.000,  1.000]
+#   - parity = -1
+#   - shear =  -0.250
+#   - translation = [ 1.250,  4.000]
+#   - rms error: 
+#       - in final system units   0.00
+#       - in initial system units   0.00
+#   - error (in EM overview units): 
+#        [ 0.  0.]
+#        [ 0.  0.]
+#        [  0.00000000e+00  -4.44089210e-16]
+#        [ -2.22044605e-16  -4.44089210e-16]
+#
+# Correlation of targets from initial to final system
+#
+#  Id      Initial          Final   
+   0     1.50   1.00     2.50   3.00  
+   1     1.00   2.00     1.75   2.00  
+#
+# Correlation of targets from final to initial system
+#
+#  Id      Initial          Final   
+   0     2.50   1.00     3.50   3.00  
+   1     2.00   2.00     2.75   2.00  
+   2     1.50   2.00     2.25   2.00  
