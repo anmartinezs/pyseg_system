@@ -30,3 +30,21 @@ Test for measuring univariate 2nd order and simulations computation speed-up.
 
 Main Routine: 
 	-Initialization...
+		+CPUs found: 40
+	-Measurements loops: 
+		+Number of processes: 1
+			*Computation time per c.u.: 10.1053 [secs]
+			*Computation time per c.u. and null-model simulations time: 10.0893 [secs]
+		+Number of processes: 2
+			*Computation time per c.u.: 5.00835 [secs]
+			*Computation time per c.u. and null-model simulations time: 5.08325 [secs]
+		+Number of processes: 4
+			*Computation time per c.u.: 2.60515 [secs]
+			*Computation time per c.u. and null-model simulations time: 2.62094 [secs]
+		+Number of processes: 8
+			*Computation time per c.u.: 1.43127 [secs]
+			*Computation time per c.u. and null-model simulations time: 1.42973 [secs]
+		+Number of processes: 16
+			*Computation time per c.u.: 0.880498 [secs]
+			*Computation time per c.u. and null-model simulations time: 0.855677 [secs]
+		+Number of processes: 24

@@ -33,13 +33,13 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pre/in/all_pre_v6.star'
+in_star = ROOT_PATH + '/org/pre/in/all_pre.star' # '/org/pre/in/all_pre_v6.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_all_pre_pre_ss7px_v6' # '/ref_a3/ltomos'
+out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_all_pre_pre_ss7.31px' # '/ref_a3/ltomos'
 out_stem = 'all_pre_pre' # 'pre'
 
 # Segmentation pre-processing
@@ -54,7 +54,7 @@ sg_voi_mask = True
 # Post-processing
 pt_min_parts = 0
 pt_keep = None
-pt_ssup = 7 # voxels
+pt_ssup = 7.31 # voxels
 
 ########################################################################################
 # MAIN ROUTINE
