@@ -1,0 +1,4 @@
+define_not_for_expansion(`HAVE_HOST_CPU_x86_64')
+define_not_for_expansion(`HAVE_ABI_64')
+define_not_for_expansion(`HAVE_LIMB_LITTLE_ENDIAN')
+define_not_for_expansion(`HAVE_DOUBLE_IEEE_LITTLE_ENDIAN')

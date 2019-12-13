@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#no final slash !!
+targetFold=/fs/pool/pool-bmsan-apps/antonio/sys/soft/cgal/4.7
+# ifraFold=${targetFold}/infrastr
+# objFold=${targetFold}/obj
+
+
+if [ -d "$targetFold" ]; then
+  echo "error: remove $targetFold before installing !!"
+  exit 1
+fi
+
+mkdir $targetFold
+# mkdir $ifraFold
+# mkdir $objFold
+
+
+# Copy already downloaded package
+cp ./downloads/CGAL-4.7.tar.gz $targetFold
+cd $targetFold
+gunzip CGAL-4.7.tar.gz
+tar xvf CGAL-4.7.tar
+cd CGAL-4.7/
+mkdir build
+buildFold=$targetFold/build
+
+# Setting up complier
+CXX_BIN="/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/g++"
+export LD="/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/ld"
+LIB_GMP_DIR="/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/infrastr/lib"
+LIB_MPFR_DIR=$LIB_GMP_DIR
+INCLUDE_GMP_DIR="/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/infrastr/include"
+INCLUDE_MPFR_DIR=$INCLUDE_GMP_DIR
+LIB_GMP=$LIB_GMP_DIR/libgmp.so
+LIB_MPFR=$LIB_MPFR_DIR/libmpfr.so
+export BOOST_ROOT=/fs/pool/pool-bmsan-apps/antonio/sys/soft/boost/1.60.0/build
+
+# Set compiler (GCC v5.3.0)
+export CC=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/gcc
+export CXX=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/g++
+export CPP=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/cpp
+export LD=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/ld
+alias c++=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/c++
+alias g++=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/g++
+alias gcc=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/gcc
+alias cpp=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/cpp
+alias ld=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/bin/ld
+export LD_LIBRARY_PATH=/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/lib64:/fs/pool/pool-bmsan-apps/antonio/sys/soft/gcc/5.3.0/obj/lib:$LD_LIBRARY_PATH
+PYTHON_BIN="/fs/pool/pool-bmsan-apps/antonio/app/soft/PYTHON/2.7.10/bin/python"
+
+# Configuration
+cmake . -DCMAKE_INSTALL_PREFIX=$buildFold -DGMP_LIBRARIES=$LIB_GMP -DGMP_INCLUDE_DIR=$INCLUDE_GMP_DIR -DMPFR_LIBRARIES=$LIB_MPFR -DMPFR_INCLUDE_DIR=$INCLUDE_MPFR_DIR 
+# -DCMAKE_CXX_COMPILER=$CXX_BIN 
+
+# Installation
+make && make install
+

@@ -1,0 +1,3 @@
+define(<CONFIG_TOP_SRCDIR>,<`../.'>)
+define(<WANT_ASSERT>,0)
+define(<WANT_PROFILING>,<`no'>)
