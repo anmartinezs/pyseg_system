@@ -5,6 +5,11 @@ De novo analysis for cryo-electron tomography
 
 * **data**: input data for running some tests and tutorials
 * **pyseg-sys**: the code (libraries and execution scripts) for PySeg, PyOrg and TomoSegMemTV.
+* **sys**: third party software with their installers.
+  + DisPerSe (v. 0.9.24)
+    - Cfitsio (v. 3.380)
+  + CGAL (v 4.7)
+  + Graph-tool (v 2.2.44)
 * **doc**: documentation files
   + manual: a general manual for PySeg (v 0.1) **TODO: update to v1.0**
   + tutorials: specific examples to introduce the users in the usage of the software
