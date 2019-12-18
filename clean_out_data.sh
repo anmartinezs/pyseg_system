@@ -16,13 +16,15 @@ rm -r data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto/*
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen/*
 
 # classification
-rm -r data/tutorials/exp_ssmb/klass/out/*
+rm -r data/tutorials/exp_ssmb/klass/out
+mkdir data/tutorials/exp_ssmb/klass/out
 
 # stat
 rm -r data/tutorials/exp_ssmb/stat/ltomos/*
 mkdir data/tutorials/exp_ssmb/stat/ltomos/test
 mkdir data/tutorials/exp_ssmb/stat/ltomos/test/test_ssup_8
-rm -r data/tutorials/exp_ssmb/stat/out/*
+rm -r data/tutorials/exp_ssmb/stat/out
+mkdir data/tutorials/exp_ssmb/klass/out
 
 ## TUTORIAL synth_sumb
 
