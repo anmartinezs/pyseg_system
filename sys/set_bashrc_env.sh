@@ -13,7 +13,7 @@ printf "export PATH="$PWD"/soft/disperse/0.9.24_pyseg_gcc7/build/bin:""$""PATH" 
 printf "\n## Conda python \n" >> soft/bashrc_pyseg_sys
 printf "export PATH="$PWD"/soft/miniconda2/bin:""$""PATH" >> soft/bashrc_pyseg_sys
 printf "\n# PySeg python code \n" >> soft/bashrc_pyseg_sys
-printf "export PYTHONPATH="$PWD"/../pyseg-sys:""$""PYTHONPATH" >> soft/bashrc_pyseg_sys
+printf "export PYTHONPATH="$PWD"/../code:""$""PYTHONPATH" >> soft/bashrc_pyseg_sys
 printf "\n" >> soft/bashrc_pyseg_sys
 
 ## Add entry to .bashrc
