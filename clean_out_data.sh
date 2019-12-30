@@ -4,7 +4,7 @@ set -ex
 
 ## TEST
 
-rm -r pyseg-sys/tests/results/*
+rm -r code/tests/results/*
 
 ## TUTORIAL exp_ssmb
 
