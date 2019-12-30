@@ -1244,7 +1244,7 @@ class TomoParticles(object):
 
     def get_voi(self):
         try:
-            if isinstance(self.__voi, np.memmap):
+            if isinstance(self.__df_voi, str):
                 return np.load(self.__df_voi)
             else:
                 return self.__voi

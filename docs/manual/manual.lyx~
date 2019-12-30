@@ -1,0 +1,2255 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Manual for PySeg system installation and usage (v 1.0)
+\end_layout
+
+\begin_layout Author
+Antonio Martinez-Sanchez
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+ and Vladan Lucic
+\end_layout
+
+\begin_layout Address
+\align center
+\begin_inset script superscript
+
+\begin_layout Plain Layout
+*
+\end_layout
+
+\end_inset
+
+an.martinez.s.sw@gmail.com (martinez@biochem.mpg.de)
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+PySeg system (pyseg-sys) contains two Python libraries called 
+\series bold
+pyseg
+\series default
+ and 
+\series bold
+pyorg
+\series default
+ for processing and analyzing data in cryo-Electron Tomography (cryo-ET),
+ besides some additional dependencies not included in standard Linux systems.
+ Library pyseg contains functionality for reference free picking proteins
+ in cryo-ET tomograms and pyorg for their statistical analysis, in general
+ we will call them both together as PySeg.
+ Additionally some standalone scripts and input data are provided for testing
+ and illustrative purposes.
+\end_layout
+
+\begin_layout Standard
+IMPORTANT: it is required to be proficient with Python programming language
+ for taking advantage of all capabilities contained by PySeg, unfortunately
+ no GUI is available yet.
+ PySeg is an open source project so any contribution is very welcomed.
+\end_layout
+
+\begin_layout Section
+System requirements
+\end_layout
+
+\begin_layout Standard
+The installers provided in this release has been tested in a Ubuntu 18.04
+ machine.
+ However, PySeg system can also be installed in any other Linux 64bit platform
+ if all dependencies are satisfied.
+\end_layout
+
+\begin_layout Standard
+System prerequisites:
+\end_layout
+
+\begin_layout Itemize
+Anaconda (tested version 4.3.21), package manager for Python (v 2.7.13)
+\end_layout
+
+\begin_layout Itemize
+CMAKE (tested version 2.812.2)
+\end_layout
+
+\begin_layout Itemize
+Ubuntu packages required by DisPerSe, if you have already a installed version
+ of DisPerSe they may not be needed:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Qt5
+\end_layout
+
+\begin_layout Itemize
+M4
+\end_layout
+
+\begin_layout Itemize
+Boost 
+\end_layout
+
+\begin_layout Itemize
+GCC/G++ 
+\end_layout
+
+\begin_layout Itemize
+MathGL
+\end_layout
+
+\begin_layout Itemize
+GSL
+\end_layout
+
+\begin_layout Itemize
+gmp
+\end_layout
+
+\begin_layout Itemize
+VTK
+\end_layout
+
+\begin_layout Itemize
+CGAL
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ubuntu packages required by graph-tool, if you have already a installed
+ version of graph-tool they may not be needed:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+pycairo
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+CHECK
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+PySeg has some other dependencies not included in Ubuntu, advanced users
+ can install them separately, but they are included in this release with
+ a tested installer to simplify the system installation.
+ 
+\end_layout
+
+\begin_layout Standard
+External software included in PySeg system:
+\end_layout
+
+\begin_layout Itemize
+DisPerSe (v 0.9.24) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sousbie2011"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Python packages (are downloaded/installed through Anaconda package manager):
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Numpy
+\end_layout
+
+\begin_layout Itemize
+Scipy
+\end_layout
+
+\begin_layout Itemize
+Scikit-learn 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pedregosa2011"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+scikit-image
+\end_layout
+
+\begin_layout Itemize
+scikit-fmm
+\end_layout
+
+\begin_layout Itemize
+Pyfits
+\end_layout
+
+\begin_layout Itemize
+OpenCV
+\end_layout
+
+\begin_layout Itemize
+Graph-tool 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Peixoto2014"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+beautifulsoup4
+\end_layout
+
+\begin_layout Itemize
+lxml
+\end_layout
+
+\begin_layout Itemize
+pillow
+\end_layout
+
+\begin_layout Itemize
+vtk
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Python packages already included:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Pyto 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lucic2016"
+
+\end_inset
+
+ (some testing data were removed to reduce disk space) 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Next software is not required to run PySeg, nevertheless it is strongly
+ recommended to analyze/visualize its results:
+\end_layout
+
+\begin_layout Itemize
+Paraview (v 5.3.0)
+\end_layout
+
+\begin_layout Itemize
+IMOD (v 4.9.0) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Mastronarde2017"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Chimera (v 1.10.2) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pettersen2004"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Relion (v 2.1) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Scheres2012"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Installation
+\end_layout
+
+\begin_layout Standard
+Copy or extract the 
+\series bold
+\size footnotesize
+python_system
+\series default
+\size default
+ folder in the path you want to install the whole system.
+ The installation of all dependencies to run PySeg on a Ubuntu 18.04 computer
+ requires the next steps (other systems may need some modifications for
+ the installers):
+\end_layout
+
+\begin_layout Enumerate
+Install Ubuntu APT packages, it requires administrative privileges:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+\size footnotesize
+path/to/pyseg_system/sys>./install_ubuntu_apt_pkgs.sh
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Install third party dependencies (currently just to compile locally DisPerSe,
+ not required if you just want to use 
+\series bold
+pyorg
+\series default
+):
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+\size footnotesize
+path/to/pyseg_system/sys>./install_third_parties.sh
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Install conda, if you have already a conda version installed on your computer
+ this step may not be required.
+ This step actually installs the latest version for Miniconda2, and follow
+ the interactive instruction (choose the default values, and don't forget
+ to close and open the terminal in order to make the changes have effect):
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+\size footnotesize
+path/to/pyseg_system/sys>./install_miniconda.sh
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Install conda packages (graph-tool included):
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+\size footnotesize
+path/to/pyseg_system/sys>./install_conda_pkgs.sh
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Set environment variables in .bashrc file:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\series bold
+\size footnotesize
+path/to/pyseg_system/sys>./set_bashrc_env.sh
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+A copy of TomoSegMemTV (with SynapSegTools) is included in 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys
+\family default
+\series default
+\size default
+, this a Matlab package for membrane segmentation in (Cryo-)Electron Tomography,
+ in the folders 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/docs/{tomosegmemtv,syanpsegtools}
+\family default
+\series default
+\size default
+ you have the documentation for their installation and usage.
+\end_layout
+
+\begin_layout Subsection
+Uninstall
+\end_layout
+
+\begin_layout Standard
+For deleting completely the code, data and the installed software just remove
+ the directory 
+\series bold
+\size footnotesize
+pyseg_system
+\series default
+\size default
+.
+ If you want to delete only the installed software and keep the code and
+ data, remove the directory 
+\series bold
+\size footnotesize
+pyseg_system/sys/soft
+\series default
+\size default
+.
+ Don't forget to erase the 
+\shape italic
+Pyseg system
+\shape default
+ and 
+\shape italic
+Miniconda
+\shape default
+ entries from your 
+\series bold
+\size footnotesize
+~/.bashrc
+\series default
+\size default
+ file.
+\end_layout
+
+\begin_layout Standard
+Run the script 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/clean_out_data.sh
+\family default
+\series default
+\size default
+ when you want to delete the output files generated by the 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/
+\family default
+pyseg-sys/test/*.sh
+\series default
+\size default
+ scripts (see Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Guide-to-run"
+
+\end_inset
+
+) and release disk space.
+\end_layout
+
+\begin_layout Section
+Testing (tutorial exp_ssmb)
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Guide-to-run"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here is described how to run a serial of scripts for test that Pyseg has
+ been installed successfully, they are within 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tests/*.sh
+\family default
+\series default
+\size default
+.
+ These tests, require some minimal input experimental data, if you want
+ learn more in deep how to use PySeg and take advantage of its capabilities
+ we encourage to complete the tutorial in 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tutorials/synth_sumb
+\family default
+\series default
+\size default
+, their documentation is in 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/docs/tutorials/synth_sumb
+\family default
+\series default
+\size default
+, this tutorial generates its own synthetic datasets in order to guarantee
+ the reproducibility of its results, so it is strongly recommended to complete
+ this tutorial before you start to process your experimental data.
+ 
+\end_layout
+
+\begin_layout Standard
+All results provided in this document have been generated by a laptop computer
+ with an Intel Core i5 processor and 8Gb RAM.
+ Real experimental datasets in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MartinezXXXX"
+
+\end_inset
+
+ and to complete tutorial in 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tutorials/synth_sumb
+\family default
+\series default
+\size default
+ we used a computer with 36 processors Intel(R) Xeon(R) and 500 GB of RAM.
+\end_layout
+
+\begin_layout Standard
+Some task are computationally costly and some other are not completely paralleli
+zed yet so they can take several minutes.
+ Tasks on big experimental datasets can take hour/days.
+\end_layout
+
+\begin_layout Subsection
+Synthetic grid
+\end_layout
+
+\begin_layout Standard
+This scripts checks that pyseg library can be loaded properly by Python
+ interpreter and evaluates bio-material tracing performance.
+ It generates a set of grid tomograms under different noise conditions and
+ evaluate how precisely is delineated by pyseg software.
+\end_layout
+
+\begin_layout Itemize
+Location (bash): 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tests/tracing_grid.sh
+\end_layout
+
+\begin_layout Itemize
+Input parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+do_long
+\family default
+\series default
+\size default
+: short version is 'False' (default) and takes few minutes but is enough
+ for testing functionality, long version 'True' produces stronger statistics
+ but takes a few hours and require high memory resources.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: an image graph with the precision metrics, the synthetic grid tomograms
+ generated and the graphs computed in folder 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tests/results
+\family default
+\series default
+\size default
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/grid_errors.png
+	lyxscale 30
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/test_grid_short.png
+	lyxscale 8
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/test_grid_long.png
+	lyxscale 10
+	width 30text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Synthetic grid tomogram (left) with arrows pointing to examples of errors.
+ Test output graphs for short (center) and long (right) versions.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Bio-material tracing in cryo-ET tomograms for single membrane analysis
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Bio-material-tracing-in"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here we provide a set of scripts to trace membrane-bound proteins and extract
+ their localization and relative orientation to membrane.
+ As example, an input tomogram with an ER microsome 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pfeffer2014"
+
+\end_inset
+
+ and its membrane segmentation are also provided 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Martinez-Sanchez2014"
+
+\end_inset
+
+.
+ We provide here just one tomogram for simplicity, but scripts I/O is managed
+ by STAR files allowing to many tomograms at once.
+\end_layout
+
+\begin_layout Standard
+You can run all the scripts under this Subsection in their proper order
+ just calling the single bash script 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tests/tracing.sh
+\family default
+\series default
+\size default
+.
+\end_layout
+
+\begin_layout Subsubsection
+Computing the Spatial Embedded Graph (GraphMCF)
+\end_layout
+
+\begin_layout Itemize
+Location (Python): 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tutorials/exp_ssmb/tracing/mb_graph_{cyto,lumen}.py
+\end_layout
+
+\begin_layout Itemize
+Input data: the STAR file 
+\family sans
+\series bold
+\size footnotesize
+data/tracing/mb_single/in/in_graph.star
+\family default
+\series default
+\size default
+ with input tomograms and segmentations to process.
+ A segmentation can be a subvolume of a bigger tomogram, psSegOff{X,Y,Z}
+ columns are used to identify the top-left-front segmentation corner on
+ tomograms coordinates.
+\end_layout
+
+\begin_layout Itemize
+Input parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+res
+\family default
+\series default
+\size default
+: input tomograms voxel size (nm/voxel).
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+s_sig
+\family default
+\series default
+\size default
+: sigma for Gaussian filtering input tomograms, it allows to smooth small
+ and irrelevant features and increases SNR.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+v_den
+\family default
+\series default
+\size default
+: vertex density within membranes, it allows to adjust simplification adaptively
+ for every tomogram.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ve_ratio
+\family default
+\series default
+\size default
+: averaged ratio vertex/edge in the graph within membrane.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+max_len
+\family default
+\series default
+\size default
+: maximum euclidean shortest distance to membrane in nm.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: a STAR file with the (sub-)tomograms and their corresponding graphs
+ (MbGraphMCF objects) 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/graph/{cyto,lumen}/in_gra
+ph_mb_graph.star
+\family default
+\series default
+\size default
+.
+ Additional files for visualization in Paraview.
+\end_layout
+
+\begin_layout Standard
+IMPORTANT: DisPerSe has a bug and crash with long I/O paths, be careful
+ with that at this point.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/paraview_graph.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Visualization in Paraview of the spatial embedded graph generated for microsome
+ lumen material.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Graph refinement (filament network)
+\end_layout
+
+\begin_layout Standard
+In this step the spatially embedded graph can be refined by applying geometrical
+ restrictions.
+ The input graph is reduced to a network of filaments (paths between two
+ vertices), it is is required to define the subset of sources and targets
+ vertices then filaments are computed as the closest paths among them.
+ A subset of the graph vertices is defined by a properly constructed XML
+ file (
+\family sans
+\series bold
+\size footnotesize
+data/tracing/mb_single/in/mb_sources.xml
+\family default
+\series default
+\size default
+ and 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/in/{cyto,lumen}/{cyto,lum
+en}_sources.xml
+\family default
+\series default
+\size default
+) where 
+\family sans
+\series bold
+\size footnotesize
+side
+\family default
+\series default
+\size default
+ indicates the segmented region:
+\end_layout
+
+\begin_layout Itemize
+Location (Python): 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tutorials/exp_ssmb/tracing/mb_fils_network_{cyto,lumen}.py
+\end_layout
+
+\begin_layout Itemize
+Input data: the STAR file 
+\family sans
+\series bold
+\size footnotesize
+data/tracing/mb_single/graph/{lumen,cyto}/in_graph_mb_graph.star
+\family default
+\series default
+\size default
+ as it is returned by 
+\family sans
+\series bold
+\size footnotesize
+mb_graph.py
+\family default
+\series default
+\size default
+ script.
+ The XML files for segmenting source and target vertices (see above).
+\end_layout
+
+\begin_layout Itemize
+Filament geometrical parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+g_rg_eud
+\family default
+\series default
+\size default
+: euclidean distance between source and target vertices.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+g_rg_len
+\family default
+\series default
+\size default
+: geodesic distance trough the graph between source and target vertices.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+g_rg_sin
+\family default
+\series default
+\size default
+: filament sinuosity, geodesic/euclidean distances ratio.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A STAR file with filtered version of the input GraphMCF with filaments
+ network 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/fils/{cyto,lumen}/fil_mb_
+sources_to_{cyto,lumen}_targets_net.star
+\family default
+\series default
+\size default
+.
+ Additional files for visualization in Paraview.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/paraview_fils.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Visualization in Paraview of the cytosolic (red) and lumenal (green) filaments.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Particle picking
+\end_layout
+
+\begin_layout Standard
+In this step points on input filaments are selected as particle centers
+ for further analysis, mainly for particle reconstruction and feeding a
+ subtomogram averaging procedure.
+ Additionally, information relative to orientation of the particle respect
+ the membrane is also provided to reduce alignment complexity during subtomogram
+ averaging.
+ PySeg has been developed to feed Relion software, an advanced user could
+ use any other software but that would require some modification of the
+ python code.
+\end_layout
+
+\begin_layout Standard
+Point selection on filaments is defined by a properly constructed XML file
+ 
+\end_layout
+
+\begin_layout Standard
+
+\family sans
+\size footnotesize
+(
+\series bold
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/in/{cyto,lumen}/mb_{cyto,
+lumen}_cont.xml
+\series default
+)
+\family default
+\size default
+ where 
+\family sans
+\series bold
+\size footnotesize
+cont=+
+\family default
+\series default
+\size default
+ indicates to pick the point where filament intersect the membrane.
+\end_layout
+
+\begin_layout Itemize
+Location (Python): 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/mb_picking_{cyto,lumen}.py
+\end_layout
+
+\begin_layout Itemize
+Input data: 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/fils/{cyto,lumen}/fil_mb_
+sources_to_{cyto,lumen}_targets_net.star
+\family default
+\series default
+\size default
+ the STAR file as it is returned by 
+\family sans
+\series bold
+\size footnotesize
+mb_fil_network.py
+\series default
+ 
+\family default
+\size default
+script.
+ A XML file for point selection on filaments (see above).
+\end_layout
+
+\begin_layout Itemize
+Peaks cleaning parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+peak_th
+\family default
+\series default
+\size default
+: percentile of points to discard by their density level.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+peak_ns
+\family default
+\series default
+\size default
+: scale suppression in nm, two selected points cannot be closer than this
+ distance.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A STAR file with a list with of the coordinates pickled
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/data/tutorials/exp_ssmb/tracing/mb_single/pick/{cyto,lumen}/fil_mb_
+sources_to_{cyto,lumen}_targets_net_parts.star
+\family default
+\series default
+\size default
+, additional files for particle reconstruction either in Relion or IMOD
+ with particle centers and rotation angles Tilt and Psi (Relion format).
+ Files for visualization in Paraview.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/paraview_picking.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Visualization with Paraview of particles picked in cytosolic (red) and lumenal
+ (green) sides, arrows represent the local normal to the segmented membrane.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Unsupervised and deterministic classification
+\end_layout
+
+\begin_layout Standard
+The bash script 
+\family sans
+\series bold
+\size footnotesize
+classification.sh
+\family default
+\series default
+\size default
+ calls to a python procedure for structural membrane-bound particle classificati
+on in an unsupervised, no input for the number of classes and initial reference
+ is needed, and deterministic manner, the same input the same output.
+\end_layout
+
+\begin_layout Standard
+This scripts has two limitations; prior to classification the 3D particles
+ are converted into 2D images by rotational average around membrane normals,
+ and particles must be already aligned respect to the membrane (Tilt and
+ Psi angles in Relion format).
+ To overcome these limitations the procedure has been designed to work in
+ collaboration with Relion, by applying a high symmetrization around membrane
+ normal (C10 for example) we can pre-align the particles with respect the
+ membrane, without considering Rot angle.
+ On the other hand, the script is not designed to produce final 3D averages,
+ its role is to group a highly heterogeneous set of particles, template
+ free picked, which can not be treated directly by standard cryo-ET classificati
+on methods, into more homogeneous groups which can be classified and refined
+ by Relion.
+\end_layout
+
+\begin_layout Standard
+IMPORTANT: due to space limitations no experimental data are provided, 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MartinezXXXX"
+
+\end_inset
+
+ is an example of the results obtained with this procedure an how to combine
+ it with Relion.
+\end_layout
+
+\begin_layout Itemize
+Location (Python): 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/pyseg-sys/tutorials/exp_ssmb/class/plane_align_class_test.py
+\end_layout
+
+\begin_layout Itemize
+Input data: A STAR file with membrane-bound particles aligned respect the
+ membrane(Tilt and Psi angles)
+\end_layout
+
+\begin_layout Itemize
+Parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+pp_mask: binary mask to focus the classification.
+\end_layout
+
+\begin_layout Itemize
+pp_low_sg: sigma (in voxels) for pre-filter particles with a Gaussian kernel,
+ it increases the SNR for each particle and suppress high frequencies.
+\end_layout
+
+\begin_layout Itemize
+pp_npr: Number of parallel processes.
+\end_layout
+
+\begin_layout Itemize
+ap_pref: affinity propagation preference (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pedregosa2011"
+
+\end_inset
+
+).
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A set of STAR files with the new classes.
+ Particle exemplar and average per each class.
+\end_layout
+
+\begin_layout Subsection
+Statistical spatial analysis
+\end_layout
+
+\begin_layout Standard
+Here some scripts to quantitatively describe proteins (3D solids) are organized
+ within cellular compartments (irregular volumes) are provided.
+ The basic functionality is implemented in library surf_dst, and a more
+ detailed description about the metrics computed is in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MartinezXXXX"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For simplicity we are going to take the particles pickled in Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Bio-material-tracing-in"
+
+\end_inset
+
+ as input, nevertheless the ideal situation is to make this analysis after
+ particles has been averaged and classified, then we can analyze separately
+ each protein and use their correct shape.
+\end_layout
+
+\begin_layout Standard
+IMPORTANT: this analysis is completely independent from the picking method,
+ so it is NOT limited to membrane-bound proteins.
+\end_layout
+
+\begin_layout Standard
+IMPORTANT: examples showed here have the intention of introducing the reader
+ in the usage of the software, no biological conclusion can be extracted
+ form them, an example of results obtained from representative experimental
+ dataset can be found in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MartinezXXXX"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Input preparation
+\end_layout
+
+\begin_layout Standard
+Particles from many tomograms (ListTomoParticle object) and from different
+ lists, representing different proteins, (SetListTomoParticle object) are
+ gather here into the same object for further analysis.
+ 
+\end_layout
+
+\begin_layout Itemize
+Location: 
+\family sans
+\series bold
+\size footnotesize
+python/surf_dst/scripts/create_ltomos.py
+\end_layout
+
+\begin_layout Itemize
+Input data: 
+\family sans
+\series bold
+\size footnotesize
+data/stat/in/in_particles.star
+\family default
+\series default
+\size default
+ the STAR file with the list of particles which represent different proteins
+ (here cytosolic and lumenal particles) and their shape (for simplicity
+ here we use a sphere of radius 2.5), 
+\family sans
+\series bold
+\size footnotesize
+data/stat/in/in_seg.star
+\family default
+\series default
+\size default
+ the STAR file which pairs segmentations (define the cellular compartments,
+ here the membrane) and tomograms.
+\end_layout
+
+\begin_layout Itemize
+Parameters for pre-processing segmentations:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+sg_lbl
+\family default
+\series default
+\size default
+: label of the segmented compartment (Volume Of Interest, VOI).
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+sg_bc
+\family default
+\series default
+\size default
+: if True insert only the particles embedded in the VOI.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+sg_pj
+\family default
+\series default
+\size default
+: particles are projected to VOI surface, recommended for membranes.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+sg_origins
+\family default
+\series default
+\size default
+: picking and averaging resolutions did not use to agree, this array (an
+ entry for every list) is the scale factor from picking to averaging resolution.
+ They must be introduced to consider properly the alignment shifting computed
+ during sub-tomogram averaging.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+sg_dmap_path
+\family default
+\series default
+\size default
+: directory for temporary VOI memory maps, if None the VOIs are loaded into
+ memory and it could be overloaded.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Parameters for post-processing:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+pt_res
+\family default
+\series default
+\size default
+: voxel size (nm/voxel) used for picking.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+pt_ssup
+\family default
+\series default
+\size default
+: scale suppression, two particles cannot be closer that this value (particle
+ overlap is not checked here).
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+pt_min_parts
+\family default
+\series default
+\size default
+: discard tomograms with less particles than this value
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A STAR file with the pickled ListTomoPaticles objects
+\family sans
+\series bold
+\size footnotesize
+ 
+\family default
+\series default
+\size default
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\family sans
+\series bold
+\size footnotesize
+data/stat/ltomos/test/test_ssup_8_min_5_ltomos.star
+\family default
+\series default
+\size default
+.
+ Additional files for visualization are also stored.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/paraview_ltomos.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Visualization with Paraview of the VOI (membrane in orange) and two list
+ of particles generated, cytosolic (red) and lumenal (green), in both cases
+ protein shape is a 2.5 radius sphere.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Univariate first order analysis
+\end_layout
+
+\begin_layout Standard
+The first order univariate metrics computed are: closest distance histogram
+ and its cumulative distribution function (nearest neighbor distribution),
+ contact function distribution and J-function.
+ Results are computed for every tomogram, then they are averaged for every
+ list of proteins.
+\end_layout
+
+\begin_layout Itemize
+Location: 
+\family sans
+\series bold
+\size footnotesize
+python/surf_dst/scripts/uni_1st_analysis.py
+\end_layout
+
+\begin_layout Itemize
+Input data: 
+\family sans
+\series bold
+\size footnotesize
+data/stat/ltomos/test/test_ssup_8_min_5_ltomos.star
+\family default
+\series default
+\size default
+ the STAR file generated by 
+\family sans
+\series bold
+\size footnotesize
+create_ltomos.py
+\family default
+\series default
+\size default
+.
+\end_layout
+
+\begin_layout Itemize
+Parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_res
+\family default
+\series default
+\size default
+: data resolution (nm/voxel).
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_nbins
+\family default
+\series default
+\size default
+: number of bins for histograms.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_max
+\family default
+\series default
+\size default
+: maximum distance to analyze.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_f_npoints
+\family default
+\series default
+\size default
+: number of random points to generate for computing contact function distributio
+n.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+p_nsims
+\family default
+\series default
+\size default
+: number of random simulations per list and tomograms.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+p_per
+\family default
+\series default
+\size default
+: side percentile out of the displayed confidence intervals.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A set of graphs with metrics computed by lists and tomograms.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/H_0.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/G_0.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/F_0.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/J_0.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/H_1.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/G_1.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/F_1.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/J_1.png
+	lyxscale 5
+	width 20text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Univariate first order graphs computed.
+ From left to right: closest neighbor histogram, distribution, contact point
+ distribution and J-function.
+ Top row for lumenal particles and bottom for cytosolic.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Univariate second order analysis
+\end_layout
+
+\begin_layout Standard
+The second order univariate metrics computed are: Ripley's L and O.
+ Results are computed for every tomogram, then they are averaged for every
+ list of proteins.
+\end_layout
+
+\begin_layout Itemize
+Location: 
+\family sans
+\series bold
+\size footnotesize
+python/surf_dst/scripts/uni_analysis.py
+\end_layout
+
+\begin_layout Itemize
+Input data: 
+\family sans
+\series bold
+\size footnotesize
+data/stat/ltomos/test/test_ssup_8_min_5_ltomos.star
+\family default
+\series default
+\size default
+ the STAR file generated by 
+\family sans
+\series bold
+\size footnotesize
+create_ltomos.py
+\family default
+\series default
+\size default
+.
+\end_layout
+
+\begin_layout Itemize
+Parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_res
+\family default
+\series default
+\size default
+: data resolution (nm/voxel).
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_rg
+\family default
+\series default
+\size default
+: range of distances (in nm) to analyze.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_shell_thick
+\family default
+\series default
+\size default
+: neighborhood thickness for Ripley's O shell, if None then Ripley's L metric
+ is computed.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_conv_inter
+\family default
+\series default
+\size default
+ and 
+\family sans
+\series bold
+\size footnotesize
+ana_max_iter
+\family default
+\series default
+\size default
+: number of iterations to converge and maximum to try for computing irregular
+ volumes (Monte Carlo based approach).
+ For membranes we recommend 
+\family sans
+\series bold
+\size footnotesize
+ana_conv_iter=100
+\family default
+\series default
+\size default
+ and 
+\family sans
+\series bold
+\size footnotesize
+ana_max_iter=100000
+\family default
+\series default
+\size default
+, for cytosolic VOIs these values can be relaxed.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_npr
+\family default
+\series default
+\size default
+: number of parallel processes to compute Ripley's metrics.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+ana_npr_model
+\family default
+\series default
+\size default
+: number of parallel processes to generate the random simulations.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+p_sims
+\family default
+\series default
+\size default
+: number of random simulations per list and tomograms.
+\end_layout
+
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+p_per
+\family default
+\series default
+\size default
+: side percentile out of the displayed confidence intervals.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A set of graphs with the metrics computed by lists and tomograms.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/uni_lists_0.png
+	lyxscale 5
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/uni_lists_1.png
+	lyxscale 5
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Univariate second order (Ripley's L) graphs computed, lumenal left and cytosolic
+ right.
+ Confidence interval [5, 95]% for simulated random model in gray.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Bivariate second order metrics
+\end_layout
+
+\begin_layout Standard
+The second order bivariate metrics computed are: Ripley's L and O.
+ Results are computed for every tomogram, then they are averaged for every
+ list of proteins.
+\end_layout
+
+\begin_layout Itemize
+Location: 
+\family sans
+\series bold
+\size footnotesize
+python/surf_dst/scripts/bi_analysis.py
+\end_layout
+
+\begin_layout Itemize
+Input data: 
+\family sans
+\series bold
+\size footnotesize
+data/stat/ltomos/test/test_ssup_8_min_5_ltomos.star
+\family default
+\series default
+\size default
+ the STAR file generated by 
+\family sans
+\series bold
+\size footnotesize
+create_ltomos.py
+\family default
+\series default
+\size default
+.
+\end_layout
+
+\begin_layout Itemize
+Parameters:
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\family sans
+\series bold
+\size footnotesize
+in_ref_short_key
+\family default
+\series default
+\size default
+: sort key to identify the list used as reference pattern in the bivariate
+ analysis.
+\end_layout
+
+\begin_layout Itemize
+The same as the univariate case (see above).
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Output: A set of graphs with the metrics computed by lists and tomograms.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figs/bi_lists_0.png
+	lyxscale 5
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename figs/bi_lists_1.png
+	lyxscale 5
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Bivariate second order (Ripley's L) graphs computed, lumenal left and cytosolic
+ right.
+ Confidence interval [5, 95]% for simulated random model in gray.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "pyseg_references"
+options "bibtotoc,plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

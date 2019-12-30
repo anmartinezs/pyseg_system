@@ -1,5 +1,6 @@
 ## Clean data in output directories used for testing/tutorials
 #!/bin/bash
+set -ex
 
 ## TEST
 
@@ -9,11 +10,17 @@ rm -r pyseg-sys/tests/results/*
 
 # tracing
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto/*
+mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen/*
+mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto/*
+mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen/*
+mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto/*
+mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto
 rm -r data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen/*
+mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen
 
 # classification
 rm -r data/tutorials/exp_ssmb/klass/out

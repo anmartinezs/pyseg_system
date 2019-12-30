@@ -1399,7 +1399,13 @@ class GraphMCF(object):
                     if len(t) > 1:
                         prop_e[e_gt] = np.asarray(t)
                     else:
-                        prop_e[e_gt] = t[0]
+                        try:
+                            prop_e[e_gt] = t[0]
+                        except AttributeError:
+                            if np.issubdtype(t[0], np.integer):
+                                prop_e[e_gt] = int(t[0])
+                            else:
+                                prop_e[e_gt] = float(t[0])
             graph.vertex_properties[key] = prop_v
             graph.edge_properties[key] = prop_e
 
