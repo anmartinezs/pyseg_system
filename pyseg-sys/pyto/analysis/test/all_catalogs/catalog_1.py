@@ -1,1 +1,0 @@
-../catalogs_b/catalog_1.py
