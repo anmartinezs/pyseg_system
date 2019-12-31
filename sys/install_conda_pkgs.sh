@@ -2,7 +2,7 @@
 set -ex
 
 ## Installing conda packages (requires Anaconda with Python 2.7)
-conda install --yes \
+$PWD/soft/miniconda2/bin/conda install --yes \
       --channel menpo \
       --channel jochym \
       --channel anaconda \
