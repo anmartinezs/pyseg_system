@@ -1,6 +1,6 @@
 # pyseg_system (v 1.0)
 De novo analysis for cryo-electron tomography.
-The code and data here is also available in GitHub (https://github.com/anmartinezs/pyseg_system.git).
+The code and data here is also available in CodeOcean (https://codeocean.com/capsule/0526052/tree), there you can test and run the software remotedly.
 
 ### CONTENTS
 
