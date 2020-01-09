@@ -5,6 +5,7 @@ set -ex
 
 # Install DisPerSe (modified version for PySeg v1.0)
 cd install/disperse/0.9.24_pyseg_gcc7
+chmod u+x install.sh
 ./install.sh
 
 # Install graph-tool (Anaconda)

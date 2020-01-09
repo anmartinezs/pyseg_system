@@ -29,8 +29,8 @@ try:
         do_long = False
 except IndexError:
     do_long = False
-ROOT_DIR = os.path.split(os.path.abspath(__file__))[0] + '/../../../tests'
-MCF_OUT_DIR = ROOT_DIR + '/results/tracing_grid'
+ROOT_DIR = os.path.split(os.path.abspath(__file__))[0] + '/../../../tests/'
+MCF_OUT_DIR = ROOT_DIR + '/../../data/synthetic_grid'
 
 #################################
 
@@ -445,7 +445,9 @@ plt.xlabel('SNR')
 plt.legend(loc=7)
 # ref_FR_ssup_mb.sh
 plt.tight_layout()
-plt.savefig(MCF_OUT_DIR + '/test_grid_conn.png', dpi=600)
+out_fig = MCF_OUT_DIR + '/test_grid_conn.png'
+print 'Saving output figure in: ' + out_fig
+plt.savefig(out_fig, dpi=600)
 plt.close()
 
 print 'Terminated successfully. (' + time.strftime("%c") + ')'

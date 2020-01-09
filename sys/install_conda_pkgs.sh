@@ -19,4 +19,4 @@ $PWD/soft/miniconda2/bin/conda install --yes \
       vtk \
       scikit-fmm \
       graph-tool \
-    && conda clean --yes --all
+    && $PWD/soft/miniconda2/bin/conda clean --yes --all

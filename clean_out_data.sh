@@ -1,50 +1,80 @@
 ## Clean data in output directories used for testing/tutorials
 #!/bin/bash
-set -ex
+set -x
 
 ## TEST
-
-rm -r code/tests/results/*
+echo $PWD/
+if [ -d $PWD/code/tests/results ]; then
+	rm -r $PWD/code/tests/results/*
+else
+	mkdir $PWD/code/tests/results
+fi
 
 ## TUTORIAL exp_ssmb
 
 # tracing
-rm -r data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto/*
-mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto
-rm -r data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen/*
-mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen
-rm -r data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto/*
-mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto
-rm -r data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen/*
-mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen
-rm -r data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto/*
-mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto
-rm -r data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen/*
-mkdir -p data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen
+if [ -d $PWD/data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/tracing/mb_single/graph/cyto
+fi
+if [ -d $PWD/data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/tracing/mb_single/graph/lumen
+fi
+if [ -d $PWD/data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/tracing/mb_single/fils/cyto
+fi
+if [ -d $PWD/data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/tracing/mb_single/fils/lumen
+fi
+if [ -d $PWD/data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/tracing/mb_single/pick/cyto
+fi
+if [ -d $PWD/data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/tracing/mb_single/pick/lumen
+fi
 
 # classification
-rm -r data/tutorials/exp_ssmb/klass/out
-mkdir data/tutorials/exp_ssmb/klass/out
+if [ -d $PWD/data/tutorials/exp_ssmb/klass/out ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/klass/out
+else
+	mkdir $PWD/data/tutorials/exp_ssmb/klass/out
+fi
 
 # stat
-rm -r data/tutorials/exp_ssmb/stat/ltomos/*
-mkdir data/tutorials/exp_ssmb/stat/ltomos/test
-mkdir data/tutorials/exp_ssmb/stat/ltomos/test/test_ssup_8
-rm -r data/tutorials/exp_ssmb/stat/out
-mkdir data/tutorials/exp_ssmb/klass/out
+if [ -d $PWD/data/tutorials/exp_ssmb/stat/ltomos ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/stat/ltomos/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/stat/ltomos/test/test_ssup_8
+fi
+if [ -d $PWD/data/tutorials/exp_ssmb/stat/out ]; then
+	rm -r $PWD/data/tutorials/exp_ssmb/stat/out/*
+else
+	mkdir -p $PWD/data/tutorials/exp_ssmb/klass/out
+mkdir
 
 ## TUTORIAL synth_sumb
 
-rm -r data/tutorials/synth_sumb/trash/*
-rm -r data/tutorials/synth_sumb/mics/*
-rm -r data/tutorials/synth_sumb/segs/*
-rm -r data/tutorials/synth_sumb/graphs/*
-rm -r data/tutorials/synth_sumb/fils/out*
-rm -r data/tutorials/synth_sumb/pick/out*
-rm -r data/tutorials/synth_sumb/rec/*
-rm -r data/tutorials/synth_sumb/class/*
-rm -r data/tutorials/synth_sumb/rln/*
-rm -r data/tutorials/synth_sumb/org/ltomos/*
-rm -r data/tutorials/synth_sumb/org/uni_1st/*
-rm -r data/tutorials/synth_sumb/org/uni_2nd/*
-rm -r data/tutorials/synth_sumb/org/bi_2nd/*
+rm -r $PWD/data/tutorials/synth_sumb/trash/*
+rm -r $PWD/data/tutorials/synth_sumb/mics/*
+rm -r $PWD/data/tutorials/synth_sumb/segs/*
+rm -r $PWD/data/tutorials/synth_sumb/graphs/*
+rm -r $PWD/data/tutorials/synth_sumb/fils/out*
+rm -r $PWD/data/tutorials/synth_sumb/pick/out*
+rm -r $PWD/data/tutorials/synth_sumb/rec/*
+rm -r $PWD/data/tutorials/synth_sumb/class/*
+rm -r $PWD/data/tutorials/synth_sumb/rln/*
+rm -r $PWD/data/tutorials/synth_sumb/org/ltomos/*
+rm -r $PWD/data/tutorials/synth_sumb/org/uni_1st/*
+rm -r $PWD/data/tutorials/synth_sumb/org/uni_2nd/*
+rm -r $PWD/data/tutorials/synth_sumb/org/bi_2nd/*
