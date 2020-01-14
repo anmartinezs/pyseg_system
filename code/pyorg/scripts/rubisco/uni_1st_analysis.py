@@ -50,14 +50,14 @@ ROOT_PATH = '/fs/pool/pool-engel/antonio/rubisco/org'
 
 # Input STAR files
 in_star = ROOT_PATH + '/ltomos/all_v2/all_v2_ltomos_surf.star' # '/ltomos/L2Tomo8/L2Tomo8_ltomos_surf.star' # '/ltomos/all_pid/all_pid_ltomos_surf.star'
-in_wspace = None # ROOT_PATH + '/uni_1st/L2Tomo8/L2Tomo8_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_neg3_wspace.pkl'  # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_wspace = ROOT_PATH + '/uni_1st/all_v2/all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_wspace.pkl'  # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/uni_1st/all_v2/' # '/uni_1st/L2Tomo8/'
-out_stem = 'all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs'
+out_stem = 'all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_2'
 
 # List pre-processing options
-pr_ss = None  # 10 # nm
+pr_ss = None # 10 # nm
 
 # Analysis variables
 ana_res = 1.368  # 0.684 # nm/voxel
@@ -1178,11 +1178,11 @@ for lkey, ltomo in zip(lists_exp_mnnd.iterkeys(), lists_exp_mnnd.itervalues()):
     # plt.plot(hist_bins, ic2_high, 'c--')
     plt.fill_between(hist_bins, ice_low, ice_high, alpha=0.5, color='red', edgecolor='r')
     plt.tight_layout()
-    plt.legend(loc=1)
+    # plt.legend(loc=1)
     if fig_fmt is None:
         plt.show(block=True)
     else:
-        plt.savefig(out_lists_dir + '/NNS_merged_' + lkey_short + '.png')
+        plt.savefig(out_lists_dir + '/NNS_merged_' + lkey_short + '.svg')
     plt.close()
 
 # if star.has_column('_psStartSurfIds') and star.has_column('_psEndSurfIds'):
