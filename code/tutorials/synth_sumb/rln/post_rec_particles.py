@@ -247,8 +247,14 @@ rln_star.add_column(key='_rlnCoordinateZ')
 rln_star.add_column(key='_rlnOriginX')
 rln_star.add_column(key='_rlnOriginY')
 rln_star.add_column(key='_rlnOriginZ')
+if star.has_column('_rlnAngleRot'):
+    rln_star.add_column('_rlnAngleRot')
+if star.has_column('_rlnAngleTilt'):
+    rln_star.add_column('_rlnAngleTilt')
+if star.has_column('_rlnAnglePsi'):
+    rln_star.add_column('_rlnAnglePsi')
 if ANGLE_NAMES[0] in do_ang_prior:
-    if star.has_column(key='_rlnAngleRot'):
+    if rln_star.has_column(key='_rlnAngleRot'):
         rln_star.add_column(key='_rlnAngleRot')
         rln_star.add_column(key='_rlnAngleRotPrior')
     else:
@@ -256,7 +262,7 @@ if ANGLE_NAMES[0] in do_ang_prior:
         print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
         sys.exit(-1)
 if ANGLE_NAMES[1] in do_ang_prior:
-    if star.has_column(key='_rlnAngleTilt'):
+    if rln_star.has_column(key='_rlnAngleTilt'):
         rln_star.add_column(key='_rlnAngleTilt')
         rln_star.add_column(key='_rlnAngleTiltPrior')
     else:
@@ -264,7 +270,7 @@ if ANGLE_NAMES[1] in do_ang_prior:
         print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
         sys.exit(-1)
 if ANGLE_NAMES[2] in do_ang_prior:
-    if star.has_column(key='_rlnAnglePsi'):
+    if rln_star.has_column(key='_rlnAnglePsi'):
         rln_star.add_column(key='_rlnAnglePsi')
         rln_star.add_column(key='_rlnAnglePsiPrior')
     else:
@@ -323,4 +329,3 @@ for star in stars:
 print '\tStoring output STAR file in: ' + out_star
 rln_merged_star.store(out_star)
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
-

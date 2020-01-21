@@ -2673,7 +2673,7 @@ class TomoParticles(object):
             part_code.SetNumberOfComponents(1)
             part_code.SetNumberOfTuples(hold_vtp.GetNumberOfCells())
             if 3 in mat_codes[i, :]:
-                part_code.FillComponent(0, CODE_BODER)
+                part_code.FillComponent(0, CODE_BORDER)
             else:
                 part_code.FillComponent(0, CODE_POSITIVE_DST)
             hold_vtp.GetCellData().AddArray(part_id)

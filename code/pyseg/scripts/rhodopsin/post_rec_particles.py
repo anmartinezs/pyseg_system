@@ -31,7 +31,7 @@ import random
 import pyseg as ps
 import numpy as np
 import multiprocessing as mp
-from pyseg.globals import tomo_shift, get_sub_copy
+from pyseg.globals import tomo_shift # , get_sub_copy
 
 from pyseg import sub, pexceptions
 
@@ -45,21 +45,21 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Matthias/Tomography/tomos_170321/WARP_rho_t9/relion_box96_b2/'
+ROOT_PATH = '/fs/pool/pool-plitzko/Matthias/Tomography/tomos_170321/WARP_rho_t9/relion_box128_b2/'
 
 # Input STAR file
-in_star = ROOT_PATH + 'Class2D/motl4bg_perm.star'
-in_mask = ROOT_PATH + 'subtomo_RanBg_01/cyl_r15_h30_g2.mrc'
+in_star = ROOT_PATH + 'C2Dr4_4BgRan3.star'
+in_mask = ROOT_PATH + 'cyl_r20_h36_g0.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + 'subtomo_RanRg_01/'
-out_star = ROOT_PATH + 'motl_warp_qctf_Prior_AMS_RanBg_01.star'
+out_part_dir = ROOT_PATH + 'subtomo_RanBg_01/'
+out_star = ROOT_PATH + 'C2Dr4_RanBg_01.star'
 
 ####### Particles pre-processing settings
 
-do_ang_prior = ['Rot', 'Tilt', 'Psi'] # ['Rot', 'Tilt', 'Psi']
-do_ang_rnd = []
+do_ang_prior = ['Tilt', 'Psi'] # ['Rot', 'Tilt', 'Psi']
+do_ang_rnd = [] # ['Rot']
 
 ####### Multiprocessing settings
 
@@ -247,8 +247,14 @@ rln_star.add_column(key='_rlnCoordinateZ')
 rln_star.add_column(key='_rlnOriginX')
 rln_star.add_column(key='_rlnOriginY')
 rln_star.add_column(key='_rlnOriginZ')
+if star.has_column('_rlnAngleRot'):
+    rln_star.add_column('_rlnAngleRot')
+if star.has_column('_rlnAngleTilt'):
+    rln_star.add_column('_rlnAngleTilt')
+if star.has_column('_rlnAnglePsi'):
+    rln_star.add_column('_rlnAnglePsi')
 if ANGLE_NAMES[0] in do_ang_prior:
-    if star.has_column(key='_rlnAngleRot'):
+    if rln_star.has_column(key='_rlnAngleRot'):
         rln_star.add_column(key='_rlnAngleRot')
         rln_star.add_column(key='_rlnAngleRotPrior')
     else:
@@ -256,7 +262,7 @@ if ANGLE_NAMES[0] in do_ang_prior:
         print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
         sys.exit(-1)
 if ANGLE_NAMES[1] in do_ang_prior:
-    if star.has_column(key='_rlnAngleTilt'):
+    if rln_star.has_column(key='_rlnAngleTilt'):
         rln_star.add_column(key='_rlnAngleTilt')
         rln_star.add_column(key='_rlnAngleTiltPrior')
     else:
@@ -264,7 +270,7 @@ if ANGLE_NAMES[1] in do_ang_prior:
         print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
         sys.exit(-1)
 if ANGLE_NAMES[2] in do_ang_prior:
-    if star.has_column(key='_rlnAnglePsi'):
+    if rln_star.has_column(key='_rlnAnglePsi'):
         rln_star.add_column(key='_rlnAnglePsi')
         rln_star.add_column(key='_rlnAnglePsiPrior')
     else:
@@ -323,4 +329,3 @@ for star in stars:
 print '\tStoring output STAR file in: ' + out_star
 rln_merged_star.store(out_star)
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
-
