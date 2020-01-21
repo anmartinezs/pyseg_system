@@ -49,12 +49,12 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-engel/antonio/rubisco/org'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos/all_v2/all_v2_ltomos_surf.star' # '/ltomos/L2Tomo8/L2Tomo8_ltomos_surf.star' # '/ltomos/all_pid/all_pid_ltomos_surf.star'
-in_wspace = ROOT_PATH + '/uni_1st/all_v2/all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_wspace.pkl'  # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/test_v2/test_remove_parts_ltomos_surfs.star' # '/ltomos/all_v2/all_v2_ltomos_surf.star' # '/ltomos/L2Tomo8/L2Tomo8_ltomos_surf.star' # '/ltomos/all_pid/all_pid_ltomos_surf.star'
+in_wspace = None # ROOT_PATH + '/uni_1st/all_v2/all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_wspace.pkl'  # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/uni_1st/all_v2/' # '/uni_1st/L2Tomo8/'
-out_stem = 'all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_2'
+out_dir = ROOT_PATH + '/uni_1st/test_v2/' # '/uni_1st/all_v2/' # '/uni_1st/L2Tomo8/'
+out_stem = 'test_remove_parts' # 'all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_2'
 
 # List pre-processing options
 pr_ss = None # 10 # nm
@@ -350,7 +350,7 @@ if in_wspace is None:
             if (len(pids_start) > 0) and (len(pids_end) > 0):
                 print '\t\t\t\t\t-Computing nearest intersurfaces distances...'
                 if ana_ssize is None:
-                    hold_mat_ndsts, hold_mat_codes, nn_points, nn_lines = ltomo.compute_shortest_distances_matrix(
+                    hold_mat_ndsts, hold_mat_codes, nn_points, nn_lines, nn_parts = ltomo.compute_shortest_distances_matrix(
                                                                                                   pids_start,
                                                                                                   pids_end,
                                                                                                   rg_dsts=ana_ndst_rg_v,
@@ -382,10 +382,8 @@ if in_wspace is None:
                 disperse_io.save_vtp(nn_lines, out_nn_vtp)
                 out_nn_pvtp = out_nn_mat_dir + '/' + str(lkey) + str(os.path.splitext(tkey)[0].replace('/', '_')) + \
                               '_parts.vtp'
-                if ana_ssize is not None:
-                    disperse_io.save_vtp(nn_parts, out_nn_pvtp)
-                else:
-                    disperse_io.save_vtp(ltomo.gen_particles_vtp(), out_nn_pvtp)
+                disperse_io.save_vtp(nn_parts, out_nn_pvtp)
+                disperse_io.save_vtp(ltomo.gen_particles_vtp(), out_nn_pvtp)
                 # hold_mnnd = hold_mat_ndsts.min(axis=1)
                 lists_exp_mnnd[lkey].append(hold_mat_ndsts)
                 tomos_exp_mnnd[tkey][lkey] = hold_mat_ndsts

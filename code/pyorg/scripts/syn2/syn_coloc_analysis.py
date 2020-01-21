@@ -47,27 +47,27 @@ rcParams['patch.linewidth'] = 2
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn/sub/relion/fils'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2/org'
 
 # Input STAR file
-in_star_1 = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2/org/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star'
+in_star_1 = ROOT_PATH + '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star'
 key_1, l_id1 = 'pre', 4
-in_star_2 = ROOT_PATH + '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/az/ref_nomb_1_clean/ltomos_az_ref_1_gather_premb_cleft/az_cleft_premb_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_40/ltomos_tether/ves_40_cleft_premb_mask_ltomos.star' # '/ves_40/ltomos_lap/lap_ltomos.star' # '/ves_40/ltomos_premb_mask/premb_mask_ltomos.star'
-key_2, l_id2 = 'tether', 0
-in_star_3 = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2/org/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
+in_star_2 = ROOT_PATH + '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/az/ref_nomb_1_clean/ltomos_az_ref_1_gather_premb_cleft/az_cleft_premb_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_40/ltomos_tether/ves_40_cleft_premb_mask_ltomos.star' # '/ves_40/ltomos_lap/lap_ltomos.star' # '/ves_40/ltomos_premb_mask/premb_mask_ltomos.star'
+key_2, l_id2 = 'tether', 1
+in_star_3 = ROOT_PATH + '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
 key_3, l_id3 = 'pst', 4
-in_star_4 = ROOT_PATH + '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
-key_4, l_id4 = 'sv', 0
-in_star_5 = ROOT_PATH + '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star'
+in_star_4 = ROOT_PATH + '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
+key_4, l_id4 = 'sv', 1
+in_star_5 = ROOT_PATH + '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star'
 key_5, l_id5 = 'ampar', 0
-in_star_6 = ROOT_PATH + '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star'
+in_star_6 = ROOT_PATH + '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star'
 key_6, l_id6 = 'nmdar', 1
-in_tethers_csv = ROOT_PATH + '/pre/ref_nomb_1_clean/py_scripts/syn_num_tethers_2.csv'
-in_part = ROOT_PATH + '/pre/vtps/sph_rad_5_surf.vtp'
+in_tethers_csv = ROOT_PATH + '/../../syn/sub/relion/fils/pre/ref_nomb_1_clean/py_scripts/syn_num_tethers_2.csv'
+in_part = ROOT_PATH + '/../../syn/sub/relion/fils/pre/vtps/sph_rad_5_surf.vtp'
 in_wspace = None # ROOT_PATH + '/pst/ampar_vs_nmdar/org/method_2/3_pre_tether_pst/aln_15_cr10/3_pre_tether_pst_sim20_wspace.pkl'
 
 # Output directory
-out_dir = ROOT_PATH + '/pst/ampar_vs_nmdar/org/method_1/3_preb_tether_pstb/aln_15_cr10' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
+out_dir = ROOT_PATH + '/coloc/3_preb_tether_pstb/aln_15_cr10' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
 out_stem = '3_preb_tether_pstb_sim1'
 
 # Pre-processing variables
@@ -492,6 +492,18 @@ if in_wspace is None:
     hold_out_star = out_tomos_dir + '/3_' + out_stem + '_part_lyr3.star'
     print '\t\t-File: ' + hold_out_star
     part_star_7.store(hold_out_star)
+    hold_out_star = out_tomos_dir + '/0_' + out_stem + '_scols_col.star'
+    print '\t\t-File: ' + hold_out_star
+    part_star_8.store(hold_out_star)
+    hold_out_star = out_tomos_dir + '/1_' + out_stem + '_scols_lyr1.star'
+    print '\t\t-File: ' + hold_out_star
+    part_star_9.store(hold_out_star)
+    hold_out_star = out_tomos_dir + '/2_' + out_stem + '_scols_lyr2.star'
+    print '\t\t-File: ' + hold_out_star
+    part_star_10.store(hold_out_star)
+    hold_out_star = out_tomos_dir + '/3_' + out_stem + '_scols_lyr3.star'
+    print '\t\t-File: ' + hold_out_star
+    part_star_11.store(hold_out_star)
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
     print '\tPickling computation workspace in: ' + out_wspace

@@ -50,6 +50,10 @@ MP_NUM_ATTEMPTS, MP_MIN_TIME, MP_JOIN_TIME = 10, 0.5, 10
 MAX_TRIES_FACTOR = 10 # 100
 PARTS_LBL_FIELD = 'parts_field'
 TRY_FMM = False
+CODE_POSITIVE_DST = 1
+CODE_NEGATIVE_DST = 2
+CODE_BORDER = 3
+CODE_STR = 'CODE'
 
 # GLOBAL FUNCTIONS
 
@@ -2602,18 +2606,18 @@ class TomoParticles(object):
                         #### Get the code for this distance
                         # Check if segmentation border is closer than closest inter-particles distance,
                         # if True the measurements for these particle are discarded
-                        hold_code = 1
+                        hold_code = CODE_POSITIVE_DST
                         if dst_map is not None:
                             x, y, z = int(round(point_1[0])), int(round(point_1[1])), int(round(point_1[2]))
                             try:
                                 dst = dst_map[x, y, z]
                                 if dst < del_border:
-                                    hold_code = 3
+                                    hold_code = CODE_BORDER
                             except IndexError:
                                 print 'WARNING (TomoParticles:compute_shortest_distances_matrix): incorrect indexing ' \
                                       'for the distance map ' + str(time.time())
-                                hold_code = 3
-                        if hold_code == 1:
+                                hold_code = CODE_BORDER
+                        if hold_code == CODE_POSITIVE_DST:
                             # Check if point_2 is inside the reference particle ('negative' distance)
                             if is_point_inside_surf(point_2, selector_part, 2, 10):
                                 if min_neg_dst > 0:
@@ -2621,9 +2625,9 @@ class TomoParticles(object):
                                     hold_pt_1_dst = point_2 - surf_pt_1
                                     hold_pt_1_dst = np.sqrt((hold_pt_1_dst * hold_pt_1_dst).sum())
                                     if hold_pt_1_dst > min_neg_dst:
-                                        hold_code = 2
+                                        hold_code = CODE_NEGATIVE_DST
                                 else:
-                                    hold_code = 2
+                                    hold_code = CODE_NEGATIVE_DST
                         hold_codes.append(hold_code)
 
                 hold_max_conn, len_hold_pairs = max_conn, len(hold_pairs)
@@ -2653,6 +2657,35 @@ class TomoParticles(object):
                             pairs_dsts[i].append(hold_dst)
                             mat_out[i, ii].append(hold_dst)
                         mat_codes[i, ii].append(hold_code)
+
+        # Create the particles vtkPolyData and add border property to particles
+        appender = vtk.vtkAppendPolyData()
+        for i in range(n_parts):
+
+            # Add particle id property
+            hold_vtp = self.__parts[i].get_vtp()
+            part_id, part_code = vtk.vtkIntArray(), vtk.vtkIntArray()
+            part_id.SetName(PT_ID)
+            part_id.SetNumberOfComponents(1)
+            part_id.SetNumberOfTuples(hold_vtp.GetNumberOfCells())
+            part_id.FillComponent(0, i)
+            part_code.SetName(CODE_STR)
+            part_code.SetNumberOfComponents(1)
+            part_code.SetNumberOfTuples(hold_vtp.GetNumberOfCells())
+            if 3 in mat_codes[i, :]:
+                part_code.FillComponent(0, CODE_BODER)
+            else:
+                part_code.FillComponent(0, CODE_POSITIVE_DST)
+            hold_vtp.GetCellData().AddArray(part_id)
+            hold_vtp.GetCellData().AddArray(part_code)
+
+            # Append current particle
+            appender.AddInputData(hold_vtp)
+
+            # Fuse to one vtkPolyData
+            appender.Update()
+
+        poly_parts = appender.GetOutput()
 
         # Loop for creating the connections paths VTKs
         poly_p, points_p = vtk.vtkPolyData(), vtk.vtkPoints()
@@ -2738,10 +2771,7 @@ class TomoParticles(object):
         poly_l.GetCellData().AddArray(arr_len_l)
         poly_l.GetCellData().AddArray(arr_code_l)
 
-        if inter_ssize is None:
-            return mat_out, mat_codes, poly_p, poly_l
-        else:
-            return mat_out, mat_codes, poly_p, poly_l, mask_surf
+        return mat_out, mat_codes, poly_p, poly_l, poly_parts
 
     def ensure_embedding(self):
         """

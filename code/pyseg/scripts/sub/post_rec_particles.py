@@ -48,13 +48,13 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/rln/pst/class_blob_h_v6/run17_c1_it050_data_c1_prior_clean.star' # '/rln/pre/root_v5_rot_rnd_prior.star'
-in_mask = ROOT_PATH + '/masks/mask_cyl_64_35_52_10_r.mrc' # '/masks/mask_cyl_64_15_50_15.mrc'
+in_star = ROOT_PATH + '/rln/ref_model/run3_c1_LB_mb_data_prior.star' # '/rln/pst/class_blob_h_v6/run17_c1_it050_data_c1_prior_clean.star' # '/rln/pre/root_v5_rot_rnd_prior.star'
+in_mask = ROOT_PATH + '/masks/mask_cyl_64_34_50_12.mrc' # '/masks/mask_cyl_64_35_52_10_r.mrc' # '/masks/mask_cyl_64_15_50_15.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/rec/pst/particles_blob_ha_v6_nomb_post'
-out_star = ROOT_PATH + '/rec/pst/blob_ha_class_run17_nomb_post.star'
+out_part_dir = ROOT_PATH + '/rec/col/LB_cyto' # '/rec/pst/particles_blob_ha_v6_nomb_post'
+out_star = ROOT_PATH + '/rec/col/LB_cyto_post.star' # '/rec/pst/blob_ha_class_run17_nomb_post.star'
 
 ####### Particles pre-processing settings
 
@@ -63,7 +63,7 @@ do_ang_rnd = [] # ['Rot']
 
 ####### Multiprocessing settings
 
-mp_npr = 1 # 10
+mp_npr = 10 # 10
 
 ########################################################################################
 # Local functions

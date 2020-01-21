@@ -705,6 +705,66 @@ class ColumnsFinder(object):
         poly.GetPointData().AddArray(p_lyr)
         return poly
 
+    def gen_subcolumns_vtp(self):
+        """
+        Generates a VTK object to display subcolumns
+        :return: a vtkPolyData object for subcolumns
+        """
+
+        # Initialization
+        poly = vtk.vtkPolyData()
+        p_points = vtk.vtkPoints()
+        p_cells = vtk.vtkCellArray()
+        p_ids = vtk.vtkIntArray()
+        p_ids.SetName('SCOL')
+        p_ids.SetNumberOfComponents(1)
+        p_lyr = vtk.vtkIntArray()
+        p_lyr.SetName('LAYER')
+        p_lyr.SetNumberOfComponents(1)
+        lyr1_coords, lyr2_coords, lyr3_coords = self.__tl1.get_particle_coords(), self.__tl2.get_particle_coords(), \
+                                                self.__tl3.get_particle_coords()
+
+
+        # Insterting coordinates
+        count = 0
+        for scol_id, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+            if scol is not None:
+                lyr_1, lyr_2, lyr_3 = scol[0], scol[1], scol[2]
+                for sclst_1 in lyr_1:
+                    for idx in sclst_1.get_ids():
+                        coord_1 = lyr1_coords[idx]
+                        p_points.InsertNextPoint(coord_1)
+                        p_cells.InsertNextCell(1)
+                        p_cells.InsertCellPoint(count)
+                        p_ids.InsertTuple(count, (scol_id,))
+                        p_lyr.InsertTuple(count, (1,))
+                        count += 1
+                for sclst_2 in lyr_2:
+                    for idx in sclst_2.get_ids():
+                        coord_2 = lyr2_coords[idx]
+                        p_points.InsertNextPoint(coord_2)
+                        p_cells.InsertNextCell(1)
+                        p_cells.InsertCellPoint(count)
+                        p_ids.InsertTuple(count, (scol_id,))
+                        p_lyr.InsertTuple(count, (2,))
+                        count += 1
+                for sclst_3 in lyr_3:
+                    for idx in sclst_3.get_ids():
+                        coord_3 = lyr3_coords[idx]
+                        p_points.InsertNextPoint(coord_3)
+                        p_cells.InsertNextCell(1)
+                        p_cells.InsertCellPoint(count)
+                        p_ids.InsertTuple(count, (scol_id,))
+                        p_lyr.InsertTuple(count, (3,))
+                        count += 1
+
+        # Generate the poly
+        poly.SetPoints(p_points)
+        poly.SetVerts(p_cells)
+        poly.GetPointData().AddArray(p_ids)
+        poly.GetPointData().AddArray(p_lyr)
+        return poly
+
     def gen_col_tomo_particles(self, tomo_fname, part_vtp, voi):
         """
         Creates a TomoParticles object with the columns

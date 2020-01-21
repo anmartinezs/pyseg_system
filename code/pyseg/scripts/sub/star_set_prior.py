@@ -28,11 +28,11 @@ ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input star file
 # in_star = ROOT_PATH + '/particles_ves_cont.star'
-in_star = ROOT_PATH + '/rln/pst/class_blob_ha_v6/run21_c1_nomb_it015_data_c3.star'
+in_star = ROOT_PATH + '/rln/ref_model/run3_c1_LB_mb_data.star' # '/rln/pst/class_blob_ha_v6/run21_c1_nomb_it015_data_c3.star'
 
 # Oput star file stem
 # out_star = ROOT_PATH+'/nali/particles_ves_cont_prior_rnd_rot.star'
-out_star = ROOT_PATH + '/rln/pst/class_blob_ha_v6/run21_c1_nomb_it015_data_c3_prior_clean.star'
+out_star = ROOT_PATH + '/rln/ref_model/run3_c1_LB_mb_data_prior.star' # '/rln/pst/class_blob_ha_v6/run21_c1_nomb_it015_data_c3_prior_clean.star'
 
 ###### Parameters_
 
