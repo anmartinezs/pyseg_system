@@ -61,6 +61,7 @@ if [ -d $PWD/data/tutorials/exp_ssmb/stat/out ]; then
 	rm -r $PWD/data/tutorials/exp_ssmb/stat/out/*
 else
 	mkdir -p $PWD/data/tutorials/exp_ssmb/klass/out
+fi
 mkdir
 
 ## TUTORIAL synth_sumb
@@ -71,7 +72,19 @@ rm -r $PWD/data/tutorials/synth_sumb/segs/*
 rm -r $PWD/data/tutorials/synth_sumb/graphs/*
 rm -r $PWD/data/tutorials/synth_sumb/fils/out*
 rm -r $PWD/data/tutorials/synth_sumb/pick/out*
+if [ -f $PWD/data/tutorials/synth_sumb/rec/mask_sph_130_60.mrc ]; then
+	mv $PWD/data/tutorials/synth_sumb/rec/mask_sph_130_60.mrc $PWD/data/tutorials/synth_sumb/
+fi
+if [ -f $PWD/data/tutorials/synth_sumb/rec/wedge_130_60.mrc ]; then
+	mv $PWD/data/tutorials/synth_sumb/rec/wedge_130_60.mrc $PWD/data/tutorials/synth_sumb/
+fi
 rm -r $PWD/data/tutorials/synth_sumb/rec/*
+if [ -f $PWD/data/tutorials/synth_sumb/mask_sph_130_60.mrc ]; then
+	mv $PWD/data/tutorials/synth_sumb/mask_sph_130_60.mrc $PWD/data/tutorials/synth_sumb/rec/
+fi
+if [ -f $PWD/data/tutorials/synth_sumb/wedge_130_60.mrc ]; then
+	mv $PWD/data/tutorials/synth_sumb/wedge_130_60.mrc $PWD/data/tutorials/synth_sumb/rec/
+fi
 rm -r $PWD/data/tutorials/synth_sumb/class/*
 rm -r $PWD/data/tutorials/synth_sumb/rln/*
 rm -r $PWD/data/tutorials/synth_sumb/org/ltomos/*
