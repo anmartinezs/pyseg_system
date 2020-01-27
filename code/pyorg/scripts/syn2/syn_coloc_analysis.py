@@ -50,14 +50,14 @@ rcParams['patch.linewidth'] = 2
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2/org'
 
 # Input STAR file
-in_star_1 = ROOT_PATH + '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star'
-key_1, l_id1 = 'pre', 4
-in_star_2 = ROOT_PATH + '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/az/ref_nomb_1_clean/ltomos_az_ref_1_gather_premb_cleft/az_cleft_premb_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_40/ltomos_tether/ves_40_cleft_premb_mask_ltomos.star' # '/ves_40/ltomos_lap/lap_ltomos.star' # '/ves_40/ltomos_premb_mask/premb_mask_ltomos.star'
-key_2, l_id2 = 'tether', 1
-in_star_3 = ROOT_PATH + '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
-key_3, l_id3 = 'pst', 4
-in_star_4 = ROOT_PATH + '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
-key_4, l_id4 = 'sv', 1
+in_star_1 = ROOT_PATH + '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star'
+key_1, l_id1 = 'pre', 0 # 4
+in_star_2 = ROOT_PATH + '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star' # '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/az/ref_nomb_1_clean/ltomos_az_ref_1_gather_premb_cleft/az_cleft_premb_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_40/ltomos_tether/ves_40_cleft_premb_mask_ltomos.star' # '/ves_40/ltomos_lap/lap_ltomos.star' # '/ves_40/ltomos_premb_mask/premb_mask_ltomos.star'
+key_2, l_id2 = 'tether', 1 # 1
+in_star_3 = ROOT_PATH + '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
+key_3, l_id3 = 'pst', 2 # 4
+in_star_4 = ROOT_PATH + '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
+key_4, l_id4 = 'sv', 1 # 1
 in_star_5 = ROOT_PATH + '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star'
 key_5, l_id5 = 'ampar', 0
 in_star_6 = ROOT_PATH + '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star'
@@ -67,7 +67,7 @@ in_part = ROOT_PATH + '/../../syn/sub/relion/fils/pre/vtps/sph_rad_5_surf.vtp'
 in_wspace = None # ROOT_PATH + '/pst/ampar_vs_nmdar/org/method_2/3_pre_tether_pst/aln_15_cr10/3_pre_tether_pst_sim20_wspace.pkl'
 
 # Output directory
-out_dir = ROOT_PATH + '/coloc/3_preb_tether_pstb/aln_15_cr10' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
+out_dir = ROOT_PATH + '/coloc/3_preb_tether_pstb_test/aln_10_cr20' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
 out_stem = '3_preb_tether_pstb_sim1'
 
 # Pre-processing variables
@@ -76,9 +76,9 @@ pre_min_parts = 1
 
 # Analysis variables
 ana_res = 0.684 # nm/voxel
-ana_col_rad = 30 # 15 # nm
+ana_col_rad = 20 # 15 # nm
 ana_clst_method = 'HC'
-ana_aln_dst = 15 # nm
+ana_aln_dst = 10 # nm
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
@@ -317,7 +317,7 @@ if in_wspace is None:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         print '\t\t\t+Processing tomogram (' + str(tomo_count + 1) + \
                   ' of ' + str(len(tomos_nc.keys())) + ') : ' + os.path.split(tkey)[1]
-        if os.path.split(tkey)[1] == 'syn_13_1_bin2_rot_crop2_seg.fits':
+        if os.path.split(tkey)[1] == 'syn_14_18_bin2_rot_crop2_seg.fits':
             print 'jol'
         try:
             ltomo_2, ltomo_3 = list_2.get_tomo_by_key(tkey), list_3.get_tomo_by_key(tkey)

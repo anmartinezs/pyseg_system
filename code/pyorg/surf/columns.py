@@ -1208,7 +1208,7 @@ class ColumnsFinder(object):
                 if len(c_ids) > 0:
                     hold_clsts[id_lyr].append(Cluster(c_ids, coords))
 
-        # Getting the ids of all the particles witin sub-columns
+        # Getting the ids of all the particles within sub-columns
         scol_ids_1, scol_ids_2, scol_ids_3 = list(), list(), list()
         for scol in self.__scols.itervalues():
             for clst_1 in scol[0]:
@@ -1259,5 +1259,4 @@ class ColumnsFinder(object):
                     count_col += 1
                 # hold_cols[count_col] = hold_col
                 # count_col += 1
-
         return hold_cols

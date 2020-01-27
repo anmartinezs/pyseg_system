@@ -63,7 +63,7 @@ do_ang_rnd = [] # ['Rot']
 
 ####### Multiprocessing settings
 
-mp_npr = 1 # 10
+mp_npr = 10 # 1
 
 ########################################################################################
 # Local functions

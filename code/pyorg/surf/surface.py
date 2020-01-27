@@ -2662,6 +2662,13 @@ class TomoParticles(object):
         appender = vtk.vtkAppendPolyData()
         for i in range(n_parts):
 
+            # Check particle code
+            hold_code = CODE_POSITIVE_DST
+            for ii in range(len(mat_codes[i, :])):
+                if mat_codes[i, ii][0] == CODE_BORDER:
+                    hold_code = CODE_BORDER
+                    break
+
             # Add particle id property
             hold_vtp = self.__parts[i].get_vtp()
             part_id, part_code = vtk.vtkIntArray(), vtk.vtkIntArray()
@@ -2672,10 +2679,7 @@ class TomoParticles(object):
             part_code.SetName(CODE_STR)
             part_code.SetNumberOfComponents(1)
             part_code.SetNumberOfTuples(hold_vtp.GetNumberOfCells())
-            if 3 in mat_codes[i, :]:
-                part_code.FillComponent(0, CODE_BORDER)
-            else:
-                part_code.FillComponent(0, CODE_POSITIVE_DST)
+            part_code.FillComponent(0, hold_code)
             hold_vtp.GetCellData().AddArray(part_id)
             hold_vtp.GetCellData().AddArray(part_code)
 
@@ -2691,13 +2695,16 @@ class TomoParticles(object):
         poly_p, points_p = vtk.vtkPolyData(), vtk.vtkPoints()
         poly_l, points_l = vtk.vtkPolyData(), vtk.vtkPoints()
         cells_p, cells_l = vtk.vtkCellArray(), vtk.vtkCellArray()
-        arr_type_p, arr_pid_p, arr_id_p = vtk.vtkIntArray(), vtk.vtkIntArray(), vtk.vtkIntArray()
+        arr_type_p, arr_pid_p, arr_id_p, arr_code_p = vtk.vtkIntArray(), vtk.vtkIntArray(), vtk.vtkIntArray(), \
+                                                     vtk.vtkIntArray()
         arr_type_p.SetName('TYPE')
         arr_type_p.SetNumberOfComponents(1)
         arr_pid_p.SetName('POINT_ID')
         arr_pid_p.SetNumberOfComponents(1)
         arr_id_p.SetName('PART_ID')
         arr_id_p.SetNumberOfComponents(1)
+        arr_code_p.SetName('CODE')
+        arr_code_p.SetNumberOfComponents(1)
         arr_pid_l, arr_id_l, arr_len_l, arr_code_l = vtk.vtkIntArray(), vtk.vtkIntArray(), vtk.vtkFloatArray(), \
                                                      vtk.vtkIntArray()
         arr_pid_l.SetName('POINT_ID')
@@ -2711,6 +2718,12 @@ class TomoParticles(object):
         count_p = 0
         # Loop for points
         for i in range(n_parts):
+            # Check particle code
+            hold_code = CODE_POSITIVE_DST
+            for ii in range(len(mat_codes[i, :])):
+                if mat_codes[i, ii][0] == CODE_BORDER:
+                    hold_code = CODE_BORDER
+                    break
             part = self.__parts[i]
             for ii in range(n_points_in):
                 hold_point = part.get_surf_point(in_pids[ii], ref_vtp=part_surf)
@@ -2720,6 +2733,7 @@ class TomoParticles(object):
                 arr_type_p.InsertTuple(count_p, (1,))
                 arr_pid_p.InsertTuple(count_p, (ii,))
                 arr_id_p.InsertTuple(count_p, (i,))
+                arr_code_p.InsertTuple(count_p, (hold_code,))
                 count_p += 1
             for ii in range(n_points_out):
                 hold_point = part.get_surf_point(out_pids[ii], ref_vtp=part_surf)
@@ -2729,11 +2743,18 @@ class TomoParticles(object):
                 arr_type_p.InsertTuple(count_p, (2,))
                 arr_pid_p.InsertTuple(count_p, (ii,))
                 arr_id_p.InsertTuple(count_p, (i,))
+                arr_code_p.InsertTuple(count_p, (hold_code,))
                 count_p += 1
         # Loop for connections
         count_l, count_p = 0, 0
         # for i in range(n_parts):
         for i in pairs.iterkeys():
+            # Check particle code
+            hold_code = CODE_POSITIVE_DST
+            for ii in range(len(mat_codes[i, :])):
+                if mat_codes[i, ii][0] == CODE_BORDER:
+                    hold_code = CODE_BORDER
+                    break
             hold_pairs = pairs[i]
             if hold_pairs is None:
                 continue
@@ -2756,7 +2777,7 @@ class TomoParticles(object):
                 hold = point_2 - point_1
                 hold_dst = math.sqrt((hold * hold).sum())
                 arr_len_l.InsertTuple(count_l, (hold_dst,))
-                arr_code_l.InsertTuple(count_l, (mat_codes[i, ii][0],))
+                arr_code_l.InsertTuple(count_l, (hold_code,))
                 # mat_out[i, ii] = dst
                 count_l += 1
         poly_p.SetPoints(points_p)
@@ -2766,6 +2787,7 @@ class TomoParticles(object):
         poly_p.GetCellData().AddArray(arr_type_p)
         poly_p.GetCellData().AddArray(arr_pid_p)
         poly_p.GetCellData().AddArray(arr_id_p)
+        poly_p.GetCellData().AddArray(arr_code_p)
         poly_l.GetCellData().AddArray(arr_pid_l)
         poly_l.GetCellData().AddArray(arr_id_l)
         poly_l.GetCellData().AddArray(arr_len_l)

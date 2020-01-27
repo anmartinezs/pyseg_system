@@ -33,14 +33,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-engel/antonio/rubisco/org'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_parts_test_v2.star' # '/in/in_parts_all_iso1.7.star' # '/in/in_parts_all.star'
+in_star = ROOT_PATH + '/in/in_parts_L2Tomo8.star' # '/in/in_parts_test_v2.star' # '/in/in_parts_all_iso1.7.star' # '/in/in_parts_all.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_test2.star' # '/in/in_seg_all.star' # '/in/in_seg_all.star'
+in_seg = ROOT_PATH + '/in/in_seg_L2Tomo8.star' # '/in/in_seg_test2.star' # '/in/in_seg_all.star' # '/in/in_seg_all.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/test_v2' # '/ltomos/all_iso1.7' # '/ltomos/all_pid' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'test_remove_parts' # 'all_iso1.7' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/L2Tomo8' # '/ltomos/test_v2' # '/ltomos/all_iso1.7' # '/ltomos/all_pid' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'L2Tomo8_code_parts' # 'test_remove_parts' # 'all_iso1.7' # 'pre'
 
 pt_res = 1.368 # nm/vx - resolution
 
