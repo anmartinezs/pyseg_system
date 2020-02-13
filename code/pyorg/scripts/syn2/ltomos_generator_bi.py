@@ -33,17 +33,17 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pre/in/all_pre_pick.star' # '/org/pre/in/all_pre_avgs.star' # '/org/pre/in/all_pre_v6.star'
+in_star = ROOT_PATH + '/org/bi/in/all_bi.star' # '/org/pre/in/all_pre_avgs.star' # '/org/pre/in/all_pre_v6.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_all_pre_pick' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
-out_stem = 'all_pre_pick' # 'all_pre_avgs' # 'pre'
+out_dir = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pre_bi_proj_pst_min10' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
+out_stem = 'all_pre_bi_proj_pst_min10' # 'all_pre_avgs' # 'pre'
 
 # Segmentation pre-processing
-sg_lbl = 2 # 1
+sg_lbl = 1 # 5 # 2
 sg_sg = 0
 sg_dec = 0.9
 sg_bc = False
@@ -52,7 +52,7 @@ sg_pj = True # False
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5': 10} # 0
+pt_min_parts = {'0': 10, '1': 10, '2': 10, '3': 5, '4': 5, '5': 10} # 0
 pt_keep = None
 pt_ssup = 7.31 # 14.62 # voxels
 pt_ssup_ref = None # '5'

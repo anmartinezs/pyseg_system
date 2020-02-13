@@ -33,14 +33,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/col/in/all_preb_tether_pstb_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
+in_star = ROOT_PATH + '/org/col/in/all_col2_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_zeros_fits.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star'
+in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_zeros_fits.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/col/ltomos/ltomos_preb_tether_pstb_xd5nm' # '/org/col/ltomos/ltomos_all_scol_test'
-out_stem = 'all_preb_tether_pstb_xd5nm' # 'all_scol_test' # 'pre'
+out_dir = ROOT_PATH + '/org/col/ltomos/ltomos_col2' # '/org/col/ltomos/ltomos_all_scol_test'
+out_stem = 'all_col2' # 'all_scol_test' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 2 # 1
@@ -52,7 +52,7 @@ sg_pj = True
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = 0
+pt_min_parts = 0 # {'0': 5, '1': 5, '2': 5, '3': 5} # 5
 pt_keep = None
 pt_ssup = 7.31 # 5 # voxels
 
@@ -171,17 +171,17 @@ for star_row in range(star.get_nrows()):
         try:
             seg_row = seg_dic[os.path.split(mic_str)[1]]
         except KeyError:
-            if not mic_str.endswith('.fits'):
-                print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
-                continue
-        if mic_str.endswith('.fits'):
-            seg_str = mic_str
-            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
-            mic = disperse_io.load_tomo(mic_str, mmap=True)
-        else:
-            seg_str = star_seg.get_element('_psSegImage', seg_row)
-            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
-            mic = disperse_io.load_tomo(mic_str, mmap=True)
+            # if not mic_str.endswith('.fits'):
+            print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
+            continue
+        # if mic_str.endswith('.fits'):
+        #     seg_str = mic_str
+        #     (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+        #     mic = disperse_io.load_tomo(mic_str, mmap=True)
+        # else:
+        seg_str = star_seg.get_element('_psSegImage', seg_row)
+        (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+        mic = disperse_io.load_tomo(mic_str, mmap=True)
         part = surf.Particle(part_vtp, center=(0., 0., 0.), normal=(0, 0, 1.))
 
         # Initial rotation
@@ -210,12 +210,12 @@ for star_row in range(star.get_nrows()):
         # Un-centering
         part.translation(mic_cx, mic_cy, mic_cz)
         # Un-cropping
-        if mic_str.endswith('.fits'):
-            seg_offy, seg_offx, seg_offz = 0, 0, 0
-        else:
-            seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
-                                           star_seg.get_element('_psSegOffY', seg_row), \
-                                           star_seg.get_element('_psSegOffZ', seg_row)
+        # if mic_str.endswith('.fits'):
+        #     seg_offy, seg_offx, seg_offz = 0, 0, 0
+        # else:
+        seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
+                                       star_seg.get_element('_psSegOffY', seg_row), \
+                                       star_seg.get_element('_psSegOffZ', seg_row)
         part.translation(-seg_offx, -seg_offy, -seg_offz)
         part.swap_xy()
 
@@ -248,13 +248,15 @@ for star_row in range(star.get_nrows()):
     if pt_keep is not None:
         print '\t\tFiltering to keep the ' + str(pt_keep) + 'th more highly populated'
         list_tomos.clean_low_pouplated_tomos(pt_keep)
-    if pt_min_parts >= 0:
-        print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
-        list_tomos.filter_by_particles_num(pt_min_parts)
+    if not isinstance(pt_min_parts, dict):
+        if pt_min_parts >= 0:
+            print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+            list_tomos.filter_by_particles_num(pt_min_parts)
     if pt_ssup is not None:
         list_tomos.scale_suppression(pt_ssup)
 
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
+    star_stem = star_stem.split('_')[0]
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl
     try:
@@ -278,11 +280,16 @@ for star_row in range(star.get_nrows()):
     # Adding particle to list
     set_lists.add_list_tomos(list_tomos, star_stem)
 
+if isinstance(pt_min_parts, dict):
+    print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+    set_lists.filter_by_particles_num_tomos(pt_min_parts)
+
 for star_row in range(star.get_nrows()):
 
     part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
                                    star.get_element('_suSurfaceVtp', star_row)
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
+    star_stem = star_stem.split('_')[0]
     list_tomos = set_lists.get_lists_by_key(star_stem)
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl

@@ -33,28 +33,29 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pst/in/all_pst.star' # '/org/pst/in/all_pst_v6_gluta_2.5.star'
+in_star = ROOT_PATH + '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star' # '/org/pst/in/all_pst_v6_gluta_2.5.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_all_pst_pre_ss7.31px' # '/ref_a3/ltomos'
-out_stem = 'all_pst_pre' # 'pre'
+out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_H_L_avgs_proj' # '/org/pst/ltomos/ltomos_pst_pick' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # '/ref_a3/ltomos'
+out_stem = 'all_H_L_avgs_proj' # 'all_pst_pick' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # 'pre'
 
 # Segmentation pre-processing
-sg_lbl = 2 # 1
+sg_lbl = 1 # 2
 sg_sg = 0
 sg_dec = 0.9
 sg_bc = False
-sg_bm = 'center'
-sg_pj = True
+sg_bm = None # 'center'
+sg_pj = True # False
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = 0
+pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5':10, '6': 10, '7': 10, '8': 10, '9': 10, '10': 10, '11': 10}
 pt_keep = None
-pt_ssup = 7.31 # voxels
+pt_ssup = 14.62 # 7.31 # 20 # voxels
+pt_ssup_ref = '1' # None
 
 ########################################################################################
 # MAIN ROUTINE
@@ -84,6 +85,8 @@ print '\tPost-processing: '
 print '\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of particles.'
 print '\t\t-Minimum number of particles: ' + str(pt_min_parts)
 print '\t\t-Scale suppression: ' + str(pt_ssup) + ' voxels'
+if pt_ssup_ref is not None:
+    print '\t\t-Crossed scale-suppression activated.'
 print ''
 
 ######### Process
@@ -224,7 +227,7 @@ for star_row in range(star.get_nrows()):
         try:
             list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj, meta=meta_info)
         except pexceptions.PySegInputError as e:
-            print 'WARINING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
+            print 'WARNING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
                   ' because of "' + e.get_message() + '"'
             pass
 
@@ -235,23 +238,25 @@ for star_row in range(star.get_nrows()):
     if pt_keep is not None:
         print '\t\tFiltering to keep the ' + str(pt_keep) + 'th more highly populated'
         list_tomos.clean_low_pouplated_tomos(pt_keep)
-    if pt_min_parts >= 0:
-        print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
-        list_tomos.filter_by_particles_num(pt_min_parts)
+    if not isinstance(pt_min_parts, dict):
+        if pt_min_parts >= 0:
+            print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+            list_tomos.filter_by_particles_num(pt_min_parts)
     if pt_ssup is not None:
         list_tomos.scale_suppression(pt_ssup)
 
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
-    out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
-    print '\t\tPickling the list of tomograms in the file: ' + out_pkl
-    try:
-        list_tomos.pickle(out_pkl)
-        kwargs = {'_psPickleFile': out_pkl}
-        star_out.add_row(**kwargs)
-    except pexceptions.PySegInputError as e:
-        print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
-        sys.exit(-1)
+    star_stem = star_stem.split('_')[0]
+    # out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
+    # print '\t\tPickling the list of tomograms in the file: ' + out_pkl
+    # try:
+    #     list_tomos.pickle(out_pkl)
+    #     kwargs = {'_psPickleFile': out_pkl}
+    #     star_out.add_row(**kwargs)
+    # except pexceptions.PySegInputError as e:
+    #     print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
+    #     print 'Terminated. (' + time.strftime("%c") + ')'
+    #     sys.exit(-1)
 
     out_app = out_dir + '/' + star_stem + '_app'
     if not os.path.exists(out_app):
@@ -265,22 +270,31 @@ for star_row in range(star.get_nrows()):
     # Adding particle to list
     set_lists.add_list_tomos(list_tomos, star_stem)
 
+if isinstance(pt_min_parts, dict):
+    print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+    set_lists.filter_by_particles_num_tomos(pt_min_parts)
+
+if pt_ssup_ref is not None:
+    print '\t\tCrossing scale supression with reference list: ' + str(pt_ssup_ref)
+    set_lists.scale_suppression(pt_ssup, ref_list=pt_ssup_ref)
+
 for star_row in range(star.get_nrows()):
 
     part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
                                    star.get_element('_suSurfaceVtp', star_row)
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
+    star_stem = star_stem.split('_')[0]
     list_tomos = set_lists.get_lists_by_key(star_stem)
-    # out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
-    # print '\t\tPickling the list of tomograms in the file: ' + out_pkl
-    # try:
-    #     list_tomos.pickle(out_pkl)
-    #     kwargs = {'_psPickleFile': out_pkl}
-    #     star_out.add_row(**kwargs)
-    # except pexceptions.PySegInputError as e:
-    #     print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
-    #     print 'Terminated. (' + time.strftime("%c") + ')'
-    #     sys.exit(-1)
+    out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
+    print '\t\tPickling the list of tomograms in the file: ' + out_pkl
+    try:
+        list_tomos.pickle(out_pkl)
+        kwargs = {'_psPickleFile': out_pkl}
+        star_out.add_row(**kwargs)
+    except pexceptions.PySegInputError as e:
+        print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
+        print 'Terminated. (' + time.strftime("%c") + ')'
+        sys.exit(-1)
 
     out_app = out_dir + '/' + star_stem + '_app'
     if not os.path.exists(out_app):

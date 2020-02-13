@@ -39,7 +39,7 @@ in_star = ROOT_PATH + '/org/tether/in/all_tether.star' # '/org/pre/in/all_pre_v6
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_and_zeros_fits.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px' # '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px' # '/ref_a3/ltomos'
+out_dir = ROOT_PATH + '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px' # '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px' # '/ref_a3/ltomos'
 out_stem = 'all_pre_tether' # 'pre'
 
 # Segmentation pre-processing
@@ -54,7 +54,7 @@ sg_voi_mask = True
 # Post-processing
 pt_min_parts = 0
 pt_keep = None
-pt_ssup = 14.62 # 7.31 # voxels
+pt_ssup = 7.31 # 14.62 # voxels
 
 ########################################################################################
 # MAIN ROUTINE

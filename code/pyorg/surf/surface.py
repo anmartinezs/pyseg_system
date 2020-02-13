@@ -287,14 +287,19 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
                 particles_2 = part_centers_2
                 voi_surf = voi
 
-            if thick is None:
-                nhoods = ListSphereNhood(particle, distances,
-                                         voi=voi_surf, selector_voi=selector_voi,
-                                         conv_iter=conv_iter, max_iter=max_iter, fmm=fmm)
-            else:
-                nhoods = ListShellNhood(particle, distances, thick=thick_f,
-                                        voi=voi_surf, selector_voi=selector_voi,
-                                        conv_iter=conv_iter, max_iter=max_iter, fmm=fmm)
+            try:
+                if thick is None:
+                    nhoods = ListSphereNhood(particle, distances,
+                                             voi=voi_surf, selector_voi=selector_voi,
+                                             conv_iter=conv_iter, max_iter=max_iter, fmm=fmm)
+                else:
+                    nhoods = ListShellNhood(particle, distances, thick=thick_f,
+                                            voi=voi_surf, selector_voi=selector_voi,
+                                            conv_iter=conv_iter, max_iter=max_iter, fmm=fmm)
+            except ValueError:
+                print 'WARNING: process ' + str(pr_id) + ' failed to process the particle ' + str(j) + ', skipping...'
+                raise ValueError
+                # continue
 
             # Get spheres mask
             rgs = nhoods.get_rad_ranges()
@@ -3595,6 +3600,7 @@ class ListTomoParticles(object):
     def filter_by_particles_num(self, min_num_particles=1):
         hold_dict = dict()
         for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+            # print key + ': ' + str(tomo.get_num_particles())
             if tomo.get_num_particles() >= min_num_particles:
                 hold_dict[key] = tomo
         self.__tomos = hold_dict
@@ -3728,9 +3734,6 @@ class SetListTomoParticles(object):
 
     def __init__(self):
         self.__lists = dict()
-        # Variables for picking
-        self.__list_keys = None
-        self.__llist_keys = None
 
     # EXTERNAL FUNCTIONALITY
 
@@ -4075,18 +4078,18 @@ class SetListTomoParticles(object):
         # Initialization
         star_part = sub.Star()
         hold_part = None
-        for i, list in enumerate(self.get_lists().values()):
-            for tomo in list.get_tomo_list():
+        for i, llist in enumerate(self.get_lists().values()):
+            for tomo in llist.get_tomo_list():
                 for part in tomo.get_particles():
                     hold_part = part
-                    if (hold_part is None):
+                    if hold_part is None:
                         break
-                if (hold_part is None):
+                if hold_part is None:
                     break
-            if (hold_part is None):
+            if hold_part is None:
                 break
         if hold_part is None:
-            return
+            return None
         meta_dic = hold_part.get_meta()
         for key in meta_dic.iterkeys():
             star_part.add_column(key)
@@ -4166,19 +4169,36 @@ class SetListTomoParticles(object):
                         ref_coords = rtomo.get_particle_coords()
                         tomo.scale_suppression(ss, ext_coords=ref_coords)
 
-    # Delete those tomograms with a number of particles lower than an input value for any list
+    #
     def filter_by_particles_num_tomos(self, min_num_particles=1):
+        """
+        Delete those tomograms with a number of particles lower than an input value for any list
+        :param min_num_particles: a number or a dict, the allows to specify different minimum number for each layer
+        :return:
+        """
 
         # Computing total particles per tomogram loop
-        tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-        for tkey in tomos_del.keys():
-            for ltomos in self.__lists.itervalues():
-                try:
-                    tomo = ltomos.get_tomo_by_key(tkey)
-                except KeyError:
-                    continue
-                if tomo.get_num_particles() < min_num_particles:
-                    tomos_del[tkey] = True
+        if isinstance(min_num_particles, dict):
+            tomos_dict = dict().fromkeys(self.get_set_tomos(), 0)
+            for lkey, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+                hold_min = min_num_particles[lkey]
+                for tomo in ltomos.get_tomo_list():
+                    if tomo.get_num_particles() >= hold_min:
+                        tomos_dict[tomo.get_tomo_fname()] += 1
+            tomos_del = dict().fromkeys(self.get_set_tomos(), False)
+            for key in tomos_dict.iterkeys():
+                if tomos_dict[key] < len(min_num_particles.keys()):
+                    tomos_del[key] = True
+        else:
+            tomos_del = dict().fromkeys(self.get_set_tomos(), False)
+            for tkey in tomos_del.keys():
+                for ltomos in self.__lists.itervalues():
+                    try:
+                        tomo = ltomos.get_tomo_by_key(tkey)
+                    except KeyError:
+                        continue
+                    if tomo.get_num_particles() < min_num_particles:
+                        tomos_del[tkey] = True
 
         # Deleting loop
         for ltomos in self.__lists.itervalues():

@@ -66,12 +66,36 @@ mkdir
 
 ## TUTORIAL synth_sumb
 
-rm -r $PWD/data/tutorials/synth_sumb/trash/*
-rm -r $PWD/data/tutorials/synth_sumb/mics/*
-rm -r $PWD/data/tutorials/synth_sumb/segs/*
-rm -r $PWD/data/tutorials/synth_sumb/graphs/*
-rm -r $PWD/data/tutorials/synth_sumb/fils/out*
-rm -r $PWD/data/tutorials/synth_sumb/pick/out*
+if [ -d $PWD/data/tutorials/synth_sumb/trash ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/trash/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/trash
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/mics ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/mics/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/mics
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/segs ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/segs/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/segs
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/graphs ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/graphs/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/graphs
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/fils/out ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/fils/out/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/fils/out
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/pick/out ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/pick/out/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/pick/out
+fi
 if [ -f $PWD/data/tutorials/synth_sumb/rec/mask_sph_130_60.mrc ]; then
 	mv $PWD/data/tutorials/synth_sumb/rec/mask_sph_130_60.mrc $PWD/data/tutorials/synth_sumb/
 fi
@@ -87,7 +111,23 @@ if [ -f $PWD/data/tutorials/synth_sumb/wedge_130_60.mrc ]; then
 fi
 rm -r $PWD/data/tutorials/synth_sumb/class/*
 rm -r $PWD/data/tutorials/synth_sumb/rln/*
-rm -r $PWD/data/tutorials/synth_sumb/org/ltomos/*
-rm -r $PWD/data/tutorials/synth_sumb/org/uni_1st/*
-rm -r $PWD/data/tutorials/synth_sumb/org/uni_2nd/*
-rm -r $PWD/data/tutorials/synth_sumb/org/bi_2nd/*
+if [ -d $PWD/data/tutorials/synth_sumb/org/ltomos ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/org/ltomos/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/org/ltomos
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/org/uni_1st ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/org/uni_1st/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/org/uni_1st
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/org/uni_2nd ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/org/uni_2nd/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/org/uni_2nd
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/org/bi_2nd ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/org/bi_2nd/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/org/bi_2nd
+fi

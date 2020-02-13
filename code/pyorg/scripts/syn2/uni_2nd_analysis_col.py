@@ -50,23 +50,23 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pst/ltomos/ltomos_all_pst_pre_ss15px_v6/all_pst_pre_ltomos_surf.star'
+in_star = ROOT_PATH + '/org/col/ltomos/ltomos_col2/all_col2_ltomos_surfs.star' # '/org/col/ltomos/ltomos_preb_tether_pstb_xd5nm_amin10/all_preb_tether_pstb_xd5nm_amin10_ltomos_surfs.star' # '/org/pst/ltomos/ltomos_all_pst_pre_ss15px_v6/all_pst_pre_ltomos_surf.star'
 in_wspace = None # ROOT_PATH + '/data/tutorials/synth_sumb/org/uni_2nd/test_1_proj_rbf_8_300_10_15_sim_10_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pst/uni_2nd/'
-out_stem = 'all_pst_pre_5_150_10_sim_10'
+out_dir = ROOT_PATH + '/org/col/uni_2nd/'
+out_stem = 'all_col2_ss7.31px_sim200' # 'all_preb_tether_pstb_xd5nm_amin10_sim10'
 
 # Analysis variables
 ana_res = 0.684 # nm/voxel
-ana_rg = np.arange(5, 150, 10) # in nm
+ana_rg = np.arange(5, 150, 5) # in nm
 ana_shell_thick = None # 15 # 5
 ana_rdf = False
 ana_fmm = True
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 10
+p_nsims = 200
 p_per = 5 # %
 
 # Multiprocessing options
