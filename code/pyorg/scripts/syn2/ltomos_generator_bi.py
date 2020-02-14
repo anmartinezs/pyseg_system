@@ -39,8 +39,8 @@ in_star = ROOT_PATH + '/org/bi/in/all_bi.star' # '/org/pre/in/all_pre_avgs.star'
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pre_bi_proj_pst_min10' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
-out_stem = 'all_pre_bi_proj_pst_min10' # 'all_pre_avgs' # 'pre'
+out_dir = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pst_bi_proj_min20' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
+out_stem = 'all_pst_bi_proj_min20' # 'all_pre_avgs' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 1 # 5 # 2
@@ -52,7 +52,7 @@ sg_pj = True # False
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = {'0': 10, '1': 10, '2': 10, '3': 5, '4': 5, '5': 10} # 0
+pt_min_parts = {'0': 20, '1': 20, '2': 20, '3': 20, '4': 20, '5': 20} # 0
 pt_keep = None
 pt_ssup = 7.31 # 14.62 # voxels
 pt_ssup_ref = None # '5'

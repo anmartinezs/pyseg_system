@@ -52,18 +52,18 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star_ref = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pre_bi_proj_pst_min10/all_pre_bi_proj_pst_min10_ltomos_surfs.star'
-in_ref_short_key = '0'
-in_star = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pre_bi_proj_pst_min10/all_pre_bi_proj_pst_min10_ltomos_surfs.star'  #
+in_star_ref = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pst_bi_proj_min20/all_pst_bi_proj_min20_ltomos_surfs.star'
+in_ref_short_key = '1' # '0'
+in_star = ROOT_PATH + '/org/bi/ltomos/ltomos_all_pst_bi_proj_min20/all_pst_bi_proj_min20_ltomos_surfs.star'  #
 in_wspace = None # ROOT_PATH + '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/org/bi/bi_2nd/'
-out_stem = 'all_pre_bi_proj_pst_min10_ss7.31px'  # ''uni_sph_4_60_5'
+out_stem = 'all_az_pst_bi_proj_min20_ss7.31px'  # 'uni_sph_4_60_5'
 
 # Analysis variables
 ana_res = 0.684  # nm/voxel
-ana_rg = np.arange(5, 150, 5)  # in nm
+ana_rg = np.arange(5, 120, 5)  # in nm
 ana_shell_thick = None  # 15 # 5
 ana_rdf = False
 ana_fmm = True

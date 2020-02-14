@@ -489,6 +489,9 @@ def pr_routine(pr_id, tomo_ids, settings):
 # MAIN ROUTINE
 ########################################################################################
 
+if mp_npr > tm_nt:
+    mp_npr = tm_nt
+
 ########## Printing the initial message
 
 print 'Generate synthetic microsomes.'
