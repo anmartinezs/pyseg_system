@@ -130,7 +130,7 @@ This tutorial gives an example that shows the most of PySeg functionalities
  for processing unoriented membranes, here a script is provided to generate
  synthetically the input data.
  A membrane is unoriented, in contrast to oriented, if we don't know what
- are its inner and outer sides (see Fig X).
+ are its inner and outer sides.
  We use to have unoriented membranes when cryo-ET tomograms has been processed
  with automated methods for membrane segmentation, like TomoSemMemTV.
  In general, to orient a membrane is not at all a trivial task in cryo-ET
