@@ -67,8 +67,8 @@ in_part = ROOT_PATH + '/../../syn/sub/relion/fils/pre/vtps/sph_rad_5_surf.vtp'
 in_wspace = None # ROOT_PATH + '/pst/ampar_vs_nmdar/org/method_2/3_pre_tether_pst/aln_15_cr10/3_pre_tether_pst_sim20_wspace.pkl'
 
 # Output directory
-out_dir = ROOT_PATH + '/coloc/3_preb_tether_pstb_test/aln_10_cr20' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
-out_stem = '3_preb_tether_pstb_sim1'
+out_dir = ROOT_PATH + '/coloc/3_preb_tether_pstb_test/aln_15_cr30' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
+out_stem = '3_preb_tether_pstb_sim1_m1'
 
 # Pre-processing variables
 pre_ssup = 5 #nm
@@ -76,9 +76,9 @@ pre_min_parts = 1
 
 # Analysis variables
 ana_res = 0.684 # nm/voxel
-ana_col_rad = 20 # 15 # nm
+ana_col_rad = 30 # 15 # nm
 ana_clst_method = 'HC'
-ana_aln_dst = 10 # nm
+ana_aln_dst = 15 # nm
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
@@ -317,7 +317,7 @@ if in_wspace is None:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         print '\t\t\t+Processing tomogram (' + str(tomo_count + 1) + \
                   ' of ' + str(len(tomos_nc.keys())) + ') : ' + os.path.split(tkey)[1]
-        if os.path.split(tkey)[1] == 'syn_14_18_bin2_rot_crop2_seg.fits':
+        if os.path.split(tkey)[1] == 'syn_14_20_bin2_rot_crop2_seg.fits':
             print 'jol'
         try:
             ltomo_2, ltomo_3 = list_2.get_tomo_by_key(tkey), list_3.get_tomo_by_key(tkey)
@@ -388,7 +388,8 @@ if in_wspace is None:
         if vesicles[tkey] > 0:
             tomos_denv[tkey] = float(tomos_nc[tkey]) / float(vesicles[tkey])
         tomos_area[tkey] = cfinder.get_area_tomo() * (ana_res * ana_res)
-        tomos_acol[tkey] = cfinder.get_occupancy(mode='cyl', rad=ana_col_rad_v, area=True) * (ana_res * ana_res)
+        tomos_acol[tkey] = cfinder.get_occupancy(mode='cyl', rad=ana_aln_dst_v, area=True, layers=[0, ], scols=True) \
+                           * (ana_res * ana_res)
         tab[tkey].append(tomos_acol[tkey])
         tab[tkey].append(tomos_area[tkey])
         tab[tkey].append(tomos_np_l1[tkey])
@@ -425,7 +426,8 @@ if in_wspace is None:
                 if vesicles[tkey] > 0:
                     tomos_denv_sims[tkey].append(float(hold_nc_sims) / float(vesicles[tkey]))
                 tomos_area_sims[tkey].append(cfinder2.get_area_tomo() * (ana_res * ana_res))
-                tomos_acol_sims[tkey].append(cfinder2.get_occupancy(mode='cyl', rad=ana_col_rad_v, area=True) * (ana_res * ana_res))
+                tomos_acol_sims[tkey].append(cfinder2.get_occupancy(mode='cyl', rad=ana_aln_dst_v, area=True,
+                                                                    layers=[0, ], scols=True)) * (ana_res * ana_res)
                 tomos_occ_sims[tkey].append(cfinder2.get_occupancy(mode='cyl', rad=ana_col_rad_v))
                 tomos_npc_l1_sim[tkey].append(cfinder2.get_num_particles(lyr=1))
                 tomos_npc_l2_sim[tkey].append(cfinder2.get_num_particles(lyr=2))
@@ -451,7 +453,9 @@ if in_wspace is None:
                 tomos_nsc_sims2[tkey].append(cfinder3.get_num_sub_columns())
                 tomos_den_sims2[tkey].append(cfinder3.get_den_columns())
                 hold_area, hold_acols = cfinder3.get_area_tomo(), cfinder3.get_area_columns(mode='cyl',
-                                                                                            rad=ana_col_rad_v)
+                                                                                            rad=ana_aln_dst_v,
+                                                                                            layers=[0, ],
+                                                                                            scols=True) * (ana_res * ana_res)
                 tomos_area_sims2[tkey].append(hold_area)
                 if len(hold_acols) > 0:
                     tomos_acol_sims2[tkey] += hold_acols

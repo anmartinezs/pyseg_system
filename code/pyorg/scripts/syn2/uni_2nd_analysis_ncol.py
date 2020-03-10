@@ -50,12 +50,12 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/col/ltomos/ltomos_ncol2_min5/all_ncol2_min5_ltomos_surfs.star' # '/org/col/ltomos/ltomos_preb_tether_pstb_xd5nm_amin10/all_preb_tether_pstb_xd5nm_amin10_ltomos_surfs.star' # '/org/pst/ltomos/ltomos_all_pst_pre_ss15px_v6/all_pst_pre_ltomos_surf.star'
-in_wspace = None # ROOT_PATH + '/data/tutorials/synth_sumb/org/uni_2nd/test_1_proj_rbf_8_300_10_15_sim_10_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/org/ncol/ltomos/ltomos_ncol/all_ncol_ltomos_surfs.star' # '/org/col/ltomos/ltomos_preb_tether_pstb_xd5nm_amin10/all_preb_tether_pstb_xd5nm_amin10_ltomos_surfs.star' # '/org/pst/ltomos/ltomos_all_pst_pre_ss15px_v6/all_pst_pre_ltomos_surf.star'
+in_wspace = ROOT_PATH + '/org/ncol/uni_2nd//all_ncol_ss7.31px_sim200_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/org/col/uni_2nd/'
-out_stem = 'all_ncol2_min5_ss7.31px_sim200' # 'all_preb_tether_pstb_xd5nm_amin10_sim10'
+out_dir = ROOT_PATH + '/org/ncol/uni_2nd/'
+out_stem = 'all_ncol_ss7.31px_sim200_2' # 'all_preb_tether_pstb_xd5nm_amin10_sim10'
 
 # Analysis variables
 ana_res = 0.684 # nm/voxel
@@ -66,7 +66,7 @@ ana_fmm = True
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 200
+p_nsims = 200 # 5
 p_per = 5 # %
 
 # Multiprocessing options
@@ -417,7 +417,7 @@ for tkey, ltomo in zip(tomos_exp.iterkeys(), tomos_exp.itervalues()):
                 plt.ylabel('Radial Distribution Function')
             else:
                 plt.ylabel('Ripley\'s O')
-        plt.xlabel('Scale [nm]')
+        plt.xlabel('Distance [nm]')
         plt.plot(ana_rg, arr, color=lists_color[lkey], label=lkey)
 
         plt.legend(loc=4)
@@ -443,7 +443,7 @@ for tkey, ltomo in zip(tomos_exp.iterkeys(), tomos_exp.itervalues()):
     plt.figure()
     plt.title('Clustering p-value for ' + tkey_short)
     plt.ylabel('p-value')
-    plt.xlabel('Scale [nm]')
+    plt.xlabel('Distance [nm]')
     try:
         for lkey, vals in zip(p_values.iterkeys(), p_values.itervalues()):
             plt.plot(ana_rg, vals, color=lists_color[lkey], linestyle='-', label=lkey)
@@ -491,7 +491,7 @@ for lkey, vals in zip(hold_sim_vals.iterkeys(), hold_sim_vals.itervalues()):
     vals_mat = np.asarray(vals, dtype=np.float32)
     lbl = lkey
     plt.plot(ana_rg, np.median(vals_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='--')
-plt.xlabel('Scale [nm]')
+plt.xlabel('Distance [nm]')
 plt.grid(True)
 plt.legend(loc=4)
 plt.tight_layout()
@@ -564,7 +564,7 @@ for lkey, tlist in zip(lists_exp.iterkeys(), lists_exp.itervalues()):
             plt.ylabel('Radial Distribution Function')
         else:
             plt.ylabel('Ripley\'s O')
-    plt.xlabel('Scale [nm]')
+    plt.xlabel('Distance [nm]')
     # Getting experimental IC
     exp_low, exp_med, exp_high = compute_ic(p_per, np.asarray(tlist))
     # plt.plot(ana_rg, exp_low, color=lists_color[lkey], linestyle='--', label=lkey)
@@ -612,7 +612,7 @@ if do_pval:
     plt.figure()
     plt.title('Clustering significance')
     plt.ylabel('p-value')
-    plt.xlabel('Scale [nm]')
+    plt.xlabel('Distance [nm]')
     p_per_lim = 1. - .01 * p_per
     plt.plot((ana_rg[0], ana_rg[-1]), (p_per_lim, p_per_lim), color='k', linestyle='--')
     for lkey, tlist in zip(lists_exp.iterkeys(), lists_exp.itervalues()):

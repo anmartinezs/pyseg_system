@@ -33,14 +33,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/col/in/all_ncol2_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
+in_star = ROOT_PATH + '/org/ncol/in/all_ncol_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_zeros_fits.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/col/ltomos/ltomos_ncol2_min5' # '/org/col/ltomos/ltomos_all_scol_test'
-out_stem = 'all_ncol2_min5' # 'all_scol_test' # 'pre'
+out_dir = ROOT_PATH + '/org/ncol/ltomos/ltomos_ncol' # '/org/ncol/ltomos/ltomos_ncol_tmin3_min5' # '/org/col/ltomos/ltomos_all_scol_test'
+out_stem = 'all_ncol' # 'all_ncol_tmin3_min5' # 'all_scol_test' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 2 # 1
@@ -52,8 +52,7 @@ sg_pj = True
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = {'0': 5, '2': 5, '3': 5, '4': 5, '5': 5, '6': 5, '7': 5, '8': 5, '9': 5, '10': 5,
-               '11': 5, '12': 5, '13': 5} # 5
+pt_min_parts = 0 # {'0': 3, '1': 5, '2': 5, '3': 5, '4': 5, '5': 5} # 5
 pt_keep = None
 pt_ssup = 7.31 # 5 # voxels
 
@@ -144,6 +143,7 @@ appender = vtk.vtkAppendPolyData()
 flt_stem = 'syn_11_2_bin2'
 
 print '\tLoop for tomograms in the list: '
+glist_tomos = surf.ListTomoParticles()
 set_lists = surf.SetListTomoParticles()
 for star_row in range(star.get_nrows()):
 
@@ -151,8 +151,12 @@ for star_row in range(star.get_nrows()):
     list_tomos = surf.ListTomoParticles()
     part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
                                    star.get_element('_suSurfaceVtp', star_row)
+    short_id = os.path.splitext(os.path.split(part_star_str)[1])[0]
+    short_id = short_id.split('_')[0]
     for tomo_fname, voi in zip(vois.iterkeys(), vois.itervalues()):
         list_tomos.add_tomo(surf.TomoParticles(tomo_fname, sg_lbl, voi=voi))
+        if star_row == 0:
+            glist_tomos.add_tomo(surf.TomoParticles(tomo_fname, sg_lbl, voi=voi))
 
     print '\t\tLoading particles STAR file(s):'
     star_part = sub.Star()
@@ -172,17 +176,17 @@ for star_row in range(star.get_nrows()):
         try:
             seg_row = seg_dic[os.path.split(mic_str)[1]]
         except KeyError:
-            # if not mic_str.endswith('.fits'):
-            print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
-            continue
-        # if mic_str.endswith('.fits'):
-        #     seg_str = mic_str
-        #     (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
-        #     mic = disperse_io.load_tomo(mic_str, mmap=True)
-        # else:
-        seg_str = star_seg.get_element('_psSegImage', seg_row)
-        (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
-        mic = disperse_io.load_tomo(mic_str, mmap=True)
+            if not mic_str.endswith('.fits'):
+                print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
+                continue
+        if mic_str.endswith('.fits'):
+            seg_str = mic_str
+            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+            mic = disperse_io.load_tomo(mic_str, mmap=True)
+        else:
+            seg_str = star_seg.get_element('_psSegImage', seg_row)
+            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+            mic = disperse_io.load_tomo(mic_str, mmap=True)
         part = surf.Particle(part_vtp, center=(0., 0., 0.), normal=(0, 0, 1.))
 
         # Initial rotation
@@ -211,12 +215,12 @@ for star_row in range(star.get_nrows()):
         # Un-centering
         part.translation(mic_cx, mic_cy, mic_cz)
         # Un-cropping
-        # if mic_str.endswith('.fits'):
-        #     seg_offy, seg_offx, seg_offz = 0, 0, 0
-        # else:
-        seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
-                                       star_seg.get_element('_psSegOffY', seg_row), \
-                                       star_seg.get_element('_psSegOffZ', seg_row)
+        if mic_str.endswith('.fits'):
+            seg_offy, seg_offx, seg_offz = 0, 0, 0
+        else:
+            seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
+                                           star_seg.get_element('_psSegOffY', seg_row), \
+                                           star_seg.get_element('_psSegOffZ', seg_row)
         part.translation(-seg_offx, -seg_offy, -seg_offz)
         part.swap_xy()
 
@@ -241,6 +245,13 @@ for star_row in range(star.get_nrows()):
             print 'WARNING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
                   ' because of "' + e.get_message() + '"'
             pass
+        if short_id in ['0', '1', '2']:
+            try:
+                glist_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj, meta=meta_info)
+            except pexceptions.PySegInputError as e:
+                print 'WARNING (glist): particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
+                      ' because of "' + e.get_message() + '"'
+                pass
 
         # TODEBUG
         if os.path.splitext(os.path.split(mic_str)[1])[0] == flt_stem:
@@ -280,18 +291,15 @@ for star_row in range(star.get_nrows()):
 
     # Adding particle to list
     set_lists.add_list_tomos(list_tomos, star_stem)
+set_lists.add_list_tomos(glist_tomos, '3')
 
 if isinstance(pt_min_parts, dict):
     print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
     set_lists.filter_by_particles_num_tomos(pt_min_parts)
 
-for star_row in range(star.get_nrows()):
+dic_lists = set_lists.get_lists()
+for star_stem, list_tomos in zip(dic_lists.iterkeys(), dic_lists.itervalues()):
 
-    part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
-                                   star.get_element('_suSurfaceVtp', star_row)
-    star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
-    star_stem = star_stem.split('_')[0]
-    list_tomos = set_lists.get_lists_by_key(star_stem)
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl
     try:
@@ -314,9 +322,9 @@ for star_row in range(star.get_nrows()):
             # tomo_vtp = poly_swapxy(tomo.append_particles_vtp(mode='surface'))
             disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
 
-out_parts = out_dir + '/' + out_stem + '_parts.star'
-print '\tStoring the particles STAR file: ' + out_parts
-set_lists.to_particles_star().store(out_parts)
+# out_parts = out_dir + '/' + out_stem + '_parts.star'
+# print '\tStoring the particles STAR file: ' + out_parts
+# set_lists.to_particles_star().store(out_parts)
 
 print '\tStoring list appended by tomograms in: ' + out_dir
 tomos_vtp = set_lists.tomos_to_vtp(mode='surface')

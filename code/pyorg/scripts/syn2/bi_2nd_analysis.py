@@ -63,14 +63,14 @@ out_stem = 'all_az_pst_bi_proj_min20_ss7.31px'  # 'uni_sph_4_60_5'
 
 # Analysis variables
 ana_res = 0.684  # nm/voxel
-ana_rg = np.arange(5, 120, 5)  # in nm
+ana_rg = np.arange(1, 120, 2)  # in nm
 ana_shell_thick = None  # 15 # 5
 ana_rdf = False
 ana_fmm = True
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 10
+p_nsims = 200
 p_per = 5  # %
 
 # Multiprocessing settings

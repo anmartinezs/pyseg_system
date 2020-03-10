@@ -3657,18 +3657,35 @@ class ListTomoParticles(object):
 
         # Initialization
         star_part = sub.Star()
-        star_part.add_column('_rlnMicrographName')
-        star_part.add_column('_rlnCoordinateX')
-        star_part.add_column('_rlnCoordinateY')
-        star_part.add_column('_rlnCoordinateZ')
+        hold_part = None
+        for tomo in self.get_tomo_list():
+            for part in tomo.get_particles():
+                hold_part = part
+                if hold_part is None:
+                    break
+            if hold_part is None:
+                break
+        if hold_part is None:
+            return None
+        meta_dic = hold_part.get_meta()
+        for key in meta_dic.iterkeys():
+            star_part.add_column(key)
+        star_part.add_column('_rlnGroupNumber')
+
+        # Create micrographs dictionary
+        mic_dic = dict()
+        for i, tomo in enumerate(self.get_tomo_list()):
+            mic_dic[tomo.get_tomo_fname()] = i
 
         # Tomograms loop
         for tomo in self.get_tomo_list():
             tomo_fname = tomo.get_tomo_fname()
             for part in tomo.get_particles():
-                x, y, z = part.get_center()
+                kwargs, meta_dic = dict(), part.get_meta()
+                for key, val in zip(meta_dic.iterkeys(), meta_dic.itervalues()):
+                    kwargs[key] = val
+                kwargs['_rlnGroupNumber'] = mic_dic[tomo_fname]
                 # Insert the particles into the star file
-                kwargs = {'_rlnMicrographName': tomo_fname, '_rlnCoordinateX': x, '_rlnCoordinateY': y, '_rlnCoordinateZ': z}
                 star_part.add_row(**kwargs)
 
         return star_part

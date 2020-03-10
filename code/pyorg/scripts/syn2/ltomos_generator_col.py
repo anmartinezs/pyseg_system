@@ -33,14 +33,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/col/in/all_col2_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
+in_star = ROOT_PATH + '/org/col/in/all_col_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_zeros_fits.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/col/ltomos/ltomos_col2' # '/org/col/ltomos/ltomos_all_scol_test'
-out_stem = 'all_col2' # 'all_scol_test' # 'pre'
+out_dir = ROOT_PATH + '/org/col/ltomos/ltomos_col' # '/org/col/ltomos/ltomos_col_tmin3_min5' # '/org/col/ltomos/ltomos_all_scol_test'
+out_stem = 'all_col' # 'all_col_tmin3_min5' # 'all_scol_test' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 2 # 1
@@ -52,7 +52,7 @@ sg_pj = True
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = 0 # {'0': 5, '1': 5, '2': 5, '3': 5} # 5
+pt_min_parts = 0 # {'0': 5, '1': 5, '2': 3, '3': 5, '4': 5, '5': 5}
 pt_keep = None
 pt_ssup = 7.31 # 5 # voxels
 

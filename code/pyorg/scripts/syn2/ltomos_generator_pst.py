@@ -33,14 +33,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star' # '/org/pst/in/all_pst_v6_gluta_2.5.star'
+in_star = ROOT_PATH + '/org/pst/in/all_pst_v6_gluta_2.5.star' # '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_H_L_avgs_proj' # '/org/pst/ltomos/ltomos_pst_pick' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # '/ref_a3/ltomos'
-out_stem = 'all_H_L_avgs_proj' # 'all_pst_pick' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # 'pre'
+out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_ss15px_test' # '/org/pst/ltomos/ltomos_H_L_avgs_proj' # '/org/pst/ltomos/ltomos_pst_pick' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # '/ref_a3/ltomos'
+out_stem = 'all_pst_v6_gluta2.5_ss15px_test' # 'all_H_L_avgs_proj' # 'all_pst_pick' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 1 # 2
@@ -54,7 +54,7 @@ sg_voi_mask = True
 # Post-processing
 pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5':10, '6': 10, '7': 10, '8': 10, '9': 10, '10': 10, '11': 10}
 pt_keep = None
-pt_ssup = 14.62 # 7.31 # 20 # voxels
+pt_ssup = 15 # 14.62 # 7.31 # 20 # voxels
 pt_ssup_ref = '1' # None
 
 ########################################################################################
@@ -266,6 +266,10 @@ for star_row in range(star.get_nrows()):
         if tomo.get_num_particles() > 0:
             tomo_fname = os.path.splitext(os.path.split(tomo.get_tomo_fname())[1])[0]
             disperse_io.save_vtp(tomo.append_particles_vtp(mode='surface'), out_app+'/'+tomo_fname+'.vtp')
+
+    # Storing the particles
+    out_lstar = out_dir + '/' + star_stem + '_parts.star'
+    list_tomos.to_particles_star().store(out_lstar)
 
     # Adding particle to list
     set_lists.add_list_tomos(list_tomos, star_stem)

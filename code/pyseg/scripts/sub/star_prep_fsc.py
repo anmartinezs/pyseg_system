@@ -31,17 +31,17 @@ import numpy as np
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn/sub/relion/fils/pst' # '/fs/pool/pool-lucic2/antonio/ribo_johannes/lum_ext_repick/ribo'
 
 # Input STAR
-in_star = ROOT_PATH + '/rln/pst/mb_blob2.star' # '/ampar_vs_nmdar/ampar/loc_ref_4uqj_swapxy/run2_c1_r12_data.star' # '/rln_class2_trans/run4_it035_data_ribo_trap.star'
+in_star = ROOT_PATH + '/rln/class2_model_inv/run1_c2_HA_mb_it035_data.star' # '/ampar_vs_nmdar/ampar/loc_ref_4uqj_swapxy/run2_c1_r12_data.star' # '/rln_class2_trans/run4_it035_data_ribo_trap.star'
 
 # Output STAR file
-out_star = ROOT_PATH + '/rln/pst/mb_blob2_halves.star' # '/ampar_vs_nmdar/ampar/loc_ref_4uqj_swapxy/run2_c1_r12_data_noset.star' # '/rln_class2_trans/run4_it035_data_ribo_trap_dpick.star'
+out_star = ROOT_PATH + '/rln/class2_model_inv/run1_c2_HA_mb_it035_data_c1.star' # '/ampar_vs_nmdar/ampar/loc_ref_4uqj_swapxy/run2_c1_r12_data_noset.star' # '/rln_class2_trans/run4_it035_data_ribo_trap_dpick.star'
 
 # Input parameters
 del_subset = True
 set_groups = False
-set_halves = True
+set_halves = False # True
 set_one_group = None # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/rln/tomos/syn_11_2_bin2/syn_11_2_bin2.mrc'
-keep_classes = None # [1, ]
+keep_classes = [1, ] # None #
 
 ########################################################################################
 # Global functions

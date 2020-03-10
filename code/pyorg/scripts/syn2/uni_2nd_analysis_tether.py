@@ -50,12 +50,12 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/col/ltomos/ltomos_col/all_col_ltomos_surfs.star' # '/org/col/ltomos/ltomos_preb_tether_pstb_xd5nm_amin10/all_preb_tether_pstb_xd5nm_amin10_ltomos_surfs.star' # '/org/pst/ltomos/ltomos_all_pst_pre_ss15px_v6/all_pst_pre_ltomos_surf.star'
-in_wspace = ROOT_PATH + '/org/col/uni_2nd//all_col_ss7.31px_sim200_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos_surfs.star' # '/org/col/ltomos/ltomos_preb_tether_pstb_xd5nm_amin10/all_preb_tether_pstb_xd5nm_amin10_ltomos_surfs.star' # '/org/pst/ltomos/ltomos_all_pst_pre_ss15px_v6/all_pst_pre_ltomos_surf.star'
+in_wspace = None # ROOT_PATH + '/org/ncol/uni_2nd//all_ncol_ss7.31px_sim200_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/org/col/uni_2nd/'
-out_stem = 'all_col_ss7.31px_sim200_2' # 'all_preb_tether_pstb_xd5nm_amin10_sim10'
+out_dir = ROOT_PATH + '/org/tether/uni_2nd/'
+out_stem = 'all_tether_ss7.31px_sim200' # 'all_preb_tether_pstb_xd5nm_amin10_sim10'
 
 # Analysis variables
 ana_res = 0.684 # nm/voxel

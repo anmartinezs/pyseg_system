@@ -317,12 +317,13 @@ class ColumnsFinder(object):
 
         return areas
 
-    def get_occupancy(self, mode='cyl', rad=15, layers=[0, 1, 2], area=False):
+    def get_occupancy(self, mode='cyl', rad=15, layers=[0, 1, 2], area=False, scols=False):
         """
         Return the proportion of suface area occupied by columns
         :param mode, rad: same as get_area_columns()
         :param layers: list with the layers to include
         :param area: if True (default False) then area, instead of occupancy, is computed considering overlappings
+        :param scols: if True (default False) then area correspond with subcolumns instead of columns
         :return: get the occupancy value found
         """
 
@@ -352,13 +353,18 @@ class ColumnsFinder(object):
         if mode == 'cyl':
             col_coords = list()
 
+        if scols:
+            hold_cols = self.__scols
+        else:
+            hold_cols = self.__cols
+
         # Load the coordinates
-        for col_id, col in zip(self.__cols.iterkeys(), self.__cols.itervalues()):
+        for col_id, col in zip(hold_cols.iterkeys(), hold_cols.itervalues()):
             if col is not None:
                 if mode == 'hull':
                     col_coords = list()
                 for lyr_id in layers:
-                    for clst in col[lyr_id-1]:
+                    for clst in col[lyr_id]:
                         for coord in clst.get_coords():
                             if ids_sorted[0] == 0:
                                 col_coords.append((coord[1], coord[2]))
@@ -403,9 +409,9 @@ class ColumnsFinder(object):
         elif mode == 'cyl':
             dst_field = sp.ndimage.morphology.distance_transform_edt(flat_voi, return_distances=True, return_indices=False)
             if area:
-                return (dst_field <= rad).sum()
+                return (dst_field < rad).sum()
             else:
-                return (dst_field <= rad).sum() / float(self.get_area_tomo())
+                return (dst_field < rad).sum() / float(self.get_area_tomo())
         else:
             raise ValueError
 
@@ -434,8 +440,8 @@ class ColumnsFinder(object):
                 if scols is None:
                     hold_col = self.__build_clusters_HC_scols(dst)
                 else:
-                    hold_col = self.__build_clusters_HC_m2(dst, scols)
-                    # hold_col = self.__build_clusters_HC_m1(dst, scols)
+                    # hold_col = self.__build_clusters_HC_m2(dst, scols)
+                    hold_col = self.__build_clusters_HC_m1(dst, scols)
             elif method == 'AP':
                 if scols:
                     raise NotImplementedError
@@ -538,29 +544,29 @@ class ColumnsFinder(object):
                 self.__scols_props[col_id] = dict()
             col_id += 1
 
-        # Inserting points in the surroundings of sub-columns for layer 1
-        l1_coords = self.__tl1.get_particle_coords()
-        lut_points_1 = -1 * np.ones(shape=l1_coords.shape[0], dtype=np.int)
-        for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
-            for clst in scol[0]:
-                for idx in clst.get_ids():
-                    lut_points_1[idx] = key
-        pts_toadd = dict()
-        for i in range(len(lut_points_1)):
-            if lut_points_1[i] < 0:
-                pt_coord = l1_coords[i, :]
-                min_dst, min_key = np.finfo(np.float).max, None
-                for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
-                    for clst in scol[0]:
-                        for coord in clst.get_coords():
-                            hold = pt_coord - coord
-                            dst = np.sqrt((hold * hold).sum())
-                            if dst < min_dst:
-                                min_dst, min_key = dst, key
-                if (min_key is not None) and (min_dst <= col_rad):
-                    pts_toadd[i] = min_key
-        for pt_id, scol_key in zip(pts_toadd.iterkeys(), pts_toadd.itervalues()):
-            self.__scols[scol_key][0].append(Cluster([pt_id, ], [l1_coords[pt_id, :], ]))
+        # # Inserting points in the surroundings of sub-columns for layer 1
+        # l1_coords = self.__tl1.get_particle_coords()
+        # lut_points_1 = -1 * np.ones(shape=l1_coords.shape[0], dtype=np.int)
+        # for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+        #     for clst in scol[0]:
+        #         for idx in clst.get_ids():
+        #             lut_points_1[idx] = key
+        # pts_toadd = dict()
+        # for i in range(len(lut_points_1)):
+        #     if lut_points_1[i] < 0:
+        #         pt_coord = l1_coords[i, :]
+        #         min_dst, min_key = np.finfo(np.float).max, None
+        #         for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+        #             for clst in scol[0]:
+        #                 for coord in clst.get_coords():
+        #                     hold = pt_coord - coord
+        #                     dst = np.sqrt((hold * hold).sum())
+        #                     if dst < min_dst:
+        #                         min_dst, min_key = dst, key
+        #         if (min_key is not None) and (min_dst <= col_rad):
+        #             pts_toadd[i] = min_key
+        # for pt_id, scol_key in zip(pts_toadd.iterkeys(), pts_toadd.itervalues()):
+        #     self.__scols[scol_key][0].append(Cluster([pt_id, ], [l1_coords[pt_id, :], ]))
 
     def build_columns(self, col_rad=0):
         """
@@ -1047,7 +1053,7 @@ class ColumnsFinder(object):
 
     def __build_clusters_HC_m1(self, dst_clst, dst_aln):
         """
-        Private method for generating clusters within layers by applying Hirarchical Clustering
+        Private method for generating clusters within layers by applying Hierarchical Clustering
         :param dst_clst: cluster distance threshold
         :param dst_aln: distance alignment threshold
         :return:
@@ -1166,7 +1172,7 @@ class ColumnsFinder(object):
 
     def __build_clusters_HC_m2(self, dst_clst, dst_aln):
         """
-        Private method for generating clusters within layers by applying Hirarchical Clustering for columns
+        Private method for generating clusters within layers by applying Hierarchical Clustering for columns
         :param dst_clst: cluster distance threshold
         :param dst_aln: distance alignment threshold
         :return:
