@@ -7,3 +7,5 @@
     + Adding statistical analysis for filaments
 * **10/03/2020**
     + Updating synapses colocalization routines
+    + Adding /code/tutorials/exp_sumb/tracing
+    + Bugs correction in /code/tutorials/synth_sumb/tracing/rec_particles.py 

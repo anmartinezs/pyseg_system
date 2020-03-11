@@ -42,22 +42,22 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
-ROOT_PATH = '../../../..'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/carsten'
 
 # Input STAR file
-in_star = ROOT_PATH + '/data/tutorials/synth_sumb/pick/out/fil_mb_sources_to_no_mb_targets_net_parts.star'
-in_ctf = ROOT_PATH + '/data/tutorials/synth_sumb/rec/wedge_130_60.mrc'
+in_star = ROOT_PATH + '/pick/out/fil_mb_sources_to_no_mb_targets_net_parts.star'
+in_ctf = ROOT_PATH + '/rec/wedge_64_60.mrc'
 # Required if '_psSegImage' not in input STAR
-in_mask_norm = ROOT_PATH + '/data/tutorials/synth_sumb/rec/mask_sph_130_60.mrc'
+in_mask_norm = ROOT_PATH + '/rec/mask_sph_64_25.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/data/tutorials/synth_sumb/rec/particles'
-out_star = ROOT_PATH + '/data/tutorials/synth_sumb/rec/particles_rln.star'
+out_part_dir = ROOT_PATH + '/rec/particles'
+out_star = ROOT_PATH + '/rec/particles_rln.star'
 
 ####### Particles pre-processing settings
 
-do_bin = 4
+do_bin = 1 # 4
 do_ang_prior = ['Tilt', 'Psi'] # ['Rot', 'Tilt', 'Psi']
 do_ang_rnd = ['Rot']
 do_noise = False
@@ -66,7 +66,7 @@ do_norm = True
 
 ####### Multiprocessing settings
 
-mp_npr = 5 # 10
+mp_npr = 1 # 5 # 10
 
 ########################################################################################
 # Local functions
