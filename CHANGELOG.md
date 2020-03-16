@@ -8,4 +8,6 @@
 * **10/03/2020**
     + Updating synapses colocalization routines
     + Adding /code/tutorials/exp_sumb/tracing
-    + Bugs correction in /code/tutorials/synth_sumb/tracing/rec_particles.py 
+    + Bugs correction in /code/tutorials/synth_sumb/tracing/rec_particles.py
+* **16/03/2020**
+    + Adding AG and Kmeans (with PCA) to /code/tutorials/synth_sumb/class/plane_align_class.py

@@ -3661,12 +3661,12 @@ class ListTomoParticles(object):
         for tomo in self.get_tomo_list():
             for part in tomo.get_particles():
                 hold_part = part
-                if hold_part is None:
+                if hold_part is not None:
                     break
-            if hold_part is None:
-                break
-        if hold_part is None:
-            return None
+        #     if hold_part is None:
+        #         break
+        # if hold_part is None:
+        #     return None
         meta_dic = hold_part.get_meta()
         for key in meta_dic.iterkeys():
             star_part.add_column(key)
