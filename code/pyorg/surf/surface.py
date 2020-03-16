@@ -1,5 +1,5 @@
 '''
-Classes for representing a surface and a set of surfaces 
+Classes for representing a tomograms with particles
 
 '''
 

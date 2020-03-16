@@ -13,3 +13,4 @@ import pexceptions
 import disperse_io
 import sub
 import surf
+import diff_geom

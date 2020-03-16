@@ -11,3 +11,4 @@
     + Bugs correction in /code/tutorials/synth_sumb/tracing/rec_particles.py
 * **16/03/2020**
     + Adding AG and Kmeans (with PCA) to /code/tutorials/synth_sumb/class/plane_align_class.py
+    + Creating /code/pyorg/diff_geom module

@@ -100,14 +100,17 @@ class RelionCols(object):
                        '_psStartSurfIds',
                        '_psEndSurfIds',
                        '_psSurfacePID',
-                       # PySurf: Surface analysis
+                       # PyOrg: Surface analysis
                        '_suTomoParticles',
                        '_suSurfaceVtp',
                        '_suPartShape',
                        '_suSurfaceVtpSim',
-                       # Microtubules
+                       # PyOrg: Microtubules
                        '_mtCenterLine',
-                       '_mtParticlesTomo'
+                       '_mtParticlesTomo',
+                       # PyOrg: generic fibers
+                       '_fbCurve',
+                       '_fbTomoFilaments'
                        )
         self.__dtypes = (str,
                          float,
@@ -153,12 +156,12 @@ class RelionCols(object):
                          str,
                          str,
                          int,
-                         # PySurf: Surface analysis
+                         # PyOrg: Microtubules
                          str,
                          str,
                          str,
                          str,
-                         # Microtubules:
+                         # PyOrg: generic fibers
                          str,
                          str
                          )
