@@ -3,19 +3,17 @@ Classes for representing a tomograms with filaments
 
 '''
 
-import gc
+
 import os
-import time
-import random
-from shutil import rmtree
-from pyorg import pexceptions, sub
-from utils import *
-from pyorg.spatial.sparse import nnde, cnnde
-from pyorg.globals.utils import unpickle_obj
-from sklearn.cluster import AffinityPropagation
+import copy
 import numpy as np
 import scipy as sp
-import multiprocessing as mp
+from shutil import rmtree
+from utils import *
+from pyorg import pexceptions, sub
+from pyorg.globals.utils import unpickle_obj
+from pyorg import globals as gl
+from pyorg.diff_geom import SpaceCurve
 try:
     import cPickle as pickle
 except:
@@ -26,6 +24,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 ##### Global variables
 
 FIL_ID = 'fil_id'
+FIL_MODE_FAST = 2
 
 # GLOBAL FUNCTIONS
 
@@ -43,7 +42,258 @@ def clean_dir(dir):
 
 # CLASSES
 
+############################################################################
+# Class for a Filament: curve in the space
+#
+class Filament(object):
 
+    def __init__(self, coords):
+        """
+        :param coords: sequence of coordinates
+        """
+
+        # Input parsing
+        self.__curve = SpaceCurve(coords, mode=FIL_MODE_FAST, do_geom=True)
+        self.__vtp = self.get_vtp()
+
+        # Pre-compute bounds for accelerate computations
+        self.__bounds = np.zeros(shape=6, dtype=np.float32)
+        self.__update_bounds()
+
+    #### Set/Get functionality
+
+    def get_vtp(self):
+        """
+        :return: return a vtkPolyData object
+        """
+        return self.__vtp
+
+    def get_fname(self):
+        return self.__fname
+
+    def get_bounds(self):
+        """
+        :return: surface bounds (x_min, x_max, y_min, y_max, z_min, z_max) as array
+        """
+        return self.__bounds
+
+    #### External functionality
+
+    def add_vtp_global_attribute(self, name, vtk_type, value):
+        """
+        Add and attribute with the same value for all cells
+        :param name: attribute name
+        :param vtk_type: a child vtkAbstractArray for data type
+        :param value: tuple with the value
+        :return:
+        """
+
+        # Input parsing
+        if not issubclass(vtk_type, vtk.vtkAbstractArray):
+            error_msg = 'Input vtk_type must be child class of vtkAbstractArray!'
+            raise pexceptions.PySegInputError(expr='add_vtp_global_attribute (Particle)', msg=error_msg)
+        if isinstance(value, str):
+            t_value, n_comp = value, 1
+        elif not isinstance(value, tuple):
+            t_value, n_comp = (value,), 1
+        else:
+            t_value, n_comp = value, len(value)
+
+        # Initialization
+        prop = vtk_type()
+        prop.SetNumberOfComponents(n_comp)
+        prop.SetName(str(name))
+
+        # Array construction
+        n_cells = self.__vtp.GetNumberOfCells()
+        prop.SetNumberOfTuples(n_cells)
+        for i in range(n_cells):
+            # prop.SetValue(i, t_value)
+            prop.SetTuple(i, t_value)
+
+        # Adding the data
+        self.__vtp.GetCellData().AddArray(prop)
+
+    def translation(self, shift_x, shift_y, shift_z):
+        """
+        Rigid translation
+        :param shift_i: translations in X, Y, Z axes respectively
+        :return:
+        """
+
+        # Transformation on the PolyData
+        box_tr = vtk.vtkTransform()
+        box_tr.Translate(shift_x, shift_y, shift_z)
+        tr_box = vtk.vtkTransformPolyDataFilter()
+        tr_box.SetInputData(self.__vtp)
+        tr_box.SetTransform(box_tr)
+        tr_box.Update()
+        self.__vtp = tr_box.GetOutput()
+
+        # Update center (does not apply to normals)
+        box_tr = vtk.vtkTransform()
+        box_tr.Translate(shift_x, shift_y, shift_z)
+        tr_box = vtk.vtkTransformPolyDataFilter()
+        tr_box.SetInputData(self.__center)
+        tr_box.SetTransform(box_tr)
+        tr_box.Update()
+        self.__center = tr_box.GetOutput()
+
+        # Update the bounds
+        self.__update_bounds()
+
+    def rotation(self, rot, tilt, psi, active=True):
+        """
+        Rigid rotation
+        :param rot, tilt, psi: rotation angles in Relion format in degrees
+        :param active: if True the rotation is active, otherwise it is possible
+        :return:
+        """
+
+        # Transformation on the PolyData
+        M = gl.rot_mat_relion(rot, tilt, psi, deg=True)
+        if not active:
+            M = M.T
+        mat_rot = vtk.vtkMatrix4x4()
+        for i in range(3):
+            for j in range(3):
+                mat_rot.SetElement(i, j, M[i, j])
+        rot_tr = vtk.vtkTransform()
+        rot_tr.SetMatrix(mat_rot)
+        tr_rot = vtk.vtkTransformPolyDataFilter()
+        tr_rot.SetInputData(self.__vtp)
+        tr_rot.SetTransform(rot_tr)
+        tr_rot.Update()
+        self.__vtp = tr_rot.GetOutput()
+
+        # Update center
+        hold_center = np.asarray(self.get_center(), dtype=np.float)
+        rot_tr = vtk.vtkTransform()
+        rot_tr.SetMatrix(mat_rot)
+        tr_rot = vtk.vtkTransformPolyDataFilter()
+        tr_rot.SetInputData(self.__center)
+        tr_rot.SetTransform(rot_tr)
+        tr_rot.Update()
+        self.__center = tr_rot.GetOutput()
+
+        # Normal rotation
+        hold_normal = np.asarray(self.get_normal(), dtype=np.float) + hold_center
+        rot_center, rot_normal = M*hold_center.reshape(3, 1), M*hold_normal.reshape(3, 1)
+        hold_normal = np.asarray((rot_normal - rot_center), dtype=np.float).reshape(3)
+        # Re-normalization
+        norm_normal = math.sqrt((hold_normal*hold_normal).sum())
+        if norm_normal > 0:
+            self.set_normal(hold_normal / norm_normal)
+
+        # Update the bounds
+        self.__update_bounds()
+
+    def swap_xy(self):
+        """
+        Swap the coordinates of XY axes
+        :return:
+        """
+        # Swap surface points
+        self.__vtp = poly_swapxy(self.__vtp)
+        # Swap the centers
+        self.__center = poly_swapxy(self.__center)
+        # Swap the normal vector
+        hold_normal = self.get_normal()
+        self.set_normal((hold_normal[1], hold_normal[0], hold_normal[2]))
+        # Swap the bounds by updating
+        self.__update_bounds()
+
+    def store_vtp(self, fname):
+        """
+        Saves the object poly in disk as a *.vtp file
+        :param fname: full path of the output file
+        :param mode: kind of poly to store, valid: 'surface' (default) or 'center'
+        :return:
+        """
+        # Input parsing
+        disperse_io.save_vtp(self.__center, fname)
+
+    def bound_in_bounds(self, bounds):
+        """
+        Check if the object's bound are at least partially in another bound
+        :param bounds: input bound
+        :return:
+        """
+        x_over, y_over, z_over = True, True, True
+        if (self.__bounds[0] > bounds[1]) or (self.__bounds[1] < bounds[0]):
+            x_over = False
+        if (self.__bounds[2] > bounds[3]) or (self.__bounds[3] < bounds[2]):
+            y_over = False
+        if (self.__bounds[4] > bounds[5]) or (self.__bounds[5] < bounds[4]):
+            y_over = False
+        return x_over and y_over and z_over
+
+    def point_in_bounds(self, point):
+        """
+        Check if a point within filament's bounds
+        :param point: point to check
+        :return:
+        """
+        x_over, y_over, z_over = True, True, True
+        if (self.__bounds[0] > point[0]) or (self.__bounds[1] < point[0]):
+            x_over = False
+        if (self.__bounds[2] > point[1]) or (self.__bounds[3] < point[1]):
+            y_over = False
+        if (self.__bounds[4] > point[2]) or (self.__bounds[5] < point[2]):
+            y_over = False
+        return x_over and y_over and z_over
+
+    def pickle(self, fname):
+        """
+        VTK attributes requires a special treatment during pickling
+        :param fname: file name ended with .pkl
+        :return:
+        """
+
+        # Dump pickable objects and store the file names of the unpickable objects
+        stem, ext = os.path.splitext(fname)
+        self.__vtp_fname = stem + '_curve.vtp'
+        pkl_f = open(fname, 'w')
+        try:
+            pickle.dump(self, pkl_f)
+        finally:
+            pkl_f.close()
+
+        # Store unpickable objects
+        writer = vtk.vtkXMLPolyDataWriter()
+        writer.SetFileName(self.__vtp_fname)
+        vtk_ver = vtk.vtkVersion().GetVTKVersion()
+        if int(vtk_ver[0]) < 6:
+            writer.SetInput(self.__vtp)
+        else:
+            writer.SetInputData(self.__vtp)
+        if writer.Write() != 1:
+            error_msg = 'Error writing %s.' % self.__vtp_fname
+            raise pexceptions.PySegInputError(expr='pickle (Filament)', msg=error_msg)
+
+    # INTERNAL FUNCTIONALITY AREA
+
+    def __update_bounds(self):
+        arr = self.__vtp.GetBounds() # self.__vtp.GetPoints().GetData()
+        self.__bounds[0], self.__bounds[1] = arr[0], arr[1] # arr.GetRange(0)
+        self.__bounds[2], self.__bounds[3] = arr[2], arr[3] # arr.GetRange(1)
+        self.__bounds[4], self.__bounds[5] = arr[4], arr[5] # arr.GetRange(2)
+
+    # Restore previous state
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        # Restore unpickable objects
+        reader = vtk.vtkXMLPolyDataReader()
+        reader.SetFileName(self.__vtp_fname)
+        reader.Update()
+        self.__vtp = reader.GetOutput()
+
+    # Copy the object's state from self.__dict__ which contains all instance attributes.
+    # Afterwards remove unpickable objects
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['_Filament__vtp']
+        return state
 
 ############################################################################
 # Class for tomograms with filaments
@@ -342,7 +592,7 @@ class TomoFilaments(object):
             os.makedirs(out_dir)
 
         # Tomograms loop
-        for i, part in enumerate(self.__parts):
+        for i, part in enumerate(self.__fils):
 
             # Pickling the particle
             pkl_file = out_dir + '/filament_' + str(i) + '.pkl'
@@ -373,7 +623,7 @@ class TomoFilaments(object):
         for row in range(star.get_nrows()):
 
             # Loading the particles
-            self.__parts.append(unpickle_obj(star.get_element('_suLVtp', row)))
+            self.__fils.append(unpickle_obj(star.get_element('_fbCurve', row)))
 
     def gen_filaments_vtp(self):
         """
@@ -484,3 +734,506 @@ class TomoFilaments(object):
         del state['_TomoFilaments__parts']
         return state
 
+############################################################################
+# Class for a list of tomograms with embedded filaments
+#
+class ListTomoFilaments(object):
+
+    def __init__(self):
+        self.__tomos = dict()
+        # For pickling
+        self.__pkls = None
+
+    # EXTERNAL FUNCTIONALITY
+
+    def get_tomos(self):
+        return self.__tomos
+
+    def get_num_filaments(self):
+        total = 0
+        for tomo in self.__tomos.itervalues():
+            total += tomo.get_num_filaments()
+        return total
+
+    def get_num_filaments_dict(self):
+        nparts = dict()
+        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+            nparts[key] = tomo.get_num_filaments()
+        return nparts
+
+    def get_volumes_dict(self):
+        vols = dict()
+        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+            vols[key] = tomo.compute_voi_volume()
+        return vols
+
+    def get_tomo_fname_list(self):
+        return self.__tomos.keys()
+
+    def get_tomo_list(self):
+        return self.__tomos.values()
+
+    def get_tomo_by_key(self, key):
+        return self.__tomos[key]
+
+    def add_tomo(self, tomo_fils):
+        """
+        :param tomo_fils: TomoFilaments object to add to the list
+        :return:
+        """
+        # Input parsing
+        tomo_fname = tomo_fils.get_tomo_fname()
+        if tomo_fname in self.get_tomo_fname_list():
+            print 'WARNING: tomo_surf (ListTomoFilaments): tomogram ' + tomo_fname + ' was already inserted.'
+            return
+        # Adding the tomogram to the list and dictionaries
+        self.__tomos[tomo_fname] = tomo_fils
+
+    def del_tomo(self, tomo_key):
+        """
+        Delete a TomoSurface entry in the list
+        :param tomo_key: TomoFilament key
+        :return:
+        """
+        del self.__tomos[tomo_key]
+
+    def insert_filament(self, fil, tomo_fname, check_bounds=True, check_inter=None):
+        """
+
+        :param fil: particle to insert in the tomogram, it must be fully embedded by the tomogram
+        :param tomo_fname: path to the tomogram
+        :param check_bounds: if True (default) checks that all input filament points are embedded
+                             within the tomogram bounds
+        :param check_inter: if a value (default None) check that filament points are further than these value to another
+                            already inserted filament
+        :return:
+        """
+        try:
+            self.__tomos[tomo_fname].insert_particle(fil, check_bounds, check_inter=check_inter)
+        except KeyError:
+            error_msg = 'Tomogram ' + tomo_fname + ' is not added to list!'
+            raise pexceptions.PySegInputError(expr='insert_particle (ListTomoFilaments)', msg=error_msg)
+
+    def store_stars(self, out_stem, out_dir):
+        """
+        Store the list of tomograms in STAR file and also the STAR files for every tomogram
+        :param out_stem: string stem used for storing the STAR file for TomoParticles objects
+        :param out_dir: output directory
+        :return:
+        """
+
+        # STAR file for the tomograms
+        tomos_star = sub.Star()
+        tomos_star.add_column('_suTomoParticles')
+
+        # Tomograms loop
+        for i, tomo_fname in enumerate(self.__tomos.keys()):
+
+            # Pickling the tomogram
+            tomo_dir = out_dir + '/tomo_' + str(i)
+            if not os.path.exists(tomo_dir):
+                os.makedirs(tomo_dir)
+            tomo_stem = os.path.splitext(os.path.split(tomo_fname)[1])[0]
+            pkl_file = tomo_dir + '/' + tomo_stem + '_tf.pkl'
+            self.__tomos[tomo_fname].pickle(pkl_file)
+
+            # Adding a new enter
+            kwargs = {'_suTomoParticles': pkl_file}
+            tomos_star.add_row(**kwargs)
+
+        # Storing the tomogram STAR file
+        tomos_star.store(out_dir + '/' + out_stem + '_tfl.star')
+
+    def store_filaments(self, out_dir):
+        """
+        Store the filaments in a vtkPolyData per tomogram
+        :param out_dir: output directory
+        :param mode:
+        :return:
+        """
+        # Tomograms loop
+        for i, tomo_fname in enumerate(self.__tomos.keys()):
+
+            tomo_stem = os.path.splitext(os.path.split(tomo_fname)[1])[0]
+
+            # Storing
+            disperse_io.save_vtp(self.__tomos[tomo_fname].gen_filaments_vtp(), out_dir + '/' + tomo_stem + '_parts_fils.vtp')
+
+
+    # fname: file name ended with .pkl
+    def pickle(self, fname):
+
+        # Store unpickable objects and create the table to find them
+        f_path, f_name = os.path.split(fname)
+        f_stem = os.path.splitext(f_name)[0]
+        tomos_dir = f_path + '/' + f_stem
+        if not os.path.exists(tomos_dir):
+            os.makedirs(tomos_dir)
+
+        # Dump pickable objects and store the file names of the unpickable objects
+        count = 0
+        self.__pkls = dict()
+        for key, tomo in self.__tomos.iteritems():
+            key_stem = os.path.splitext(os.path.split(key)[1])[0]
+            hold_file = tomos_dir + '/' + key_stem + '.pkl'
+            try:
+                tomo.pickle(hold_file)
+            except IOError:
+                hold_file = tomos_dir + '/_' + str(count) + '.pkl'
+                tomo.pickle(hold_file)
+            self.__pkls[key] = hold_file
+            count += 1
+
+        # Pickling
+        pkl_f = open(fname, 'w')
+        try:
+            pickle.dump(self, pkl_f)
+        finally:
+            pkl_f.close()
+
+    def gen_model_instance(self, model, rad=0):
+        """
+        Generates and instance of the current tomogram from a model
+        :param model: class for modeling TomoParticles
+        :param rad: filament radius
+        :return:
+        """
+        tomos = ListTomoFilaments()
+        for i, tomo in enumerate(self.__tomos.itervalues()):
+            model_in = model(tomo.get_voi(), rad=0)
+            tomo_name = 'tomo_model_' + model_in.get_type_name() + '_' + str(i)
+            tomos.add_tomo(model.gen_instance(model_in.get_num_filaments(), tomo_name))
+        return tomos
+
+    def filter_by_filaments_num(self, min_num_filaments=1):
+        """
+        Delete for list the tomogram with low particles
+        :param min_num_filaments: minimum number of particles, below that the tomogram is deleted (default 1)
+        :return:
+        """
+        hold_dict = dict()
+        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+            # print key + ': ' + str(tomo.get_num_filaments())
+            if tomo.get_num_filaments() >= min_num_filaments:
+                hold_dict[key] = tomo
+        self.__tomos = hold_dict
+
+    def clean_low_pouplated_tomos(self, n_keep):
+        """
+        Clean tomogram with a low amount of particles
+        :param n_keep: number of tomograms to, the one with the highest amount of particles
+        :return:
+        """
+        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(self.__tomos.keys())):
+            return
+        # Sorting loop
+        n_parts = dict()
+        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+            n_parts[key] = tomo.get_num_filaments()
+        pargs_sort = np.argsort(np.asarray(n_parts.values()))[::-1]
+        keys = n_parts.keys()
+        # Cleaning loop
+        hold_dict = dict()
+        for parg in pargs_sort[:n_keep]:
+            key = keys[parg]
+            hold_dict[key] = self.__tomos[key]
+        self.__tomos = hold_dict
+
+    def filaments_by_tomos(self):
+        """
+        :return: return a dictionary with the num of filaments by tomos
+        """
+        keys = self.get_tomo_fname_list()
+        part = dict.fromkeys(keys)
+        for key in keys:
+            part[key] = self.__tomos[key].get_num_filaments()
+        return part
+
+    def to_tomos_star(self, out_dir):
+        """
+        Generates a STAR file with TomoFilaments pickles
+        :param out_dir:  output directory for the pickles
+        :return: a STAR file
+        """
+
+        # Initialization
+        star_tomo = sub.Star()
+        star_tomo.add_column('_psPickleFile')
+
+        # Tomograms loop
+        for tomo in self.get_tomo_list():
+            tkey = os.path.splitext(os.path.split(tomo.get_tomo_fname())[1])[0]
+            out_pkl = out_dir + '/' + tkey + '_tp.pkl'
+            tomo.pickle(out_pkl)
+            # Insert the pickled tomo into the star file
+            star_tomo.set_column_data('_psPickleFile', out_pkl)
+
+        return star_tomo
+
+    # INTERNAL FUNCTIONALITY AREA
+
+    def __setstate__(self, state):
+        """
+        Restore previous state
+        :param state:
+        :return:
+        """
+        self.__dict__.update(state)
+        # Restore unpickable objects
+        self.__tomos = dict()
+        for key, pkl in self.__pkls.iteritems():
+            self.__tomos[key] = unpickle_obj(pkl)
+
+    def __getstate__(self):
+        """
+        Copy the object's state from self.__dict__ which contains all instance attributes.
+        Afterwards remove unpickable objects
+        :return:
+        """
+        state = self.__dict__.copy()
+        del state['_ListTomoFilaments__tomos']
+        return state
+
+############################################################################
+# Class for a set of list tomograms with embedded filaments
+#
+class SetListTomoFilaments(object):
+
+    def __init__(self):
+        self.__lists = dict()
+
+    # EXTERNAL FUNCTIONALITY
+
+    def get_lists(self):
+        return self.__lists
+
+    def get_lists_by_key(self, key):
+        return self.__lists[key]
+
+    def get_key_from_short_key(self, short_key):
+        for lkey in self.__lists.iterkeys():
+            fkey = os.path.split(lkey)[1]
+            hold_key_idx = fkey.index('_')
+            hold_key = fkey[:hold_key_idx]
+            if short_key == hold_key:
+                return lkey
+
+    def get_lists_by_short_key(self, key):
+        for lkey, list in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            if self.get_key_from_short_key(lkey) == key:
+                return  list
+
+    def get_tomos_fname(self):
+        hold_list = list()
+        for ltomos in self.get_lists().values():
+            hold_list += ltomos.get_tomo_fname_list()
+        return list(set(hold_list))
+
+    def add_list_tomos(self, ltomos, list_name):
+        """
+        Add a new ListTomoParticles to the set
+        :param ltomos: input ListTomoParticles object
+        :param list_name: string for naming the list
+        :return:
+        """
+        # Input parsing (compatible with older versions)
+        if ltomos.__class__.__name__ != 'ListTomoParticles':
+            error_msg = 'WARNING: add_tomo (SetListTomoParticles): ltomos input must be ListTomoParticles object.'
+            raise pexceptions.PySegInputError(expr='add_tomo (SetListTomoParticles)', msg=error_msg)
+        # Adding the list to the dictionary
+        self.__lists[str(list_name)] = ltomos
+
+    def get_set_tomos(self):
+        """
+        :return: return a set with all tomos in all list
+        """
+        tomos_l = list()
+        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for tomo in ltomos.get_tomo_list():
+                tomos_l.append(tomo.get_tomo_fname())
+        return set(tomos_l)
+
+    def merge_to_one_list(self, list_names=None):
+        """
+        Merge the particles lists into one
+        :param list_names: a list with name of the list to merge, if None (default) then all are merged
+        :return: a ListTomoParticles object
+        """
+
+        # Input parsing
+        if list_names is None:
+            list_names = self.__lists.keys()
+        out_list = ListTomoFilaments()
+
+        # Getting the list of all tomograms
+        tomo_names, vois = list(), dict()
+        for list_name in list_names:
+            hold_list = self.__lists[list_name]
+            for tomo_name in hold_list.get_tomo_fname_list():
+                tomo_names.append(tomo_name)
+                if not(tomo_name in vois.keys()):
+                    hold_tomo = hold_list.get_tomo_by_key(tomo_name)
+                    vois[tomo_name] = hold_tomo.get_voi()
+        tomo_names = list(set(tomo_names))
+
+        # Loop for filling the tomograms
+        hold_tomos = list()
+        for tomo_name in tomo_names:
+            hold_tomo = TomoFilaments(tomo_name, 1, voi=vois[tomo_name])
+            out_list.add_tomo(hold_tomo)
+            for list_name in list_names:
+                hold_list = self.__lists[list_name]
+                hold_ltomo = hold_list.get_tomo_by_key(tomo_name)
+                for hold_fil in hold_ltomo.get_filaments():
+                    out_list.insert_filament(copy.deepcopy(hold_fil), tomo_name, check_bounds=False, check_inter=False)
+
+        return out_list
+
+    def filaments_by_list(self):
+        """
+        :return: Return a dictionary with the number of filaments by list
+        """
+        fils = dict()
+        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            fils[key] = ltomos.get_num_filaments()
+        return fils
+
+    def filaments_by_tomos(self):
+        """
+        :return: Return a dictionary with the number of filaments by tomogram
+        """
+        fils = dict()
+        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for tomo in ltomos.get_tomo_list():
+                try:
+                    fils[tomo.get_tomo_fname()] += tomo.get_num_filaments()
+                except KeyError:
+                    fils[tomo.get_tomo_fname()] = tomo.get_num_filaments()
+        return fils
+
+    def proportions_by_tomos(self):
+        """
+        :return: Return a dictionary with the proportions for every tomogram
+        """
+        parts = dict()
+        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for tomo in ltomos.get_tomo_list():
+                key_t = tomo.get_tomo_fname()
+                try:
+                    parts[key_t].append(tomo.get_num_filaments())
+                except KeyError:
+                    parts[key_t] = list()
+                    parts[key_t].append(tomo.get_num_filaments())
+        return parts
+
+    def proportions_by_list(self):
+        """
+        :return: Return a dictionary with the proportions for every tomogram
+        """
+        # Initialization
+        fils_list, fils_tomo = dict.fromkeys(self.__lists.keys()), dict.fromkeys(self.get_set_tomos())
+        for key_t in fils_tomo.iterkeys():
+            fils_tomo[key_t] = 0
+        for key_l in fils_list.iterkeys():
+            fils_list[key_l] = np.zeros(shape=len(fils_tomo.keys()))
+        # Particles loop
+        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for i, key_t in enumerate(fils_tomo.keys()):
+                tomo = ltomos.get_tomo_by_key(key_t)
+                hold_fils = tomo.get_num_filaments()
+                fils_tomo[key_t] += hold_fils
+                fils_list[key_l][i] += hold_fils
+        # Proportions loop
+        for key_l in fils_list.iterkeys():
+            for i, tomo_nfils in enumerate(fils_tomo.values()):
+                if tomo_nfils > 0:
+                    fils_list[key_l][i] /= tomo_nfils
+                else:
+                    fils_list[key_l][i] = 0.
+        return fils_list
+
+    def pickle_tomo_star(self, out_star, out_dir_pkl):
+        """
+        Generates a STAR file with the ListTomoParicles and pickes their TomoParticles
+        :param out_star: output STAR file
+        :param out_dir_pkl: output directory for the pickles
+        :return: a STAR file
+        """
+
+        # Initialization
+        star_list = sub.Star()
+        star_list.add_column('_psPickleFile')
+
+        # Tomograms loop
+        for lname, ltomo in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            lkey = os.path.splitext(os.path.split(lname)[1])[0]
+            out_star, out_list_dir = out_dir_pkl + '/' + lkey + '_tf.star', out_dir_pkl + '/' + lkey + '_tf'
+            clean_dir(out_list_dir)
+            list_star = ltomo.to_tomo_star(out_list_dir)
+            list_star.store(out_star)
+            # Insert the pickled tomo into the star file
+            star_list.set_column_data('_psPickleFile', out_star)
+
+        star_list.store(out_star)
+
+    def filter_by_filaments_num_tomos(self, min_num_filaments=1):
+        """
+        Delete those tomograms with a number of filaments lower than an input value for any list
+        :param min_num_filaments: a number or a dict, the allows to specify different minimum number for each layer
+        :return:
+        """
+
+        # Computing total particles per tomogram loop
+        if isinstance(min_num_filaments, dict):
+            tomos_dict = dict().fromkeys(self.get_set_tomos(), 0)
+            for lkey, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+                hold_min = min_num_filaments[lkey]
+                for tomo in ltomos.get_tomo_list():
+                    if tomo.get_num_filaments() >= hold_min:
+                        tomos_dict[tomo.get_tomo_fname()] += 1
+            tomos_del = dict().fromkeys(self.get_set_tomos(), False)
+            for key in tomos_dict.iterkeys():
+                if tomos_dict[key] < len(min_num_filaments.keys()):
+                    tomos_del[key] = True
+        else:
+            tomos_del = dict().fromkeys(self.get_set_tomos(), False)
+            for tkey in tomos_del.keys():
+                for ltomos in self.__lists.itervalues():
+                    try:
+                        tomo = ltomos.get_tomo_by_key(tkey)
+                    except KeyError:
+                        continue
+                    if tomo.get_num_filaments() < min_num_filaments:
+                        tomos_del[tkey] = True
+
+        # Deleting loop
+        for ltomos in self.__lists.itervalues():
+            for tkey in tomos_del.keys():
+                if tomos_del[tkey]:
+                    try:
+                        ltomos.del_tomo(tkey)
+                    except KeyError:
+                        continue
+
+    def filter_by_filaments_num(self, min_num_filaments=1):
+        """
+        Delete for list the tomogram with low particles (considering all lists)
+        :param min_num_filaments: minimum number of particles, below that the tomogram is deleted (default 1)
+        :return:
+        """
+
+        # Computing total particles per tomogram loop
+        hold_dict = dict()
+        for ltomos in self.__lists.itervalues():
+            for tomo in ltomos.get_tomo_list():
+                tkey, n_parts = tomo.get_tomo_fname(), tomo.get_num_filaments()
+                try:
+                    hold_dict[tkey] += n_parts
+                except KeyError:
+                    hold_dict[tkey] = n_parts
+
+        # Deleting loop
+        for tkey, n_parts in zip(hold_dict.iterkeys(), hold_dict.itervalues()):
+            if n_parts < min_num_filaments:
+                for ltomos in self.__lists.itervalues():
+                    ltomos.del_tomo(tkey)

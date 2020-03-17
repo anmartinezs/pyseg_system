@@ -12,3 +12,5 @@
 * **16/03/2020**
     + Adding AG and Kmeans (with PCA) to /code/tutorials/synth_sumb/class/plane_align_class.py
     + Creating /code/pyorg/diff_geom module
+* **17/03/2020**
+    + Git Nightly branch created
