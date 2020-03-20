@@ -26,6 +26,10 @@ A description of the requirements, auxiliary software, installation and function
 ### USAGE
 In **docs/tutorials/synth_sumb/synth_sumb.pdf** there is a tutorial for de novo analysis of membrane proteins using self-generated synthetic data, it is strongly recomended to complete this tutorial before starting with your experimental data.
 
+### REPORTING BUGS
+
+If you have found a bug or have an issue with the software, please open an issue [here](https://github.com/anmartinezs/pyseg_system/wiki).
+
 ### LICENSE
 
 Licensed under the Apache License, Version 2.0 (see LICENSE file)

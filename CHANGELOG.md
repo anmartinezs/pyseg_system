@@ -14,3 +14,5 @@
     + Creating /code/pyorg/diff_geom module
 * **17/03/2020**
     + Git Nightly branch created
+* **20/03/2020**
+    + Adding filament and segmentations analysis in PyOrg

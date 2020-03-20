@@ -3784,9 +3784,9 @@ class SetListTomoParticles(object):
     # list_name: string for naming the list
     def add_list_tomos(self, ltomos, list_name):
         # Input parsing (compatible with older versions)
-        if ltomos.__class__.__name__ != 'ListTomoParticles':
-            error_msg = 'WARNING: add_tomo (SetListTomoParticles): ltomos input must be ListTomoParticles object.'
-            raise pexceptions.PySegInputError(expr='add_tomo (SetListTomoParticles)', msg=error_msg)
+        if ltomos.__class__.__name__ != 'ListTomoFilaments':
+            error_msg = 'WARNING: add_tomo (SetListTomoFilaments): ltomos input must be ListTomoParticles object.'
+            raise pexceptions.PySegInputError(expr='add_tomo (SetListTomoFilaments)', msg=error_msg)
         # Adding the list to the dictionary
         self.__lists[str(list_name)] = ltomos
 

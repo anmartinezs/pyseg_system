@@ -10,7 +10,8 @@ __author__ = 'martinez'
 import vtk
 import math
 import numpy as np
-from pyseg.globals.utils import angle_2vec_3D, closest_points
+from pyorg.globals.utils import angle_2vec_3D, closest_points
+from pyorg.surf.utils import points_to_polyline
 
 ###### Global variables
 PI_2 = .5 * np.pi
@@ -264,9 +265,12 @@ class SpaceCurve(object):
 
     ###### External functionality area
 
-    # Returns a new SpaceCurve whose samples are the decimation of the current
-    # n_samp: number of samples for the decimated curve
     def gen_decimated(self, n_samp):
+        """
+        Generates a new SpaceCurve whose samples are the decimation of the current
+        :param n_samp: number of samples for the decimated curve
+        :return: a new SpaceCurve whose samples are the decimation of the current
+        """
         # decimator = vtk.vtkDecimatePolylineFilter()
         decimator = vtk.vtkSplineFilter()
         decimator.SetSubdivideToSpecified()
@@ -279,6 +283,46 @@ class SpaceCurve(object):
         for i in range(poly_dec.GetNumberOfPoints()):
             coords.append(np.asarray(poly_dec.GetPoint(i), dtype=np.float))
         return SpaceCurve(coords)
+
+    def gen_uni_sampled_coords(self, len_samp):
+        """
+        Generates a new SpaceCurve whose samples are uniformly sampled (except the last one)
+        :param len_samp: sampling length or geodesic distance
+        :return: a new SpaceCurve whose samples are samples uniformly (except the last one)
+        """
+
+        # Initialization
+        n_samp = int(math.floor(self.get_length() / len_samp))
+        lenc = n_samp * len_samp
+
+        # Trival case
+        if n_samp <= 2:
+            return self.get_samples()
+        else:
+            # Fix the two last samples
+            samples, lengths = self.get_samples(), self.get_lengths()
+            argm = np.argmax(lengths>=lenc)
+            lacoord, lcoord = samples[argm-1], samples[-1]
+            off = lenc - lengths[argm-1]
+            assert off >= 0
+            vl = lcoord - lacoord
+            vl = vl / math.sqrt((vl * vl).sum())
+            lacoord += (vl*off)
+            samples = samples[:argm]
+            samples[-1] = lacoord
+
+            poly = points_to_polyline(samples)
+            decimator = vtk.vtkSplineFilter()
+            decimator.SetSubdivideToSpecified()
+            decimator.SetNumberOfSubdivisions(n_samp-1)
+            decimator.SetInputData(poly)
+            decimator.Update()
+            poly_dec = decimator.GetOutput()
+            coords = list()
+            for i in range(poly_dec.GetNumberOfPoints()):
+                coords.append(np.asarray(poly_dec.GetPoint(i), dtype=np.float))
+            coords.append(lcoord)
+            return coords
 
     def compute_point_intersection(self, point):
         """

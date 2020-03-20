@@ -491,6 +491,23 @@ def angle_2vec_2D(v_p, v_q):
         hold = 1.
     return math.acos(hold)
 
+def closest_points(point, points, nn=1):
+    """
+    Find the closest points to an input reference by Euclidean distance
+    :param point: Input reference point
+    :param points: Array of points to look for the closest neighbour
+    :param nn: (default 1) number of neighbours to look for
+    :return: An array with the closest points found
+    """
+
+    eu_dsts = point - points
+    eu_dsts = np.sqrt((eu_dsts * eu_dsts).sum(axis=1))
+    n_ids = np.argsort(eu_dsts)
+    out_points = np.zeros(shape=(nn, 3))
+    for i in xrange(nn):
+        out_points[i] = points[n_ids[i], :]
+    return out_points
+
 # Flip cloud of points coordinates along specified dimensions
 # dim_id: dimensions index, it must in [0, 1, ..., nd]
 def flip_cloud(cloud, dim_id=0):

@@ -108,9 +108,15 @@ class RelionCols(object):
                        # PyOrg: Microtubules
                        '_mtCenterLine',
                        '_mtParticlesTomo',
-                       # PyOrg: generic fibers
+                       # PyOrg: generic fibers or filaments
                        '_fbCurve',
-                       '_fbTomoFilaments'
+                       '_fbTomoFilaments',
+                       '_fbXMLFile',
+                       '_fbRadius',
+                       # PyOrg: oriented membrane segmentation
+                       '_omTomoSegmentation',
+                       '_omMbSegmentation',
+                       '_omLmSegmentation'
                        )
         self.__dtypes = (str,
                          float,
@@ -156,12 +162,21 @@ class RelionCols(object):
                          str,
                          str,
                          int,
+                         # PyOrg: Surface analysis
+                         str,
+                         str,
+                         str,
+                         str,
                          # PyOrg: Microtubules
                          str,
                          str,
-                         str,
-                         str,
                          # PyOrg: generic fibers
+                         str,
+                         str,
+                         str,
+                         float,
+                         # PyOrg: oriented membrane segmentation
+                         str,
                          str,
                          str
                          )

@@ -1,5 +1,5 @@
 '''
-Classes for representing a tomograms with filaments
+Classes for representing tomograms with filaments
 
 '''
 
@@ -25,6 +25,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 FIL_ID = 'fil_id'
 FIL_MODE_FAST = 2
+FIL_MODE_PRECISE = 1
 
 # GLOBAL FUNCTIONS
 
@@ -47,14 +48,23 @@ def clean_dir(dir):
 #
 class Filament(object):
 
-    def __init__(self, coords):
+    def __init__(self, coords, dst_samp=None):
         """
         :param coords: sequence of coordinates
+        :param dst_samp: if not None (default) ensures uniform sampling, if the curve length is smaller than the
+        distance sample a ValueError is raised
         """
 
+        # Ensure curve uniform sampling
+        if dst_samp is not None:
+            hold_curve = SpaceCurve(coords, mode=FIL_MODE_FAST, do_geom=True)
+            hold_coords = hold_curve.gen_uni_sampled_coords(dst_samp)
+        else:
+            hold_coords = coords
+
         # Input parsing
-        self.__curve = SpaceCurve(coords, mode=FIL_MODE_FAST, do_geom=True)
-        self.__vtp = self.get_vtp()
+        self.__curve = SpaceCurve(hold_coords, mode=FIL_MODE_PRECISE, do_geom=True)
+        self.__vtp = self.__curve.get_vtp()
 
         # Pre-compute bounds for accelerate computations
         self.__bounds = np.zeros(shape=6, dtype=np.float32)
@@ -62,14 +72,17 @@ class Filament(object):
 
     #### Set/Get functionality
 
+    def get_coords(self):
+        """
+        :return: return curve coordinates
+        """
+        return self.__curve.get_samples()
+
     def get_vtp(self):
         """
         :return: return a vtkPolyData object
         """
         return self.__vtp
-
-    def get_fname(self):
-        return self.__fname
 
     def get_bounds(self):
         """
@@ -114,7 +127,7 @@ class Filament(object):
         # Adding the data
         self.__vtp.GetCellData().AddArray(prop)
 
-    def translation(self, shift_x, shift_y, shift_z):
+    def translate(self, shift_x, shift_y, shift_z):
         """
         Rigid translation
         :param shift_i: translations in X, Y, Z axes respectively
@@ -130,19 +143,13 @@ class Filament(object):
         tr_box.Update()
         self.__vtp = tr_box.GetOutput()
 
-        # Update center (does not apply to normals)
-        box_tr = vtk.vtkTransform()
-        box_tr.Translate(shift_x, shift_y, shift_z)
-        tr_box = vtk.vtkTransformPolyDataFilter()
-        tr_box.SetInputData(self.__center)
-        tr_box.SetTransform(box_tr)
-        tr_box.Update()
-        self.__center = tr_box.GetOutput()
+        # Update the curve point from PolyData
+        self.__curve = polyline_to_points(self.__vtp)
 
         # Update the bounds
         self.__update_bounds()
 
-    def rotation(self, rot, tilt, psi, active=True):
+    def rotate(self, rot, tilt, psi, active=True):
         """
         Rigid rotation
         :param rot, tilt, psi: rotation angles in Relion format in degrees
@@ -166,24 +173,8 @@ class Filament(object):
         tr_rot.Update()
         self.__vtp = tr_rot.GetOutput()
 
-        # Update center
-        hold_center = np.asarray(self.get_center(), dtype=np.float)
-        rot_tr = vtk.vtkTransform()
-        rot_tr.SetMatrix(mat_rot)
-        tr_rot = vtk.vtkTransformPolyDataFilter()
-        tr_rot.SetInputData(self.__center)
-        tr_rot.SetTransform(rot_tr)
-        tr_rot.Update()
-        self.__center = tr_rot.GetOutput()
-
-        # Normal rotation
-        hold_normal = np.asarray(self.get_normal(), dtype=np.float) + hold_center
-        rot_center, rot_normal = M*hold_center.reshape(3, 1), M*hold_normal.reshape(3, 1)
-        hold_normal = np.asarray((rot_normal - rot_center), dtype=np.float).reshape(3)
-        # Re-normalization
-        norm_normal = math.sqrt((hold_normal*hold_normal).sum())
-        if norm_normal > 0:
-            self.set_normal(hold_normal / norm_normal)
+        # Update the curve point from PolyData
+        self.__curve = polyline_to_points(self.__vtp)
 
         # Update the bounds
         self.__update_bounds()
@@ -380,37 +371,10 @@ class TomoFilaments(object):
         return self.__fils
 
     def get_num_filaments(self):
-        return len(self.__parts)
+        return len(self.__fils)
 
 
     # EXTERNAL FUNCTIONALITY AREA
-
-    # Particle bounds are extended distance within the valid range of the tomogram
-    # Returns: the extended surface
-    def get_extended_bounds(self, part, ex_dst):
-
-        ex_f, hold_bounds = float(ex_dst), part.get_bounds()
-
-        hold_bounds[0] -= ex_f
-        if hold_bounds[0] < self.__bounds[0]:
-            hold_bounds[0] = self.__bounds[0]
-        hold_bounds[2] -= ex_f
-        if hold_bounds[2] < self.__bounds[2]:
-            hold_bounds[2] = self.__bounds[2]
-        hold_bounds[4] -= ex_f
-        if hold_bounds[4] < self.__bounds[4]:
-            hold_bounds[4] = self.__bounds[4]
-        hold_bounds[1] += ex_f
-        if hold_bounds[1] < self.__bounds[1]:
-            hold_bounds[1] = self.__bounds[1]
-        hold_bounds[3] += ex_f
-        if hold_bounds[3] < self.__bounds[3]:
-            hold_bounds[3] = self.__bounds[3]
-        hold_bounds[5] += ex_f
-        if hold_bounds[5] < self.__bounds[5]:
-            hold_bounds[5] = self.__bounds[5]
-
-        return hold_bounds
 
     def make_voi_surf(self, iso_th=.5, dec=.9):
         """
@@ -439,55 +403,46 @@ class TomoFilaments(object):
             return True
         return False
 
-    # Check if a surface is embedded in the tomogram
-    # surf: the surface to check
-    # mode: embedding mode, valid: 'full' the whole surface must be enclosed in the valid tomogram
-    #       region, 'center' surface center,  'box' surface box
-    def is_embedded(self, surf, mode='full'):
+    def is_embedded(self, fil, mode='full'):
+        """
+        Check if a surface is embedded in the tomogram
+        :param surf: the filament to check
+        :param mode:  embedding mode, valid: 'full' the whole filament must be enclosed in the valid tomogram
+    #       region, 'box' surface box
+        :return:
+        """
 
         # Input parsing
-        if (mode != 'full') and (mode != 'center') and (mode != 'box'):
+        if (mode != 'full') and (mode != 'box'):
             error_msg = 'Input mode ' + str(mode) + ' is not valid!'
-            raise pexceptions.PySegInputError(expr='is_embedded (TomoParticles)', msg=error_msg)
-
-        if mode == 'center':
-            # Check if the center point is fully embedded
-            center = surf.get_center()
-            if (center[0] < self.__bounds[0]) or (center[0] > self.__bounds[1]) or \
-                    (center[1] < self.__bounds[2]) or (center[1] > self.__bounds[3]) or \
-                    (center[2] < self.__bounds[4]) or (center[2] > self.__bounds[5]):
-                return False
-            x, y, z = int(round(center[0])), int(round(center[1])), int(round(center[2]))
-            if self.__voi is not None:
-                if isinstance(self.__voi, np.ndarray):
-                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < self.__voi.shape[0]) and (y < self.__voi.shape[1]) \
-                            and (z < self.__voi.shape[2]):
-                        if self.__voi[x, y, z] > 0:
-                            return True
-                else:
-                    if self.__voi_selector.IsInsideSurface(x, y, z) > 0:
-                        return True
-                    # print 'ERROR: is embedded with mode=center for surfaces not implemented yet!'
-                    # raise NotImplementedError
-            return False
+            raise pexceptions.PySegInputError(expr='is_embedded (TomoFilaments)', msg=error_msg)
 
 
         # Check the possibility of embedding
-        surf_bounds = surf.get_bounds()
-        if (surf_bounds[1] < self.__bounds[0]) and (surf_bounds[0] > self.__bounds[1]) and \
-                (surf_bounds[3] < self.__bounds[2]) and (surf_bounds[2] > self.__bounds[3]) and \
-                (surf_bounds[5] < self.__bounds[4]) and (surf_bounds[4] > self.__bounds[5]):
+        fil_bounds = fil.get_bounds()
+        if (fil_bounds[1] < self.__bounds[0]) and (fil_bounds[0] > self.__bounds[1]) and \
+                (fil_bounds[3] < self.__bounds[2]) and (fil_bounds[2] > self.__bounds[3]) and \
+                (fil_bounds[5] < self.__bounds[4]) and (fil_bounds[4] > self.__bounds[5]):
             return False
 
         if mode == 'full':
             # Check if the box is fully embedded
-            if (surf_bounds[0] < self.__bounds[0]) or (surf_bounds[1] > self.__bounds[1]) or \
-                    (surf_bounds[2] < self.__bounds[2]) or (surf_bounds[3] > self.__bounds[3]) or \
-                    (surf_bounds[4] < self.__bounds[4]) or (surf_bounds[5] > self.__bounds[5]):
+            if (fil_bounds[0] < self.__bounds[0]) or (fil_bounds[1] > self.__bounds[1]) or \
+                    (fil_bounds[2] < self.__bounds[2]) or (fil_bounds[3] > self.__bounds[3]) or \
+                    (fil_bounds[4] < self.__bounds[4]) or (fil_bounds[5] > self.__bounds[5]):
                 return False
-            # Check if surface intersect the mask
-            if not is_2_polys_intersect(surf.get_vtp(mode='surface'), self.__voi):
+            # Check if surface intersect the VOI
+            if isinstance(self.__voi, np.ndarray):
+                if not is_2_polys_intersect(fil.get_vtp(), self.__voi):
                     return False
+            else:
+                coords = fil.get_coords()
+                for coord in coords:
+                    x, y, z = int(round(coord[0])), int(round(coord[1])), int(round(coord[2]))
+                    if (x>=0) and (y>=0) and (z>=0) and \
+                        (x<self.__voi.shape[0]) and (y<self.__voi.shape[1]) and (z<self.__voi.shape[2]):
+                        if self.__voi[x, y, z] == 0:
+                            return False
 
         return True
 
@@ -506,7 +461,7 @@ class TomoFilaments(object):
         if not isinstance(fil, Filament):
             error_msg = 'Input object must be a Filament instance.'
             raise pexceptions.PySegInputError(expr='insert_filament (TomoFilaments)', msg=error_msg)
-        if (check_inter is not None) and self.check_filaments_itersection(fil, check_inter):
+        if (check_inter is not None) and self.check_filament_intersection(fil, check_inter):
             error_msg = 'This particle intersect with another already inserted one.'
             raise pexceptions.PySegInputError(expr='insert_surface (TomoFilaments)', msg=error_msg)
 
@@ -515,6 +470,20 @@ class TomoFilaments(object):
             error_msg = 'Input Filament is not fully embedded in the reference tomogram.'
             raise pexceptions.PySegInputError(expr='insert_filament (TomoFilaments)', msg=error_msg)
         self.__fils.append(fil)
+
+    def check_filament_intersection(self, fil, rad):
+        """
+        Determines if a filament intersect with an already inserted filament
+        :param fil: input filament
+        :param rad: filament radius
+        :return:
+        """
+        fil_vtp = fil.get_vtp()
+        for nfil in self.get_filaments():
+            dst = vtp_to_vtp_closest_point(fil_vtp, nfil.get_vtp())
+            if dst < rad:
+                return True
+        return False
 
     def delete_filaments(self, fil_ids):
         """
@@ -731,7 +700,7 @@ class TomoFilaments(object):
         del state['_TomoFilaments__voi']
         del state['_TomoFilaments__voi_selector']
         del state['_TomoFilaments__voi_dst_ids']
-        del state['_TomoFilaments__parts']
+        del state['_TomoFilaments__fils']
         return state
 
 ############################################################################
@@ -756,10 +725,10 @@ class ListTomoFilaments(object):
         return total
 
     def get_num_filaments_dict(self):
-        nparts = dict()
+        nfils = dict()
         for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
-            nparts[key] = tomo.get_num_filaments()
-        return nparts
+            nfils[key] = tomo.get_num_filaments()
+        return nfils
 
     def get_volumes_dict(self):
         vols = dict()
@@ -809,7 +778,7 @@ class ListTomoFilaments(object):
         :return:
         """
         try:
-            self.__tomos[tomo_fname].insert_particle(fil, check_bounds, check_inter=check_inter)
+            self.__tomos[tomo_fname].insert_filament(fil, check_bounds, check_inter=check_inter)
         except KeyError:
             error_msg = 'Tomogram ' + tomo_fname + ' is not added to list!'
             raise pexceptions.PySegInputError(expr='insert_particle (ListTomoFilaments)', msg=error_msg)
@@ -817,14 +786,14 @@ class ListTomoFilaments(object):
     def store_stars(self, out_stem, out_dir):
         """
         Store the list of tomograms in STAR file and also the STAR files for every tomogram
-        :param out_stem: string stem used for storing the STAR file for TomoParticles objects
+        :param out_stem: string stem used for storing the STAR file for TomoFilaments objects
         :param out_dir: output directory
         :return:
         """
 
         # STAR file for the tomograms
         tomos_star = sub.Star()
-        tomos_star.add_column('_suTomoParticles')
+        tomos_star.add_column('_fbTomoFilaments')
 
         # Tomograms loop
         for i, tomo_fname in enumerate(self.__tomos.keys()):
@@ -838,7 +807,7 @@ class ListTomoFilaments(object):
             self.__tomos[tomo_fname].pickle(pkl_file)
 
             # Adding a new enter
-            kwargs = {'_suTomoParticles': pkl_file}
+            kwargs = {'_fbTomoFilaments': pkl_file}
             tomos_star.add_row(**kwargs)
 
         # Storing the tomogram STAR file
@@ -857,7 +826,7 @@ class ListTomoFilaments(object):
             tomo_stem = os.path.splitext(os.path.split(tomo_fname)[1])[0]
 
             # Storing
-            disperse_io.save_vtp(self.__tomos[tomo_fname].gen_filaments_vtp(), out_dir + '/' + tomo_stem + '_parts_fils.vtp')
+            disperse_io.save_vtp(self.__tomos[tomo_fname].gen_filaments_vtp(), out_dir + '/' + tomo_stem + '_fils.vtp')
 
 
     # fname: file name ended with .pkl
@@ -907,8 +876,8 @@ class ListTomoFilaments(object):
 
     def filter_by_filaments_num(self, min_num_filaments=1):
         """
-        Delete for list the tomogram with low particles
-        :param min_num_filaments: minimum number of particles, below that the tomogram is deleted (default 1)
+        Delete for list the tomogram with low filaments
+        :param min_num_filaments: minimum number of particles, below the tomogram is deleted (default 1)
         :return:
         """
         hold_dict = dict()
@@ -927,11 +896,11 @@ class ListTomoFilaments(object):
         if (n_keep is None) or (n_keep < 0) or (n_keep >= len(self.__tomos.keys())):
             return
         # Sorting loop
-        n_parts = dict()
+        n_fils = dict()
         for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
-            n_parts[key] = tomo.get_num_filaments()
-        pargs_sort = np.argsort(np.asarray(n_parts.values()))[::-1]
-        keys = n_parts.keys()
+            n_fils[key] = tomo.get_num_filaments()
+        pargs_sort = np.argsort(np.asarray(n_fils.values()))[::-1]
+        keys = n_fils.keys()
         # Cleaning loop
         hold_dict = dict()
         for parg in pargs_sort[:n_keep]:
@@ -944,10 +913,10 @@ class ListTomoFilaments(object):
         :return: return a dictionary with the num of filaments by tomos
         """
         keys = self.get_tomo_fname_list()
-        part = dict.fromkeys(keys)
+        fil = dict.fromkeys(keys)
         for key in keys:
-            part[key] = self.__tomos[key].get_num_filaments()
-        return part
+            fil[key] = self.__tomos[key].get_num_filaments()
+        return fil
 
     def to_tomos_star(self, out_dir):
         """
@@ -1031,15 +1000,15 @@ class SetListTomoFilaments(object):
 
     def add_list_tomos(self, ltomos, list_name):
         """
-        Add a new ListTomoParticles to the set
-        :param ltomos: input ListTomoParticles object
+        Add a new ListTomoFilaments to the set
+        :param ltomos: input ListTomoFilaments object
         :param list_name: string for naming the list
         :return:
         """
         # Input parsing (compatible with older versions)
-        if ltomos.__class__.__name__ != 'ListTomoParticles':
-            error_msg = 'WARNING: add_tomo (SetListTomoParticles): ltomos input must be ListTomoParticles object.'
-            raise pexceptions.PySegInputError(expr='add_tomo (SetListTomoParticles)', msg=error_msg)
+        if ltomos.__class__.__name__ != 'ListTomoFilaments':
+            error_msg = 'WARNING: add_tomo (SetListTomoFilaments): ltomos input must be ListTomoParticles object.'
+            raise pexceptions.PySegInputError(expr='add_tomo (SetListTomoFilaments)', msg=error_msg)
         # Adding the list to the dictionary
         self.__lists[str(list_name)] = ltomos
 
@@ -1057,7 +1026,7 @@ class SetListTomoFilaments(object):
         """
         Merge the particles lists into one
         :param list_names: a list with name of the list to merge, if None (default) then all are merged
-        :return: a ListTomoParticles object
+        :return: a ListTomoFilaments object
         """
 
         # Input parsing
@@ -1154,7 +1123,7 @@ class SetListTomoFilaments(object):
 
     def pickle_tomo_star(self, out_star, out_dir_pkl):
         """
-        Generates a STAR file with the ListTomoParicles and pickes their TomoParticles
+        Generates a STAR file with the ListTomoFilaments and pickes their TomoFilaments
         :param out_star: output STAR file
         :param out_dir_pkl: output directory for the pickles
         :return: a STAR file

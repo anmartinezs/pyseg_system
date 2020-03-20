@@ -2,7 +2,8 @@
 
     Generates a ListTomoFilaments object from a input STAR file
 
-    Input:  - STAR file for pairing STAR files with filaments and segmentations
+    Input:  - STAR file with the list of filaments, each list pairs tomograms and filament networks
+            - STAR file for pairing tomograms and segmentations
 
     Output: - A ListTomoFilaments pickled object for every STAR file row
 
@@ -28,7 +29,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_test.star'
+in_star = ROOT_PATH + '/in/in_ltomos_fils_test.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = ROOT_PATH + '/in/in_seg_test.star'
@@ -41,9 +42,8 @@ out_stem = 'test' # 'pre'
 sg_lbl = 1 # segmented label
 sg_bc = False
 
-# Post-processing
-pt_res = 1.408 # nm/vx - resolution
-pt_ssup = 5. # nm - scale suppression for the input particles
+# Filament pre-procesing
+fl_dst = 5 # None # nm
 
 #### Advanced settings
 
@@ -55,7 +55,7 @@ sg_dec = 0.9 # Decimation factor for the triangle mesh
 # Post-processing
 pt_ss_ref = None # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = None # for using different scale-suppression distances for crossed scale suppression
-pt_min_parts = 1 # Tomograms with less particles are removed
+pt_min_fils = 1 # Tomograms with less filaments are removed
 pt_min_by_tomo = False # If True particle from all patterns are considered
 pt_keep = None # To keep just the indicated highly populated tomograms
 
@@ -70,7 +70,7 @@ print '\tAuthor: ' + __author__
 print '\tDate: ' + time.strftime("%c") + '\n'
 print 'Options:'
 print '\tOutput directory: ' + str(out_dir)
-print '\tInput STAR file of particles: ' + str(in_star)
+print '\tInput STAR file of filaments: ' + str(in_star)
 print '\t\t-Input STAR file for segmentations: ' + str(in_seg)
 print '\tSegmentation pre-processing: '
 print '\t\t-Segmentation label: ' + str(sg_lbl)
@@ -80,16 +80,17 @@ if sg_swap_xy:
     print '\t\t-Swap X and Y particle coordinates.'
 if sg_bc:
     print '\t\t-Checking filaments-VOI overlapping.'
+print '\tFilament pre-processing:'
+if fl_dst is not None:
+    print '\t\t-Sampling distance: ' + str(fl_dst) + ' nm'
 print '\tPost-processing: '
-print '\t\t-Resolution: ' + str(pt_res) + ' nm/vx'
-print '\t\t-Scale suppression: ' + str(pt_ssup) + ' nm'
 if (pt_ss_ref is not None) and (pt_ss_ref_dst is not None):
     print '\t\t-Reference key for crossed scale suppresion: ' + str(pt_ss_ref)
     print '\t\t-Crossed scale suppresion: ' + str(pt_ss_ref_dst) + ' nm'
-print '\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of particles.'
-print '\t\t-Minimum number of particles: ' + str(pt_min_parts)
+print '\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of filaments.'
+print '\t\t-Minimum number of filaments: ' + str(pt_min_fils)
 if pt_min_by_tomo:
-    print '\t\t-Num. particles computation by tomograms.'
+    print '\t\t-Num. filaments computation by tomograms.'
 print ''
 
 ######### Process
@@ -136,131 +137,125 @@ for tomo_row in range(star_seg.get_nrows()):
     seg_fname = os.path.splitext(seg_str.replace('/', '_'))[0]
     out_voi = out_dir + '/' + seg_fname + '_mask_voi.mrc'
     # print out_voi
-    disperse_io.save_numpy(voi, out_voi)
+    # disperse_io.save_numpy(voi, out_voi)
     # voi = disperse_io.load_tomo(out_voi, mmap=True)
-    vois[seg_str] = out_voi
+    vois[seg_str] = voi
     nvois[seg_str] = 0
 
 print '\tLoop for tomograms in the list: '
 fils_inserted = 0
-shape_paths, seg_mic_dir = dict(), dict()
-set_lists = surf.SetListTomoParticles()
+set_lists = surf.SetListTomoFilaments()
 for star_row in range(star.get_nrows()):
 
     print '\t\tNow list of tomograms initialization...'
     list_tomos = surf.ListTomoFilaments()
-    fils_xml_str, mic_str = star.get_element('_psXMLFile', star_row), star.get_element('_rlnMicrographName', star_row)
-    try:
-        seg_row = seg_dic[mic_str]
-    except KeyError:
-        print 'WARNING: Micrograph not found: ' + mic_str
-        continue
-    seg_str = star_seg.get_element('_psSegImage', seg_row)
-    seg_mic_dir[seg_str] = mic_str
-    mic = disperse_io.load_tomo(mic_str, mmap=True)
+    fil_star_str = star.get_element('_psStarFile', star_row)
     for tomo_fname, voi in zip(vois.iterkeys(), vois.itervalues()):
-        if isinstance(voi, str):
-            voi_ext = os.path.splitext(voi)[1]
-            if voi_ext == '.mrc':
-                voi = disperse_io.load_tomo(voi, mmap=True)
-            else:
-                print 'ERROR: ' + voi_ext + ' not recognized extension for VOI ' + voi
-                print 'Terminated. (' + time.strftime("%c") + ')'
-                sys.exit(-1)
-        hold_tomo = surf.TomoFilaments(tomo_fname, sg_lbl, voi=voi, surf_g=sg_sg, surf_dec=sg_dec)
-        list_tomos.add_tomo(hold_tomo)
+        list_tomos.add_tomo(surf.TomoFilaments(tomo_fname, 1, voi=voi))
 
-    print '\t\tLoading filaments XML file(s):'
-    xml_fils = sub.XMLFilaments()
+    print '\t\tLoading filaments STAR file(s):'
+    star_fil = sub.Star()
     try:
-        xml_fils.load(fils_xml_str)
+        star_fil.load(fil_star_str)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: input XML file could not be loaded because of "' + e.get_message() + '"'
+        print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
         print 'Terminated. (' + time.strftime("%c") + ')'
         sys.exit(-1)
 
-    print '\t\tParticles loop..'
-    fils_lut = np.zeros(shape=xml_fils.get_nfils(), dtype=np.bool)
-    fils_coords = np.zeros(shape=(xml_fils.get_nfils(), 3), dtype=np.float32)
-    for fils_row in range(xml_fils.get_nfils()):
+    print '\t\tFilaments loop..'
+    for fil_row in range(star_fil.get_nrows()):
 
-        # Initialization
-        hold_fil = surf.Filament(xml_fils.get_fil_coords(fils_row))
-
-        # Segmentation rigid body transformations
-        if sg_swap_xy:
-            mic_center = np.asarray((.5*mic.shape[1], .5*mic.shape[0], .5*mic.shape[2]), dtype=np.float32)
+        fils_xml_str = star_fil.get_element('_fbXMLFile', fil_row)
+        mic_str = star_fil.get_element('_rlnMicrographName', fil_row)
+        mic = disperse_io.load_tomo(mic_str, mmap=True)
+        fils_res, fils_rad = star_fil.get_element('_psPixelSize', fil_row), star_fil.get_element('_fbRadius', fil_row)
+        if fils_res <= 0:
+            print 'WARNING: Pixel size for a tomogram must be greater than zero:' + mic_str
+            continue
+        if fils_rad >= 0:
+            fils_rad_v = fils_rad / fils_res
         else:
-            mic_center = np.asarray((.5 * mic.shape[0], .5 * mic.shape[1], .5 * mic.shape[2]), dtype=np.float32)
-
-        # Centering
-        hold_fil.translate((-1.) * mic_center)
-        # Un-rotation
-        seg_rot, seg_tilt, seg_psi = star_seg.get_element('_psSegRot', seg_row), \
-                                     star_seg.get_element('_psSegTilt', seg_row), \
-                                     star_seg.get_element('_psSegPsi', seg_row)
-        if sg_swap_xy:
-            seg_rot, seg_tilt, seg_psi = -1 * seg_rot, -1 * seg_tilt, -1 * seg_psi
-        if (seg_rot != 0) or (seg_tilt != 0) or (seg_psi != 0):
-            hold_fil.rotate(seg_rot, seg_tilt, seg_psi, mode='relion')
-
-        # Un-centering
-        hold_fil.translate(mic_center)
-        # Un-cropping
-        seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
-                                       star_seg.get_element('_psSegOffY', seg_row), \
-                                       star_seg.get_element('_psSegOffZ', seg_row)
-        if sg_swap_xy:
-            hold_fil.translate(seg_offy, seg_offx, seg_offz)
-        else:
-            hold_fil.translate(seg_offx, seg_offy, seg_offz)
-
-        # Insert the new particle in the proper tomogram
+            fils_rad_v = None
+        fl_dst_v = None
+        if fl_dst is not None:
+            fl_dst_v = fl_dst / fils_res
+        print '\t\t\tLoading filaments XML file(s): ' + fils_xml_str
+        xml_fils = sub.XMLFilaments()
         try:
-            list_tomos.insert_filament(hold_fil, seg_str, check_bounds=sg_bc)
-            fils_inserted += 1
-            nvois[seg_str] += 1
+            xml_fils.load(fils_xml_str)
         except pexceptions.PySegInputError as e:
-            print 'WARNING: particle in row ' + str(fils_row) + ' could not be inserted in tomogram ' + tomo_fname + \
-                  ' because of "' + e.get_message() + '"'
-            pass
-        fils_lut[fils_row] = True
+            print 'ERROR: input XML file could not be loaded because of "' + e.get_message() + '"'
+            print 'Terminated. (' + time.strftime("%c") + ')'
+            sys.exit(-1)
+        try:
+            seg_row = seg_dic[mic_str]
+        except KeyError:
+            print 'WARNING: Micrograph not found: ' + mic_str
+            continue
+        seg_str = star_seg.get_element('_psSegImage', seg_row)
 
-    del_l = list(np.where(fils_lut == False)[0])
-    if pt_ssup is not None:
-        pt_ssup_v = pt_ssup / pt_res
-        print '\t\tApplying scale suppresion (' + str(pt_ssup_v) + ')...'
-        list_tomos.scale_suppression(pt_ssup_v)
+        for fils_row in range(xml_fils.get_nfils()):
+
+            # Initialization
+            hold_fil = surf.Filament(xml_fils.get_fil_coords(fils_row), fl_dst_v)
+
+            # Segmentation rigid body transformations
+            if sg_swap_xy:
+                mic_center = np.asarray((.5*mic.shape[1], .5*mic.shape[0], .5*mic.shape[2]), dtype=np.float32)
+            else:
+                mic_center = np.asarray((.5 * mic.shape[0], .5 * mic.shape[1], .5 * mic.shape[2]), dtype=np.float32)
+
+            # Centering
+            mic_center_inv = (-1.) * mic_center
+            hold_fil.translate(mic_center_inv[0], mic_center_inv[1], mic_center_inv[2])
+            # Un-rotation
+            seg_rot, seg_tilt, seg_psi = star_seg.get_element('_psSegRot', seg_row), \
+                                         star_seg.get_element('_psSegTilt', seg_row), \
+                                         star_seg.get_element('_psSegPsi', seg_row)
+            if sg_swap_xy:
+                seg_rot, seg_tilt, seg_psi = -1 * seg_rot, -1 * seg_tilt, -1 * seg_psi
+            if (seg_rot != 0) or (seg_tilt != 0) or (seg_psi != 0):
+                hold_fil.rotate(seg_rot, seg_tilt, seg_psi, mode='relion')
+
+            # Un-centering
+            hold_fil.translate(mic_center[0], mic_center[1], mic_center[2])
+            # Un-cropping
+            seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
+                                           star_seg.get_element('_psSegOffY', seg_row), \
+                                           star_seg.get_element('_psSegOffZ', seg_row)
+            if sg_swap_xy:
+                hold_fil.translate(seg_offy, seg_offx, seg_offz)
+            else:
+                hold_fil.translate(seg_offx, seg_offy, seg_offz)
+
+            # Insert the new particle in the proper tomogram
+            try:
+                list_tomos.insert_filament(hold_fil, seg_str, check_bounds=sg_bc, check_inter=fils_rad_v)
+                fils_inserted += 1
+                nvois[seg_str] += 1
+            except pexceptions.PySegInputError as e:
+                print 'WARNING: particle in row ' + str(fils_row) + ' could not be inserted in tomogram ' + tomo_fname + \
+                      ' because of "' + e.get_message() + '"'
+                pass
+
     if pt_keep is not None:
         print '\t\tFiltering to keep the ' + str(pt_keep) + 'th more highly populated'
         list_tomos.clean_low_pouplated_tomos(pt_keep)
     if not pt_min_by_tomo:
-        if pt_min_parts >= 0:
-            print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
-            list_tomos.filter_by_particles_num(pt_min_parts)
+        if pt_min_fils >= 0:
+            print '\t\tFiltering tomograms with less filaments than: ' + str(pt_min_fils)
+            list_tomos.filter_by_filaments_num(pt_min_fils)
 
     # Adding ListTomograms to Set
-    xml_stem = os.path.splitext(os.path.split(fils_xml_str)[1])[0]
-    set_lists.add_list_tomos(list_tomos, xml_stem)
-
-if (pt_ss_ref is not None) and (pt_ss_ref_dst is not None):
-    pt_ss_ref_dst_v = pt_ss_ref_dst / pt_res
-    for ss_ref in pt_ss_ref:
-        print '\t-Applying crossed scale suppression using ' + str(ss_ref) + \
-              ' as reference list: ' + str(pt_ss_ref_dst) + ' nm'
-        set_lists.scale_suppression(pt_ss_ref_dst_v, ref_list=ss_ref)
-
-if pt_min_by_tomo:
-    if pt_min_parts >= 0:
-        print '\t-Filtering lists with less particles than: ' + str(pt_min_parts)
-        set_lists.filter_by_particles_num(pt_min_parts)
+    lfil_stem = os.path.splitext(os.path.split(fil_star_str)[1])[0]
+    set_lists.add_list_tomos(list_tomos, lfil_stem)
 
 for star_row in range(star.get_nrows()):
 
-    fils_xml_str = star.get_element('_psXMLFile', star_row)
-    xml_stem = os.path.splitext(os.path.split(fils_xml_str)[1])[0]
-    list_tomos = set_lists.get_lists_by_key(xml_stem)
-    out_pkl = out_dir + '/' + xml_stem + '_tpl.pkl'
+    fil_star_str = star.get_element('_psStarFile', star_row)
+    lfil_stem = os.path.splitext(os.path.split(fil_star_str)[1])[0]
+    list_tomos = set_lists.get_lists_by_key(lfil_stem)
+    out_pkl = out_dir + '/' + lfil_stem + '_tpl.pkl'
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl
     try:
         list_tomos.pickle(out_pkl)
@@ -271,14 +266,14 @@ for star_row in range(star.get_nrows()):
         print 'Terminated. (' + time.strftime("%c") + ')'
         sys.exit(-1)
 
-    out_app = out_dir + '/' + xml_stem + '_app'
+    out_app = out_dir + '/' + lfil_stem + '_app'
     if not os.path.exists(out_app):
         os.makedirs(out_app)
     print '\tStoring filaments grouped by tomograms: ' + out_app
     for tomo in list_tomos.get_tomo_list():
-        if tomo.get_num_particles() > 0:
+        if tomo.get_num_filaments() > 0:
             tomo_fname = tomo.get_tomo_fname().replace('/', '_')
-            tomo_vtp = tomo.append_filaments_vtp(mode='surface')
+            tomo_vtp = tomo.gen_filaments_vtp()
             disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
 
 print '\tTotal number of filaments inserted (before post-processing): ' + str(fils_inserted)
