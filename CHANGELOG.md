@@ -16,3 +16,7 @@
     + Git Nightly branch created
 * **20/03/2020**
     + Adding filament and segmentations analysis in PyOrg
+* **21/03/2020**
+    + Bug correction in /code/tutorials/exp_sumb/pre/pre_tomo_seg.py
+    + Improvement of clean_out_data.sh
+    + Adding nighly branch to README.md

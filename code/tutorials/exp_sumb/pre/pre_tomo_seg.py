@@ -43,24 +43,24 @@ MB_LBL, MB_NEIGH = 1, 2
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/carsten'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/radu'
 
 # Input STAR file
-in_star = ROOT_PATH + '/tomos/in/mb_seg_single.star'
+in_star = ROOT_PATH + '/seg/tomo_05_seg.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/tomos/mbu'
+out_dir = ROOT_PATH + '/pre/mbu'
 
 # Subvolume splitting settings
 sp_split = (2, 2, 1) # None
-sp_off_voxels = 5 # vox
+sp_off_voxels = 30 # vox
 
 # Membrane segmentation
-sg_res = 0.8516 # nm/voxel
+sg_res = 1.42 # nm/voxel
 sg_th = None # 8
 sg_sz = None # 3e3
-sg_mb_thick = 2 # nm
-sg_mb_neigh = 10 # nm
+sg_mb_thick = 3 # nm
+sg_mb_neigh = 15 # nm
 
 # CSV file pre-processing
 cv_coords_cools = (1, 2, 3)
@@ -252,7 +252,7 @@ for row in range(gl_star.get_nrows()):
             offs_x.append((off_mask_min_x, pad_x+sp_off_voxels))
             lock = False
             while not lock:
-                hold = offs_x[-1][1] - sp_off_voxels + pad_x
+                hold = offs_x[-1][1] + pad_x
                 if hold >= off_mask_max_x:
                     offs_x.append((offs_x[-1][1] - sp_off_voxels, off_mask_max_x))
                     lock = True
@@ -269,7 +269,7 @@ for row in range(gl_star.get_nrows()):
             offs_y.append((off_mask_min_x, pad_y + sp_off_voxels))
             lock = False
             while not lock:
-                hold = offs_y[-1][1] - sp_off_voxels + pad_y
+                hold = offs_y[-1][1] + pad_y
                 if hold >= off_mask_max_y:
                     offs_y.append((offs_y[-1][1] - sp_off_voxels, off_mask_max_y))
                     lock = True
@@ -286,7 +286,7 @@ for row in range(gl_star.get_nrows()):
             offs_z.append((off_mask_min_z, pad_z + sp_off_voxels))
             lock = False
             while not lock:
-                hold = offs_z[-1][1] - sp_off_voxels + pad_z
+                hold = offs_z[-1][1] + pad_z
                 if hold >= off_mask_max_z:
                     offs_z.append((offs_z[-1][1] - sp_off_voxels, off_mask_max_z))
                     lock = True
