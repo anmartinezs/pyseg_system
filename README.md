@@ -2,7 +2,7 @@
 De novo analysis for cryo-electron tomography.
 The code and data here is also available in CodeOcean (https://doi.org/10.24433/CO.0526052.v2), there you can test and run the software remotedly.
 
-In this GitHub repository you have two branches (git checkout <feature_branch>):
+This GitHub repository have two branches (git checkout <feature_branch>):
 * **master**: (default) a permanent branch which always reflects the release history.
 * **nightly**: the latest develpments and corrections.
 
