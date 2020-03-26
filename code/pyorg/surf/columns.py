@@ -217,6 +217,34 @@ class ColumnsFinder(object):
 
         return count
 
+    def get_num_parts_lyr1_scols(self, scol_rad=0):
+        """
+        Get the number of particles in layer 1 closer to subcolumns than rad
+        :param scol_rad: subcolumns radius
+        :return: an integer
+        """
+
+        # Inserting points in the surroundings of sub-columns for layer 1
+        scol_coords, l1_coords = list(), self.__tl1.get_particle_coords()
+        for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+            for clst in scol[0]:
+                for scol_coord in clst.get_coords():
+                    scol_coords.append(scol_coord)
+        if len(scol_coords) <= 0:
+            return 0
+        scol_coords = np.asarray(scol_coords)
+
+        # Counting
+        count = 0
+        for i, coord in enumerate(l1_coords):
+            hold = scol_coords - coord
+            dst = np.sqrt((hold * hold).sum(axis=1)).min()
+            if dst < scol_rad:
+                count += 1
+                continue
+
+        return count
+
     def get_area_tomo(self):
         """
         Computes the area of the reference layer by approximating it to a plane

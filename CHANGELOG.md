@@ -20,3 +20,5 @@
     + Bug correction in /code/tutorials/exp_sumb/pre/pre_tomo_seg.py
     + Improvement of clean_out_data.sh
     + Adding nighly branch to README.md
+* **21/03/2020**
+    + Adding file code/tutorials/synth_sumb/class/mbz_cly_mask.m

@@ -48,13 +48,13 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
 
 # Input STAR file
-in_star = ROOT_PATH + '/rln/ref_model/run3_c1_LB_mb_data_prior.star' # '/rln/pst/class_blob_h_v6/run17_c1_it050_data_c1_prior_clean.star' # '/rln/pre/root_v5_rot_rnd_prior.star'
-in_mask = ROOT_PATH + '/masks/mask_cyl_64_34_50_12.mrc' # '/masks/mask_cyl_64_35_52_10_r.mrc' # '/masks/mask_cyl_64_15_50_15.mrc'
+in_star = ROOT_PATH + '/org/pst/ltomos/ltomos_all_pst_subclean/7_parts.star' # '/rln/ref_model/run3_c1_LB_mb_data_prior.star' # '/rln/pst/class_blob_h_v6/run17_c1_it050_data_c1_prior_clean.star' # '/rln/pre/root_v5_rot_rnd_prior.star'
+in_mask = ROOT_PATH + '/masks/mask_cyl_64_35_48_15_r.mrc' # '/masks/mask_cyl_64_34_50_12.mrc' # '/masks/mask_cyl_64_35_52_10_r.mrc' # '/masks/mask_cyl_64_15_50_15.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/rec/col/LB_cyto' # '/rec/pst/particles_blob_ha_v6_nomb_post'
-out_star = ROOT_PATH + '/rec/col/LB_cyto_post.star' # '/rec/pst/blob_ha_class_run17_nomb_post.star'
+out_part_dir = ROOT_PATH + '/rec/pst/particles_lab_c2_v6_nomb_post' # '/rec/col/LB_cyto' # '/rec/pst/particles_blob_ha_v6_nomb_post'
+out_star = ROOT_PATH + '/rec/pst/particles_lab_c2_v6_nomb_post.star' # '/rec/col/LB_cyto_post.star' # '/rec/pst/blob_ha_class_run17_nomb_post.star'
 
 ####### Particles pre-processing settings
 
@@ -63,7 +63,7 @@ do_ang_rnd = [] # ['Rot']
 
 ####### Multiprocessing settings
 
-mp_npr = 10 # 10
+mp_npr = 1 # 10
 
 ########################################################################################
 # Local functions
@@ -213,14 +213,14 @@ if len(do_ang_prior) > 0:
             print 'ERROR: unrecognized angle: ' + ang_prior
             print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
-    print '\t\t-Adding prior for angles: ' + ang_prior
+        print '\t\t-Adding prior for angles: ' + ang_prior
 if len(do_ang_rnd) > 0:
     for ang_rnd in do_ang_rnd:
         if ang_rnd not in ['Rot', 'Tilt', 'Psi']:
             print 'ERROR: unrecognized angle: ' + ang_rnd
             print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
-    print '\t\t-Setting random values for angles: ' + ang_rnd
+        print '\t\t-Setting random values for angles: ' + ang_rnd
 print '\tMultiprocessing settings: '
 print '\t\t-Number processes: ' + str(mp_npr)
 print ''

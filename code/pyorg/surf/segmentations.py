@@ -300,10 +300,10 @@ class TomoOMSegmentations(object):
         if not isinstance(name, str):
             error_msg = 'Input is not a string.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
-        if (voi_mb is not None) and isinstance(voi_mb, np.ndarray):
+        if (voi_mb is not None) and (not isinstance(voi_mb, np.ndarray)):
             error_msg = 'Input VOI must an numpy.ndarray.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
-        if (voi_lm is not None) and isinstance(voi_lm, np.ndarray):
+        if (voi_lm is not None) and (not isinstance(voi_lm, np.ndarray)):
             error_msg = 'Input VOI must an numpy.ndarray.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
         self.__name = name
@@ -312,44 +312,44 @@ class TomoOMSegmentations(object):
         # Create the VOIs
         self.__voi_mb = voi_mb
         self.__voi_lm = voi_lm
-        if (self.__voi_mb.shape == self.__voi_lm.shape):
+        if self.__voi_mb.shape != self.__voi_lm.shape:
             error_msg = 'Input tomograms for membranes and lumen must have the same sizes.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
 
         # Pre-compute the segmentation labels
         if lbls_mb is None:
             self.__lbl_voi_mb, nlbls = sp.ndimage.label(self.__voi_mb, structure=np.ones(shape=(3, 3, 3)))
-            hold_lbls_mb = range(1, nlbls+1)
+            lbls_mb = range(1, nlbls+1)
+            disperse_io.save_numpy(self.__lbl_voi_mb, '/fs/pool/pool-ruben/antonio/filaments/ltomos_omsegs/test/hold_mb.mrc')
         hold_nlbls_mb = len(lbls_mb)
         if lbls_lm is None:
             self.__lbl_voi_lm, nlbls = sp.ndimage.label(self.__voi_lm, structure=np.ones(shape=(3, 3, 3)))
-            hold_lbls_lm = range(1, nlbls+1)
+            lbls_lm = range(1, nlbls+1)
+            disperse_io.save_numpy(self.__lbl_voi_lm, '/fs/pool/pool-ruben/antonio/filaments/ltomos_omsegs/test/hold_lm.mrc')
         hold_nlbls_lm = len(lbls_lm)
 
         # Compute the distance fields
-        self.__dst_field_mb, dst_ids_mb = sp.ndimage.morphology.distance_transform_edt(np.invert(self.__voi_mb),
-                                                                                       return_distances=True,
-                                                                                       return_indices=False)
+        self.__dst_field_mb = sp.ndimage.morphology.distance_transform_edt(np.invert(self.__voi_mb),
+                                                                           return_distances=True,
+                                                                           return_indices=False)
         self.__dst_field_lm, dst_ids_lm = sp.ndimage.morphology.distance_transform_edt(np.invert(self.__voi_lm),
                                                                                        return_distances=True,
-                                                                                       return_indices=False)
+                                                                                       return_indices=True)
 
         # Find the corresponding lumen label for each membrane label
         mat_mb_lm = np.zeros(shape=(hold_nlbls_mb, hold_nlbls_lm), dtype=np.int32)
         for x in range(self.__voi_mb.shape[0]):
             for y in range(self.__voi_mb.shape[1]):
                 for z in range(self.__voi_mb.shape[2]):
-                    hold_nlbls_mb, hold_lbl_lm = self.__lbl_voi_mb[x, y, z], self.__lbl_voi_lm[x, y, z]
-                    if hold_nlbls_lm == 0:
+                    hold_lbl_mb, hold_lbl_lm = self.__lbl_voi_mb[x, y, z], self.__lbl_voi_lm[x, y, z]
+                    if hold_lbl_lm == 0:
                         x_idx, y_idx, z_idx = dst_ids_lm[:, x, y, z]
-                        hold_nlbls_lm = self.__lbl_voi_lm[x_idx, y_idx, z_idx]
-                    mat_mb_lm[hold_nlbls_mb, hold_nlbls_lm] += 1
-        for lm_idx in range(1, hold_nlbls_lm+1):
-            hold_lbl_mb = np.argmax(mat_mb_lm[:, lm_idx])
-            self.__lbl_voi_lm[lm_idx-1] = hold_lbl_mb
+                        hold_lbl_lm = self.__lbl_voi_lm[x_idx, y_idx, z_idx]
+                    mat_mb_lm[hold_lbl_mb-1, hold_lbl_lm-1] += 1
 
         # Create the segmentations
-        for lbl_mb, lbl_lm in zip(self.__lbl_voi_mb, self.__lbl_voi_lm):
+        for lbl_mb in lbls_mb:
+            lbl_lm = np.argmax(mat_mb_lm[lbl_mb - 1, :])
             self.__segs.append(OMSegmentation(self.__lbl_voi_mb, self.__lbl_voi_lm, lbl_mb, lbl_lm))
 
     # GET/SET AREA
@@ -451,6 +451,8 @@ class TomoOMSegmentations(object):
         else:
             error_msg = 'Input mode not valid: ' + str(mode)
             raise pexceptions.PySegInputError(expr='compute_voi_volume (TomoOMSegmentations)', msg=error_msg)
+
+        return tomo_seg
 
     # INTERNAL FUNCTIONALITY AREA
 
@@ -652,28 +654,6 @@ class ListTomoOMSegmentations(object):
         return star_tomo
 
     # INTERNAL FUNCTIONALITY AREA
-
-    def __setstate__(self, state):
-        """
-        Restore previous state
-        :param state:
-        :return:
-        """
-        self.__dict__.update(state)
-        # Restore unpickable objects
-        self.__tomos = dict()
-        for key, pkl in self.__pkls.iteritems():
-            self.__tomos[key] = unpickle_obj(pkl)
-
-    def __getstate__(self):
-        """
-        Copy the object's state from self.__dict__ which contains all instance attributes.
-        Afterwards remove unpickable objects
-        :return:
-        """
-        state = self.__dict__.copy()
-        del state['_ListTomoFilaments__tomos']
-        return state
 
 ############################################################################
 # Class for a set of list tomograms with embedded filaments

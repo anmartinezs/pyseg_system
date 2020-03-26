@@ -108,14 +108,14 @@ for star_row in range(star.get_nrows()):
         mic = disperse_io.load_tomo(mic_str, mmap=True)
         print '\t\t\tLoading membrane segmentations file: ' + segs_mb_str
         try:
-            seg_mb = disperse_io.load_numpy(segs_mb_str) == sg_lbl
+            seg_mb = disperse_io.load_tomo(segs_mb_str) == sg_lbl
         except pexceptions.PySegInputError as e:
             print 'ERROR: input membrane segmentations file could not be loaded because of "' + e.get_message() + '"'
             print 'Terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
         print '\t\t\tLoading lumen segmentations file: ' + segs_lm_str
         try:
-            seg_lm = disperse_io.load_numpy(segs_lm_str) == sg_lbl
+            seg_lm = disperse_io.load_tomo(segs_lm_str) == sg_lbl
         except pexceptions.PySegInputError as e:
             print 'ERROR: input lumen segmentations file could not be loaded because of "' + e.get_message() + '"'
             print 'Terminated. (' + time.strftime("%c") + ')'
@@ -164,9 +164,11 @@ for star_row in range(star.get_nrows()):
     print '\tStoring segmentations grouped by tomograms: ' + out_app
     for tomo in list_tomos.get_tomo_list():
         if tomo.get_num_segmentations() > 0:
-            tomo_fname = tomo.get_tomo_fname().replace('/', '_')
-            tomo_vtp = tomo.gen_segmentations_vtp()
-            disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
+            tomo_fname = tomo.get_tomo_name().replace('/', '_')
+            hold_tomo = tomo.gen_seg_tomo(mode='mb')
+            disperse_io.save_numpy(hold_tomo, out_app+'/'+tomo_fname+'_mb.mrc')
+            hold_tomo = tomo.gen_seg_tomo(mode='lm')
+            disperse_io.save_numpy(hold_tomo, out_app + '/' + tomo_fname + '_lm.mrc')
 
 print '\tTotal number of segmentations inserted (before post-processing): ' + str(segs_inserted)
 
