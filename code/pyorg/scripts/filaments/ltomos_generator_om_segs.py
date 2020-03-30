@@ -36,6 +36,7 @@ out_stem = 'test' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 1 # segmented label
+sg_max_rad = 10 # nm
 
 #### Advanced settings
 
@@ -102,17 +103,7 @@ for star_row in range(star.get_nrows()):
     print '\t\tFilaments loop..'
     for seg_row in range(star_seg.get_nrows()):
 
-        segs_mb_str = star_seg.get_element('_omMbSegmentation', seg_row)
         segs_lm_str = star_seg.get_element('_omLmSegmentation', seg_row)
-        mic_str = star_seg.get_element('_rlnMicrographName', seg_row)
-        mic = disperse_io.load_tomo(mic_str, mmap=True)
-        print '\t\t\tLoading membrane segmentations file: ' + segs_mb_str
-        try:
-            seg_mb = disperse_io.load_tomo(segs_mb_str) == sg_lbl
-        except pexceptions.PySegInputError as e:
-            print 'ERROR: input membrane segmentations file could not be loaded because of "' + e.get_message() + '"'
-            print 'Terminated. (' + time.strftime("%c") + ')'
-            sys.exit(-1)
         print '\t\t\tLoading lumen segmentations file: ' + segs_lm_str
         try:
             seg_lm = disperse_io.load_tomo(segs_lm_str) == sg_lbl
@@ -120,11 +111,27 @@ for star_row in range(star.get_nrows()):
             print 'ERROR: input lumen segmentations file could not be loaded because of "' + e.get_message() + '"'
             print 'Terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
+        if star_seg.has_column('_omMbSegmentation'):
+            segs_mb_str = star_seg.get_element('_omMbSegmentation', seg_row)
+            print '\t\t\tLoading membrane segmentations file: ' + segs_mb_str
+            try:
+                seg_mb = disperse_io.load_tomo(segs_mb_str) == sg_lbl
+            except pexceptions.PySegInputError as e:
+                print 'ERROR: input membrane segmentations file could not be loaded because of "' + e.get_message() + '"'
+                print 'Terminated. (' + time.strftime("%c") + ')'
+                sys.exit(-1)
+        mic_str = star_seg.get_element('_rlnMicrographName', seg_row)
+        mic = disperse_io.load_tomo(mic_str, mmap=True)
+        sg_res = star_seg.get_element('_psPixelSize', seg_row)
+        if sg_res <= 0:
+            print 'WARNING: Pixel size for a tomogram must be greater than zero:' + mic_str
+            continue
+        sg_max_rad_v = sg_max_rad / sg_res
 
         # Insert the new particle in the proper tomogram
         tomo_fname = os.path.splitext(os.path.split(mic_str)[1])[0]
         try:
-            list_tomos.insert_tomo(tomo_fname, voi_mb=seg_mb, voi_lm=seg_lm, lbls_mb=None, lbls_lm=None)
+            list_tomos.insert_tomo(tomo_fname, voi_mb=seg_mb, voi_lm=seg_lm, max_dst=sg_max_rad_v)
             segs_inserted += 1
         except pexceptions.PySegInputError as e:
             print 'WARNING: segmentations in row ' + str(seg_row) + ' could not be inserted in tomogram ' + \
@@ -165,9 +172,9 @@ for star_row in range(star.get_nrows()):
     for tomo in list_tomos.get_tomo_list():
         if tomo.get_num_segmentations() > 0:
             tomo_fname = tomo.get_tomo_name().replace('/', '_')
-            hold_tomo = tomo.gen_seg_tomo(mode='mb')
+            hold_tomo = tomo.get_lbl_voi(mode='mb')
             disperse_io.save_numpy(hold_tomo, out_app+'/'+tomo_fname+'_mb.mrc')
-            hold_tomo = tomo.gen_seg_tomo(mode='lm')
+            hold_tomo = tomo.get_lbl_voi(mode='lm')
             disperse_io.save_numpy(hold_tomo, out_app + '/' + tomo_fname + '_lm.mrc')
 
 print '\tTotal number of segmentations inserted (before post-processing): ' + str(segs_inserted)

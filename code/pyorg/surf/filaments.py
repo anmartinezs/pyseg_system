@@ -11,7 +11,7 @@ import scipy as sp
 from shutil import rmtree
 from utils import *
 from pyorg import pexceptions, sub
-from pyorg.globals.utils import unpickle_obj
+from pyorg.globals.utils import unpickle_obj, trilin3d
 from pyorg import globals as gl
 from pyorg.diff_geom import SpaceCurve
 try:
@@ -26,6 +26,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 FIL_ID = 'fil_id'
 FIL_MODE_FAST = 2
 FIL_MODE_PRECISE = 1
+VOI_NDSTS = 'voi_dsts'
 
 # GLOBAL FUNCTIONS
 
@@ -94,7 +95,7 @@ class Filament(object):
 
     def add_vtp_global_attribute(self, name, vtk_type, value):
         """
-        Add and attribute with the same value for all cells
+        Add an attribute with the same value for all cells
         :param name: attribute name
         :param vtk_type: a child vtkAbstractArray for data type
         :param value: tuple with the value
@@ -104,7 +105,7 @@ class Filament(object):
         # Input parsing
         if not issubclass(vtk_type, vtk.vtkAbstractArray):
             error_msg = 'Input vtk_type must be child class of vtkAbstractArray!'
-            raise pexceptions.PySegInputError(expr='add_vtp_global_attribute (Particle)', msg=error_msg)
+            raise pexceptions.PySegInputError(expr='add_vtp_global_attribute (Filament)', msg=error_msg)
         if isinstance(value, str):
             t_value, n_comp = value, 1
         elif not isinstance(value, tuple):
@@ -127,6 +128,36 @@ class Filament(object):
         # Adding the data
         self.__vtp.GetCellData().AddArray(prop)
 
+    def add_vtp_points_attribute(self, name, vtk_type, values, n_comp=1):
+        """
+        Add an attribute for each point in the filament
+        :param name: attribute name
+        :param vtk_type: a child vtkAbstractArray for data type
+        :param values: tuple with the values, its length must be equal to the number of filament points
+        :param n_comp: number of components for each value
+        :return:
+        """
+
+        # Input parsing
+        if not issubclass(vtk_type, vtk.vtkAbstractArray):
+            error_msg = 'Input vtk_type must be child class of vtkAbstractArray!'
+            raise pexceptions.PySegInputError(expr='add_vtp_points_attribute (Filament)', msg=error_msg)
+
+        # Initialization
+        prop = vtk_type()
+        prop.SetNumberOfComponents(n_comp)
+        prop.SetName(str(name))
+
+        # Array construction
+        n_points = self.__vtp.GetNumberOfPoints()
+        prop.SetNumberOfTuples(n_points)
+        for i in range(n_points):
+            # prop.SetValue(i, t_value)
+            prop.SetTuple(i, (values[i],))
+
+        # Adding the data
+        self.__vtp.GetPointData().AddArray(prop)
+
     def translate(self, shift_x, shift_y, shift_z):
         """
         Rigid translation
@@ -144,7 +175,7 @@ class Filament(object):
         self.__vtp = tr_box.GetOutput()
 
         # Update the curve point from PolyData
-        self.__curve = polyline_to_points(self.__vtp)
+        self.__curve = SpaceCurve(polyline_to_points(self.__vtp, mode='line'))
 
         # Update the bounds
         self.__update_bounds()
@@ -174,7 +205,7 @@ class Filament(object):
         self.__vtp = tr_rot.GetOutput()
 
         # Update the curve point from PolyData
-        self.__curve = polyline_to_points(self.__vtp)
+        self.__curve = SpaceCurve(polyline_to_points(self.__vtp, mode='line'))
 
         # Update the bounds
         self.__update_bounds()
@@ -314,14 +345,10 @@ class TomoFilaments(object):
         self.__voi_selector = None
         if isinstance(voi, np.ndarray):
             self.__voi = voi > 0
-            self.__voi_dst_ids = sp.ndimage.morphology.distance_transform_edt(np.invert(self.__voi),
-                                                                              return_distances=False,
-                                                                              return_indices=True)
             self.__bounds = np.zeros(shape=6, dtype=np.float32)
             self.__update_bounds()
         else:
             self.__voi = voi
-            self.__voi_dst_ids = None
             # Selector
             self.__voi_selector = vtk.vtkSelectEnclosedPoints()
             self.__voi_selector.Initialize(self.__voi)
@@ -343,7 +370,6 @@ class TomoFilaments(object):
 
         # Intermediate file for pickling assisting
         self.__voi_fname = None
-        self.__voi_ids_fname = None
         self.__fils_fname = None
 
     # GET/SET AREA
@@ -387,7 +413,6 @@ class TomoFilaments(object):
             seg = np.zeros(shape=np.asarray(shape) + 2, dtype=np.float32)
             seg[1:shape[0] + 1, 1:shape[1] + 1, 1:shape[2] + 1] = self.__voi
             voi = iso_surface(seg, iso_th, closed=True, normals='outwards')
-            self.__voi_dst_ids = None
             self.__voi = poly_decimate(voi, dec)
             self.__voi_selector = vtk.vtkSelectEnclosedPoints()
             self.__voi_selector.Initialize(self.__voi)
@@ -516,7 +541,6 @@ class TomoFilaments(object):
             self.__voi_fname = stem_path + '/' + stem_ + '_surf.vtp'
         else:
             self.__voi_fname = stem_path + '/' + stem_ + '_mask.npy'
-            self.__voi_ids_fname = stem_path + '/' + stem_ + '_mask_ids.npy'
         # self.__parts_fname = stem_path + '/' + os.path.splitext(stem_)[0]+'_parts.star'
         self.__fils_fname = stem_path + '/' + stem_ + '_fils.star'
         pkl_f = open(fname, 'w')
@@ -539,7 +563,6 @@ class TomoFilaments(object):
                 raise pexceptions.PySegInputError(expr='pickle (TomoFilaments)', msg=error_msg)
         else:
             np.save(self.__voi_fname, self.__voi)
-            np.save(self.__voi_ids_fname, self.__voi_dst_ids)
 
         # Store particles list
         self.filaments_pickle(self.__fils_fname)
@@ -660,6 +683,36 @@ class TomoFilaments(object):
             surf = surfacer.GetSurfaceArea()
         return surf
 
+    def compute_fils_seg_dsts(self, seg=None):
+        """
+        Computes first order metrics
+        :param seg: input segmentation with the references for measuring distance to filament, if None (default)
+                    then ~VOI
+        :return: an array with the n (number of filament points or samples) nearest distances
+        """
+
+        # Input parsing
+        if seg is None:
+            seg_inv = self.__voi
+        else:
+            seg_inv = np.invert(seg)
+
+        # Computing the distances field
+        dsts_field = sp.ndimage.morphology.distance_transform_edt(seg_inv, return_distances=True, return_indices=False)
+
+        # Filaments loop
+        dsts = list()
+        for fil in self.__fils:
+            fil_coords = fil.get_coords()
+            fil_dsts = np.zeros(shape=fil_coords.shape[0], dtype=np.float32)
+            for i, coord in enumerate(fil_coords):
+                hold_dst = trilin3d(dsts_field, coord)
+                fil_dsts[i] = hold_dst
+                dsts.append(hold_dst)
+            fil.add_vtp_points_attribute(VOI_NDSTS, vtk.vtkFloatArray, fil_dsts, 1)
+
+        return np.asarray(dsts)
+
     # INTERNAL FUNCTIONALITY AREA
 
     def __update_bounds(self):
@@ -678,7 +731,7 @@ class TomoFilaments(object):
     def __setstate__(self, state):
         self.__dict__.update(state)
         # Restore unpickable objects
-        self.__voi_selector, self.__voi_dst_ids = None, None
+        self.__voi_selector = None
         if os.path.splitext(self.__voi_fname)[1] == '.vtp':
             reader = vtk.vtkXMLPolyDataReader()
             reader.SetFileName(self.__voi_fname)
@@ -687,9 +740,8 @@ class TomoFilaments(object):
             self.__voi_selector = vtk.vtkSelectEnclosedPoints()
             self.__voi_selector.Initialize(self.__voi)
         else:
-            self.__voi, self.__voi_dst_ids = None, None
+            self.__voi = None
             self.__voi = np.load(self.__voi_fname, mmap_mode='r')
-            self.__voi_dst_ids = np.load(self.__voi_ids_fname, mmap_mode='r')
         # Load particles from STAR file
         self.load_filaments_pickle(self.__fils_fname)
 
@@ -699,7 +751,6 @@ class TomoFilaments(object):
         state = self.__dict__.copy()
         del state['_TomoFilaments__voi']
         del state['_TomoFilaments__voi_selector']
-        del state['_TomoFilaments__voi_dst_ids']
         del state['_TomoFilaments__fils']
         return state
 

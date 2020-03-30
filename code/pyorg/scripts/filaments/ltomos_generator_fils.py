@@ -131,7 +131,7 @@ for tomo_row in range(star_seg.get_nrows()):
     mic_str, seg_str = star_seg.get_element('_rlnMicrographName', tomo_row), \
                        star_seg.get_element('_psSegImage', tomo_row)
     print '\t\t-Generating VOI from segmentation: ' + str(mic_str)
-    tomo = disperse_io.load_tomo(seg_str, mmap=True).swapaxes(0, 1)
+    tomo = disperse_io.load_tomo(seg_str, mmap=True)
     voi = tomo == sg_lbl
     # seg_fname = os.path.split(os.path.splitext(seg_str)[0])[1]
     seg_fname = os.path.splitext(seg_str.replace('/', '_'))[0]
@@ -274,7 +274,12 @@ for star_row in range(star.get_nrows()):
         if tomo.get_num_filaments() > 0:
             tomo_fname = tomo.get_tomo_fname().replace('/', '_')
             tomo_vtp = tomo.gen_filaments_vtp()
-            disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
+            disperse_io.save_vtp(tomo_vtp, out_app + '/' + tomo_fname + '.vtp')
+        hold_voi = tomo.get_voi()
+        if isinstance(hold_voi, np.ndarray):
+            disperse_io.save_numpy(hold_voi, out_app + '/' + tomo_fname + '_voi.mrc')
+        else:
+            disperse_io.save_vtp(hold_voi, out_app + '/' + tomo_fname + '_voi.vtp')
 
 print '\tTotal number of filaments inserted (before post-processing): ' + str(fils_inserted)
 

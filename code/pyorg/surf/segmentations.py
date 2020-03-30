@@ -142,40 +142,37 @@ class Segmentation(object):
 #
 class OMSegmentation(object):
 
-    def __init__(self, tomo_mb, tomo_lm, lbl_mb, lbl_lm):
+    def __init__(self, tomo_mb, tomo_lm, lbl):
         """
-        :param tomo_mb: tomogram with the membrane
+        :param tomo_mb: tomogram with the membrane (None is allowed)
         :param tomo_lm: tomogram with the lumen
-        :param lbl_mb: label for the segmentation
-        :param lbl_lm: label for the lumen
+        :param lbl:
         """
 
         # Input parsing
-        self.__ids_mb = np.where(tomo_mb == lbl_mb)
-        self.__vcount_mb = len(self.__ids_mb[0])
-        self.__lbl_mb = lbl_mb
-        assert self.__vcount_mb > 0
-        self.__ids_lm = np.where(tomo_lm == lbl_lm)
+        self.__ids_lm = np.where(tomo_lm == lbl)
         self.__vcount_lm = len(self.__ids_lm[0])
-        self.__lbl_lm = lbl_lm
+        self.__lbl = lbl
         assert self.__vcount_lm > 0
+        if tomo_mb is None:
+            self.__ids_mb = self.__ids_lm
+            self.__vcount_mb = self.__vcount_lm
+        else:
+            self.__ids_mb = np.where(tomo_mb == lbl)
+            self.__vcount_mb = len(self.__ids_mb[0])
+        assert self.__vcount_mb > 0
 
         # Pre-compute bounds for accelerate computations
-        self.__bounds_mb, self.__bounds_lm = np.zeros(shape=6, dtype=np.float32), np.zeros(shape=6, dtype=np.float32)
+        self.__bounds = np.zeros(shape=6, dtype=np.float32)
         self.__update_bounds()
 
     #### Set/Get functionality
 
-    def get_label(self, mode='mb'):
+    def get_label(self):
         """
-        :param mode: 'mb' or 'lumen' label
         :return: an integer label
         """
-        assert (mode == 'mb') or (mode == 'lm')
-        if mode == 'mb':
-            return self.__lbl_mb
-        elif mode == 'lm':
-            return self.__lbl_lm
+        return self.__lbl
 
     def get_ids(self, mode='lm'):
         """
@@ -197,33 +194,23 @@ class OMSegmentation(object):
         if mode == 'mb':
             return self.__vcount_mb
         elif mode == 'lm':
-            return self.__bounds_lm
+            return self.__vcount_lm
 
-    def get_bounds(self, mode='mb'):
+    def get_bounds(self):
         """
-        :param mode: to get bounds from 'membrane' or 'lumen'
         :return: surface bounds (x_min, x_max, y_min, y_max, z_min, z_max) as array
         """
-        assert (mode == 'mb') or (mode == 'lm')
-        if mode == 'mb':
-            return self.__bounds_mb
-        elif mode == 'lm':
-            return self.__bounds_lm
+        return self.__bounds
 
     #### External functionality
 
-    def bound_in_bounds(self, bounds, mode='mb'):
+    def bound_in_bounds(self, bounds):
         """
         Check if the object's bound are at least partially in another bound
         :param bounds: input bound
-        :param mode: to set bounds of 'membrane' or 'lumen'
         :return:
         """
-        assert (mode == 'mb') or (mode == 'lm')
-        if mode == 'mb':
-            hold_bounds = self.__bounds_mb
-        elif mode == 'lm':
-            hold_bounds = self.__bounds_lm
+        hold_bounds = self.__bounds
         x_over, y_over, z_over = True, True, True
         if (hold_bounds[0] > bounds[1]) or (hold_bounds[1] < bounds[0]):
             x_over = False
@@ -233,18 +220,13 @@ class OMSegmentation(object):
             y_over = False
         return x_over and y_over and z_over
 
-    def point_in_bounds(self, point, mode='mb'):
+    def point_in_bounds(self, point):
         """
         Check if a point within filament's bounds
         :param point: point to check
-        :param mode: to set bounds of 'membrane' or 'lumen'
         :return:
         """
-        assert (mode == 'mb') or (mode == 'lm')
-        if mode == 'mb':
-            hold_bounds = self.__bounds_mb
-        elif mode == 'lm':
-            hold_bounds = self.__bounds_lm
+        hold_bounds = self.__bounds
         x_over, y_over, z_over = True, True, True
         if (hold_bounds[0] > point[0]) or (hold_bounds[1] < point[0]):
             x_over = False
@@ -273,27 +255,52 @@ class OMSegmentation(object):
     # INTERNAL FUNCTIONALITY AREA
 
     def __update_bounds(self):
-        self.__bounds_mb[0], self.__bounds_mb[1] = self.__ids_mb[0].min(), self.__ids_mb[0].max()
-        self.__bounds_mb[2], self.__bounds_mb[3] = self.__ids_mb[1].min(), self.__ids_mb[1].max()
-        self.__bounds_mb[4], self.__bounds_mb[5] = self.__ids_mb[2].min(), self.__ids_mb[2].max()
-        self.__bounds_lm[0], self.__bounds_lm[1] = self.__ids_lm[0].min(), self.__ids_lm[0].max()
-        self.__bounds_lm[2], self.__bounds_lm[3] = self.__ids_lm[1].min(), self.__ids_lm[1].max()
-        self.__bounds_lm[4], self.__bounds_lm[5] = self.__ids_lm[2].min(), self.__ids_lm[2].max()
+        bounds_mb, bounds_lm = np.zeros(shape=6, dtype=np.float32), np.zeros(shape=6, dtype=np.float32)
+        bounds_mb[0], bounds_mb[1] = self.__ids_mb[0].min(), self.__ids_mb[0].max()
+        bounds_mb[2], bounds_mb[3] = self.__ids_mb[1].min(), self.__ids_mb[1].max()
+        bounds_mb[4], bounds_mb[5] = self.__ids_mb[2].min(), self.__ids_mb[2].max()
+        bounds_lm[0], bounds_lm[1] = self.__ids_lm[0].min(), self.__ids_lm[0].max()
+        bounds_lm[2], bounds_lm[3] = self.__ids_lm[1].min(), self.__ids_lm[1].max()
+        bounds_lm[4], bounds_lm[5] = self.__ids_lm[2].min(), self.__ids_lm[2].max()
+        if bounds_mb[0] < bounds_lm[0]:
+            self.__bounds[0] = bounds_mb[0]
+        else:
+            self.__bounds[0] = bounds_lm[0]
+        if bounds_mb[1] < bounds_lm[1]:
+            self.__bounds[1] = bounds_mb[1]
+        else:
+            self.__bounds[1] = bounds_lm[1]
+        if bounds_mb[2] < bounds_lm[2]:
+            self.__bounds[2] = bounds_mb[2]
+        else:
+            self.__bounds[2] = bounds_lm[2]
+        if bounds_mb[3] < bounds_lm[3]:
+            self.__bounds[3] = bounds_mb[3]
+        else:
+            self.__bounds[3] = bounds_lm[3]
+        if bounds_mb[4] < bounds_lm[4]:
+            self.__bounds[4] = bounds_mb[4]
+        else:
+            self.__bounds[4] = bounds_lm[4]
+        if bounds_mb[5] < bounds_lm[5]:
+            self.__bounds[5] = bounds_mb[5]
+        else:
+            self.__bounds[5] = bounds_lm[5]
+
 
 ############################################################################
 # Class for tomograms with oriented membrane segmentations
 #
 class TomoOMSegmentations(object):
 
-    def __init__(self, name, voi_mb=None, voi_lm=None, lbls_mb=None, lbls_lm=None):
+    def __init__(self, name, voi_mb=None, voi_lm=None, max_dst=0):
         """
         :param name: name to identify the tomogram
         :param voi_mb: if None (default) the membrane tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
         :param voi_lm: if None (default) the lumen tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
-        :param lbls_mb: lists of labels with the membrane segmentations
-        :param lbls_lm: lists of labels with the lumen segmentations
+        :param max_dst: maximum distance to lumen border for membrane segmentation (in segmentation pixels)
         """
 
         # Input parsing
@@ -301,71 +308,125 @@ class TomoOMSegmentations(object):
             error_msg = 'Input is not a string.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
         if (voi_mb is not None) and (not isinstance(voi_mb, np.ndarray)):
-            error_msg = 'Input VOI must an numpy.ndarray.'
+            error_msg = 'Input VOI for membranes must be an numpy.ndarray.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
         if (voi_lm is not None) and (not isinstance(voi_lm, np.ndarray)):
-            error_msg = 'Input VOI must an numpy.ndarray.'
+            error_msg = 'Input VOI for lumen must be an numpy.ndarray.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
         self.__name = name
         self.__segs = list()
 
-        # Create the VOIs
-        self.__voi_mb = voi_mb
-        self.__voi_lm = voi_lm
-        if self.__voi_mb.shape != self.__voi_lm.shape:
+        # Create the lumen's label field
+        if voi_mb.shape != voi_lm.shape:
             error_msg = 'Input tomograms for membranes and lumen must have the same sizes.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
+        self.__lbl_voi_lm, nlbls = sp.ndimage.label(voi_lm, structure=np.ones(shape=(3, 3, 3)))
+        lbls_lm = range(1, nlbls+1)
+        # disperse_io.save_numpy(self.__lbl_voi_lm, '/fs/pool/pool-ruben/antonio/filaments/ltomos_omsegs/test/hold_lm.mrc')
+        hold_lm = sp.ndimage.morphology.binary_dilation(voi_lm > 0)
+        dst_field_lm, dst_ids_lm = sp.ndimage.morphology.distance_transform_edt(hold_lm, return_distances=True,
+                                                                                return_indices=True)
+        # hold_lm = sp.ndimage.morphology.binary_dilation(voi_lm == 0)
+        # dst_field_inv_lm, dst_ids_inv_lm = sp.ndimage.morphology.distance_transform_edt(hold_lm, return_distances=True,
+        #                                                                                return_indices=True)
 
-        # Pre-compute the segmentation labels
-        if lbls_mb is None:
-            self.__lbl_voi_mb, nlbls = sp.ndimage.label(self.__voi_mb, structure=np.ones(shape=(3, 3, 3)))
-            lbls_mb = range(1, nlbls+1)
-            disperse_io.save_numpy(self.__lbl_voi_mb, '/fs/pool/pool-ruben/antonio/filaments/ltomos_omsegs/test/hold_mb.mrc')
-        hold_nlbls_mb = len(lbls_mb)
-        if lbls_lm is None:
-            self.__lbl_voi_lm, nlbls = sp.ndimage.label(self.__voi_lm, structure=np.ones(shape=(3, 3, 3)))
-            lbls_lm = range(1, nlbls+1)
-            disperse_io.save_numpy(self.__lbl_voi_lm, '/fs/pool/pool-ruben/antonio/filaments/ltomos_omsegs/test/hold_lm.mrc')
-        hold_nlbls_lm = len(lbls_lm)
-
-        # Compute the distance fields
-        self.__dst_field_mb = sp.ndimage.morphology.distance_transform_edt(np.invert(self.__voi_mb),
-                                                                           return_distances=True,
-                                                                           return_indices=False)
-        self.__dst_field_lm, dst_ids_lm = sp.ndimage.morphology.distance_transform_edt(np.invert(self.__voi_lm),
-                                                                                       return_distances=True,
-                                                                                       return_indices=True)
-
-        # Find the corresponding lumen label for each membrane label
-        mat_mb_lm = np.zeros(shape=(hold_nlbls_mb, hold_nlbls_lm), dtype=np.int32)
-        for x in range(self.__voi_mb.shape[0]):
-            for y in range(self.__voi_mb.shape[1]):
-                for z in range(self.__voi_mb.shape[2]):
-                    hold_lbl_mb, hold_lbl_lm = self.__lbl_voi_mb[x, y, z], self.__lbl_voi_lm[x, y, z]
-                    if hold_lbl_lm == 0:
-                        x_idx, y_idx, z_idx = dst_ids_lm[:, x, y, z]
-                        hold_lbl_lm = self.__lbl_voi_lm[x_idx, y_idx, z_idx]
-                    mat_mb_lm[hold_lbl_mb-1, hold_lbl_lm-1] += 1
+        # Set lumen labels to membrane segmentation
+        mb_ids = np.where(voi_mb)
+        self.__lbl_voi_mb = np.zeros(shape=voi_mb.shape, dtype=np.int32)
+        for x, y, z in zip(mb_ids[0], mb_ids[1], mb_ids[2]):
+            hold_dst = dst_field_lm[x, y, z]
+            if (hold_dst > 0) and (hold_dst <= max_dst):
+                x_idx, y_idx, z_idx = dst_ids_lm[:, x, y, z]
+                x_l = x_idx - 2
+                if x_l <= 0:
+                    x_l = 0
+                x_h = x_idx + 3
+                if x_h >= self.__lbl_voi_mb.shape[0]:
+                    x_h = self.__lbl_voi_mb.shape[0]
+                y_l = y_idx - 2
+                if y_l <= 0:
+                    y_l = 0
+                y_h = y_idx + 3
+                if y_h >= self.__lbl_voi_mb.shape[1]:
+                    y_h = self.__lbl_voi_mb.shape[1]
+                z_l = z_idx - 2
+                if z_l <= 0:
+                    z_l = 0
+                z_h = z_idx + 3
+                if z_h >= self.__lbl_voi_mb.shape[2]:
+                    z_h = self.__lbl_voi_mb.shape[2]
+                hold_lbls_lm = self.__lbl_voi_lm[x_l:x_h, y_l:y_h, z_l:z_h]
+                try:
+                    hold_lbl_lm = np.argmax(np.bincount(hold_lbls_lm[hold_lbls_lm > 0]))
+                    self.__lbl_voi_mb[x, y, z] = hold_lbl_lm
+                except ValueError:
+                    pass # print 'jol 1'
+            # else:
+            #     hold_dst_inv = dst_field_inv_lm[x, y, z]
+            #     if (hold_dst_inv > 0) and (hold_dst_inv <= max_dst):
+            #         x_idx, y_idx, z_idx = dst_ids_inv_lm[:, x, y, z]
+            #         x_l = x_idx - 2
+            #         if x_l <= 0:
+            #             x_l = 0
+            #         x_h = x_idx + 3
+            #         if x_h >= self.__lbl_voi_mb.shape[0]:
+            #             x_h = self.__lbl_voi_mb.shape[0]
+            #         y_l = y_idx - 2
+            #         if y_l <= 0:
+            #             y_l = 0
+            #         y_h = y_idx + 3
+            #         if y_h >= self.__lbl_voi_mb.shape[1]:
+            #             y_h = self.__lbl_voi_mb.shape[1]
+            #         z_l = z_idx - 2
+            #         if z_l <= 0:
+            #             z_l = 0
+            #         z_h = z_idx + 3
+            #         if z_h >= self.__lbl_voi_mb.shape[2]:
+            #             z_h = self.__lbl_voi_mb.shape[2]
+            #         hold_lbls_lm = self.__lbl_voi_lm[x_l:x_h, y_l:y_h, z_l:z_h]
+            #         try:
+            #             hold_lbl_lm = np.argmax(np.bincount(hold_lbls_lm[hold_lbls_lm > 0]))
+            #             self.__lbl_voi_mb[x, y, z] = hold_lbl_lm
+            #         except ValueError:
+            #             pass # print 'Jol 2'
+            #     else:
+            #         pass # print 'Jol 3'
 
         # Create the segmentations
-        for lbl_mb in lbls_mb:
-            lbl_lm = np.argmax(mat_mb_lm[lbl_mb - 1, :])
-            self.__segs.append(OMSegmentation(self.__lbl_voi_mb, self.__lbl_voi_lm, lbl_mb, lbl_lm))
+        for lbl_lm in lbls_lm:
+            try:
+                self.__segs.append(OMSegmentation(self.__lbl_voi_mb, self.__lbl_voi_lm, lbl_lm))
+            except AssertionError:
+                continue
 
     # GET/SET AREA
 
     def get_voi(self, mode='mb'):
         """
-        Get the tomograms with the segmentations
+        Get the tomograms with the segmentations VOI
         :param mode: 'mb' membrane, 'lm' lumen, 'mb-lm' membrane and lumen fused
-        :return: an ndarray
+        :return: a binary ndarray
         """
         if mode == 'mb':
-            return self.__voi_mb
+            return self.__lbl_voi_mb > 0
         elif mode == 'lm':
-            return self.__voi_lm
+            return self.__lbl_voi_lm > 0
         elif mode == 'mb-lm':
             return (self.__voi_mb + self.__voi_lm) > 0
+        else:
+            error_msg = 'Input mode not valid: ' + str(mode)
+            raise pexceptions.PySegInputError(expr='get_voi (TomoOMSegmentations)', msg=error_msg)
+
+    def get_lbl_voi(self, mode='mb'):
+        """
+        Get the labeled tomograms with the segmentations
+        :param mode: 'mb' membrane, 'lm' lumen
+        :return: an ndarray with the segmentations labeled
+        """
+        if mode == 'mb':
+            return self.__lbl_voi_mb
+        elif mode == 'lm':
+            return self.__lbl_voi_lm
         else:
             error_msg = 'Input mode not valid: ' + str(mode)
             raise pexceptions.PySegInputError(expr='get_voi (TomoOMSegmentations)', msg=error_msg)
@@ -423,36 +484,25 @@ class TomoOMSegmentations(object):
             error_msg = 'Input mode not valid: ' + str(mode)
             raise pexceptions.PySegInputError(expr='compute_voi_volume (TomoOMSegmentations)', msg=error_msg)
 
-    def gen_seg_tomo(self, mode='mb'):
+    def compute_om_seg_dsts(self):
         """
-        Generates a tomogram with all segmentations labelled
-        :param mode: 'mb' membrane, 'lm' lumen, 'mb-lm' membrane and lumen fused
-        :return: a tomogram, ndarray, with segmentations labelled
+        Computes the distance among the different oriented membrane segmentations
+        :return: a 3D array (tomogram segmemntation) where each voxels encodes the distance to the closes membrane
+                 segmentation, background pixels are set to zero.
         """
-        tomo_seg = np.zeros(shape=self.__voi_mb.shape, dtype=np.int32)
-        if mode == 'mb':
-            for seg in self.get_segmentations():
-                mb_ids, mb_lbl = seg.get_ids(mode='mb'), seg.get_label(mode='mb')
-                for x, y, z in zip(mb_ids[0], mb_ids[1], mb_ids[2]):
-                    tomo_seg[x, y, z] = mb_lbl
-        elif mode == 'lm':
-            for seg in self.get_segmentations():
-                lm_ids, lm_lbl = seg.get_ids(mode='lm'), seg.get_label(mode='lm')
-                for x, y, z in zip(lm_ids[0], lm_ids[1], lm_ids[2]):
-                    tomo_seg[x, y, z] = lm_lbl
-        elif mode == 'mb-lm':
-            for seg in self.get_segmentations():
-                mb_ids, mb_lbl = seg.get_ids(mode='mb'), seg.get_label(mode='mb')
-                lm_ids, lm_lbl = seg.get_ids(mode='lm'), seg.get_label(mode='lm')
-                for x, y, z in zip(mb_ids[0], mb_ids[1], mb_ids[2]):
-                    tomo_seg[x, y, z] = mb_lbl
-                for x, y, z in zip(lm_ids[0], lm_ids[1], lm_ids[2]):
-                    tomo_seg[x, y, z] = mb_lbl
-        else:
-            error_msg = 'Input mode not valid: ' + str(mode)
-            raise pexceptions.PySegInputError(expr='compute_voi_volume (TomoOMSegmentations)', msg=error_msg)
 
-        return tomo_seg
+        # Initialization
+        dsts_field = np.zeros(shape=self.__lbl_voi_lm.shape, dtype=np.float32)
+
+        # Loop for segmentations
+        for seg in self.__segs:
+            hold_lbl_voi = (self.__lbl_voi_lm == seg.get_label()) + (self.__lbl_voi_lm == 0)
+            hold_dsts = sp.ndimage.morphology.distance_transform_edt(hold_lbl_voi, return_distances=True,
+                                                                     return_indices=False)
+            mb_ids = self.__lbl_voi_mb == seg.get_label()
+            dsts_field[mb_ids] = hold_dsts[mb_ids]
+
+        return dsts_field
 
     # INTERNAL FUNCTIONALITY AREA
 
@@ -520,17 +570,17 @@ class ListTomoOMSegmentations(object):
         """
         del self.__tomos[tomo_key]
 
-    def insert_tomo(self, name, voi_mb=None, voi_lm=None, lbls_mb=None, lbls_lm=None):
+    def insert_tomo(self, name, voi_mb=None, voi_lm=None, max_dst=0):
         """
         :param name: name to identify the tomogram
         :param voi_mb: if None (default) the membrane tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
         :param voi_lm: if None (default) the lumen tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
-        :param lbls_mb: lists of labels with the membrane segmentations
+        :param max_dst: maximum distance for membrane pixles to border inside the lumen (in segmentation pixels)
         :param lbls_lm: lists of labels with the lumen segmentations
         """
-        self.__tomos[name] = TomoOMSegmentations(name, voi_mb=voi_mb, voi_lm=voi_lm, lbls_mb=lbls_mb, lbls_lm=lbls_lm)
+        self.__tomos[name] = TomoOMSegmentations(name, voi_mb=voi_mb, voi_lm=voi_lm, max_dst=max_dst)
 
     def store_stars(self, out_stem, out_dir):
         """

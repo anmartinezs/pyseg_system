@@ -22,3 +22,6 @@
     + Adding nighly branch to README.md
 * **26/03/2020**
     + Adding file code/tutorials/synth_sumb/class/mbz_cly_mask.m
+* **30/03/2020**
+    + Correcting bug in code/tutorials/exp_sumb/pre/pre_tomo_seg.m
+    + Commenting mask imsave in code/tutorials/synth_sumb/class/plane_align_class.py

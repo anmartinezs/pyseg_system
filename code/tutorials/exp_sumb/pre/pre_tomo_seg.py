@@ -238,7 +238,7 @@ for row in range(gl_star.get_nrows()):
         row_dic['_psSegTilt'] = 0
         row_dic['_psSegPsi'] = 0
         row_dic['_psSegOffX'] = off_mask_min_x # 0
-        row_dic['_psSegOffY'] = off_mask_max_y # 0
+        row_dic['_psSegOffY'] = off_mask_min_y # 0
         row_dic['_psSegOffZ'] = off_mask_min_z
         star.add_row(**row_dic)
     else:
