@@ -30,17 +30,17 @@ __author__ = 'Antonio Martinez-Sanchez'
 ########################################################################################
 
 # ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn/sub/relion/fils/pst'
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/tether/in/all_tether.star' # '/org/pre/in/all_pre_v6.star'
+in_star = ROOT_PATH + '/../syn2/org/tether/in/all_tether.star' # '/org/pre/in/all_pre_v6.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_and_zeros_fits.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px' # '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px' # '/ref_a3/ltomos'
-out_stem = 'all_pre_tether' # 'pre'
+out_dir = ROOT_PATH + '/org/tether/ltomos/ltomos_pre_tether_xd5nm' # '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px' # '/ref_a3/ltomos'
+out_stem = 'pre_tether_xd5nm' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 5 # 1
@@ -54,7 +54,7 @@ sg_voi_mask = True
 # Post-processing
 pt_min_parts = 0
 pt_keep = None
-pt_ssup = 14.62 # 7.31 # voxels
+pt_ssup = 7.31 # 14.62 # voxels
 
 ########################################################################################
 # MAIN ROUTINE

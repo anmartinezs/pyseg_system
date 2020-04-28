@@ -8,7 +8,7 @@ Set of classes for particle classification
 __author__ = 'Antonio Martinez-Sanchez'
 
 
-import cv2
+# import cv2
 
 import gc
 import sys

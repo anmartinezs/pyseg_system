@@ -29,17 +29,17 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_fils_test.star'
+in_star = ROOT_PATH + '/in/in_ltomos_fils_sep.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_test.star'
+in_seg = ROOT_PATH + '/in/in_seg_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/test' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'test' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/fils_sep' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'fils_sep_2' # 'pre'
 
 # Segmentation pre-processing
-sg_lbl = 1 # segmented label
+sg_lbl = 0 # 1 # segmented label
 sg_bc = False
 
 # Filament pre-procesing
@@ -179,6 +179,8 @@ for star_row in range(star.get_nrows()):
         fl_dst_v = None
         if fl_dst is not None:
             fl_dst_v = fl_dst / fils_res
+        list_tomos.set_resolution(fils_res)
+        list_tomos.set_fils_radius(fils_rad)
         print '\t\t\tLoading filaments XML file(s): ' + fils_xml_str
         xml_fils = sub.XMLFilaments()
         try:
@@ -215,7 +217,7 @@ for star_row in range(star.get_nrows()):
             if sg_swap_xy:
                 seg_rot, seg_tilt, seg_psi = -1 * seg_rot, -1 * seg_tilt, -1 * seg_psi
             if (seg_rot != 0) or (seg_tilt != 0) or (seg_psi != 0):
-                hold_fil.rotate(seg_rot, seg_tilt, seg_psi, mode='relion')
+                hold_fil.rotate(seg_rot, seg_tilt, seg_psi)
 
             # Un-centering
             hold_fil.translate(mic_center[0], mic_center[1], mic_center[2])

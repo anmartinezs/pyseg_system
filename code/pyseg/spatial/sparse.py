@@ -16,7 +16,7 @@ from variables import *
 import multiprocessing as mp
 import threading as mt
 from scipy.signal import butter, lfilter
-import cv2
+# import cv2
 from matplotlib.pyplot import cm
 import pyseg as ps
 from abc import *

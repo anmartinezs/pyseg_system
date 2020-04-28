@@ -43,13 +43,13 @@ MB_LBL, MB_NEIGH = 1, 2
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/radu'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/carsten'
 
 # Input STAR file
-in_star = ROOT_PATH + '/seg/tomo_05_seg.star'
+in_star = ROOT_PATH + '/tomos/in/mb_seg_single.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/pre/mbu'
+out_dir = ROOT_PATH + '/tomos/mbu'
 
 # Subvolume splitting settings
 sp_split = (2, 2, 1) # None

@@ -853,6 +853,34 @@ class Particle(object):
     def decimation(self, dec):
         self.__vtp = poly_decimate(self.__vtp, dec)
 
+    def scale(self, scale_x, scale_y, scale_z):
+        """
+        Scaling tranformation
+        :param scale_x|y|z: scaling factor in X|Y|Z
+        :return:
+        """
+
+        # Transformation on the PolyData
+        box_tr = vtk.vtkTransform()
+        box_tr.Scale(scale_x, scale_y, scale_z)
+        tr_box = vtk.vtkTransformPolyDataFilter()
+        tr_box.SetInputData(self.__vtp)
+        tr_box.SetTransform(box_tr)
+        tr_box.Update()
+        self.__vtp = tr_box.GetOutput()
+
+        # Update center (does not apply to normals)
+        box_tr = vtk.vtkTransform()
+        box_tr.Translate(scale_x, scale_y, scale_z)
+        tr_box = vtk.vtkTransformPolyDataFilter()
+        tr_box.SetInputData(self.__center)
+        tr_box.SetTransform(box_tr)
+        tr_box.Update()
+        self.__center = tr_box.GetOutput()
+
+        # Update the bounds
+        self.__update_bounds()
+
     # Rigid translation
     # shift_i: translations in X, Y, Z axes respectively
     def translation(self, shift_x, shift_y, shift_z):
@@ -2811,6 +2839,31 @@ class TomoParticles(object):
                 if not self.__voi[int(round(coord[0])), int(round(coord[1])), int(round(coord[2]))]:
                     return False
         return True
+
+    def resize(self, factor):
+        """
+        Resize the tomogram, particle coordinates and VOI.
+        :param factor: resizing factor (default 1.)
+        :return:
+        """
+        # Resize the particles
+        for part in self.__parts:
+            # part.scale(factor, factor, factor)
+            v_t = (factor-1.) * np.asarray(part.get_center())
+            part.translation(v_t[0], v_t[1], v_t[2])
+        # Resize the VOI
+        if isinstance(self.__voi, np.ndarray):
+            self.__voi = sp.ndimage.zoom(self.__voi, factor, order=0)
+            self.__voi_dst_ids = sp.ndimage.zoom(self.__voi, factor, order=0)
+        else:
+            tr, tr_flt = vtk.vtkTransform(), vtk.vktTransformFilter()
+            tr.Scale(factor, factor, factor)
+            tr_flt.SetInputConnection(self.__voi)
+            tr_flt.SetTransform(tr)
+            self.__voi = tr_flt.GetOutputPort()
+            self.__voi_selector = vtk.vtkSelectEnclosedPoints()
+            self.__voi_selector.Initialize(self.__voi)
+        self.__update_bounds()
 
     # INTERNAL FUNCTIONALITY AREA
 

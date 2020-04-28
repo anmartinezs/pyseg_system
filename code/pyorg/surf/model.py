@@ -1,5 +1,5 @@
 '''
-Classes for generating organization models of particles in tomograms
+Classes for generating organization models of particles and filaments in tomograms
 
 '''
 
@@ -19,6 +19,7 @@ from pyorg import pexceptions
 from pyorg import disperse_io
 from pyorg.globals import unpickle_obj, clean_dir, lin_map
 from surface import ListTomoParticles, TomoParticles, Particle, ParticleL
+from filaments import TomoFilaments, Filament
 try:
     import cPickle as pickle
 except:
@@ -161,7 +162,7 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
     for pr_id in range(len(processes)):
         if pr_id != pr_results[pr_id]:
             error_msg = 'Process ' + str(pr_id) + ' exited unexpectedly!'
-            raise pexceptions.PySegInputError(expr='compute_uni_2nd_order (TomoParticles)', msg=error_msg)
+            raise pexceptions.PySegInputError(expr='gen_tlist()', msg=error_msg)
     gc.collect()
 
     # Loop for gathering the results
@@ -458,7 +459,7 @@ class Model(object):
         if (mode != 'full') or (mode != 'center'):
             error_msg = 'Only modes \'full\' and \'center\' are valid for embedding, current \'' + \
                         str(mode) + '\' is not valid!'
-            raise pexceptions.PySegInputError(expr='is_embedded (TomoParticles)', msg=error_msg)
+            raise pexceptions.PySegInputError(expr='gen_instance (Model)', msg=error_msg)
         raise NotImplementedError
 
     # VTK attributes requires a special treatment during pickling
@@ -982,3 +983,163 @@ class ModelRR(Model):
             return out_coords, out_rots
         else:
             return tomo
+
+
+############################################################################
+# Abstract class for filaments generator within a VOI
+#
+class ModelFils(object):
+
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self, voi, res=1, rad=1):
+        """
+        Classs builder
+        :param voi: the input VOI
+        :param res: tomogram pixel size (default 1)
+        :param rad: filament radius (default 1)
+        """
+        self.set_voi(voi)
+        self.__type_name = None
+        assert (res > 0) and (rad > 0)
+        self.__res, self.__rad = res, rad
+
+    ## Set/Get methods
+
+    def set_voi(self, voi):
+        """
+        Set the VOI for model, required to generate a model
+        :param voi: input VOI, valid: a vtkPolyData object or a numpy ndarray
+        :param vect: particle reference vector, default (0, 0, 1)
+        """
+        # Input parsing
+        self.__voi = None
+        if voi is None:
+            return
+        if not isinstance(voi, np.ndarray):
+            error_msg = 'Invalid VOI type, it must be a ndarray!'
+            raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
+        self.__voi = voi
+
+    @abc.abstractmethod
+    def gen_instance(self, mode='full'):
+        """
+        Abstract method for generating an instance of the model
+        :param mode: embedding mode, valid: 'full' and 'none'
+        :return: a TomoFilaments object with simulated instance
+        """
+        if (mode != 'full') or (mode != 'none'):
+            error_msg = 'Only modes \'full\' and \'none\' are valid for embedding, current \'' + \
+                        str(mode) + '\' is not valid!'
+            raise pexceptions.PySegInputError(expr='gen_instance (ModelFils)', msg=error_msg)
+        raise NotImplementedError
+
+
+############################################################################
+# Class for Random Shifting and Rotations model: the simulated filaments are just the references but just randomly
+# shifted and ratotated within some random ranges
+#
+class ModelFilsRSR(ModelFils):
+
+
+    def __init__(self, voi=None, res=1, rad=1, shifts=[0, 100], rots=[0, 180]):
+        """
+        :param voi: VOI surface
+        :param res: tomogram pixel size (default 1)
+        :param rad: filament radius (default 1)
+        :param shifts: filament range (2-tuple) for shiftings for each dimension in nm (default [0, 100])
+        :param rots: angular rotation (2-tuple) range for three angles in degs (default [0, 180])
+        """
+        super(ModelFilsRSR, self).__init__(voi, res, rad)
+        self._Model__type_name = 'FilsRSR'
+        assert hasattr(shifts, '__len__') and (len(shifts) == 2)
+        self.__rg_shifts = shifts
+        assert hasattr(rots, '__len__') and (len(rots) == 2)
+        self.__rg_rots = rots
+
+    def gen_instance(self, tomo_fname, fils, mode='full', max_ntries=100, max_fils=None):
+        """
+        Generates a TomoFilaments with this model
+        :param tomo_fname: name for the simulated tomogram
+        :param fils: reference filaments
+        :param mode: mode for embedding, valid: 'full' and 'none'
+        :param max_ntries: if not None then it set the maximum number of tries to fit each simulated filament
+        :param max_fils: if not None (default), otherwise sets the maximum number of filaments to simulate
+        :return: a TomoFilaments object with simulated instance
+        """
+
+        # Seeding random generator needed for multiprocessing
+        timestamp = time.time()
+        np.random.seed(seed=int(str(math.fabs(int(timestamp)-timestamp))[2:9])) # getting second decimals
+
+        # Initialization
+        TomoFilaments(tomo_fname, -1, voi=self._ModelFils__voi, res=self._ModelFils__res, rad=self._ModelFils__rad)
+        tomo = TomoFilaments(tomo_fname, -1, self._ModelFils__voi)
+        if mode == 'full':
+            check_bounds, check_inter = True, self._ModelFils__rad / self._ModelFils__res
+        elif mode == 'none':
+            check_bounds, check_inter = False, False
+        else:
+            error_msg = 'No valid input mode: ' + str(mode)
+            raise pexceptions.PySegInputError(expr='gen_instance (ModelFilsRSR)', msg=error_msg)
+
+        # Get the reference filaments
+        if max_fils is None:
+            n_fils = len(fils)
+        else:
+            n_fils = max_fils
+        n_tries = n_fils * max_ntries
+        rnd_ids_fils = np.random.randint(0, len(fils), size=n_tries)
+        # fils_lut = np.zeros(shape=len(fils), dtype=np.bool)
+
+        # Generations loop
+        count_added = 0
+        for n_try in range(n_tries):
+
+            # Get the filament
+            rnd_idx = rnd_ids_fils[n_try]
+            # if fils_lut[rnd_idx]:
+            #     continue
+            fil = fils[rnd_idx]
+
+            # Generate random shifting and rotation
+            x_rnd_sgn, y_rnd_sgn, z_rnd_sgn = np.random.randint(-1, 2, size=3)
+            if x_rnd_sgn == 0:
+                x_rnd_sgn = 1
+            if y_rnd_sgn == 0:
+                y_rnd_sgn = 1
+            if z_rnd_sgn == 0:
+                z_rnd_sgn = 1
+            x_rnd = x_rnd_sgn * random.uniform(self.__rg_shifts[0], self.__rg_shifts[1])
+            y_rnd = y_rnd_sgn * random.uniform(self.__rg_shifts[0], self.__rg_shifts[1])
+            z_rnd = z_rnd_sgn * random.uniform(self.__rg_shifts[0], self.__rg_shifts[1])
+            rot_rnd = random.uniform(self.__rg_rots[0], self.__rg_rots[1])
+            tilt_rnd = random.uniform(self.__rg_shifts[0], self.__rg_rots[1])
+            psi_rnd = random.uniform(self.__rg_rots[0], self.__rg_rots[1])
+
+            # Filament transformations
+            hold_fil = Filament(fil.get_coords())
+            fil_mid = hold_fil.get_middle_coord()
+            hold_fil.translate(-1.*fil_mid[0], -1.*fil_mid[1], -1.*fil_mid[2])
+            hold_fil.rotate(rot_rnd, tilt_rnd, psi_rnd)
+            hold_fil.translate(fil_mid[0], fil_mid[1], fil_mid[2])
+            hold_fil.translate(x_rnd, y_rnd, z_rnd)
+
+            # Try to insert
+            try:
+                tomo.insert_filament(hold_fil, check_bounds=check_bounds, check_inter=check_inter)
+            except pexceptions.PySegInputError:
+                continue
+
+            # Check termination condition
+            # fils_lut[rnd_idx] = True
+            count_added += 1
+            if count_added >= n_fils:
+                break
+
+        # Check all filamensts has been placed
+        if count_added < n_fils:
+            print 'WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
+                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).'
+
+        return tomo

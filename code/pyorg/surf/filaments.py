@@ -91,6 +91,11 @@ class Filament(object):
         """
         return self.__bounds
 
+    def get_middle_coord(self):
+        coords = self.__curve.get_samples()
+        n_2 = int(math.ceil(coords.shape[0] / 2))
+        return coords[n_2, :]
+
     #### External functionality
 
     def add_vtp_global_attribute(self, name, vtk_type, value):
@@ -184,7 +189,7 @@ class Filament(object):
         """
         Rigid rotation
         :param rot, tilt, psi: rotation angles in Relion format in degrees
-        :param active: if True the rotation is active, otherwise it is possible
+        :param active: if True the rotation is active, otherwise it is passive
         :return:
         """
 
@@ -322,12 +327,14 @@ class Filament(object):
 #
 class TomoFilaments(object):
 
-    def __init__(self, tomo_fname, lbl, voi=None, sg=None):
+    def __init__(self, tomo_fname, lbl, voi=None, sg=None, res=1, rad=1):
         """
         :param tomo_fname: full path to a segmented tomogram
         :param lbl: label which marks the VOI (Volume Of Interest)
         :param voi: if None (default) unused, otherwise VOI is already available so 'lbl' will not be considered
         :param sg: sigma Gaussian smoothing to reduce surface stepping, default None. Only valid if VOI is None
+        :param res: input value
+        :param rad: input value
         """
 
         # Input parsing
@@ -372,12 +379,40 @@ class TomoFilaments(object):
         self.__voi_fname = None
         self.__fils_fname = None
 
+        # Pixel size settings
+        self.set_resolution(res)
+        self.set_fils_radius(rad)
+
     # GET/SET AREA
+
+    def set_resolution(self, res):
+        """
+        Set resolution in nm/pixel
+        :param res: input value
+        :return:
+        """
+        assert res > 0
+        self.__res = res
+
+    def set_fils_radius(self, rad):
+        """
+        Set filaments radius
+        :param rad: input value
+        :return:
+        """
+        assert rad > 0
+        self.__rad = rad
 
     # Decimate the VOI
     # dec: decimation factor (default None) for VOI surface
     def decimate_voi(self, dec):
         self.__voi = poly_decimate(self.__voi, dec)
+
+    def get_resolution(self):
+        return self.__res
+
+    def get_fils_radius(self):
+        return self.__rad
 
     def get_voi(self):
         try:
@@ -457,7 +492,7 @@ class TomoFilaments(object):
                     (fil_bounds[4] < self.__bounds[4]) or (fil_bounds[5] > self.__bounds[5]):
                 return False
             # Check if surface intersect the VOI
-            if isinstance(self.__voi, np.ndarray):
+            if not isinstance(self.__voi, np.ndarray):
                 if not is_2_polys_intersect(fil.get_vtp(), self.__voi):
                     return False
             else:
@@ -473,7 +508,7 @@ class TomoFilaments(object):
 
     def insert_filament(self, fil, check_bounds=True, check_inter=None):
         """
-
+        Insert a filament in the tomogram
         :param fil: particle to insert in the tomogram, it must be fully embedded by the tomogram
         :param check_bounds: if True (default) checks that all input filament points are embedded
                              within the tomogram bounds
@@ -503,10 +538,10 @@ class TomoFilaments(object):
         :param rad: filament radius
         :return:
         """
-        fil_vtp = fil.get_vtp()
+        fil_vtp, rad_2 = fil.get_vtp(), 2 * rad
         for nfil in self.get_filaments():
             dst = vtp_to_vtp_closest_point(fil_vtp, nfil.get_vtp())
-            if dst < rad:
+            if dst < rad_2:
                 return True
         return False
 
@@ -711,7 +746,7 @@ class TomoFilaments(object):
                 dsts.append(hold_dst)
             fil.add_vtp_points_attribute(VOI_NDSTS, vtk.vtkFloatArray, fil_dsts, 1)
 
-        return np.asarray(dsts)
+        return np.asarray(dsts) * self.__res
 
     # INTERNAL FUNCTIONALITY AREA
 
@@ -763,8 +798,29 @@ class ListTomoFilaments(object):
         self.__tomos = dict()
         # For pickling
         self.__pkls = None
+        self.__res, self.__rad = 1, 1
 
     # EXTERNAL FUNCTIONALITY
+
+    def set_resolution(self, res):
+        """
+        Set resolution in nm/pixel
+        :param res: input value
+        :return:
+        """
+        for tomo in self.__tomos.itervalues():
+            tomo.set_resolution(res)
+        self.__res = res
+
+    def set_fils_radius(self, rad):
+        """
+        Set filaments radius
+        :param res: input value
+        :return:
+        """
+        for tomo in self.__tomos.itervalues():
+            tomo.set_fils_radius(rad)
+        self.__rad = rad
 
     def get_tomos(self):
         return self.__tomos
@@ -894,7 +950,8 @@ class ListTomoFilaments(object):
         count = 0
         self.__pkls = dict()
         for key, tomo in self.__tomos.iteritems():
-            key_stem = os.path.splitext(os.path.split(key)[1])[0]
+            # key_stem = os.path.splitext(os.path.split(key)[1])[0]
+            key_stem = key.replace('/', '_')
             hold_file = tomos_dir + '/' + key_stem + '.pkl'
             try:
                 tomo.pickle(hold_file)

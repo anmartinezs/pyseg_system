@@ -30,31 +30,32 @@ __author__ = 'Antonio Martinez-Sanchez'
 ########################################################################################
 
 # ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn/sub/relion/fils/pst'
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn2'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/tether/in/all_tether.star' # '/org/pre/in/all_pre_v6.star'
+in_star = ROOT_PATH + '/org/pre/in/all_pre_v6_chr_ref.star' # '/org/pre/in/all_pre_avgs.star' # '/org/pre/in/all_pre_v6.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_and_zeros_fits.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
+in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px' # '/org/tether/ltomos/ltomos_all_pre_tether_ss7.31px' # '/ref_a3/ltomos'
-out_stem = 'all_pre_tether' # 'pre'
+out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_xd5nm' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
+out_stem = 'pre_pre_v6_chr_ref_xd5nm' # 'all_pre_avgs' # 'pre'
 
 # Segmentation pre-processing
-sg_lbl = 5 # 1
+sg_lbl = 2 # 1
 sg_sg = 0
 sg_dec = 0.9
 sg_bc = False
-sg_bm = 'center'
-sg_pj = True
+sg_bm = 'center' # None
+sg_pj = True # False
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = 0
+pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5': 10} # 0
 pt_keep = None
-pt_ssup = 14.62 # 7.31 # voxels
+pt_ssup = 7.31 # 14.62 # voxels
+pt_ssup_ref = None # '5'
 
 ########################################################################################
 # MAIN ROUTINE
@@ -84,6 +85,8 @@ print '\tPost-processing: '
 print '\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of particles.'
 print '\t\t-Minimum number of particles: ' + str(pt_min_parts)
 print '\t\t-Scale suppression: ' + str(pt_ssup) + ' voxels'
+if pt_ssup_ref is not None:
+    print '\t\t-Crossed scale-suppression activated.'
 print ''
 
 ######### Process
@@ -169,24 +172,13 @@ for star_row in range(star.get_nrows()):
         # Initialization
         mic_str = star_part.get_element('_rlnMicrographName', part_row)
         try:
-            # First try by taken the full file name
             seg_row = seg_dic[os.path.split(mic_str)[1]]
         except KeyError:
-            # # Second try just by taken the filename ste
-            # fname_split = os.path.split(mic_str)[1].split('_')
-            # fname_stem = fname_split[0] + '_' + fname_split[1] + '_' + fname_split[2] + '_' + fname_split[3] + '.mrc'
-            # try:
-            #     seg_row = seg_dic[fname_stem]
-            # except KeyError:
             print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
             continue
-            # mic_str = star_seg.get_element('_rlnMicrographName', seg_row)
         seg_str = star_seg.get_element('_psSegImage', seg_row)
         mic = disperse_io.load_tomo(mic_str, mmap=True)
-        if mic_str.endswith('.fits'):
-            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
-        else:
-            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+        (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
         part = surf.Particle(part_vtp, center=(0., 0., 0.), normal=(0, 0, 1.))
 
         # Initial rotation
@@ -218,21 +210,20 @@ for star_row in range(star.get_nrows()):
         part.translation(-seg_offx, -seg_offy, -seg_offz)
         part.swap_xy()
 
-        # # Insert the new particle in the proper tomogram
-        # meta_info = dict()
-        # meta_info['_rlnMicrographName'] = mic_str
-        # meta_info['_rlnImageName'] = star_part.get_element('_rlnImageName', part_row)
-        # meta_info['_rlnCtfImage'] = star_part.get_element('_rlnCtfImage', part_row)
-        # meta_info['_rlnCoordinateX'] = star_part.get_element('_rlnCoordinateX', part_row)
-        # meta_info['_rlnCoordinateY'] = star_part.get_element('_rlnCoordinateY', part_row)
-        # meta_info['_rlnCoordinateZ'] = star_part.get_element('_rlnCoordinateZ', part_row)
-        # meta_info['_rlnOriginX'] = star_part.get_element('_rlnOriginX', part_row)
-        # meta_info['_rlnOriginY'] = star_part.get_element('_rlnOriginY', part_row)
-        # meta_info['_rlnOriginZ'] = star_part.get_element('_rlnOriginZ', part_row)
-        # meta_info['_rlnAngleRot'] = star_part.get_element('_rlnAngleRot', part_row)
-        # meta_info['_rlnAngleTilt'] = star_part.get_element('_rlnAngleTilt', part_row)
-        # meta_info['_rlnAnglePsi'] = star_part.get_element('_rlnAnglePsi', part_row)
-        meta_info = None
+        # Insert the new particle in the proper tomogram
+        meta_info = dict()
+        meta_info['_rlnMicrographName'] = mic_str
+        meta_info['_rlnImageName'] = star_part.get_element('_rlnImageName', part_row)
+        meta_info['_rlnCtfImage'] = star_part.get_element('_rlnCtfImage', part_row)
+        meta_info['_rlnCoordinateX'] = star_part.get_element('_rlnCoordinateX', part_row)
+        meta_info['_rlnCoordinateY'] = star_part.get_element('_rlnCoordinateY', part_row)
+        meta_info['_rlnCoordinateZ'] = star_part.get_element('_rlnCoordinateZ', part_row)
+        meta_info['_rlnOriginX'] = star_part.get_element('_rlnOriginX', part_row)
+        meta_info['_rlnOriginY'] = star_part.get_element('_rlnOriginY', part_row)
+        meta_info['_rlnOriginZ'] = star_part.get_element('_rlnOriginZ', part_row)
+        meta_info['_rlnAngleRot'] = star_part.get_element('_rlnAngleRot', part_row)
+        meta_info['_rlnAngleTilt'] = star_part.get_element('_rlnAngleTilt', part_row)
+        meta_info['_rlnAnglePsi'] = star_part.get_element('_rlnAnglePsi', part_row)
         try:
             list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj, meta=meta_info)
         except pexceptions.PySegInputError as e:
@@ -247,13 +238,15 @@ for star_row in range(star.get_nrows()):
     if pt_keep is not None:
         print '\t\tFiltering to keep the ' + str(pt_keep) + 'th more highly populated'
         list_tomos.clean_low_pouplated_tomos(pt_keep)
-    if pt_min_parts >= 0:
-        print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
-        list_tomos.filter_by_particles_num(pt_min_parts)
-    if pt_ssup is not None:
+    if not isinstance(pt_min_parts, dict):
+        if pt_min_parts >= 0:
+            print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+            list_tomos.filter_by_particles_num(pt_min_parts)
+    if (pt_ssup is not None) and (pt_ssup_ref is None):
         list_tomos.scale_suppression(pt_ssup)
 
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
+    star_stem = star_stem.split('_')[0]
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl
     try:
@@ -277,11 +270,20 @@ for star_row in range(star.get_nrows()):
     # Adding particle to list
     set_lists.add_list_tomos(list_tomos, star_stem)
 
+if isinstance(pt_min_parts, dict):
+    print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+    set_lists.filter_by_particles_num_tomos(pt_min_parts)
+
+if pt_ssup_ref is not None:
+    print '\t\tCrossing scale supression with reference list: ' + str(pt_ssup_ref)
+    set_lists.scale_suppression(pt_ssup, ref_list=pt_ssup_ref)
+
 for star_row in range(star.get_nrows()):
 
     part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
                                    star.get_element('_suSurfaceVtp', star_row)
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
+    star_stem = star_stem.split('_')[0]
     list_tomos = set_lists.get_lists_by_key(star_stem)
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl

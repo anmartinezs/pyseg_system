@@ -25,16 +25,16 @@ import numpy as np
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/carsten'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/radu'
 
 # Input STAR file with the list of files to gather or a directory
-in_star = ROOT_PATH + '/class/noali_all/to_merge'
+in_star = ROOT_PATH + '/class/noali_all_2/merge_big_gap'
 
 # Input STAR file with segmentation information to focus the masks
 in_seg = None # ROOT_PATH + '/two_segmentations.star'
 
 # Output file
-out_star = ROOT_PATH + '/class/noali_all/class_1_ag_r_noali_all_merge.star'
+out_star = ROOT_PATH + '/class/noali_all_2/class_1_ap_r_ali_mbclean_merge_big_gap.star'
 
 ########################################################################################
 # MAIN ROUTINE

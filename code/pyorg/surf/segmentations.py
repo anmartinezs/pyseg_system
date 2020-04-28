@@ -22,6 +22,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 ##### Global variables
 
+NM3_TO_UM3 = 1e-9
 
 # GLOBAL FUNCTIONS
 
@@ -293,7 +294,7 @@ class OMSegmentation(object):
 #
 class TomoOMSegmentations(object):
 
-    def __init__(self, name, voi_mb=None, voi_lm=None, max_dst=0):
+    def __init__(self, name, voi_mb=None, voi_lm=None, max_dst=0, res=1):
         """
         :param name: name to identify the tomogram
         :param voi_mb: if None (default) the membrane tomogram is loaded from tomo_fname, otherwise this is actually
@@ -301,6 +302,7 @@ class TomoOMSegmentations(object):
         :param voi_lm: if None (default) the lumen tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
         :param max_dst: maximum distance to lumen border for membrane segmentation (in segmentation pixels)
+        :param res: input value
         """
 
         # Input parsing
@@ -399,7 +401,20 @@ class TomoOMSegmentations(object):
             except AssertionError:
                 continue
 
+        # Pixel size settings
+        self.set_resolution(res)
+
     # GET/SET AREA
+
+    def set_resolution(self, res):
+        """
+        Set resolution in nm/pixel
+        :param res: input value
+        :return:
+        """
+        assert res > 0
+        self.__res = res
+        self.__res_3 = self.__res * self.__res * self.__res
 
     def get_voi(self, mode='mb'):
         """
@@ -440,6 +455,14 @@ class TomoOMSegmentations(object):
     def get_num_segmentations(self):
         return len(self.__segs)
 
+    def get_tomo_vol(self):
+        """
+        Compute the volume of the whole tomogram (um**3)
+        :return: a float value
+        """
+        return np.asarray(self.__lbl_voi_mb.shape, dtype=np.float).prod() \
+               * self.__res * self.__res * self.__res * NM3_TO_UM3
+
     # EXTERNAL FUNCTIONALITY AREA
 
     def delete_segmentation(self, seg_ids):
@@ -472,17 +495,28 @@ class TomoOMSegmentations(object):
         """
         Compute voi volume in voxels
         :param mode: 'mb' membrane, 'lm' lumen, 'mb-lm' membrane and lumen fused
-        :return:
+        :return: the volume (um**3) for each organelle
         """
         if mode == 'mb':
-            return self.__voi_mb.sum()
+            return self.__voi_mb.sum() * self.__res_3 * NM3_TO_UM3
         elif mode == 'lm':
-            return self.__voi_lm.sum()
+            return self.__voi_lm.sum() * self.__res_3 * NM3_TO_UM3
         elif mode == 'mb-lm':
-            return self.__voi_mb.sum() + self.__voi_lm.sum()
+            return (self.__voi_mb.sum() + self.__voi_lm.sum()) * self.__res_3 * NM3_TO_UM3
         else:
             error_msg = 'Input mode not valid: ' + str(mode)
             raise pexceptions.PySegInputError(expr='compute_voi_volume (TomoOMSegmentations)', msg=error_msg)
+
+    def compute_seg_volumes(self, mode='mb'):
+        """
+        Compute the volumes for each segmentation
+        :param mode: 'mb' membrane, 'lm' lumen
+        :return: an array with the volume (um**3) for each organelle
+        """
+        vols = np.zeros(shape=len(self.__segs), dtype=np.float32)
+        for i, seg in enumerate(self.__segs):
+            vols[i] = seg.get_voxels_count(mode) * self.__res * self.__res * self.__res * NM3_TO_UM3
+        return vols
 
     def compute_om_seg_dsts(self):
         """
@@ -502,7 +536,7 @@ class TomoOMSegmentations(object):
             mb_ids = self.__lbl_voi_mb == seg.get_label()
             dsts_field[mb_ids] = hold_dsts[mb_ids]
 
-        return dsts_field
+        return dsts_field * self.__res
 
     # INTERNAL FUNCTIONALITY AREA
 
@@ -516,8 +550,19 @@ class ListTomoOMSegmentations(object):
         self.__tomos = dict()
         # For pickling
         self.__pkls = None
+        self.__res = 1
 
     # EXTERNAL FUNCTIONALITY
+
+    def set_resolution(self, res):
+        """
+        Set resolution in nm/pixel
+        :param res: input value
+        :return:
+        """
+        for tomo in self.__tomos.itervalues():
+            tomo.set_resolution(res)
+        self.__res = res
 
     def get_tomos(self):
         return self.__tomos

@@ -16,7 +16,6 @@ from scipy.ndimage.morphology import distance_transform_edt
 from skimage.morphology import convex_hull_image
 from pyseg.factory import SubGraphVisitor
 from variables import *
-import cv2 as cv
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from pyseg.filament import Filament
