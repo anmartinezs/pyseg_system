@@ -46,12 +46,12 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
-in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_vols//oms_vols_25_250_3_wspace.pkl' # None
+in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_fil_ctrl/fil_ctrl_ltomos.star' # '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
+in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_fil_ctrl/oms_fil_ctrl_25_250_3_png_wspace.pkl' # None
 
 # Output directory
-out_dir = ROOT_PATH + '/ana/oms_dsts/oms_vols/'
-out_stem = 'oms_vols_25_250_3_png'
+out_dir = ROOT_PATH + '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
+out_stem = 'oms_fil_ctrl_25_250_3_png_2'
 
 # Analysis variables
 pt_per = 95 # %
@@ -595,22 +595,22 @@ for idx, lkey in zip(np.arange(1, 3*len(lists_exp_occ.keys())), lists_exp_occ.it
     ic_low = 100. * np.percentile(lists_exp_occ[lkey], pt_per)
     ic_med = 100. * np.percentile(lists_exp_occ[lkey], 50)
     ic_high = 100. * np.percentile(lists_exp_occ[lkey], 100-pt_per)
-    plt.bar(idx, ic_med, BAR_WIDTH, color=lists_color[lkey], linewidth=4)
+    plt.bar(idx, ic_med, BAR_WIDTH, color=lists_color[lkey], linewidth=2, edgecolor='k')
     plt.errorbar(idx, ic_med, yerr=np.asarray([[ic_med - ic_low, ic_high - ic_med], ]).reshape(2, 1),
                  ecolor='k', elinewidth=4, capthick=4, capsize=8)
-    x_ticks += idx
-    if lkey_short == '0':
-        x_lbls = 'WT'
-    elif lkey_short == '1':
-        x_lbls = 'MSA'
-    elif lkey_short == '2':
-        x_lbls = 'PFF'
-    elif lkey_short == '3':
-        x_lbls = 'CTRL'
-    elif lkey_short == '4':
-        x_lbls = 'FIL'
+    x_ticks.append(idx)
+    if lkey == '0':
+        x_lbls.append('WT')
+    elif lkey == '1':
+        x_lbls.append('MSA')
+    elif lkey == '2':
+        x_lbls.append('PFF')
+    elif lkey == '3':
+        x_lbls.append('CTRL')
+    elif lkey == '4':
+        x_lbls.append('FIL')
     else:
-        x_lbls = lkey_short
+        x_lbls.append(lkey)
 plt.xticks(x_ticks, x_lbls)
 plt.xlim(0.5, max(x_ticks) + .5)
 plt.tight_layout()

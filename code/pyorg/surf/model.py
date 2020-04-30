@@ -13,11 +13,12 @@ import time
 import random
 import shutil
 import numpy as np
+import scipy as sp
 import ctypes
 import multiprocessing as mp
 from pyorg import pexceptions
 from pyorg import disperse_io
-from pyorg.globals import unpickle_obj, clean_dir, lin_map
+from pyorg.globals import unpickle_obj, clean_dir, add_mw, vect_to_zrelion, rot_mat_relion, trilin3d, lin_map
 from surface import ListTomoParticles, TomoParticles, Particle, ParticleL
 from filaments import TomoFilaments, Filament
 try:
@@ -992,17 +993,23 @@ class ModelFils(object):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, voi, res=1, rad=1):
+    def __init__(self, voi, res=1, rad=1, density_2d=None):
         """
         Classs builder
         :param voi: the input VOI
         :param res: tomogram pixel size (default 1)
         :param rad: filament radius (default 1)
+        :param density_2d: axial orthogonal 2D density projection
         """
         self.set_voi(voi)
         self.__type_name = None
         assert (res > 0) and (rad > 0)
         self.__res, self.__rad = res, rad
+        if density_2d is None:
+            self.__density_2d = None
+        else:
+            assert isinstance(density_2d, np.ndarray)
+            self.__density_2d = density_2d
 
     ## Set/Get methods
 
@@ -1020,6 +1027,110 @@ class ModelFils(object):
             error_msg = 'Invalid VOI type, it must be a ndarray!'
             raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
         self.__voi = voi
+
+    def gen_fil_straight_density(self, length, pitch=0, rnd_iang=True):
+        """
+        Generates a straight version of the filament density
+        :param len: filament length in nm
+        :param pitch: filament pitch (torsion) in nm
+        :param rnd_iang: if True (deault) then initial axial rotation is set randomly
+        :return: a 3D-array with the density of an aligned (filament axis in Z) straight filament.
+        """
+
+        # Input parsing
+        assert (length > 0) and (self.__density_2d is not None)
+        len_px = int(math.ceil(length / self.__res))
+        ang_sep = pitch / 360.
+        ang_step_v = ang_sep / self.__res
+
+        # Initial axial rotation
+        ref_density_2d, ref_ang = self.__density_2d, 0.
+        if rnd_iang:
+            ref_ang = 360. * random.random()
+            ref_density_2d = sp.ndimage.rotate(ref_density_2d, ref_ang, axes=(1, 0), reshape=False, order=3,
+                                               mode='constant', cval=0.0, prefilter=True)
+
+        # Loop for create the filament, a stack of axis rotated 2D density model images
+        fil_stack = np.zeros(shape=(ref_density_2d.shape[0], ref_density_2d.shape[1], len_px), dtype=np.float32)
+        for i in range(len_px):
+            ang = ref_ang + ang_step_v
+            hold_density_2d = sp.ndimage.rotate(hold_density_2d, ang, axes=(1, 0), reshape=False, order=3,
+                                                mode='constant', cval=0.0, prefilter=True)
+            fil_stack[:, :, i] = hold_density_2d
+
+        return fil_stack
+
+    def gen_tomo_straight_densities(self, ref_fils, pitch=0, mwa=None, mwta=0, snr=None):
+        """
+        Generates a density tomogram with followin the filament network introduced
+        :param ref_fils: list of reference filaments
+        :param mwa: missing wedge angle in degrees (default None)
+        :param mwta: missing wedge tilt angle (default 0)
+        :param snr: SNR of the output tomogram (default None, then SNR=inf, no noise)
+        :return: the simulated density tomogram
+        """
+
+        # Initialization
+        tomo = np.zeros(shape=self.__voi.shape, dtype=np.float16)
+        tomo_lut = np.zeros(shape=self.__voi.shape, dtype=np.bool)
+
+        # Loop for filament
+        for fil in ref_fils:
+
+            # Create the straight filament density model and the transform matrix
+            coords = fil.get_coords()
+            v_fil = coords[-1] - coords[0]
+            v_fil_len = math.sqrt((v_fil * v_fil).sum())
+            v_fil_n = v_fil / v_fil_len
+            fil_den = self.gen_fil_straight_density(v_fil_len, pitch=pitch, rnd_iang=True)
+            rot, tilt, psi = vect_to_zrelion(v_fil_n, mode='active')
+            R = rot_mat_relion(rot, tilt, psi, deg=True)
+            R_i = R.T
+            fil_cent = np.asarray((.5 * self.__density_2d.shape[0], .5 * self.__density_2d.shape[1], v_fil_len*.5))
+            shift = coords[0] - fil_cent
+
+            # For each filament point project to tomogram
+            for x_fil in range(fil_den.shape[0]):
+                for y_fil in range(fil_den.shape[1]):
+                    for z_fil in range(fil_den.shape[2]):
+                        p_fil = np.asarray((x_fil, y_fil, z_fil), dtype=np.float32)
+                        p_fil_t = R * p_fil + shift
+                        # Tomogram point hits
+                        p_fil_t_xl, p_fil_t_xh = int(math.floor(p_fil_t[0])), int(math.ceil(p_fil_t[0]))
+                        p_fil_t_yl, p_fil_t_yh = int(math.floor(p_fil_t[1])), int(math.ceil(p_fil_t[1]))
+                        p_fil_t_zl, p_fil_t_zh = int(math.floor(p_fil_t[2])), int(math.ceil(p_fil_t[2]))
+                        p_fil_t1 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zl), dtype=np.float32)
+                        p_fil_t2 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zl), dtype=np.float32)
+                        p_fil_t3 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zl), dtype=np.float32)
+                        p_fil_t4 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zl), dtype=np.float32)
+                        p_fil_t5 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zh), dtype=np.float32)
+                        p_fil_t6 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zh), dtype=np.float32)
+                        p_fil_t7 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zh), dtype=np.float32)
+                        p_fil_t8 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zh), dtype=np.float32)
+                        # For each tomogram hit interpolate the gray value from the reference filament dansiy
+                        for p_fil_ti in (p_fil_t1, p_fil_t2, p_fil_t3, p_fil_t4, p_fil_t5, p_fil_t6, p_fil_t7, p_fil_t7,
+                                         p_fil_t8):
+                            if (p_fil_ti[0] >= 0) and (p_fil_ti[1] >= 0) and (p_fil_ti[2] >= 0) \
+                                and (p_fil_ti[0] < tomo.shape[0]) and (p_fil_ti[1] < tomo.shape[1]) \
+                                    and (p_fil_ti[2] < tomo.shape[2]):
+                                if not tomo_lut[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]]:
+                                    p_fil_b = R_i * (p_fil_ti - shift)
+                                    den = trilin3d(fil_den, p_fil_b)
+                                    tomo[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]] = den
+                                    tomo_lut[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]] = True
+
+        # Add the noise to fit the SNR
+        mn = tomo[tomo_lut].mean()
+        sg_bg = mn / snr
+        tomo += np.random.normal(mn, sg_bg, size=tomo.shape)
+        tomo = lin_map(tomo, tomo.max(), tomo.min())
+
+        # Add the missing wedge
+        if mwa is not None:
+            tomo = add_mw(tomo, mwa, tilt_ang=mwta, norm='01')
+
+        # Return the result
+        return tomo
 
     @abc.abstractmethod
     def gen_instance(self, mode='full'):

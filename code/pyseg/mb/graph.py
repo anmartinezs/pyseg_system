@@ -516,7 +516,7 @@ class MbGraphMCF(GraphMCF):
             gl = self.get_prop_entry_fast(gl_id, v_id, 1, gl_dt)[0]
             sin = self.get_prop_entry_fast(sin_id, v_id, 1, sin_dt)[0]
             if slice.test(side=seg, eu_dst=eu, geo_dst=geo, geo_len=gl, sin=sin):
-                    h_v_ids.append(v_id)
+                h_v_ids.append(v_id)
 
         # Vertices thresholding
         th_l = slice.get_list_th()

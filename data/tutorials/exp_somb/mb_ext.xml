@@ -1,0 +1,28 @@
+<file>
+
+  <!-- MB-CONT -->
+
+  <mb_slice>
+    <name>mb_ext</name>
+    <side>3</side>
+    <cont>-</cont>
+    <eu_dst id="low">-inf</eu_dst>
+    <eu_dst id="high">inf</eu_dst>
+    <eu_dst id="sign">+</eu_dst>
+    <geo_dst id="low">0</geo_dst>
+    <geo_dst id="high">inf</geo_dst>
+    <geo_dst id="sign">+</geo_dst>
+    <geo_len id="low">0</geo_len>
+    <geo_len id="high">inf</geo_len>
+    <geo_len id="sign">+</geo_len>
+    <sin id="low">0</sin>
+    <sin id="high">inf</sin>
+    <sin id="sign">+</sin>
+    <clst_nv id="low">-inf</clst_nv>
+    <clst_nv id="high">inf</clst_nv>
+    <clst_nv id="sign">+</clst_nv>
+  </mb_slice>
+
+
+</file>
+

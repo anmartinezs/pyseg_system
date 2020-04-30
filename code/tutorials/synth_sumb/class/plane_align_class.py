@@ -232,7 +232,7 @@ else:
                                       npr=mp_npr, debug_dir=out_debug_dir, ref_dir=in_ref_dir, direct_rec=pp_direct,
                                       bin=pp_bin)
             star_class.save_particles(out_dir+'/all_particles', out_stem, masks=True, stack=True)
-            imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
+            # imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
         except ps.pexceptions.PySegInputError as e:
             print 'ERROR: Particles could not be loaded because of "' + e.get_message() + '"'
             print 'Terminated. (' + time.strftime("%c") + ')'

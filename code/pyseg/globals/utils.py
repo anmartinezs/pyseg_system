@@ -986,17 +986,20 @@ def tomo_butter_low(tomo, cl, n=5, fs=False):
     # Filtering
     return np.real(np.fft.ifftn(np.fft.fftn(tomo) * np.fft.fftshift(Hl)))
 
-# Implements an algorithm for estimating signed distance form input segmentation slice by slice along Z axis
-# IMPORTANT: only tested for smooth membranes
-# tomo: input 3D array with the segmentation
-# lbl: label for segmented region, if None (default) segmented region is every voxel >0
-# res: voxel resolution, pixel/nm (default 1)
-# del_b: if True (default) no reliable border segmentation are discarded (set to zero)
-# mode_2d: if True (default False) the distances are computed in 2D slice by slice instead of 3D
-# get_point: if True (default False) reference point for orientation is also returned
-# set_point: if not None (default) sets the reference point
-# Returns: a tomogram with the signed distance in nm
-def signed_distance_2d(tomo, lbl=None, res=1, del_b=True, mode_2d=False, get_point=False, set_point=None):
+def signed_distance_2d(tomo, lbl=None, res=1, del_b=True, mode_2d=True, get_point=False, set_point=None):
+    """
+    Implements an algorithm for estimating signed distance form input segmentation slice by slice along Z axis
+    IMPORTANT: only tested for smooth membranes
+    :param tomo: input 3D array with the segmentation
+    :param lbl: label for segmented region, if None (default) segmented region is every voxel >0
+    :param res: voxel resolution, pixel/nm (default 1)
+    :param del_b: if True (default) no reliable border segmentation are discarded (set to zero)
+    :param mode_2d: if True (default False) the distances are computed in 2D slice by slice instead of 3D
+    :param get_point: if True (default False) reference point for orientation is also returned
+    :param set_point: if not None (default) sets the reference point, otherwise it is computed as the most distant
+                      point to segmentation
+    :return: a tomogram with the signed distance in nm
+    """
 
     # Parsing
     if (not isinstance(tomo, np.ndarray)) or (len(tomo.shape) != 3):
@@ -1007,7 +1010,7 @@ def signed_distance_2d(tomo, lbl=None, res=1, del_b=True, mode_2d=False, get_poi
     else:
         tomo_h = np.invert(tomo == lbl)
     if set_point is not None:
-        if (not hasattr(set_point, '__len__')) or (len(set_point) != 2):
+        if (not hasattr(set_point, '__len__')) or ((len(set_point) != 2) and (len(set_point) != 3)):
             error_msg = 'Input reference point must be a 3-tuple.'
             raise pyseg.pexceptions.PySegInputError(expr='signed_distance_2d', msg=error_msg)
     tomo_s = np.zeros(shape=tomo_h.shape, dtype=np.float32)

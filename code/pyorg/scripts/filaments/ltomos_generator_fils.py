@@ -29,14 +29,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_fils_sep.star'
+in_star = ROOT_PATH + '/in/in_ltomos_fils_new.star' # '/in/in_ltomos_fils_sep.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_2.star'
+in_seg = ROOT_PATH + '/in/in_seg_new.star' # '/in/in_seg_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/fils_sep' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'fils_sep_2' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/fils_new' # '/ltomos/fils_sep' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'fils_new' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 0 # 1 # segmented label

@@ -24,7 +24,9 @@
     + Adding file code/tutorials/synth_sumb/class/mbz_cly_mask.m
 * **30/03/2020**
     + Correcting bug in code/tutorials/exp_sumb/pre/pre_tomo_seg.m
-    + Commenting mask imsave in code/tutorials/synth_sumb/class/plane_align_class.py
 * **08/04/2020**
     + Updates in rec_particles.py script
-    + Synthetic model (ModelFilsRSR) for filaments 
+    + Synthetic model (ModelFilsRSR) for filaments
+* **30/04/2020**
+    + Adding tutorial exp_somb, single oriented membrane with experimental data.
+    + Commenting mask imsave in code/tutorials/synth_sumb/class/plane_align_class.py
