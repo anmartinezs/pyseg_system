@@ -61,8 +61,8 @@ sp_off_voxels = 30 # vox
 sg_res = 0.52 # nm/voxel
 sg_th = None # 8
 sg_sz = None # 3e3
-sg_mb_thick = 6 # nm
-sg_mb_neigh = 20 # nm
+sg_mb_thick = 4 # nm
+sg_mb_neigh = 15 # nm
 
 # CSV file pre-processing
 cv_coords_cools = (1, 2, 3)

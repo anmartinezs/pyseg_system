@@ -43,6 +43,7 @@ slices_file = ROOT_PATH + '/pick/in/mb_ext.xml'
 
 peak_th = 0 # Percentile %
 peak_ns = 0.5 # 5 # nm
+peak_emb = True
 
 ###### Advanced peaks configuration
 
@@ -110,6 +111,8 @@ if peak_prop is not None:
     print '\t\t\t+Neighbourhood radius: ' + str(peak_ns)
     if peak_conn:
         print '\t\t\t-Peak connectivity active.'
+    if peak_emb:
+        print '\t\t\t-Check Embedding.'
 print ''
 
 ######### Process
@@ -267,7 +270,18 @@ for (input_pkl, in_tomo_ref, in_seg, in_img, in_off, in_rot) in \
         output_seg = stem_name + '_' + sl.get_name()
         if peak_prop is not None:
             print '\t\tCreating the peaks container...'
+            # ps.disperse_io.save_numpy(mask, output_dir + '/hold.mrc')
             tomo_peaks = TomoPeaks(shape=mask.shape, name=output_seg, mask=mask)
+            if peak_emb:
+                h_cloud_ids, h_cloud, h_cloud_cc = list(), list(), list()
+                for idx, coord, cc in zip(cloud_ids, cloud, cloud_cc):
+                    x_c, y_c, z_c = int(round(coord[0])), int(round(coord[1])), int(round(coord[2]))
+                    if mask[x_c-1:x_c+2, y_c-1:y_c+2, z_c-1:z_c+2].sum() > 0:
+                        h_cloud_ids.append(idx)
+                        h_cloud.append(coord)
+                        h_cloud_cc.append(cc)
+                cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=np.int), np.asarray(h_cloud, dtype=np.float32)
+                cloud_cc = np.asarray(h_cloud_cc, dtype=np.float32)
             tomo_peaks.add_peaks(cloud)
             tomo_peaks.add_prop(peak_prop, n_comp=1, vals=cloud_cc)
             print '\t\t\t-Number of peaks found: ' + str(tomo_peaks.get_num_peaks())

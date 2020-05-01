@@ -54,7 +54,7 @@ output_dir = ROOT_PATH + '/graphs'
 ####### GraphMCF perameter
 
 res = 0.52  # nm/pix
-s_sig = 0.8  # 1.5
+s_sig = 1.0  # 1.5
 v_den = 0.01 # 0.0035  # 0.005 # 0.0025 # nm^3
 ve_ratio = 4  # 2
 max_len = 10 # 15 # 30 # nm
@@ -65,7 +65,7 @@ max_len = 10 # 15 # 30 # nm
 csig = 0.01
 ang_rot = None
 ang_tilt = None
-nstd = 10  # 3
+nstd = 10 # 3
 smooth = 3
 mb_dst_off = 0.  # nm
 DILATE_NITER = 2  # pix
