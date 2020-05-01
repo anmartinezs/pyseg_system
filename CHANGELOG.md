@@ -28,5 +28,5 @@
     + Updates in rec_particles.py script
     + Synthetic model (ModelFilsRSR) for filaments
 * **30/04/2020**
-    + Adding tutorial exp_somb, single oriented membrane with experimental data.
+    + Adding /code/tutorials/exp_somb tutorial for processing single oriented membranes.
     + Commenting mask imsave in code/tutorials/synth_sumb/class/plane_align_class.py
