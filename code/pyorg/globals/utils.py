@@ -1584,6 +1584,38 @@ def vect_to_zrelion(v_in, mode='active'):
 
     return rot, tilt, psi
 
+def relion_norm(tomo, mask=None, inv=True):
+    """
+    Relion tomogram normalization
+    :param tomo: input tomogram
+    :param mask: if None (default) the whole tomogram is used for computing the statistics otherwise just the masked region
+    :param inv: if True the values are inverted (default)
+    :return:
+    """
+
+    # Input parsing
+    if mask is None:
+        mask = np.ones(shape=tomo.shape, dtype=np.bool)
+
+    # Inversion
+    if inv:
+        hold_tomo = -1. * tomo
+    else:
+        hold_tomo = tomo
+
+    # Statistics
+    stat_tomo = hold_tomo[mask>0]
+    mn, st = stat_tomo.mean(), stat_tomo.std()
+
+    # Histogram equalization
+    tomo_out = np.zeros(shape=tomo.shape, dtype=np.float32)
+    if st > 0:
+        tomo_out = (hold_tomo-mn) / st
+    else:
+        print 'WARNING (relion_norm): standard deviation=' + str(st)
+
+    return tomo_out
+
 ################################################################################################
 #  Class for modelling a thresholding procedure
 #  If th_high >= th_low then everything in range [th_low, th_high] is pass the test

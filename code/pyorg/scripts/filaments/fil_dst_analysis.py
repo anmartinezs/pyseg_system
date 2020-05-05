@@ -50,7 +50,7 @@ in_wspace = None # ROOT_PATH + '/ana/fil_dsts/fils_max_fils/fils_max_fils_45_sim
 
 # Output directory
 out_dir = ROOT_PATH + '/ana/fil_dsts/fils_all'
-out_stem = 'fils_max_fils_sims_25_250_25_50'
+out_stem = 'fils_max_fils_sims_25_250_25_50_v2'
 
 # Analysis variables
 ana_nbins = 25

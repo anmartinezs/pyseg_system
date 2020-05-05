@@ -68,7 +68,7 @@ in_wspace = None # ROOT_PATH + '/pst/ampar_vs_nmdar/org/method_2/3_pre_tether_ps
 
 # Output directory
 out_dir = ROOT_PATH + '/coloc/3_preb_tether_pstb_v3/aln_15_cr30' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
-out_stem = '3_preb_tether_pstb_sim1_m1'
+out_stem = '3_preb_tether_pstb_sim5_m1'
 
 # Pre-processing variables
 pre_ssup = 5 #nm
@@ -82,7 +82,7 @@ ana_aln_dst = 15 # nm
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 1
+p_nsims = 5
 p_per = 5 # %the
 
 # Figure saving options

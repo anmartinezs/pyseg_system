@@ -1040,21 +1040,22 @@ class ModelFils(object):
         # Input parsing
         assert (length > 0) and (self.__density_2d is not None)
         len_px = int(math.ceil(length / self.__res))
-        ang_sep = pitch / 360.
-        ang_step_v = ang_sep / self.__res
+        pitch_v = pitch / self.__res
+        ang_step_v = 180. / pitch_v
 
         # Initial axial rotation
         ref_density_2d, ref_ang = self.__density_2d, 0.
         if rnd_iang:
-            ref_ang = 360. * random.random()
+            ref_ang = 180. * random.random()
             ref_density_2d = sp.ndimage.rotate(ref_density_2d, ref_ang, axes=(1, 0), reshape=False, order=3,
                                                mode='constant', cval=0.0, prefilter=True)
 
         # Loop for create the filament, a stack of axis rotated 2D density model images
         fil_stack = np.zeros(shape=(ref_density_2d.shape[0], ref_density_2d.shape[1], len_px), dtype=np.float32)
+        hold_ang = ref_ang
         for i in range(len_px):
-            ang = ref_ang + ang_step_v
-            hold_density_2d = sp.ndimage.rotate(hold_density_2d, ang, axes=(1, 0), reshape=False, order=3,
+            hold_ang += ang_step_v
+            hold_density_2d = sp.ndimage.rotate(ref_density_2d, hold_ang, axes=(1, 0), reshape=False, order=3,
                                                 mode='constant', cval=0.0, prefilter=True)
             fil_stack[:, :, i] = hold_density_2d
 
@@ -1094,19 +1095,20 @@ class ModelFils(object):
                 for y_fil in range(fil_den.shape[1]):
                     for z_fil in range(fil_den.shape[2]):
                         p_fil = np.asarray((x_fil, y_fil, z_fil), dtype=np.float32)
-                        p_fil_t = R * p_fil + shift
+                        p_fil_t = R.dot(p_fil) + shift
+                        p_fil_t = np.asarray((p_fil_t[0, 0], p_fil_t[0, 1], p_fil_t[0, 2]))
                         # Tomogram point hits
                         p_fil_t_xl, p_fil_t_xh = int(math.floor(p_fil_t[0])), int(math.ceil(p_fil_t[0]))
                         p_fil_t_yl, p_fil_t_yh = int(math.floor(p_fil_t[1])), int(math.ceil(p_fil_t[1]))
                         p_fil_t_zl, p_fil_t_zh = int(math.floor(p_fil_t[2])), int(math.ceil(p_fil_t[2]))
-                        p_fil_t1 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zl), dtype=np.float32)
-                        p_fil_t2 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zl), dtype=np.float32)
-                        p_fil_t3 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zl), dtype=np.float32)
-                        p_fil_t4 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zl), dtype=np.float32)
-                        p_fil_t5 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zh), dtype=np.float32)
-                        p_fil_t6 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zh), dtype=np.float32)
-                        p_fil_t7 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zh), dtype=np.float32)
-                        p_fil_t8 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zh), dtype=np.float32)
+                        p_fil_t1 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zl), dtype=np.int32)
+                        p_fil_t2 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zl), dtype=np.int32)
+                        p_fil_t3 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zl), dtype=np.int32)
+                        p_fil_t4 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zl), dtype=np.int32)
+                        p_fil_t5 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zh), dtype=np.int32)
+                        p_fil_t6 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zh), dtype=np.int32)
+                        p_fil_t7 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zh), dtype=np.int32)
+                        p_fil_t8 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zh), dtype=np.int32)
                         # For each tomogram hit interpolate the gray value from the reference filament dansiy
                         for p_fil_ti in (p_fil_t1, p_fil_t2, p_fil_t3, p_fil_t4, p_fil_t5, p_fil_t6, p_fil_t7, p_fil_t7,
                                          p_fil_t8):
@@ -1114,20 +1116,21 @@ class ModelFils(object):
                                 and (p_fil_ti[0] < tomo.shape[0]) and (p_fil_ti[1] < tomo.shape[1]) \
                                     and (p_fil_ti[2] < tomo.shape[2]):
                                 if not tomo_lut[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]]:
-                                    p_fil_b = R_i * (p_fil_ti - shift)
+                                    p_fil_b = R_i.dot(p_fil_ti - shift)
+                                    p_fil_b = np.asarray((p_fil_b[0, 0], p_fil_b[0, 1], p_fil_b[0, 2]))
                                     den = trilin3d(fil_den, p_fil_b)
                                     tomo[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]] = den
                                     tomo_lut[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]] = True
 
-        # Add the noise to fit the SNR
-        mn = tomo[tomo_lut].mean()
-        sg_bg = mn / snr
-        tomo += np.random.normal(mn, sg_bg, size=tomo.shape)
-        tomo = lin_map(tomo, tomo.max(), tomo.min())
-
-        # Add the missing wedge
-        if mwa is not None:
-            tomo = add_mw(tomo, mwa, tilt_ang=mwta, norm='01')
+        # # Add the noise to fit the SNR
+        # mn = tomo[tomo_lut].mean()
+        # sg_bg = mn / snr
+        # tomo += np.random.normal(mn, sg_bg, size=tomo.shape)
+        # tomo = lin_map(tomo, tomo.max(), tomo.min())
+        #
+        # # Add the missing wedge
+        # if mwa is not None:
+        #     tomo = add_mw(tomo, mwa, tilt_ang=mwta, norm='01')
 
         # Return the result
         return tomo
@@ -1153,15 +1156,16 @@ class ModelFils(object):
 class ModelFilsRSR(ModelFils):
 
 
-    def __init__(self, voi=None, res=1, rad=1, shifts=[0, 100], rots=[0, 180]):
+    def __init__(self, voi=None, res=1, rad=1, shifts=[0, 100], rots=[0, 180], density_2d=None):
         """
         :param voi: VOI surface
         :param res: tomogram pixel size (default 1)
         :param rad: filament radius (default 1)
         :param shifts: filament range (2-tuple) for shiftings for each dimension in nm (default [0, 100])
         :param rots: angular rotation (2-tuple) range for three angles in degs (default [0, 180])
+        :param density_2d: axial orthogonal 2D density projection
         """
-        super(ModelFilsRSR, self).__init__(voi, res, rad)
+        super(ModelFilsRSR, self).__init__(voi, res, rad, density_2d)
         self._Model__type_name = 'FilsRSR'
         assert hasattr(shifts, '__len__') and (len(shifts) == 2)
         self.__rg_shifts = shifts
