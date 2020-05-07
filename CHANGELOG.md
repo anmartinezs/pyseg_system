@@ -30,3 +30,6 @@
 * **30/04/2020**
     + Adding /code/tutorials/exp_somb tutorial for processing single oriented membranes.
     + Commenting mask imsave in code/tutorials/synth_sumb/class/plane_align_class.py
+* **06/05/2020**
+    + Adding membrane signal suppression code/tutorials/exp_somb/post_rec_particles.py
+    + Bug fixed for code/tutorials/exp_somb/post_rec_particles.py for non-splitting mode

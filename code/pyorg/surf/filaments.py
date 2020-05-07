@@ -98,6 +98,18 @@ class Filament(object):
 
     #### External functionality
 
+    def gen_straight(self):
+        """
+        Generates a straight version of this Filament with three samples
+        :return: the generated Filament
+        """
+        coords = self.get_coords()
+        coord_s, coord_e = coords[0], coords[-1]
+        coord_m = .5 * (coord_e - coord_s)
+        coord_m += coord_s
+        return Filament(np.asarray((coord_s, coord_m, coord_e), dtype=np.float32))
+
+
     def add_vtp_global_attribute(self, name, vtk_type, value):
         """
         Add an attribute with the same value for all cells

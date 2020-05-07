@@ -1168,6 +1168,30 @@ def rot_mat_eu_relion(A, deg=True):
     else:
         return alpha, beta, gamma
 
+def rot_mat_2_vectors(v_a, v_b):
+    """
+    Compute the rotation matrix to transform v_a into v_b
+    :param v_a: origin vector
+    :param v_b: destination vector
+    :return: the rotation matrix
+    """
+
+    # Input parsing
+    n_a, n_b = math.sqrt((v_a * v_a).sum()), math.sqrt((v_b * v_b).sum())
+    if (n_a <= 0) or (n_b <= 0):
+        raise ValueError
+    v_a_n, v_b_n = v_a / n_a, v_b / n_b
+
+    # Computing the matrix
+    v = np.cross(v_a_n, v_b_n)
+    c = np.dot(v_a_n, v_b_n)
+    c2 = 1. / (1. - c)
+    I = np.identity(3)
+    V = np.matrix([[0., -v[2], v[1]], [v[2], 0., -v[0]], [-v[1], v[0], 0.]])
+    R = I + V + V*V*c2
+
+    return R
+
 # Computes quaternion from an input rotation matrix
 # Code extracted: from http://www.lfd.uci.edu/~gohlke/code/transformations.py.html
 # rot: rotation numpy matrix

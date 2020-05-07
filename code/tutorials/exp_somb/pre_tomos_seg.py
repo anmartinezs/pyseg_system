@@ -51,10 +51,10 @@ ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
 in_star = ROOT_PATH + '/pre/in/mb_seg_single_oriented.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/pre/mbo'
+out_dir = ROOT_PATH + '/pre/mbo_nosplit'
 
 # Subvolume splitting settings
-sp_split = (2, 2, 1) # None
+sp_split = None # (2, 2, 1)
 sp_off_voxels = 30 # vox
 
 # Membrane segmentation
@@ -239,9 +239,11 @@ for row in range(gl_star.get_nrows()):
             svol_seg[svol_dst < sg_mb_thick] = MB_LBL
         else:
             svol_dst = signed_distance_2d(svol_mb, res=1, del_b=True, mode_2d=True, set_point=seg_center)
-            svol_seg[svol_dst < 0], svol_seg[svol_dst > 0] = MB_NEIGH_EXT, MB_NEIGH_INT
+            svol_seg[(svol_dst > 0) & (svol_dst < sg_mb_neigh + sg_mb_thick)] = MB_NEIGH_INT
+            svol_seg[(svol_dst < 0) & (svol_dst > -1. * (sg_mb_neigh + sg_mb_thick))] = MB_NEIGH_EXT
             svol_seg[np.absolute(svol_dst) < sg_mb_thick] = MB_LBL
             svol_seg[svol_dst == 0] = 0
+            svol_seg[svol_mb > 0] = MB_LBL
         out_svol = out_seg_dir + '/' + out_ref_stem + '_tid_' + str(tomo_id) + '.mrc'
         out_seg = out_seg_dir + '/' + out_ref_stem + '_tid_' + str(tomo_id) + '_seg.mrc'
         ps.disperse_io.save_numpy(svol, out_svol)

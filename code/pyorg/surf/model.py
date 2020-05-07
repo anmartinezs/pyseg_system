@@ -18,7 +18,8 @@ import ctypes
 import multiprocessing as mp
 from pyorg import pexceptions
 from pyorg import disperse_io
-from pyorg.globals import unpickle_obj, clean_dir, add_mw, vect_to_zrelion, rot_mat_relion, trilin3d, lin_map
+from pyorg.globals import unpickle_obj, clean_dir, add_mw, vect_to_zrelion, rot_mat_relion, trilin3d, lin_map, \
+                        rot_mat_2_vectors, rot_mat_eu_relion, relion_norm
 from surface import ListTomoParticles, TomoParticles, Particle, ParticleL
 from filaments import TomoFilaments, Filament
 try:
@@ -1061,76 +1062,68 @@ class ModelFils(object):
 
         return fil_stack
 
-    def gen_tomo_straight_densities(self, ref_fils, pitch=0, mwa=None, mwta=0, snr=None):
+    def gen_tomo_straight_densities(self, ref_fils, pitch=0, mwa=None, mwta=60, snr=None):
         """
         Generates a density tomogram with followin the filament network introduced
         :param ref_fils: list of reference filaments
         :param mwa: missing wedge angle in degrees (default None)
-        :param mwta: missing wedge tilt angle (default 0)
+        :param mwta: maximum missing wedge tilt angle (default 0)
         :param snr: SNR of the output tomogram (default None, then SNR=inf, no noise)
         :return: the simulated density tomogram
         """
 
         # Initialization
-        tomo = np.zeros(shape=self.__voi.shape, dtype=np.float16)
+        import pyto
+        tomo = np.zeros(shape=self.__voi.shape, dtype=np.float32)
         tomo_lut = np.zeros(shape=self.__voi.shape, dtype=np.bool)
 
         # Loop for filament
         for fil in ref_fils:
 
-            # Create the straight filament density model and the transform matrix
+            # Create the straight filament density model aligned with X-axis
             coords = fil.get_coords()
             v_fil = coords[-1] - coords[0]
             v_fil_len = math.sqrt((v_fil * v_fil).sum())
             v_fil_n = v_fil / v_fil_len
-            fil_den = self.gen_fil_straight_density(v_fil_len, pitch=pitch, rnd_iang=True)
-            rot, tilt, psi = vect_to_zrelion(v_fil_n, mode='active')
-            R = rot_mat_relion(rot, tilt, psi, deg=True)
-            R_i = R.T
-            fil_cent = np.asarray((.5 * self.__density_2d.shape[0], .5 * self.__density_2d.shape[1], v_fil_len*.5))
-            shift = coords[0] - fil_cent
+            fil_den = self.gen_fil_straight_density(v_fil_len, pitch=pitch, rnd_iang=True).swapaxes(2, 0)
+            hold_tomo = np.zeros(shape=tomo.shape, dtype=np.float32)
+            max_x = min(tomo.shape[0], fil_den.shape[0])
+            max_y = min(tomo.shape[1], fil_den.shape[1])
+            max_z = min(tomo.shape[2], fil_den.shape[2])
+            hold_tomo[:max_x, :max_y, :max_z] = fil_den
+            # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold1.mrc')
 
-            # For each filament point project to tomogram
-            for x_fil in range(fil_den.shape[0]):
-                for y_fil in range(fil_den.shape[1]):
-                    for z_fil in range(fil_den.shape[2]):
-                        p_fil = np.asarray((x_fil, y_fil, z_fil), dtype=np.float32)
-                        p_fil_t = R.dot(p_fil) + shift
-                        p_fil_t = np.asarray((p_fil_t[0, 0], p_fil_t[0, 1], p_fil_t[0, 2]))
-                        # Tomogram point hits
-                        p_fil_t_xl, p_fil_t_xh = int(math.floor(p_fil_t[0])), int(math.ceil(p_fil_t[0]))
-                        p_fil_t_yl, p_fil_t_yh = int(math.floor(p_fil_t[1])), int(math.ceil(p_fil_t[1]))
-                        p_fil_t_zl, p_fil_t_zh = int(math.floor(p_fil_t[2])), int(math.ceil(p_fil_t[2]))
-                        p_fil_t1 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zl), dtype=np.int32)
-                        p_fil_t2 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zl), dtype=np.int32)
-                        p_fil_t3 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zl), dtype=np.int32)
-                        p_fil_t4 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zl), dtype=np.int32)
-                        p_fil_t5 = np.asarray((p_fil_t_xl, p_fil_t_yl, p_fil_t_zh), dtype=np.int32)
-                        p_fil_t6 = np.asarray((p_fil_t_xh, p_fil_t_yl, p_fil_t_zh), dtype=np.int32)
-                        p_fil_t7 = np.asarray((p_fil_t_xl, p_fil_t_yh, p_fil_t_zh), dtype=np.int32)
-                        p_fil_t8 = np.asarray((p_fil_t_xh, p_fil_t_yh, p_fil_t_zh), dtype=np.int32)
-                        # For each tomogram hit interpolate the gray value from the reference filament dansiy
-                        for p_fil_ti in (p_fil_t1, p_fil_t2, p_fil_t3, p_fil_t4, p_fil_t5, p_fil_t6, p_fil_t7, p_fil_t7,
-                                         p_fil_t8):
-                            if (p_fil_ti[0] >= 0) and (p_fil_ti[1] >= 0) and (p_fil_ti[2] >= 0) \
-                                and (p_fil_ti[0] < tomo.shape[0]) and (p_fil_ti[1] < tomo.shape[1]) \
-                                    and (p_fil_ti[2] < tomo.shape[2]):
-                                if not tomo_lut[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]]:
-                                    p_fil_b = R_i.dot(p_fil_ti - shift)
-                                    p_fil_b = np.asarray((p_fil_b[0, 0], p_fil_b[0, 1], p_fil_b[0, 2]))
-                                    den = trilin3d(fil_den, p_fil_b)
-                                    tomo[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]] = den
-                                    tomo_lut[p_fil_ti[0], p_fil_ti[1], p_fil_ti[2]] = True
+            # Computes the transform matrix and vector
+            c_fil, c_ref = .5*v_fil + coords[0], .5 * np.asarray(fil_den.shape, dtype=np.float32)
+            t_fil = c_fil - c_ref
+            R = rot_mat_2_vectors(np.asarray((1., 0., 0.), dtype=np.float32), v_fil_n)
+            rot, tilt, psi = rot_mat_eu_relion(R, deg=True)
+            angs = np.asarray((rot, tilt, psi), dtype=np.float32)
 
-        # # Add the noise to fit the SNR
-        # mn = tomo[tomo_lut].mean()
-        # sg_bg = mn / snr
-        # tomo += np.random.normal(mn, sg_bg, size=tomo.shape)
-        # tomo = lin_map(tomo, tomo.max(), tomo.min())
-        #
-        # # Add the missing wedge
-        # if mwa is not None:
-        #     tomo = add_mw(tomo, mwa, tilt_ang=mwta, norm='01')
+            # Apply the 3D rigid transformation
+            hold_tomo = np.roll(hold_tomo, np.asarray(np.round(t_fil), dtype=np.int), axis=(0, 1, 2))
+            # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold2.mrc')
+            r3d_r = pyto.geometry.Rigid3D()
+            r3d_r.q = r3d_r.make_r_euler(angles=np.radians(angs), mode='zyz_in_active')
+            hold_tomo = r3d_r.transformArray(hold_tomo, origin=c_fil, order=1, prefilter=True)
+            # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold3.mrc')
+
+            # Add the new density filament
+            tomo += hold_tomo
+            tomo_lut += (hold_tomo != 0)
+
+        # Add the noise to fit the SNR
+        disperse_io.save_numpy(tomo_lut, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold2.mrc')
+        tomo = lin_map(tomo, 0, 1)
+        mn = tomo[tomo_lut].mean()
+        sg_bg = mn / snr
+        tomo += np.random.normal(mn, sg_bg, size=tomo.shape)
+        mn = tomo.mean()
+        tomo = -1. * (tomo - mn) / tomo.std()
+
+        # Add the missing wedge
+        if mwa is not None:
+            tomo = add_mw(tomo, mwa, tilt_ang=mwta, norm='01')
 
         # Return the result
         return tomo
@@ -1234,6 +1227,93 @@ class ModelFilsRSR(ModelFils):
 
             # Filament transformations
             hold_fil = Filament(fil.get_coords())
+            fil_mid = hold_fil.get_middle_coord()
+            hold_fil.translate(-1.*fil_mid[0], -1.*fil_mid[1], -1.*fil_mid[2])
+            hold_fil.rotate(rot_rnd, tilt_rnd, psi_rnd)
+            hold_fil.translate(fil_mid[0], fil_mid[1], fil_mid[2])
+            hold_fil.translate(x_rnd, y_rnd, z_rnd)
+
+            # Try to insert
+            try:
+                tomo.insert_filament(hold_fil, check_bounds=check_bounds, check_inter=check_inter)
+            except pexceptions.PySegInputError:
+                continue
+
+            # Check termination condition
+            # fils_lut[rnd_idx] = True
+            count_added += 1
+            if count_added >= n_fils:
+                break
+
+        # Check all filamensts has been placed
+        if count_added < n_fils:
+            print 'WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
+                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).'
+
+        return tomo
+
+    def gen_instance_straights(self, tomo_fname, fils, mode='full', max_ntries=100, max_fils=None):
+        """
+        Generates straight filaments in a TomoFilaments with this model
+        :param tomo_fname: name for the simulated tomogram
+        :param fils: reference filaments
+        :param mode: mode for embedding, valid: 'full' and 'none'
+        :param max_ntries: if not None then it set the maximum number of tries to fit each simulated filament
+        :param max_fils: if not None (default), otherwise sets the maximum number of filaments to simulate
+        :return: a TomoFilaments object with simulated instance
+        """
+
+        # Seeding random generator needed for multiprocessing
+        timestamp = time.time()
+        np.random.seed(seed=int(str(math.fabs(int(timestamp)-timestamp))[2:9])) # getting second decimals
+
+        # Initialization
+        TomoFilaments(tomo_fname, -1, voi=self._ModelFils__voi, res=self._ModelFils__res, rad=self._ModelFils__rad)
+        tomo = TomoFilaments(tomo_fname, -1, self._ModelFils__voi)
+        if mode == 'full':
+            check_bounds, check_inter = True, self._ModelFils__rad / self._ModelFils__res
+        elif mode == 'none':
+            check_bounds, check_inter = False, False
+        else:
+            error_msg = 'No valid input mode: ' + str(mode)
+            raise pexceptions.PySegInputError(expr='gen_instance_straights (ModelFilsRSR)', msg=error_msg)
+
+        # Get the reference filaments
+        if max_fils is None:
+            n_fils = len(fils)
+        else:
+            n_fils = max_fils
+        n_tries = n_fils * max_ntries
+        rnd_ids_fils = np.random.randint(0, len(fils), size=n_tries)
+        # fils_lut = np.zeros(shape=len(fils), dtype=np.bool)
+
+        # Generations loop
+        count_added = 0
+        for n_try in range(n_tries):
+
+            # Get the filament
+            rnd_idx = rnd_ids_fils[n_try]
+            # if fils_lut[rnd_idx]:
+            #     continue
+            fil = fils[rnd_idx]
+
+            # Generate random shifting and rotation
+            x_rnd_sgn, y_rnd_sgn, z_rnd_sgn = np.random.randint(-1, 2, size=3)
+            if x_rnd_sgn == 0:
+                x_rnd_sgn = 1
+            if y_rnd_sgn == 0:
+                y_rnd_sgn = 1
+            if z_rnd_sgn == 0:
+                z_rnd_sgn = 1
+            x_rnd = x_rnd_sgn * random.uniform(self.__rg_shifts[0], self.__rg_shifts[1])
+            y_rnd = y_rnd_sgn * random.uniform(self.__rg_shifts[0], self.__rg_shifts[1])
+            z_rnd = z_rnd_sgn * random.uniform(self.__rg_shifts[0], self.__rg_shifts[1])
+            rot_rnd = random.uniform(self.__rg_rots[0], self.__rg_rots[1])
+            tilt_rnd = random.uniform(self.__rg_shifts[0], self.__rg_rots[1])
+            psi_rnd = random.uniform(self.__rg_rots[0], self.__rg_rots[1])
+
+            # Filament transformations
+            hold_fil = fil.gen_straight()
             fil_mid = hold_fil.get_middle_coord()
             hold_fil.translate(-1.*fil_mid[0], -1.*fil_mid[1], -1.*fil_mid[2])
             hold_fil.rotate(rot_rnd, tilt_rnd, psi_rnd)

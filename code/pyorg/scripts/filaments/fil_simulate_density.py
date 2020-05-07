@@ -42,7 +42,7 @@ in_star = ROOT_PATH + '/ltomos/fil_den/fil_den_ltomos.star'
 
 # Output directory
 out_dir = ROOT_PATH + '/sim_den/test'
-out_stem = 'test_ns2'
+out_stem = 'test_ns5'
 
 # Filament settings
 fl_den_2d = ROOT_PATH + '/models/emd_0148_2D_1.756nm.mrc'
@@ -50,12 +50,13 @@ fl_den_inv = True
 fl_pitch = 117 # nm
 
 # Tomogram settings
-tm_snr_rg = (0.05, 0.1)
-tm_mw = 60 # degs
-tm_mwta = 0 # degs
+tm_snr_rg = (0.3, 0.4)
+tm_mw = 0 # degs
+tm_mwta = 60 # degs
 
 # Simulation settings
-sm_ns = 2 # 200
+sm_ns = 5 # 200
+sm_max_fils = None # 100
 
 ########################################################################################
 # MAIN ROUTINE
@@ -85,15 +86,16 @@ else:
 if tm_mw is None:
     print '\t\t-No missing wedge.'
 else:
-    print '\t\t-Maximum angle for missing wedge: ' + str(tm_mw) + ' deg'
-    print '\t\t-Tilt angle in XY plane: ' + str(tm_mwta) + ' deg'
+    print '\t\t-Angle for missing wedge: ' + str(tm_mw) + ' deg'
+    print '\t\t-Maximum tilt angle in XY plane: ' + str(tm_mwta) + ' deg'
 print '\tSimulation settings: '
 if sm_ns <= 0:
     print 'ERROR: The number of input simulations must be greater than zero: ' + str(sm_ns)
     print 'Terminated. (' + time.strftime("%c") + ')'
     sys.exit(-1)
-else:
-    print '\t\t-Number of simulations per input filament network: ' + str(sm_ns)
+print '\t\t-Number of simulations per input filament network: ' + str(sm_ns)
+if sm_max_fils is None:
+    print '\t\t-Maximum number of filament to instert per tomogram: ' + str(sm_max_fils)
 print ''
 
 ######### Process
@@ -173,29 +175,33 @@ for lkey in lists_hash.itervalues():
 
         print '\tPre-procesing the input 2D density model: '
         model_2D = disperse_io.load_tomo(fl_den_2d)
-        model_2D = relion_norm(model_2D, mask=None, inv=fl_den_inv)
-        out_den = out_dir + '/' + tkey.replace('/', '_') + '_fl_den_2d.mrc'
+        # model_2D = relion_norm(model_2D, mask=None, inv=fl_den_inv)
+        out_den = out_stem_dir + '/' + tkey.replace('/', '_') + '_fl_den_2d.mrc'
         print '\t\t-Model stored in: ' + out_den
         disperse_io.save_numpy(model_2D, out_den)
 
         print '\t\t\t\t\t-Computing filament to membrane nearest distances...'
         hold_arr_dsts = ltomo.compute_fils_seg_dsts()
-        out_fils = out_dir + '/' + tkey.replace('/', '_') + '_fils.vtp'
+        out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_fils.vtp'
         disperse_io.save_vtp(ltomo.gen_filaments_vtp(), out_fils)
 
         print '\t\t\t\t\t-Simulating the density tomogrms:'
         model = ModelFilsRSR(ltomo.get_voi(), res=ltomo.get_resolution(), rad=ltomo.get_fils_radius(),
                              shifts=[0, 0], rots=[0, 0], density_2d=model_2D[:, :, 0])
         den_model = model.gen_fil_straight_density(fl_pitch, pitch=fl_pitch, rnd_iang=0)
-        out_den = out_dir + '/' + tkey.replace('/', '_') + '_fl_den.mrc'
+        out_den = out_stem_dir + '/' + tkey.replace('/', '_') + '_fl_den.mrc'
         disperse_io.save_numpy(den_model, out_den)
         for i in range(sm_ns):
             snr = np.random.uniform(tm_snr_rg[0], tm_snr_rg[1])
-            dim_den = model.gen_tomo_straight_densities(ltomo.get_filaments(), pitch=fl_pitch, mwa=tm_mw, mwta=tm_mwta,
+            print '\t\t\t\t\t\t+SNR: ' + str(snr)
+            fil_sim = model.gen_instance_straights('sim_' + str(i), ltomo.get_filaments(), mode='full', max_ntries=100,
+                                                   max_fils=sm_max_fils)
+            out_fil = out_stem_dir + '/' + tkey.replace('/', '_') + '_sim_' + str(i) + '_fil.vtp'
+            disperse_io.save_vtp(fil_sim.gen_filaments_vtp(), out_fil)
+            dim_den = model.gen_tomo_straight_densities(fil_sim.get_filaments(), pitch=fl_pitch, mwa=tm_mw, mwta=tm_mwta,
                                                         snr=snr)
-            out_den = out_dir + '/' + tkey.replace('/', '_') + '_sim_' + str(i) + '_den.mrc'
+            out_den = out_stem_dir + '/' + tkey.replace('/', '_') + '_sim_' + str(i) + '_den.mrc'
             disperse_io.save_numpy(dim_den, out_den)
-
 
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
 
