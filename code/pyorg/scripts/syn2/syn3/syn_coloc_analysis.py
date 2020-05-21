@@ -63,17 +63,17 @@ key_5, l_id5 = 'ampar', 0
 in_star_6 = ROOT_PATH + '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star'
 key_6, l_id6 = 'nmdar', 0
 in_tethers_csv = ROOT_PATH + '/../../syn/sub/relion/fils/pre/ref_nomb_1_clean/py_scripts/syn_num_tethers_2.csv'
-in_part = ROOT_PATH + '/../../syn/sub/relion/fils/pre/vtps/sph_rad_7.31_surf.vtp'
-in_wspace = None # ROOT_PATH + '/pst/ampar_vs_nmdar/org/method_2/3_pre_tether_pst/aln_15_cr10/3_pre_tether_pst_sim20_wspace.pkl'
+in_part = ROOT_PATH + '/../../syn/sub/relion/fils/pre/vtps/sph_rad_3.7_surf.vtp'
+in_wspace = ROOT_PATH + '/coloc/3_pre_tether_pst/aln_15_cr30_xd5nm/3_pre_tether_pst_sim5_m1_wspace.pkl'
 in_tomo_res = ROOT_PATH + '/../rec/syn_scale_tomos.star' # None
 
 # Output directory
 out_dir = ROOT_PATH + '/coloc/3_pre_tether_pst/aln_15_cr30_xd5nm' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
-out_stem = '3_pre_tether_pst_sim200_m1'
+out_stem = '3_pre_tether_pst_sim5_m1'
 
 # Pre-processing variables
-pre_ssup = 10 #nm
-pre_min_parts = 0
+pre_ssup = 5 #nm
+pre_min_parts = 1
 
 # Analysis variables
 ana_res = 0.684 # nm/voxel
@@ -84,7 +84,7 @@ ana_aln_dst = 15 # nm
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 200
+p_nsims = 5
 p_per = 5 # %the
 
 # Figure saving options
@@ -387,30 +387,32 @@ if in_wspace is None:
         print '\t\t\t\t-Computing columns...'
         # try:
         cfinder = ColumnsFinder(ltomo_1, ltomo_2, ltomo_3, ana_col_rad_v, ana_aln_dst_v, clst_method=ana_clst_method)
-        if cfinder.get_num_sub_columns() == 0:
-            print 'WARNING: No subcolumns found, continuing...'
-            continue
+        # if cfinder.get_num_sub_columns() == 0:
+        #     print 'WARNING: No subcolumns found, continuing...'
+        #     continue
 
-        print '\tUpdating column particles STAR files...'
-        cfinder.add_columns_to_star(part_star_0, tkey, layer=None)
-        cfinder.add_columns_to_star(part_star_1, tkey, layer=1)
-        cfinder.add_columns_to_star(part_star_2, tkey, layer=2)
-        cfinder.add_columns_to_star(part_star_3, tkey, layer=3)
-        cfinder.add_columns_to_star(part_star_4, tkey, layer=None, mode='parts')
-        cfinder.add_columns_to_star(part_star_5, tkey, layer=1, mode='parts')
-        cfinder.add_columns_to_star(part_star_6, tkey, layer=2, mode='parts')
-        cfinder.add_columns_to_star(part_star_7, tkey, layer=3, mode='parts')
-        cfinder.add_columns_to_star(part_star_8, tkey, layer=None, mode='scols')
-        cfinder.add_columns_to_star(part_star_9, tkey, layer=1, mode='scols')
-        cfinder.add_columns_to_star(part_star_10, tkey, layer=2, mode='scols')
-        cfinder.add_columns_to_star(part_star_11, tkey, layer=3, mode='scols')
+        if cfinder.get_num_sub_columns() > 0:
 
-        out_scol_vtp = out_tomos_dir + '/' + tkey_short + '_scol.vtp'
-        print '\t\t\t\t-Storing the sub-columns built in: ' + out_scol_vtp
-        disperse_io.save_vtp(cfinder.gen_subcolumns_vtp(), out_scol_vtp)
-        out_col_vtp = out_tomos_dir + '/' + tkey_short + '_col.vtp'
-        print '\t\t\t\t-Storing the columns built in: ' + out_col_vtp
-        disperse_io.save_vtp(cfinder.gen_columns_vtp(), out_col_vtp)
+            print '\tUpdating column particles STAR files...'
+            cfinder.add_columns_to_star(part_star_0, tkey, layer=None)
+            cfinder.add_columns_to_star(part_star_1, tkey, layer=1)
+            cfinder.add_columns_to_star(part_star_2, tkey, layer=2)
+            cfinder.add_columns_to_star(part_star_3, tkey, layer=3)
+            cfinder.add_columns_to_star(part_star_4, tkey, layer=None, mode='parts')
+            cfinder.add_columns_to_star(part_star_5, tkey, layer=1, mode='parts')
+            cfinder.add_columns_to_star(part_star_6, tkey, layer=2, mode='parts')
+            cfinder.add_columns_to_star(part_star_7, tkey, layer=3, mode='parts')
+            cfinder.add_columns_to_star(part_star_8, tkey, layer=None, mode='scols')
+            cfinder.add_columns_to_star(part_star_9, tkey, layer=1, mode='scols')
+            cfinder.add_columns_to_star(part_star_10, tkey, layer=2, mode='scols')
+            cfinder.add_columns_to_star(part_star_11, tkey, layer=3, mode='scols')
+
+            out_scol_vtp = out_tomos_dir + '/' + tkey_short + '_scol.vtp'
+            print '\t\t\t\t-Storing the sub-columns built in: ' + out_scol_vtp
+            disperse_io.save_vtp(cfinder.gen_subcolumns_vtp(), out_scol_vtp)
+            out_col_vtp = out_tomos_dir + '/' + tkey_short + '_col.vtp'
+            print '\t\t\t\t-Storing the columns built in: ' + out_col_vtp
+            disperse_io.save_vtp(cfinder.gen_columns_vtp(), out_col_vtp)
 
         print '\t\t\t\t-Count the number of particles...'
         tomos_ntet[tkey] = ltomo_4.get_num_particles()

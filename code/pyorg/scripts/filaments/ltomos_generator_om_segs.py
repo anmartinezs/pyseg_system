@@ -28,11 +28,11 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_fil_new.star' # '/in/in_ltomos_fil_ctrl_omsegs.star' # '/in/in_ltomos_omsegs.star'
+in_star = ROOT_PATH + '/in/in_ltomos_omsegs.star' # '/in/in_ltomos_fils_new_omsegs.star' # '/in/in_ltomos_fil_ctrl_omsegs.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos_omsegs/omsegs_fil_new' # '/ltomos_omsegs/omsegs_fil_ctrl' # '/ltomos_omsegs/omsegs_1' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'fil_new' # 'fil_ctrl' # 'omsegs' # 'pre'
+out_dir = ROOT_PATH + '/ltomos_omsegs/omsegs_all' # '/ltomos_omsegs/omsegs_fil_new' # '/ltomos_omsegs/omsegs_fil_ctrl' # '/ltomos_omsegs/omsegs_1' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'all' # 'fil_ctrl' # 'omsegs' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 1 # segmented label

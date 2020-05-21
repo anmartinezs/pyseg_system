@@ -45,23 +45,23 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
-ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/carsten'
 
 # Input STAR file
-in_star = ROOT_PATH + '/rec/particles_rln.star' # '/class/mb/mb_merge.star'
-in_mask = ROOT_PATH + '/masks/mask_cyl_100_37_85_25.mrc'
-in_mask_mb = ROOT_PATH + '/masks/mask_cyl_100_37_53_25_r.mrc'
+in_star = ROOT_PATH + '/class/db_mb_mbprot/merge_db_mb_mbprot2.star' # '/class/mb/mb_merge.star' # '/rec/particles_rln.star' #
+in_mask = ROOT_PATH + '/masks/mask_cyl_200_75_165_45.mrc' # '/masks/mask_cyl_100_37_85_25.mrc'
+in_mask_mb = ROOT_PATH + '/masks/mask_cyl_200_75_165_50_db_mb.mrc' # '/masks/mask_cyl_100_37_53_25_r.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/rec/particles_noali_post_mb'
-out_star = ROOT_PATH + '/rec/particles_noali_post_mb.star'
+out_part_dir = ROOT_PATH + '/rec/particles_db_mb_mbprot2_post_mb0.2' # '/rec/particles_ali_post_mb'
+out_star = ROOT_PATH + '/rec/particles_db_mb_mbprot2_post_mb0.2.star' # '/rec/particles_ali_post_mb.star'
 
 ####### Particles pre-processing settings
 
 do_ang_prior = ['Tilt', 'Psi'] # ['Rot', 'Tilt', 'Psi']
 do_ang_rnd = ['Rot']
-do_mb_sf = 0.01
+do_mb_sf = 0.2 # 0.5
 
 ####### Multiprocessing settings
 
@@ -105,10 +105,10 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     do_mb_sf = settings.do_mb_sf
     rln_star = copy.deepcopy(sh_star)
     mask = ps.disperse_io.load_tomo(in_mask, mmap=False)
-    if in_mask is not None:
+    if in_mask_mb is not None:
         mask_mb = ps.disperse_io.load_tomo(in_mask_mb, mmap=False)
         mask_mb = lin_map(mask_mb, lb=1, ub=do_mb_sf)
-        ps.disperse_io.save_numpy(mask_mb, '/fs/pool/pool-ruben/antonio/shiwei/hold.mrc')
+        # ps.disperse_io.save_numpy(mask_mb, '/fs/pool/pool-ruben/antonio/shiwei/hold.mrc')
 
     # print '\tLoop for particles: '
     count, n_rows = 0, len(rows)
@@ -162,7 +162,8 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
         svol_cent = np.asarray((int(.5 * svol_sp[0]), int(.5 * svol_sp[1]), int(.5 * svol_sp[2])), dtype=np.float32)
         svol = r3d.transformArray(svol, origin=svol_cent, order=3, prefilter=True)
         # Membrane suppression
-        svol *= mask_mb
+        if in_mask_mb is not None:
+            svol *= mask_mb
         # Adding noise
         stat_vol = svol[mask > 0]
         mn, st = stat_vol.mean(), stat_vol.std()

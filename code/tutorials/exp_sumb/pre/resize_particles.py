@@ -50,15 +50,15 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex'
 
 # Input STAR file
-in_star = ROOT_PATH + '/syn2/rec/pre/root_v5_rot_rnd_prior_post.star' # '/syn2/rec/pst/root_v5_rot_rnd_prior_post.star' # '/pick/out/fil_mb_sources_to_no_mb_targets_net_parts.star'
+in_star = ROOT_PATH + '/syn2/rec/pre/particles_pre.star' # '/syn2/rec/pre/root_v5_rot_rnd_prior_post.star' # '/syn2/rec/pst/root_v5_rot_rnd_prior_post.star' # '/pick/out/fil_mb_sources_to_no_mb_targets_net_parts.star'
 
 # Input STAR file
 in_star_tomos = ROOT_PATH + '/syn3/rec/syn_scale_tomos.star'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/syn3/rec/pre/particles_pre_root_v6_scaled' # '/syn3/rec/pst/particles_pst_root_v6_scaled'
-out_star = ROOT_PATH + '/syn3/rec/pre/particles_pre_root_v6_scaled.star' # '/syn3/rec/pst/particles_pst_root_v6_scaled.star'
+out_part_dir = ROOT_PATH + '/syn3/rec/pre/particles_pre_scaled' # '/syn3/rec/pre/particles_pre_root_v6_scaled' # '/syn3/rec/pst/particles_pst_root_v6_scaled'
+out_star = ROOT_PATH + '/syn3/rec/pre/particles_pre_scaled.star' # '/syn3/rec/pre/particles_pre_root_v6_scaled.star' # '/syn3/rec/pst/particles_pst_root_v6_scaled.star'
 
 ####### Particles pre-processing settings
 

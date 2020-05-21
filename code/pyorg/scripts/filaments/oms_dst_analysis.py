@@ -46,12 +46,12 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_fil_new/fil_new_ltomos.star' # '/ltomos_omsegs/omsegs_fil_ctrl/fil_ctrl_ltomos.star' # '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
+in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_all/all_ltomos.star' # '/ltomos_omsegs/omsegs_fil_new/fil_new_ltomos.star' # '/ltomos_omsegs/omsegs_fil_ctrl/fil_ctrl_ltomos.star' # '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
 in_wspace = None # ROOT_PATH + '/ana/oms_dsts/oms_fil_ctrl/oms_fil_ctrl_25_250_3_png_wspace.pkl' # None
 
 # Output directory
-out_dir = ROOT_PATH + '/ana/oms_dsts/oms_new' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
-out_stem = 'oms_fil_ctrl_25_250_3_png' # 'oms_fil_ctrl_25_250_3_png_2'
+out_dir = ROOT_PATH + '/ana/oms_dsts/oms_all' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
+out_stem = 'oms_fil_ctrl_25_250_3_png_v2' # 'oms_fil_ctrl_25_250_3_png_2'
 
 # Analysis variables
 pt_per = 95 # %
@@ -209,6 +209,10 @@ if in_wspace is None:
                 tomos_exp_dsts[tkey][lkey].append(hold_arr_dsts)
             out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_mb_dsts.mrc'
             disperse_io.save_numpy(hold_dsts_field, out_fils)
+            out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_mb_lbl.mrc'
+            disperse_io.save_numpy(ltomo.get_lbl_voi(mode='mb'), out_fils)
+            out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_lm_lbl.mrc'
+            disperse_io.save_numpy(ltomo.get_lbl_voi(mode='lm'), out_fils)
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
     print '\tPickling computation workspace in: ' + out_wspace
