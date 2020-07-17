@@ -1,6 +1,6 @@
 """
 
-    Pre-processing for mb_graph_batch.py of un-oriented membranes from TomoSegMemTV output
+    Pre-processing for mb_graph_batch.py of oriented membranes from TomoSegMemTV output
 
     Input:  - STAR file with 3 columns:
                 + _rlnMicrographName: tomogram original

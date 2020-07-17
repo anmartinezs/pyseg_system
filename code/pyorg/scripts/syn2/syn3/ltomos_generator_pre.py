@@ -33,14 +33,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pre/in/all_pre_v6_chr_ref_att2.star' # '/org/pre/in/all_pre_v6_chr_ref.star' # '/org/pre/in/all_pre_avgs.star' # '/org/pre/in/all_pre_v6.star'
+in_star = ROOT_PATH + '/org/pre/in/pre_att3_3d.star' # '/org/pre/in/all_pre_v6_chr_ref_att2.star' # '/org/pre/in/all_pre_v6_chr_ref.star' # '/org/pre/in/all_pre_avgs.star' # '/org/pre/in/all_pre_v6.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_att2_xd10nm' # '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_xd5nm' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
-out_stem = 'pre_pre_v6_chr_ref_att2_xd10nm' # 'pre_pre_v6_chr_ref_xd5nm' # 'all_pre_avgs' # 'pre'
+out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_att3_3d_xd10nm' # '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_att2_xd10nm' # '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_xd5nm' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
+out_stem = 'pre_att3_3d' # 'pre_pre_v6_chr_ref_att2_xd10nm' # 'pre_pre_v6_chr_ref_xd5nm' # 'all_pre_avgs' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 2 # 1
@@ -55,7 +55,7 @@ sg_voi_mask = True
 pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5': 10} # 0
 pt_keep = None
 pt_ssup = 14.62 # 7.31 # voxels
-pt_ssup_ref = None # '5'
+pt_ssup_ref = '1' # None # '5'
 
 ########################################################################################
 # MAIN ROUTINE
@@ -307,9 +307,9 @@ for star_row in range(star.get_nrows()):
             # tomo_vtp = poly_swapxy(tomo.append_particles_vtp(mode='surface'))
             disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
 
-out_parts = out_dir + '/' + out_stem + '_parts.star'
-print '\tStoring the particles STAR file: ' + out_parts
-set_lists.to_particles_star().store(out_parts)
+# out_parts = out_dir + '/' + out_stem + '_parts.star'
+# print '\tStoring the particles STAR file: ' + out_parts
+# set_lists.to_particles_star().store(out_parts)
 
 print '\tStoring list appended by tomograms in: ' + out_dir
 tomos_vtp = set_lists.tomos_to_vtp(mode='surface')

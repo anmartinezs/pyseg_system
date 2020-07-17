@@ -13,6 +13,7 @@
 ################# Package import
 
 import os
+import csv
 import pickle
 import numpy as np
 import scipy as sp
@@ -47,11 +48,11 @@ ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
 in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_all/all_ltomos.star' # '/ltomos_omsegs/omsegs_fil_new/fil_new_ltomos.star' # '/ltomos_omsegs/omsegs_fil_ctrl/fil_ctrl_ltomos.star' # '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
-in_wspace = None # ROOT_PATH + '/ana/oms_dsts/oms_fil_ctrl/oms_fil_ctrl_25_250_3_png_wspace.pkl' # None
+in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_all/oms_fil_ctrl_25_250_3_svg_v3_wspace.pkl' # None
 
 # Output directory
 out_dir = ROOT_PATH + '/ana/oms_dsts/oms_all' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
-out_stem = 'oms_fil_ctrl_25_250_3_png_v2' # 'oms_fil_ctrl_25_250_3_png_2'
+out_stem = 'oms_fil_ctrl_25_250_3_svg_v4' # 'oms_fil_ctrl_25_250_3_png_2'
 
 # Analysis variables
 pt_per = 95 # %
@@ -59,7 +60,7 @@ ana_nbins = 25
 ana_rmax = 250 # nm
 
 # Figure saving options
-fig_fmt = '.png' # if None they showed instead
+fig_fmt = '.svg' # '.png' # if None they showed instead
 
 # Plotting options
 pt_sim_v = True
@@ -452,7 +453,8 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
             # continue
             pass
-for lkey in exp_hist_dic.iterkeys():
+fieldnames, rows = list(), dict()
+for i, lkey in enumerate(exp_hist_dic.iterkeys()):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     if lkey_short == '0':
         lkey_short = 'WT'
@@ -470,6 +472,15 @@ for lkey in exp_hist_dic.iterkeys():
     # plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(hist_bins, ic_high, 'k--')
     plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color=lists_color[lkey], edgecolor='w')
+    if i == 0:
+        fieldnames.append('distance')
+        rows['distance'] = hist_bins
+    fieldnames.append(lkey_short + '_low')
+    fieldnames.append(lkey_short + '_med')
+    fieldnames.append(lkey_short + '_high')
+    rows[lkey_short + '_low'] = ic_low
+    rows[lkey_short + '_med'] = ic_med
+    rows[lkey_short + '_high'] = ic_high
 plt.legend(loc=1)
 plt.tight_layout()
 if fig_fmt is None:
@@ -477,6 +488,16 @@ if fig_fmt is None:
 else:
     plt.savefig(out_lists_dir + '/H_lists' + fig_fmt, dpi=600)
 plt.close()
+
+out_csv_file = out_lists_dir + '/H_lists.csv'
+with open(out_csv_file, 'w') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
+    writer.writeheader()
+    for i in range(len(rows['distance'])):
+        row = dict()
+        for key in rows.iterkeys():
+            row[key] = rows[key][i]
+        writer.writerow(row)
 
 print '\t\t-Plotting the CDF with tomos IC...'
 plt.figure()

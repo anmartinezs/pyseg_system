@@ -33,17 +33,17 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pst/in/all_pst_v6_chr_ref.star' # '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star'
+in_star = ROOT_PATH + '/org/pst/in/ampar_nmdar_3d.star' # '/org/pst/in/all_pst_v6_chr_ref.star' # '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm' # '/org/pst/ltomos/ltomos_H_L_avgs_proj' # '/org/pst/ltomos/ltomos_pst_pick' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # '/ref_a3/ltomos'
-out_stem = 'pst_pre_v6_chr_ref_xd5nm' # 'all_H_L_avgs_proj' # 'all_pst_pick' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # 'pre'
+out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_ampar_nmdar_3d_xd10nm' # '/org/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm' # '/org/pst/ltomos/ltomos_H_L_avgs_proj' # '/org/pst/ltomos/ltomos_pst_pick' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # '/ref_a3/ltomos'
+out_stem = 'pst_ampar_nmdar_3d' # 'all_H_L_avgs_proj' # 'all_pst_pick' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin10' # 'all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # 'pre'
 
 # Segmentation pre-processing
-sg_lbl = 2 # 1
+sg_lbl = 1 # 2
 sg_sg = 0
 sg_dec = 0.9
 sg_bc = False
@@ -54,8 +54,8 @@ sg_voi_mask = True
 # Post-processing
 pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5':10, '6': 10, '7': 10, '8': 10, '9': 10, '10': 10, '11': 10}
 pt_keep = None
-pt_ssup = 7.31 # 14.62 # 20 # voxels
-pt_ssup_ref = '1' # None
+pt_ssup = 14.62 # 7.31 # 20 # voxels
+pt_ssup_ref = '0' # None
 
 ########################################################################################
 # MAIN ROUTINE
@@ -311,9 +311,9 @@ for star_row in range(star.get_nrows()):
             # tomo_vtp = poly_swapxy(tomo.append_particles_vtp(mode='surface'))
             disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
 
-out_parts = out_dir + '/' + out_stem + '_parts.star'
-print '\tStoring the particles STAR file: ' + out_parts
-set_lists.to_particles_star().store(out_parts)
+# out_parts = out_dir + '/' + out_stem + '_parts.star'
+# print '\tStoring the particles STAR file: ' + out_parts
+# set_lists.to_particles_star().store(out_parts)
 
 print '\tStoring list appended by tomograms in: ' + out_dir
 tomos_vtp = set_lists.tomos_to_vtp(mode='surface')

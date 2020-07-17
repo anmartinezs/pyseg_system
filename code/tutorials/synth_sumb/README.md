@@ -1,0 +1,1 @@
+Basic tutorial for learing how to use PySeg, more in **/docs/tutorials/synth_sumb/synth_sumb.pdf**.

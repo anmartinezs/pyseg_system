@@ -288,13 +288,19 @@ class Star(object):
         dtype = self.__checker.get_dtype(key)
         self.__data[key][row] = dtype(val)
 
-    # Return geometrical information of specific particle: coordinates and rotation (optional) as 3-tuples
-    # row: coordinate row
-    # orig: scaling factor from pickled coordinates and subtomogram averaging (pick_angpix/sub_angpix) (default None not applied)
-    # rots: if True (default False) the rotation angles are also returned in another list
-    def get_particle_coords(self, row, orig=None, rots=False):
+    def get_particle_coords(self, row, orig=None, rots=False, c_scaling=1.):
+        """
+        Return geometrical information of specific particle: coordinates and rotation (optional) as 3-tuples
+        :param row: coordinate row
+        :param orig: scaling factor from pickled coordinates and subtomogram averaging (pick_angpix/sub_angpix) (default None not applied)
+        :param rots: if True (default False) the rotation angles are also returned in another list
+        :return: one or two (if rots==True) 3-tuples
+        """
         x, y, z = self.get_element('_rlnCoordinateX', row), self.get_element('_rlnCoordinateY', row), \
                   self.get_element('_rlnCoordinateZ', row)
+        x *= c_scaling
+        y *= c_scaling
+        z *= c_scaling
         if orig is not None:
             orig_inv = 1. / orig
             try:

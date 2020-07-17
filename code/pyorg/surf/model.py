@@ -23,6 +23,7 @@ from pyorg.globals import unpickle_obj, clean_dir, add_mw, vect_to_zrelion, rot_
                         rot_mat_2_vectors, rot_mat_eu_relion, relion_norm
 from surface import ListTomoParticles, TomoParticles, Particle, ParticleL
 from filaments import TomoFilaments, Filament
+from pyorg import globals as gl
 try:
     import cPickle as pickle
 except:
@@ -63,7 +64,7 @@ def pr_gen_tlist(pr_id, q_coords, q_angs, voi_shared, voi_shape, n_tomos, n_part
 
         # Generate instance
         model_obj.set_voi(hold_voi)
-        model_obj.set_part(part_vtp)
+        model_obj.set_part(part_vtp, vect=model_obj.get_vect())
         coords, angs = model_obj.gen_instance(n_part_tomo, tomo_fname, mode=mode_emb, coords=True)
 
         # Enqueue the result
@@ -179,7 +180,11 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
         hold_tomo = TomoParticles(hold_fname, 1, voi)
         # Loop for particles
         for i, coord in enumerate(hold_coords):
-            angs = hold_angs[i]
+            if len(hold_angs[i]) == 2:
+                angs, norm_v = hold_angs[i]
+            else:
+                angs = hold_angs[i]
+                norm_v = None
             if ref_surf_fname is None:
                 hold_part = Particle(part_vtp, center=(0, 0, 0))
                 hold_part.rotation(float(angs[0]), float(angs[1]), float(angs[2]))
@@ -187,6 +192,8 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
             else:
                 hold_part = ParticleL(ref_surf_fname, center=(float(coord[0]), float(coord[1]), float(coord[2])),
                                       eu_angs=(float(angs[0]), float(angs[1]), float(angs[2])))
+            if norm_v is not None:
+                hold_part.add_prop('normal_v', vtk.vtkFloatArray, norm_v)
             hold_tomo.insert_particle(hold_part, check_bounds=False, check_inter=False)
         t_count += 1
         ltomos.add_tomo(hold_tomo)
@@ -372,6 +379,7 @@ class Model(object):
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, voi, part, vect=(0, 0, 1)):
+        self.__part, self.__vect, self.__voi = None, None, None
         self.set_voi(voi)
         self.set_part(part, vect)
         self.__type_name = None
@@ -387,7 +395,6 @@ class Model(object):
         :param vect: particle reference vector, default (0, 0, 1)
         """
         # Input parsing
-        self.__voi = None
         if voi is None:
             return
         if (not isinstance(voi, vtk.vtkPolyData)) and (not isinstance(voi, np.ndarray)):
@@ -424,20 +431,16 @@ class Model(object):
         :param vect: particle reference vector, default (0, 0, 1)
         :return:
         """
-        self.__part = None
-        if part is None:
-            return
-        if not isinstance(part, vtk.vtkPolyData):
-            error_msg = 'Invalid particle type, it must be vtkPolyData!'
-            raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
-        self.__part = part
-        self.__vect = None
-        if vect is None:
-            return
-        if (not hasattr(vect, '__len__')) or ((len(vect) != 3) and (len(vect) != 4)):
-            error_msg = 'Invalid vector must be 3-tuple!'
-            raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
-        self.__vect = np.asarray(vect, dtype=np.float)
+        if part is not None:
+            if not isinstance(part, vtk.vtkPolyData):
+                error_msg = 'Invalid particle type, it must be vtkPolyData!'
+                raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
+            self.__part = part
+        if vect is not None:
+            if (not hasattr(vect, '__len__')) or ((len(vect) != 3) and (len(vect) != 4)):
+                error_msg = 'Invalid vector must be 3-tuple!'
+                raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
+            self.__vect = np.asarray(vect, dtype=np.float)
 
     def set_ParticleL_ref(self, ref_surf_fname):
         """
@@ -452,6 +455,9 @@ class Model(object):
 
     def get_type_name(self):
         return self.__type_name
+
+    def get_vect(self):
+        return self.__vect
 
     # n_parts: number of particles to generate
     # tomo_fname: tomogram file name
@@ -544,8 +550,8 @@ class ModelCSRV(Model):
 
     # voi: VOI surface
     # part: particle surface
-    def __init__(self, voi=None, part=None):
-        super(ModelCSRV, self).__init__(voi, part)
+    def __init__(self, voi=None, part=None, vect=(0., 0., 1.)):
+        super(ModelCSRV, self).__init__(voi, part, vect)
         self._Model__type_name = 'CSRV'
 
     def gen_instance(self, n_parts, tomo_fname, mode='full', coords=False, max_ntries_factor=10):
@@ -617,6 +623,9 @@ class ModelCSRV(Model):
                 # Random rigid body transformation
                 hold_part.rotation(rot_rnd, tilt_rnd, psi_rnd)
                 hold_part.translation(x_rnd, y_rnd, z_rnd)
+            R = gl.rot_mat_relion(rot_rnd, tilt_rnd, psi_rnd, deg=True)
+            part_normal = np.asarray(R.T * np.asarray(self._Model__vect, dtype=np.float32).reshape(3, 1)).reshape(3)
+            # hold_part.add_prop('normal_v', vtk.vtkFloatArray, part_normal)
 
             # Checking embedding and no overlapping
             try:
@@ -627,7 +636,7 @@ class ModelCSRV(Model):
                 count_it += 1
                 continue
             out_coords.append((x_rnd, y_rnd, z_rnd))
-            out_rots.append((rot_rnd, tilt_rnd, psi_rnd))
+            out_rots.append(((rot_rnd, tilt_rnd, psi_rnd), part_normal))
             count_it = 0
 
             # A new particle has been inserted
@@ -1079,7 +1088,9 @@ class ModelFils(object):
         tomo_lut = np.zeros(shape=self.__voi.shape, dtype=np.bool)
 
         # Loop for filament
-        for fil in ref_fils:
+        for i, fil in enumerate(ref_fils):
+
+            print 'DEBUG: Processing filament ' + str(i)
 
             # Create the straight filament density model aligned with X-axis
             coords = fil.get_coords()
@@ -1091,7 +1102,7 @@ class ModelFils(object):
             max_x = min(tomo.shape[0], fil_den.shape[0])
             max_y = min(tomo.shape[1], fil_den.shape[1])
             max_z = min(tomo.shape[2], fil_den.shape[2])
-            hold_tomo[:max_x, :max_y, :max_z] = fil_den
+            hold_tomo[:max_x, :max_y, :max_z] = fil_den[:max_x, :max_y, :max_z]
             # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold1.mrc')
 
             # Computes the transform matrix and vector
@@ -1173,18 +1184,18 @@ class ModelFils(object):
                 coord_1[ax_2], coord_2[ax_2] = i_2, i_2
                 coord_1[axis], coord_2[axis] = 0, self.__voi.shape[axis]
                 v_fil = coord_2 - coord_1
-                v_fil_len = math.sqrt((v_fil * v_fil).sum())
+                v_fil_len = math.sqrt((v_fil * v_fil).sum()) * self.__rad
                 v_fil_n = v_fil / v_fil_len
                 fil_den = self.gen_fil_straight_density(v_fil_len, pitch=pitch, rnd_iang=True).swapaxes(2, 0)
                 hold_tomo = np.zeros(shape=tomo.shape, dtype=np.float32)
                 max_x = min(tomo.shape[0], fil_den.shape[0])
                 max_y = min(tomo.shape[1], fil_den.shape[1])
                 max_z = min(tomo.shape[2], fil_den.shape[2])
-                hold_tomo[:max_x, :max_y, :max_z] = fil_den
-                # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold1.mrc')
+                hold_tomo[:max_x, :max_y, :max_z] = fil_den[:max_x, :max_y, :max_z]
+                # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test_ps0.704/test_ns1/hold1.mrc')
 
                 # Computes the transform matrix and vector
-                c_fil, c_ref = .5*v_fil + coord_1[0], .5 * np.asarray(fil_den.shape, dtype=np.float32)
+                c_fil, c_ref = .5*v_fil + coord_1, .5 * np.asarray(fil_den.shape, dtype=np.float32)
                 t_fil = c_fil - c_ref
                 R = rot_mat_2_vectors(np.asarray((1., 0., 0.), dtype=np.float32), v_fil_n)
                 rot, tilt, psi = rot_mat_eu_relion(R, deg=True)
@@ -1192,24 +1203,25 @@ class ModelFils(object):
 
                 # Apply the 3D rigid transformation
                 hold_tomo = np.roll(hold_tomo, np.asarray(np.round(t_fil), dtype=np.int), axis=(0, 1, 2))
-                # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold2.mrc')
-                r3d_r = pyto.geometry.Rigid3D()
-                r3d_r.q = r3d_r.make_r_euler(angles=np.radians(angs), mode='zyz_in_active')
-                hold_tomo = r3d_r.transformArray(hold_tomo, origin=c_fil, order=1, prefilter=True)
-                # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold3.mrc')
+                # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test_ps0.704/test_ns1/hold2.mrc')
+                if not (math.isnan(rot) or math.isnan(tilt) or math.isnan(psi)):
+                    r3d_r = pyto.geometry.Rigid3D()
+                    r3d_r.q = r3d_r.make_r_euler(angles=np.radians(angs), mode='zyz_in_active')
+                    hold_tomo = r3d_r.transformArray(hold_tomo, origin=c_fil, order=1, prefilter=True)
+                    # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold3.mrc')
 
                 # Add the new density filament
                 tomo += hold_tomo
                 tomo_lut += (hold_tomo != 0)
 
                 # Update index 2
-                i_2 += spacing
+                i_2 += off
 
             # Update index 1
-            i_1 += spacing
+            i_1 += off
 
         # Add the noise to fit the SNR
-        # disperse_io.save_numpy(tomo_lut, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold2.mrc')
+        # disperse_io.save_numpy(tomo_lut, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test_ps0.704/test_ns1/hold3.mrc')
         tomo = lin_map(tomo, 0, 1)
         if snr is not None:
             mn = tomo[tomo_lut].mean()
@@ -1217,6 +1229,7 @@ class ModelFils(object):
             tomo += np.random.normal(mn, sg_bg, size=tomo.shape)
         mn = tomo.mean()
         tomo = -1. * (tomo - mn) / tomo.std()
+        # disperse_io.save_numpy(tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test_ps0.704/test_ns1/hold4.mrc')
 
         # Add the missing wedge
         if mwa is not None:
@@ -1475,9 +1488,8 @@ class ModelFilsRSR(ModelFils):
             y_rnd = random.uniform(0, voi.shape[1])
             z_rnd = random.uniform(0, voi.shape[2])
             u = np.random.rand(1)[0]
-            u = self._Nhood__rad * np.cbrt(u)
             rnd_vect = np.random.randn(1, 3)[0]
-            norm = u / np.linalg.norm(rnd_vect)
+            norm = np.cbrt(u) / np.linalg.norm(rnd_vect)
             rnd_vect *= norm
 
             # Generate the filament
@@ -1487,22 +1499,27 @@ class ModelFilsRSR(ModelFils):
             while not out_of_bounds:
                 hold_coord = coords[-1] + fil_samp*rnd_vect
                 x, y, z = int(round(hold_coord[0])), int(round(hold_coord[1])), int(round(hold_coord[2]))
-                if (x < 0) or (y < 0) or (z < 0) or (x >= voi.shape[0]) or (x >= voi.shape[1]) or (x >= voi.shape[2]) \
-                        or voi[x, y, z]:
+                if (x < 0) or (y < 0) or (z < 0) or (x >= voi.shape[0]) or (y >= voi.shape[1]) or (z >= voi.shape[2]):
+                    out_of_bounds = True
+                elif not voi[x, y, z]:
                     out_of_bounds = True
                 else:
                     coords.append(hold_coord)
             # Sample backward
             out_of_bounds = False
             while not out_of_bounds:
-                hold_coord = coords[-1] - fil_samp * rnd_vect
+                hold_coord = coords[0] - fil_samp * rnd_vect
                 x, y, z = int(round(hold_coord[0])), int(round(hold_coord[1])), int(round(hold_coord[2]))
-                if (x < 0) or (y < 0) or (z < 0) or (x >= voi.shape[0]) or (x >= voi.shape[1]) or (x >= voi.shape[2]) \
-                    or (not voi[x, y, z]):
+                if (x < 0) or (y < 0) or (z < 0) or (x >= voi.shape[0]) or (y >= voi.shape[1]) or (z >= voi.shape[2]):
+                    out_of_bounds = True
+                elif not voi[x, y, z]:
                     out_of_bounds = True
                 else:
-                    coords.append(hold_coord)
-            hold_fil = Filament(hold_coord, fil_samp)
+                    coords.insert(0, hold_coord)
+            if len(coords) > 1:
+                hold_fil = Filament(coords, fil_samp)
+            else:
+                continue
 
             # Try to insert
             try:

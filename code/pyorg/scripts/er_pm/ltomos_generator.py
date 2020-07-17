@@ -30,17 +30,17 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '../../../..'
+ROOT_PATH = '/fs/pool/pool-ruben/antonio/er_coloc'
 
 # Input STAR file
-in_star = ROOT_PATH + '/data/tutorials/synth_sumb/org/in/test_1_ltomos.star'
+in_star = ROOT_PATH + '/org/in/test_single_tomo_ltomos.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/data/tutorials/synth_sumb/org/in/test_1_seg.star'
+in_seg = ROOT_PATH + '/org/in/test_single_tomo_seg.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/data/tutorials/synth_sumb/org/ltomos/test_1_proj' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'test_1_proj' # 'pre'
+out_dir = ROOT_PATH + '/org/ltomos/test_single_tomo' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'test_single_tomo' # 'pre'
 
 #### Advanced settings
 
@@ -55,7 +55,7 @@ sg_sg = 0 # Gaussian filtering for surface conversion
 sg_dec = 0.9 # Decimation factor for the triangle mesh
 
 # Post-processing
-pt_ssup = 5 # nm - scale suppression for the input particles
+pt_ssup = 8 # nm - scale suppression for the input particles
 pt_ss_ref = None # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = None # for using different scale-suppression distances for crossed scale suppression
 pt_min_parts = 1 # Tomograms with less particles are removed
@@ -152,7 +152,8 @@ for tomo_row in range(star_seg.get_nrows()):
     mic_str, seg_str = star_seg.get_element('_rlnMicrographName', tomo_row), \
                        star_seg.get_element('_psSegImage', tomo_row)
     print '\t\t-Generating VOI from segmentation: ' + str(mic_str)
-    tomo = disperse_io.load_tomo(seg_str, mmap=True).swapaxes(0, 1)
+    # tomo = disperse_io.load_tomo(seg_str, mmap=True).swapaxes(0, 1)
+    tomo = disperse_io.load_tomo(seg_str, mmap=True)
     if sg_voi_surf:
         tomo = (tomo == sg_lbl).astype(np.float32)
         if (sg_sg is not None) and (sg_sg > 0):

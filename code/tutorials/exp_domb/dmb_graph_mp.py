@@ -1,6 +1,6 @@
 """
 
-    Script for extracting an analyzing a GraphMCF from a segmented membrane (Multiprocessing version)
+    Script for extracting an analyzing a SynGraphMCF from an oriented pairs of membranes (like a synapse)
 
     Input:  - A STAR file with a list of (sub-)tomograms to process:
 	      	+ Density map tomogram
@@ -19,6 +19,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 import time
 import sys
+import math
 import pyseg as ps
 import scipy as sp
 import os
@@ -32,11 +33,9 @@ except:
 
 ########## Global variables
 
-# Membrane segmentation: 1-mb, 2-cito, 3-ext
-SEG_MB = 1
-SEG_MB_IN = 2
-SEG_MB_OUT = 3
-SEG_TAG = '_seg'
+MB_LBL_1, MB_LBL_2 = 1, 2
+EXT_LBL_1, EXT_LBL_2 = 3, 4
+GAP_LBL, BG_LBL = 5, 0
 
 ########################################################################################
 # INPUT PARAMETERS
@@ -44,22 +43,22 @@ SEG_TAG = '_seg'
 
 ####### Input data
 
-ROOT_PATH = '../../../..'  # Data path
+ROOT_PATH = '/fs/pool/pool-ruben/antonio/nuc_mito'  # Data path
 
 # Input STAR file with segmentations
-in_star = ROOT_PATH + '/data/tutorials/synth_sumb/segs/test_1_seg.star'
-npr = 5 # number of parallel processes
+in_star = ROOT_PATH + '/pre/mbdo_nosplit/dmb_seg_oriented_pre.star'
+npr = 1 # number of parallel processes
 
 ####### Output data
 
-output_dir = ROOT_PATH + '/data/tutorials/synth_sumb/graphs'
+output_dir = ROOT_PATH + '/graphs/v2'
 
 ####### GraphMCF perameter
 
-res = 1.048  # nm/pix
-s_sig = 1.0  # 1.5
+res = 1.408  # nm/pix
+s_sig = 0.75  # 1.5
 v_den = 0.0035  # 0.007 # 0.0025 # nm^3
-ve_ratio = 4  # 2
+ve_ratio = 2 # 4
 max_len = 10  # 15 # 30 # nm
 
 ####### Advanced parameters
@@ -68,9 +67,9 @@ max_len = 10  # 15 # 30 # nm
 csig = 0.01
 ang_rot = None
 ang_tilt = None
-nstd = 10  # 3
+nstd = 5 # 3 # 10
 smooth = 3
-mb_dst_off = 0.  # nm
+mb_dst_off = 5  # nm
 DILATE_NITER = 2  # pix
 do_clahe = False  # True
 
@@ -139,31 +138,21 @@ def pr_worker(pr_id, ids, q_pkls):
 
         print '\tP[' + str(pr_id) + '] Loading input data: ' + stem_tomo
         tomo = ps.disperse_io.load_tomo(input_tomo).astype(np.float32)
-        segh = ps.disperse_io.load_tomo(input_seg)
+        seg = ps.disperse_io.load_tomo(input_seg)
 
-        print '\tP[' + str(pr_id) + '] Computing distance, mask and segmentation tomograms...'
-        tomod = ps.disperse_io.seg_dist_trans(segh == SEG_MB) * res
-        maskh = np.ones(shape=segh.shape, dtype=np.int)
-        maskh[DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER] = 0
-        mask = np.asarray(tomod > (max_len + mb_dst_off + 2 * DILATE_NITER * res), dtype=np.int)
-        maskh += mask
-        maskh += (segh == 0)
-        mask = np.asarray(maskh > 0, dtype=np.float)
-        input_msk = output_dir + '/' + stem + '_mask.fits'
+        print '\tP[' + str(pr_id) + '] Computing masks and segmentation tomograms...'
+        tomoh = np.zeros(shape=seg.shape, dtype=np.bool)
+        mb_dst_off_v = int(math.ceil(mb_dst_off * res))
+        tomoh[mb_dst_off_v:-mb_dst_off_v, mb_dst_off_v:-mb_dst_off_v, mb_dst_off_v:-mb_dst_off_v] = True
+        mask = ((tomoh & (seg != BG_LBL)) == False).astype(np.float)
+        input_msk = output_dir + '/' + stem_pkl + '_mask.fits'
         ps.disperse_io.save_numpy(mask.transpose(), input_msk)
-        if mb_dst_off > 0:
-            seg = np.zeros(shape=segh.shape, dtype=segh.dtype)
-            seg[tomod < mb_dst_off] = SEG_MB
-            seg[(seg == 0) & (segh == SEG_MB_IN)] = SEG_MB_IN
-            seg[(seg == 0) & (segh == SEG_MB_OUT)] = SEG_MB_OUT
-            tomod = ps.disperse_io.seg_dist_trans(seg == SEG_MB) * res
-        else:
-            seg = segh
-        mask_den = np.asarray(tomod <= mb_dst_off, dtype=np.bool)
+        mask = mask == False
+        mask_den = ((seg == MB_LBL_1) | (seg == MB_LBL_2)) & mask
 
         print '\tP[' + str(pr_id) + '] Smoothing input tomogram (s=' + str(s_sig) + ')...'
         density = sp.ndimage.filters.gaussian_filter(tomo, s_sig)
-        density = ps.globals.cont_en_std(density, nstd=nstd, lb=0, ub=1)
+        density = ps.globals.cont_en_std(density, nstd=nstd, lb=0, ub=1, mask=mask)
         ps.disperse_io.save_numpy(tomo, output_dir + '/' + stem_pkl + '.vti')
         ps.disperse_io.save_numpy(density.transpose(), input_file)
         ps.disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
@@ -195,8 +184,9 @@ def pr_worker(pr_id, ids, q_pkls):
         manifolds = disperse.get_manifolds(no_cut=False, inv=False)
 
         # Build the GraphMCF for the membrane
-        print '\tP[' + str(pr_id) + '] Building MCF graph...'
-        graph = ps.mb.MbGraphMCF(skel, manifolds, density, seg)
+        print '\tP[' + str(pr_id) + '] Building MCF graph for a pair of oriented membranes...'
+        # graph = ps.mb.MbGraphMCF(skel, manifolds, density, seg)
+        graph = ps.mb.SynGraphMCF(skel, manifolds, density, seg)
         graph.set_resolution(res)
         graph.build_from_skel(basic_props=False)
         graph.filter_self_edges()
@@ -206,7 +196,7 @@ def pr_worker(pr_id, ids, q_pkls):
         mask = sp.ndimage.morphology.binary_dilation(mask, iterations=DILATE_NITER)
         for v in graph.get_vertices_list():
             x, y, z = graph.get_vertex_coords(v)
-            if mask[int(round(x)), int(round(y)), int(round(z))]:
+            if not mask[int(round(x)), int(round(y)), int(round(z))]:
                 graph.remove_vertex(v)
         print '\tP[' + str(pr_id) + '] Building geometry...'
         graph.build_vertex_geometry()
@@ -244,27 +234,85 @@ def pr_worker(pr_id, ids, q_pkls):
             print 'P[' + str(pr_id) + '] WARNING: graph density simplification failed:'
             print '\t-' + e.get_message()
 
-        print '\tP[' + str(pr_id) + '] Graph density simplification for edges in the membrane...'
-        mask_mb = (seg == 1) * (~mask)
-        nvv, nev, nepv = graph.compute_global_stat(mask=mask_mb)
+        print '\tGraph density simplification for edges in membrane 1...'
+        mask_pst = (seg == MB_LBL_1) & mask
+        nvv, nev, nepv = graph.compute_global_stat(mask=mask_pst)
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask_mb, dtype=np.int), e_den=e_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=np.int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
+        else:
+            print '\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv)
 
-        print '\tP[' + str(pr_id) + '] Computing graph global statistics (after simplification)...'
+        print '\tGraph density simplification for edges in the membrane 2...'
+        mask_pre = (seg == MB_LBL_2) & mask
+        nvv, nev, nepv = graph.compute_global_stat(mask=mask_pre)
+        if nepv > ve_ratio:
+            e_den = nvv * ve_ratio
+            hold_e_prop = e_prop
+            graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=np.int), e_den=e_den,
+                                         e_prop=hold_e_prop, e_mode=e_mode, fit=True)
+        else:
+            print '\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv)
+
+        print '\tGraph density simplification for edges in the exterior 1...'
+        mask_psd = (seg == EXT_LBL_1) & mask
+        nvv, nev, nepv = graph.compute_global_stat(mask=mask_psd)
+        if nepv > ve_ratio:
+            e_den = nvv * ve_ratio
+            hold_e_prop = e_prop
+            graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=np.int), e_den=e_den,
+                                         e_prop=hold_e_prop, e_mode=e_mode, fit=True)
+        else:
+            print '\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv)
+
+        print '\tGraph density simplification for edges in the exterior 2...'
+        mask_az = (seg == EXT_LBL_2) & mask
+        nvv, nev, nepv = graph.compute_global_stat(mask=mask_az)
+        if nepv > ve_ratio:
+            e_den = nvv * ve_ratio
+            hold_e_prop = e_prop
+            graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=np.int), e_den=e_den,
+                                         e_prop=hold_e_prop, e_mode=e_mode, fit=True)
+        else:
+            print '\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv)
+
+        print '\tGraph density simplification for edges in the gap...'
+        mask_clf = (seg == GAP_LBL) & mask
+        nvv, nev, nepv = graph.compute_global_stat(mask=mask_clf)
+        if nepv > ve_ratio:
+            e_den = nvv * ve_ratio
+            hold_e_prop = e_prop
+            graph.graph_density_simp_ref(mask=np.asarray(mask_clf, dtype=np.int), e_den=e_den,
+                                         e_prop=hold_e_prop, e_mode=e_mode, fit=True)
+        else:
+            print '\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv)
+
+        print '\tComputing graph global statistics (after simplification)...'
         nvv, _, _ = graph.compute_global_stat(mask=mask_den)
-        _, nev_mb, nepv_mb = graph.compute_global_stat(mask=mask_mb)
-        print '\t\t-P[' + str(pr_id) + '] Vertex density (membrane): ' + str(round(nvv, 5)) + ' nm^3'
-        print '\t\t-P[' + str(pr_id) + '] Edge density (membrane):' + str(round(nev_mb, 5)) + ' nm^3'
-        print '\t\t-P[' + str(pr_id) + '] Edge/Vertex ratio (membrane): ' + str(round(nepv_mb, 5))
+        _, nev_pst, nepv_pst = graph.compute_global_stat(mask=mask_pst)
+        _, nev_pre, nepv_pre = graph.compute_global_stat(mask=mask_pre)
+        _, nev_psd, nepv_psd = graph.compute_global_stat(mask=mask_psd)
+        _, nev_az, nepv_az = graph.compute_global_stat(mask=mask_az)
+        _, nev_clf, nepv_clf = graph.compute_global_stat(mask=mask_clf)
+        print '\t\t-Vertex density (membranes): ' + str(round(nvv, 5)) + ' nm^3'
+        print '\t\t-Edge density (MB1):' + str(round(nev_pst, 5)) + ' nm^3'
+        print '\t\t-Edge density (MB2):' + str(round(nev_pre, 5)) + ' nm^3'
+        print '\t\t-Edge density (EXT1):' + str(round(nev_psd, 5)) + ' nm^3'
+        print '\t\t-Edge density (EXT2):' + str(round(nev_az, 5)) + ' nm^3'
+        print '\t\t-Edge density (GAP):' + str(round(nev_clf, 5)) + ' nm^3'
+        print '\t\t-Edge/Vertex ratio (MB1): ' + str(round(nepv_pst, 5))
+        print '\t\t-Edge/Vertex ratio (MB2): ' + str(round(nepv_pre, 5))
+        print '\t\t-Edge/Vertex ratio (EXT1): ' + str(round(nepv_psd, 5))
+        print '\t\t-Edge/Vertex ratio (EXT2): ' + str(round(nepv_az, 5))
+        print '\t\t-Edge/Vertex ratio (GAP): ' + str(round(nepv_az, 5))
 
         print '\tComputing graph properties (2)...'
-        graph.compute_mb_geo(update=True)
+        graph.compute_mb_geo()
         graph.compute_mb_eu_dst()
         graph.compute_edge_curvatures()
-        graph.compute_edges_length(ps.globals.SGT_EDGE_LENGTH, 1, 1, 1, False)
+        # graph.compute_edges_length(ps.globals.SGT_EDGE_LENGTH, 1, 1, 1, False)
         graph.compute_vertices_dst()
         graph.compute_edge_filamentness()
         graph.compute_edge_affinity()

@@ -1188,6 +1188,12 @@ class SynGraphMCF(GraphMCF):
     def compute_mb_geo(self, update=True):
 
         # Initialization
+        if update or (self.get_prop_id(SYN_SEG) is None):
+            self.add_scalar_field_nn(self.__syn_seg, SYN_SEG)
+        if update or (self.get_prop_id(SGT_EDGE_LENGTH) is None):
+            self.compute_edges_length(SGT_EDGE_LENGTH, 1, 1, 1, False)
+        if update or (self.get_prop_id(STR_EDGE_FNESS) is None):
+            self.compute_edge_filamentness()
         key_pst_dst_id = self.get_prop_id(MB_PST_GEO_DST)
         if key_pst_dst_id is None:
             key_pst_dst_id = self.add_prop(MB_PST_GEO_DST, 'float', 1)
@@ -1521,10 +1527,10 @@ class SynGraphMCF(GraphMCF):
             if cont_mode:
                 hold_mb = self.__mb_dst_pre / self.get_resolution()
                 mask_out *= ((hold_mb >= 0) * (hold_mb <= 2))
-                # disperse_io.save_numpy(mask_out, '/home/martinez/workspace/disperse/data/psd_an1/ex/syn/fils/sub/cleft_1/pre_cont/hold_1.mrc')
             else:
                 mask_out *= ((self.__mb_dst_pre >= slice.get_eu_dst_low()) *
                              (self.__mb_dst_pre <= slice.get_eu_dst_high()))
+                # disperse_io.save_numpy(mask_out, '/fs/pool/pool-ruben/antonio/nuc_mito/hold_1.mrc')
         if cont_mode:
             return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int), mask_out, cont_p
         else:

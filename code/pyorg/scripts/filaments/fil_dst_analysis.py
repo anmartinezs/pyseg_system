@@ -13,6 +13,7 @@
 ################# Package import
 
 import os
+import csv
 import numpy as np
 import scipy as sp
 import sys
@@ -46,11 +47,11 @@ ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
 in_star = ROOT_PATH + '/ltomos/fils_all/fils_all_ltomos.star'
-in_wspace = None # ROOT_PATH + '/ana/fil_dsts/fils_max_fils/fils_max_fils_45_sims_50_250_50_wspace.pkl'
+in_wspace = ROOT_PATH + '/ana/fil_dsts/fils_all_v2/fils_max_fils_sims_50_250_25_50_png_wspace.pkl' # '/ana/fil_dsts/fils_max_fils/fils_max_fils_45_sims_50_250_50_wspace.pkl'
 
 # Output directory
-out_dir = ROOT_PATH + '/ana/fil_dsts/fils_all'
-out_stem = 'fils_max_fils_sims_25_250_25_50_v2'
+out_dir = ROOT_PATH + '/ana/fil_dsts/fils_all_v2'
+out_stem = 'fils_max_fils_sims_50_250_25_50_png_v2'
 
 # Analysis variables
 ana_nbins = 25
@@ -65,7 +66,7 @@ sm_mx_tries = 100
 sm_mx_fils = 50
 
 # Figure saving options
-fig_fmt = '.png' # if None they showed instead
+fig_fmt = '.svg' # if None they showed instead
 
 # Plotting options
 pt_per = 95 # %
@@ -451,7 +452,8 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
             # continue
             pass
-for lkey in exp_hist_dic.iterkeys():
+fieldnames, rows = list(), dict()
+for i, lkey in enumerate(exp_hist_dic.iterkeys()):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     if lkey_short == '0':
         lkey_short = 'EXP'
@@ -461,6 +463,15 @@ for lkey in exp_hist_dic.iterkeys():
     #     lkey_short = 'PFF'
     ic_low, ic_med, ic_high = compute_ic(pt_per, np.asarray(exp_hist_dic[lkey]))
     plt.plot(hist_bins, ic_med, color=lists_color[lkey], linewidth=2.0, label=lkey_short)
+    if i == 0:
+        fieldnames.append('distance')
+        rows['distance'] = hist_bins
+    fieldnames.append(lkey_short + '_low')
+    fieldnames.append(lkey_short + '_med')
+    fieldnames.append(lkey_short + '_high')
+    rows[lkey_short + '_low'] = ic_low
+    rows[lkey_short + '_med'] = ic_med
+    rows[lkey_short + '_high'] = ic_high
     # plt.plot(hist_bins, ic_low, 'k--')
     # plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(hist_bins, ic_high, 'k--')
@@ -468,6 +479,12 @@ for lkey in exp_hist_dic.iterkeys():
     ic_low_sim, ic_med_sim, ic_high_sim = compute_ic(pt_per, np.asarray(sim_hist_dic[lkey]))
     plt.plot(hist_bins, ic_med_sim, color='black', linewidth=2.0, label='SIM')
     plt.fill_between(hist_bins, ic_low_sim, ic_high_sim, alpha=0.5, color='gray', edgecolor='w')
+    fieldnames.append('SIM' + '_low')
+    fieldnames.append('SIM' + '_med')
+    fieldnames.append('SIM' + '_high')
+    rows['SIM' + '_low'] = ic_low_sim
+    rows['SIM' + '_med'] = ic_med_sim
+    rows['SIM' + '_high'] = ic_high_sim
 plt.legend(loc=1)
 plt.tight_layout()
 if fig_fmt is None:
@@ -475,6 +492,16 @@ if fig_fmt is None:
 else:
     plt.savefig(out_lists_dir + '/H_lists' + fig_fmt, dpi=600)
 plt.close()
+
+out_csv_file = out_lists_dir + '/H_lists.csv'
+with open(out_csv_file, 'w') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
+    writer.writeheader()
+    for i in range(len(rows['distance'])):
+        row = dict()
+        for key in rows.iterkeys():
+            row[key] = rows[key][i]
+        writer.writerow(row)
 
 print '\t\t-Plotting the CDF with tomos IC...'
 plt.figure()

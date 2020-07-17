@@ -108,7 +108,6 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     if in_mask_mb is not None:
         mask_mb = ps.disperse_io.load_tomo(in_mask_mb, mmap=False)
         mask_mb = lin_map(mask_mb, lb=1, ub=do_mb_sf)
-        # ps.disperse_io.save_numpy(mask_mb, '/fs/pool/pool-ruben/antonio/shiwei/hold.mrc')
 
     # print '\tLoop for particles: '
     count, n_rows = 0, len(rows)

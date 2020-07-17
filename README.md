@@ -19,7 +19,11 @@ This GitHub repository have two branches (git checkout <feature_branch>):
 * **doc**: documentation files
   + manual: a general manual, with installation, for PySeg (v 0.1)
   + tutorials: specific examples to introduce the users in the usage of the software
-    - synth_sumb: tutorial for using PySeg for single unoriented membranes using synthetic data
+    - synth_sumb: basic tutorial for using PySeg for **s**ingle **u**noriented **m**em**b**ranes using **synth**etic data
+    - synth_ssmb: Deprecated, just for testing.
+    - exp_sumb: additional and modified scripts in respect to **synth_sumb** to process **s**ingle **u**oriented **m**em**b**ranes from **exp**erimental data.
+    - exp_somb: additional and modified scripts in respect to **synth_sumb** to process **s**ingle **o**riented **m**em**b**ranes from **exp**erimental data.
+    - exp_domb: additional and modified scripts in respect to **synth_sumb** to process **d**ouble **o**riented **m**em**b**ranes from **exp**erimental data.
   + tomosegmemtv: documentation for TomoSegMemTV (membrane segmentation for electron tomogramphy)
   + synapsegtools: documentation for SynapSegTools (some graphic extension for post-processing the outputs of TomoSegMemTV)
 

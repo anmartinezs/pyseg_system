@@ -33,29 +33,32 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pre/in/all_pre_AP1_AP2_att3.star' # '/org/pre/in/all_pre_v6_chr_ref_att2.star' # '/org/pre/in/all_pre_v6_chr_ref.star' # '/org/pre/in/all_pre_avgs.star' # '/org/pre/in/all_pre_v6.star'
+in_star = ROOT_PATH + '/ripley/col/in/all_col_ltomos.star' # '/org/col/in/all_xd5nm_ltomos.star' # '/org/col/in/all_test_ltomos.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
+in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap_zeros_fits.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/org/pre/ltomos/ltomos_pre_pre_AP1_AP2_att3_xd5nm' # '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_att2_xd10nm' # '/org/pre/ltomos/ltomos_pre_pre_v6_chr_ref_xd5nm' # '/org/pre/ltomos/ltomos_all_pre_avgs' # '/org/pre/ltomos/ltomos_all_v6_pre_pre_ss7.31px_min10' # '/ref_a3/ltomos'
-out_stem = 'pre_pre_AP1_AP2_att3_xd5nm' # 'pre_pre_v6_chr_ref_att2_xd10nm' # 'pre_pre_v6_chr_ref_xd5nm' # 'all_pre_avgs' # 'pre'
+out_dir = ROOT_PATH + '/ripley/col/ltomos/ltomos_col' # '/org/col/ltomos/ltomos_col_tmin3_min5' # '/org/col/ltomos/ltomos_all_scol_test'
+out_stem = 'all_col' # 'all_col_tmin3_min5' # 'all_scol_test' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 2 # 1
 sg_sg = 0
 sg_dec = 0.9
 sg_bc = False
-sg_bm = 'center' # None
-sg_pj = True # False
+sg_bm = 'center'
+sg_pj = True
 sg_voi_mask = True
 
 # Post-processing
-pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5': 10} # 0
+pt_min_parts = 0 # {'0': 5, '1': 5, '2': 3, '3': 5, '4': 5, '5': 5}
 pt_keep = None
-pt_ssup = 14.62 # 7.31 # voxels
-pt_ssup_ref = None # '5'
+pt_ssup = 7.31 # 5 # voxels
+
+# Particles rescaling
+res_f = 0.842 / 0.684 # nm/voxel
+in_tomo_res = ROOT_PATH + '/rec/syn_scale_tomos.star'
 
 ########################################################################################
 # MAIN ROUTINE
@@ -85,8 +88,6 @@ print '\tPost-processing: '
 print '\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of particles.'
 print '\t\t-Minimum number of particles: ' + str(pt_min_parts)
 print '\t\t-Scale suppression: ' + str(pt_ssup) + ' voxels'
-if pt_ssup_ref is not None:
-    print '\t\t-Crossed scale-suppression activated.'
 print ''
 
 ######### Process
@@ -120,6 +121,24 @@ except pexceptions.PySegInputError as e:
     print 'Terminated. (' + time.strftime("%c") + ')'
     sys.exit(-1)
 
+tomos_to_resize = None
+if in_tomo_res is not None:
+    star_res = None
+    if in_tomo_res is not None:
+        star_res = sub.Star()
+        try:
+            star_res.load(in_tomo_res)
+        except pexceptions.PySegInputError as e:
+            print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
+            print 'Terminated. (' + time.strftime("%c") + ')'
+            sys.exit(-1)
+    hold_set = star_res.get_column_data_set('_rlnMicrographName')
+    tomos_to_resize = list()
+    for tomo_path in hold_set:
+        tkey_hold = os.path.split(tomo_path)[1].split('_')
+        tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
+        tomos_to_resize.append(tkey_stem)
+
 print '\tLoop for generating tomograms VOIs: '
 vois = dict()
 for tomo_row in range(star_seg.get_nrows()):
@@ -127,6 +146,11 @@ for tomo_row in range(star_seg.get_nrows()):
                        star_seg.get_element('_psSegImage', tomo_row)
     print '\t\t-Generating VOI from segmentation: ' + str(mic_str)
     tomo = disperse_io.load_tomo(seg_str, mmap=False)
+    if tomos_to_resize is not None:
+        tkey_hold = os.path.split(tomo_path)[1].split('_')
+        tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
+        if mic_str in tkey_stem:
+            tomo = sp.ndimage.zoom(tomo, res_f, order=0)
     if sg_voi_mask:
         voi = tomo == sg_lbl
         vois[seg_str] = voi
@@ -174,11 +198,17 @@ for star_row in range(star.get_nrows()):
         try:
             seg_row = seg_dic[os.path.split(mic_str)[1]]
         except KeyError:
+            # if not mic_str.endswith('.fits'):
             print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
             continue
+        # if mic_str.endswith('.fits'):
+        #     seg_str = mic_str
+        #     (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+        #     mic = disperse_io.load_tomo(mic_str, mmap=True)
+        # else:
         seg_str = star_seg.get_element('_psSegImage', seg_row)
-        mic = disperse_io.load_tomo(mic_str, mmap=True)
         (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=True, rots=True)
+        mic = disperse_io.load_tomo(mic_str, mmap=True)
         part = surf.Particle(part_vtp, center=(0., 0., 0.), normal=(0, 0, 1.))
 
         # Initial rotation
@@ -197,13 +227,19 @@ for star_row in range(star.get_nrows()):
         # Centering
         part.translation(-mic_cx, -mic_cy, -mic_cz)
         # Un-rotation
-        seg_rot, seg_tilt, seg_psi = star_seg.get_element('_psSegRot', seg_row), \
-                                     star_seg.get_element('_psSegTilt', seg_row), \
-                                     star_seg.get_element('_psSegPsi', seg_row)
+        if mic_str.endswith('.fits'):
+            seg_rot, seg_tilt, seg_psi = 0, 0, 0
+        else:
+            seg_rot, seg_tilt, seg_psi = star_seg.get_element('_psSegRot', seg_row), \
+                                         star_seg.get_element('_psSegTilt', seg_row), \
+                                         star_seg.get_element('_psSegPsi', seg_row)
         part.rotation(seg_rot, seg_tilt, seg_psi, active=True)
         # Un-centering
         part.translation(mic_cx, mic_cy, mic_cz)
         # Un-cropping
+        # if mic_str.endswith('.fits'):
+        #     seg_offy, seg_offx, seg_offz = 0, 0, 0
+        # else:
         seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', seg_row), \
                                        star_seg.get_element('_psSegOffY', seg_row), \
                                        star_seg.get_element('_psSegOffZ', seg_row)
@@ -211,23 +247,24 @@ for star_row in range(star.get_nrows()):
         part.swap_xy()
 
         # Insert the new particle in the proper tomogram
-        meta_info = dict()
-        meta_info['_rlnMicrographName'] = mic_str
-        meta_info['_rlnImageName'] = star_part.get_element('_rlnImageName', part_row)
-        meta_info['_rlnCtfImage'] = star_part.get_element('_rlnCtfImage', part_row)
-        meta_info['_rlnCoordinateX'] = star_part.get_element('_rlnCoordinateX', part_row)
-        meta_info['_rlnCoordinateY'] = star_part.get_element('_rlnCoordinateY', part_row)
-        meta_info['_rlnCoordinateZ'] = star_part.get_element('_rlnCoordinateZ', part_row)
+        # meta_info = dict()
+        # meta_info['_rlnMicrographName'] = mic_str
+        # meta_info['_rlnImageName'] = star_part.get_element('_rlnImageName', part_row)
+        # meta_info['_rlnCtfImage'] = star_part.get_element('_rlnCtfImage', part_row)
+        # meta_info['_rlnCoordinateX'] = star_part.get_element('_rlnCoordinateX', part_row)
+        # meta_info['_rlnCoordinateY'] = star_part.get_element('_rlnCoordinateY', part_row)
+        # meta_info['_rlnCoordinateZ'] = star_part.get_element('_rlnCoordinateZ', part_row)
         # meta_info['_rlnOriginX'] = star_part.get_element('_rlnOriginX', part_row)
         # meta_info['_rlnOriginY'] = star_part.get_element('_rlnOriginY', part_row)
         # meta_info['_rlnOriginZ'] = star_part.get_element('_rlnOriginZ', part_row)
-        meta_info['_rlnAngleRot'] = star_part.get_element('_rlnAngleRot', part_row)
-        meta_info['_rlnAngleTilt'] = star_part.get_element('_rlnAngleTilt', part_row)
-        meta_info['_rlnAnglePsi'] = star_part.get_element('_rlnAnglePsi', part_row)
+        # meta_info['_rlnAngleRot'] = star_part.get_element('_rlnAngleRot', part_row)
+        # meta_info['_rlnAngleTilt'] = star_part.get_element('_rlnAngleTilt', part_row)
+        # meta_info['_rlnAnglePsi'] = star_part.get_element('_rlnAnglePsi', part_row)
+        meta_info = None
         try:
             list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj, meta=meta_info)
         except pexceptions.PySegInputError as e:
-            print 'WARINING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
+            print 'WARNING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
                   ' because of "' + e.get_message() + '"'
             pass
 
@@ -242,7 +279,7 @@ for star_row in range(star.get_nrows()):
         if pt_min_parts >= 0:
             print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
             list_tomos.filter_by_particles_num(pt_min_parts)
-    if (pt_ssup is not None) and (pt_ssup_ref is None):
+    if pt_ssup is not None:
         list_tomos.scale_suppression(pt_ssup)
 
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
@@ -273,10 +310,6 @@ for star_row in range(star.get_nrows()):
 if isinstance(pt_min_parts, dict):
     print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
     set_lists.filter_by_particles_num_tomos(pt_min_parts)
-
-if pt_ssup_ref is not None:
-    print '\t\tCrossing scale supression with reference list: ' + str(pt_ssup_ref)
-    set_lists.scale_suppression(pt_ssup, ref_list=pt_ssup_ref)
 
 for star_row in range(star.get_nrows()):
 

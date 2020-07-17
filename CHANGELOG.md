@@ -33,3 +33,5 @@
 * **06/05/2020**
     + Adding membrane signal suppression code/tutorials/exp_somb/post_rec_particles.py
     + Bug fixed for code/tutorials/exp_somb/post_rec_particles.py for non-splitting mode
+* **26/05/2020**
+    + Adding tutorial exp_domb (/{code,data}/tutorials/exp_domb)

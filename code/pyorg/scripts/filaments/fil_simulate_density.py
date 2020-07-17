@@ -38,25 +38,28 @@ ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
 in_star = None # ROOT_PATH + '/ltomos/fil_den_ps1.408/fil_den_ps1.408_ltomos.star'
-in_tomo_sz = (2000, 2000, 1000) # Only used if in_star != None
+# Only used if in_star != None
+in_tomo_sz = (1000, 1000, 1000) # (200, 200, 100)
+in_tomo_res = 0.704 # nm/px
+in_tomo_frad = 15 # nm
 
 # Output directory
-out_dir = ROOT_PATH + '/sim_den/test_ps0.704'
+out_dir = ROOT_PATH + '/sim_den/test_MSA_ps0.704'
 out_stem = 'test_ns1'
 
 # Filament settings
-fl_den_2d = ROOT_PATH + '/models/emd_0148_2D_0.704nm.mrc' # '/models/emd_0148_2D_1.408nm.mrc' # '/models/emd_0148_2D_1.756nm.mrc'
+fl_den_2d = ROOT_PATH + '/models/emd_10650_2D_0.704nm.mrc' # '/models/emd_0148_2D_0.704nm.mrc' # '/models/emd_0148_2D_1.408nm.mrc' # '/models/emd_0148_2D_1.756nm.mrc'
 fl_den_inv = True
 fl_pitch = 117 # nm
 
 # Tomogram settings
-tm_snr_rg = None # (0.4, 0.5)
-tm_mw = None # 0 # degs
+tm_snr_rg = (0.4, 0.4) # None # (0.4, 0.5)
+tm_mw = 0 # degs # None
 tm_mwta = 60 # degs
 
 # Simulation settings
 sm_ns = 1 # 5 # 200
-sm_max_fils = 400 # 100 # None
+sm_max_fils = 200 # 100 # None
 
 ########################################################################################
 # MAIN ROUTINE
@@ -76,6 +79,8 @@ if in_star is None:
     print '\tSimulating tomograms with size: ' + str(in_tomo_sz) + ' px'
 else:
     print '\tInput STAR file for filaments: ' + str(in_star)
+    print '\t-Tomogram pixel size: ' + str(in_tomo_res) + ' nm/px'
+    print '\t-Filament radius: ' + str(in_tomo_frad) + ' nm'
 print '\tFilament settings: '
 print '\t\t-Input 2D axial density file: ' + str(fl_den_2d)
 if fl_den_inv:
@@ -132,7 +137,8 @@ if in_star is not None:
         short_key = fkey[:short_key_idx]
         lists_dic_rows[short_key] = row
 else:
-    htomo = TomoFilaments('void_t1', lbl=1, voi=np.ones(shape=in_tomo_sz, dtype=np.bool))
+    htomo = TomoFilaments('void_t1', lbl=1, voi=np.ones(shape=in_tomo_sz, dtype=np.bool),
+                          res=in_tomo_res, rad=in_tomo_frad)
     hltomo = ListTomoFilaments()
     hltomo.add_tomo(htomo)
     set_lists, lists_dic_rows = SetListTomoFilaments(), dict()
@@ -192,10 +198,11 @@ for lkey in lists_hash.itervalues():
         print '\t\t-Model stored in: ' + out_den
         disperse_io.save_numpy(model_2D, out_den)
 
-        print '\t\t\t\t\t-Computing filament to membrane nearest distances...'
-        hold_arr_dsts = ltomo.compute_fils_seg_dsts()
-        out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_fils.vtp'
-        disperse_io.save_vtp(ltomo.gen_filaments_vtp(), out_fils)
+        if ltomo.get_num_filaments() > 0:
+            print '\t\t\t\t\t-Computing filament to membrane nearest distances...'
+            hold_arr_dsts = ltomo.compute_fils_seg_dsts()
+            out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_fils.vtp'
+            disperse_io.save_vtp(ltomo.gen_filaments_vtp(), out_fils)
 
         print '\t\t\t\t\t-Simulating the density tomogrms:'
         model = ModelFilsRSR(ltomo.get_voi(), res=ltomo.get_resolution(), rad=ltomo.get_fils_radius(),
@@ -203,10 +210,11 @@ for lkey in lists_hash.itervalues():
         den_model = model.gen_fil_straight_density(2*fl_pitch, pitch=fl_pitch, rnd_iang=0)
         out_den = out_stem_dir + '/' + tkey.replace('/', '_') + '_fl_den.mrc'
         disperse_io.save_numpy(den_model, out_den)
-        stack_model = model.gen_tomo_stack_densities(axis=0, pitch=fl_pitch, spacing=2, mwa=tm_mw, mwta=tm_mwta,
+        stack_model = model.gen_tomo_stack_densities(axis=0, pitch=fl_pitch, spacing=1.1, mwa=tm_mw, mwta=tm_mwta,
                                                     snr=None)
         out_stack = out_stem_dir + '/' + tkey.replace('/', '_') + '_fl_stack.mrc'
         disperse_io.save_numpy(stack_model, out_stack)
+        print '\t\t\t\t\t\t+Saved stack in: ' + str(out_stack)
         del den_model
         del stack_model
         for i in range(sm_ns):

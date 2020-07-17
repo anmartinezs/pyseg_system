@@ -50,26 +50,26 @@ rcParams['patch.linewidth'] = 2
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3/org'
 
 # Input STAR file
-in_star_1 = ROOT_PATH + '/pre/ltomos/ltomos_pre_pre_v6_chr_ref_xd5nm/pre_pre_v6_chr_ref_xd5nm_ltomos.star' # '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star'
-key_1, l_id1 = 'pre', 0 # 4
-in_star_2 = ROOT_PATH + '/tether/ltomos/ltomos_pre_tether_xd5nm/pre_tether_xd5nm_ltomos.star' # '/../../syn2/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px/all_pre_tether_ltomos.star' # '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star' # '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/az/ref_nomb_1_clean/ltomos_az_ref_1_gather_premb_cleft/az_cleft_premb_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_40/ltomos_tether/ves_40_cleft_premb_mask_ltomos.star' # '/ves_40/ltomos_lap/lap_ltomos.star' # '/ves_40/ltomos_premb_mask/premb_mask_ltomos.star'
+in_star_1 = ROOT_PATH + '/pre/ltomos/ltomos_pre_pre_AP1_AP2_att3_xd5nm/pre_pre_AP1_AP2_att3_xd5nm_ltomos.star' # '/pre/ltomos/ltomos_pre_pre_v6_chr_ref_xd5nm/pre_pre_v6_chr_ref_xd5nm_ltomos.star' # '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star'
+key_1, l_id1 = 'pre', 19 # 4
+in_star_2 = ROOT_PATH + '/tether/ltomos/ltomos_pre_tether_xd5nm/pre_tether_xd5nm_ltomos.star' # '/tether/ltomos/ltomos_pre_tether_xd5nm/pre_tether_xd5nm_ltomos.star' # '/../../syn2/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px/all_pre_tether_ltomos.star' # '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pre/ltomos/ltomos_all_pre_pre_ss7.31px/all_pre_pre_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_gather_mask/pre_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_ABC/pre_premb_ABC_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pre/ref_nomb_1_clean/ltomos_pre_premb_mask_lap/pre_premb_mask_lap_ltomos.star' # '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_ap/ltomos_ves_ap_cleft/ves_ap_cleft_ltomos.star' # '/az/ref_nomb_1_clean/ltomos_az_ref_1_gather_premb_cleft/az_cleft_premb_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/ves_40/ltomos_tether_lap/ves_40_cleft_premb_mask_lap_ltomos.star_ltomos.star' # '/ves_40/ltomos_tether/ves_40_cleft_premb_mask_ltomos.star' # '/ves_40/ltomos_lap/lap_ltomos.star' # '/ves_40/ltomos_premb_mask/premb_mask_ltomos.star'
 key_2, l_id2 = 'tether', 1 # 1
-in_star_3 = ROOT_PATH + '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star' # '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
-key_3, l_id3 = 'pst', 0 # 4
-in_star_4 = ROOT_PATH + '/tether/ltomos/ltomos_pre_tether_xd5nm/pre_tether_xd5nm_ltomos.star' # '/../../syn2/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px/all_pre_tether_ltomos.star' # '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
+in_star_3 = ROOT_PATH +'/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star' # '/col/ltomos/ltomos_all_scol_xd5nm_test/all_scol_xd5nm_test_ltomos.star' # '/pst/ltomos/ltomos_all_pst_pre_ss7.31px/all_pst_pre_ltomos.star' # '/pst/ref_nomb_1_clean/ltomos_pst_premb_gather_mask/pst_premb_gather_mask_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_pre_2/an_pre2_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_an_gather_pre_2/an_gather_pre2_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
+key_3, l_id3 = 'pst', 4 # 4
+in_star_4 = ROOT_PATH + '/tether/ltomos/ltomos_pre_tether_xd5nm/pre_tether_xd5nm_ltomos.star' # '/tether/ltomos/ltomos_pre_tether_xd5nm/pre_tether_xd5nm_ltomos.star' # '/../../syn2/org/tether/ltomos/ltomos_all_pre_tether_ss14.62px/all_pre_tether_ltomos.star' # '/tether/ltomos/ltomos_all_pre_tether_ss7.31px/all_pre_tether_ltomos.star' # '/pst/ampar_vs_nmdar/org/ltomos/ltomos_ampar_nmdar_premb_mask/ampar_nmdar_premb_gather_mask_ltomos.star' # '/pst/nrt/ltomos_k4_gather_premb_mask/k4_gather_premb_mask_ltomos.star' # '/pst/nrt/k2_ABC/ltomos_k2_premb_ABC/k2_premb_ABC_ltomos.star' # '/pst/nrt/ltomos_clst_flt_high_lap/clst_flt_high_lap_ltomos.star' # '/pst/nrt/ltomos_k2_premb_mask/k2_premb_mask_ltomos.star' # '/pst/nrt/ltomos_pst_premb_mask_lap/pst_premb_mask_lap_ltomos.star'
 key_4, l_id4 = 'sv', 3 # 1
-in_star_5 = ROOT_PATH + '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star'
+in_star_5 = ROOT_PATH + '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star' # '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star'
 key_5, l_id5 = 'ampar', 0
-in_star_6 = ROOT_PATH + '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star'
+in_star_6 = ROOT_PATH + '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star' # '/pst/ltomos/ltomos_pst_pre_v6_chr_ref_xd5nm/pst_pre_v6_chr_ref_xd5nm_ltomos.star'
 key_6, l_id6 = 'nmdar', 0
 in_tethers_csv = ROOT_PATH + '/../../syn/sub/relion/fils/pre/ref_nomb_1_clean/py_scripts/syn_num_tethers_2.csv'
 in_part = ROOT_PATH + '/../../syn/sub/relion/fils/pre/vtps/sph_rad_3.7_surf.vtp'
-in_wspace = ROOT_PATH + '/coloc/3_pre_tether_pst/aln_15_cr30_xd5nm/3_pre_tether_pst_sim5_m1_wspace.pkl'
-in_tomo_res = ROOT_PATH + '/../rec/syn_scale_tomos.star' # None
+in_wspace = None # ROOT_PATH + '/coloc/3_pre_tether_pst/aln_15_cr30_xd5nm/3_pre_tether_pst_sim5_m1_wspace.pkl'
+in_tomo_res = None # ROOT_PATH + '/../rec/syn_scale_tomos.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/coloc/3_pre_tether_pst/aln_15_cr30_xd5nm' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
-out_stem = '3_pre_tether_pst_sim5_m1'
+out_dir = ROOT_PATH + '/coloc/3_pre_tether_pst/aln_150_cr300_xd5nm' # '/pst/ampar_vs_nmdar/org/col_scol/col_an_0_aln_clst_15_sim_200_nn1_1_nn2_1_nn3_1'
+out_stem = '3_pre_tether_pst_sim5_m1_nor'
 
 # Pre-processing variables
 pre_ssup = 5 #nm
@@ -78,9 +78,9 @@ pre_min_parts = 1
 # Analysis variables
 ana_res = 0.684 # nm/voxel
 ana_res_r = 0.842 # nm/voxel
-ana_col_rad = 30 # 15 # nm
+ana_col_rad = 300 # 15 # nm
 ana_clst_method = 'HC'
-ana_aln_dst = 15 # nm
+ana_aln_dst = 150 # nm
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
@@ -256,9 +256,9 @@ print '\tNumber of particles found for list 5:' + str(list_5.get_num_particles()
 print '\tNumber of particles found for list 6:' + str(list_6.get_num_particles())
 
 print '\tSet pre-processing...'
-if pre_ssup is not None:
-    pre_ssup_v = pre_ssup / ana_res
-    set_lists.scale_suppression(pre_ssup_v)
+# if pre_ssup is not None:
+#     pre_ssup_v = pre_ssup / ana_res
+#     set_lists.scale_suppression(pre_ssup_v)
 if pre_min_parts > 0:
     set_lists.filter_by_particles_num_tomos(pre_min_parts)
     list_1 = set_lists.get_lists_by_key(key_1)
@@ -268,6 +268,10 @@ if pre_min_parts > 0:
     list_5 = set_lists.get_lists_by_key(key_5)
     list_6 = set_lists.get_lists_by_key(key_6)
 part_vtp = disperse_io.load_poly(in_part)
+if part_vtp.GetNumberOfCells() <= 0:
+    print 'ERROR: input parth for particles does not contain a valid surface: ' + str(in_part)
+    print 'Terminated. (' + time.strftime("%c") + ')'
+    sys.exit(-1)
 print '\t\tNumber of particles found for list 1:' + str(list_1.get_num_particles())
 print '\t\tNumber of particles found for list 2:' + str(list_2.get_num_particles())
 print '\t\tNumber of particles found for list 3:' + str(list_3.get_num_particles())
@@ -383,6 +387,15 @@ if in_wspace is None:
                 ltomo_4.resize(res_f)
                 ltomo_5.resize(res_f)
                 ltomo_6.resize(res_f)
+
+        if pre_ssup is not None:
+            pre_ssup_v = pre_ssup / ana_res
+            ltomo_1.scale_suppression(pre_ssup_v)
+            ltomo_2.scale_suppression(pre_ssup_v)
+            ltomo_3.scale_suppression(pre_ssup_v)
+            ltomo_4.scale_suppression(pre_ssup_v)
+            ltomo_5.scale_suppression(pre_ssup_v)
+            ltomo_6.scale_suppression(pre_ssup_v)
 
         print '\t\t\t\t-Computing columns...'
         # try:

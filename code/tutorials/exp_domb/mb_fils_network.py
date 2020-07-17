@@ -1,8 +1,8 @@
 """
 
-    Script for filter a MbGraphMCF object by extracting a filament network for single oriented membrane.
+    Script for filter a SynGraphMCF object by extracting a filament network
 
-    Input:  - A STAR file with a list of graphs (MbGraphMCF) as it is returned by
+    Input:  - A STAR file with a list of graphs (SynGraphMCF) as it is returned by
               by mb_graph.py script:
             	+ Density map tomogram
             	+ Segmentation tomogram
@@ -36,16 +36,16 @@ except:
 
 ####### Input data
 
-ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei' # Data path
+ROOT_PATH = '/fs/pool/pool-ruben/antonio/nuc_mito' # Data path
 
 # Input STAR file with the GraphMCF pickles
-in_star = ROOT_PATH + '/graphs/mb_seg_single_oriented_pre_mb_graph.star' # The outuput of mb_graph.py
+in_star = ROOT_PATH + '/graphs/v2/dmb_seg_oriented_pre_mb_graph.star' # The outuput of mb_graph.py
 
 # Sources slice XML file
-in_sources = ROOT_PATH + '/fils/in/mb_sources.xml'
+in_sources = ROOT_PATH + '/fils/in/mb2_sources.xml'
 
 # Targets slice XML file
-in_targets = ROOT_PATH + '/fils/in/ext_targets.xml'
+in_targets = ROOT_PATH + '/fils/in/gap_targets.xml'
 
 ####### Output data
 
@@ -56,7 +56,7 @@ out_int_g = True
 
 g_rg_len = [1, 60] # [1, 50] # [1, 75] # nm (>0)
 g_rg_sin = [0, 3]
-g_rg_eud = [1, 25] # [1, 15] # [1, 25] # nm (>0)
+g_rg_eud = [1, 10] # [1, 15] # [1, 25] # nm (>0)
 
 ####### Graph thresholding (Advanced parameters)
 
@@ -67,7 +67,7 @@ th_mode = 'in' # 'out'
 ########################################################################################
 
 # Print initial message
-print 'Filtering a MbGraphMCF by filaments network.'
+print 'Filtering a SynGraphMCF by filaments network.'
 print '\tAuthor: ' + __author__
 print '\tDate: ' + time.strftime("%c") + '\n'
 print 'Options:'
@@ -94,7 +94,6 @@ print 'Paring input star file...'
 star = ps.sub.Star()
 star.load(in_star)
 in_graph_l = star.get_column_data('_psGhMCFPickle')
-star.add_column('_psGhMCFPickle')
 del_rows = list()
 
 # Loop for processing the input data
@@ -111,7 +110,7 @@ for row, in_graph in enumerate(in_graph_l):
     graph_gt = graph_gtt.get_gt()
 
     print '\tProcessing sources slice: ' + in_sources
-    s_slice = ps.xml_io.SliceSet(in_sources)
+    s_slice = ps.xml_io.SynSliceSet(in_sources)
     try:
         _, s_ids, _ = graph.get_cloud_mb_slice(s_slice.get_slices_list()[0], cont_mode=False, graph_gt=graph_gt)
     except ValueError:
@@ -120,7 +119,7 @@ for row, in_graph in enumerate(in_graph_l):
         continue
 
     print '\tProcessing targets slice: ' + in_targets
-    t_slice = ps.xml_io.SliceSet(in_targets)
+    t_slice = ps.xml_io.SynSliceSet(in_targets)
     try:
         _, t_ids, _ = graph.get_cloud_mb_slice(t_slice.get_slices_list()[0], cont_mode=False, graph_gt=graph_gt)
     except ValueError:
