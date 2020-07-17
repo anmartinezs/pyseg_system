@@ -46,10 +46,10 @@ class XMLFilaments(object):
         :param segment_id: Segment ID
         :return: an array of coordinates
         """
-        sidx = self.__segments['Segment ID'].find(segment_id)
+        sidx = int(self.__segments['Segment ID'][segment_id])
         coords = np.zeros(shape=(len(self.__segments['Point IDs'][sidx]), 3), dtype=np.float32)
-        for i, idx in enumerate(self.__segments['Point IDs']):
-            pid = self.__points['Point ID'].find(idx)
+        for i, idx in enumerate(self.__segments['Point IDs'][sidx]):
+            pid = int(self.__points['Point ID'][int(idx)])
             coords[i, :] = (self.__points['X Coord'][pid], self.__points['Y Coord'][pid], self.__points['Z Coord'][pid])
         return coords
 
@@ -67,51 +67,60 @@ class XMLFilaments(object):
         root = tree.getroot()
 
         # Parse the XML elements
+        nodes, points, segments = dict(), dict(), dict()
         for child in root:
             if 'Worksheet' in child.tag:
                 for key_i, val_i in zip(child.attrib.iterkeys(), child.attrib.itervalues()):
                     if ('Name' in key_i) and ('Nodes' in val_i):
                         sub_child = child[0]
-                        if 'Table' in sub_child.attrib:
+                        if 'Table' in sub_child.tag:
+                            col_names = dict()
                             for row in sub_child:
-                                if 'Row' in row.attrib:
-                                    for cell in row:
-                                        if 'Cell' in str(cell):
+                                if 'Row' in row.tag:
+                                    for cell_id, cell in enumerate(row):
+                                        if 'Cell' in cell.tag:
                                             for dat in cell:
                                                 if 'Data' in dat.tag:
                                                     for key_ii, val_ii in zip(dat.attrib.keys(), dat.attrib.values()):
                                                         if ('Type' in key_ii) and ('String' in val_ii):
-                                                            nodes[dat.tag] = list()
+                                                            col_names[cell_id] = dat.text
+                                                            nodes[dat.text] = list()
                                                         else:
-                                                            nodes[dat.tag].append(float(dat.text))
+                                                            nodes[col_names[cell_id]].append(float(dat.text))
                     if ('Name' in key_i) and ('Points' in val_i):
                         sub_child = child[0]
-                        if 'Table' in sub_child.attrib:
+                        if 'Table' in sub_child.tag:
+                            col_names = dict()
                             for row in sub_child:
-                                if 'Row' in row.attrib:
-                                    for cell in row:
-                                        if 'Cell' in str(cell):
+                                if 'Row' in row.tag:
+                                    for cell_id, cell in enumerate(row):
+                                        if 'Cell' in cell.tag:
                                             for dat in cell:
                                                 if 'Data' in dat.tag:
                                                     for key_ii, val_ii in zip(dat.attrib.keys(), dat.attrib.values()):
                                                         if ('Type' in key_ii) and ('String' in val_ii):
-                                                            points[dat.tag] = list()
+                                                            col_names[cell_id] = dat.text
+                                                            points[dat.text] = list()
                                                         else:
-                                                            points[dat.tag].append(float(dat.text))
+                                                            points[col_names[cell_id]].append(float(dat.text))
                     if ('Name' in key_i) and ('Segments' in val_i):
                         sub_child = child[0]
-                        if 'Table' in sub_child.attrib:
+                        if 'Table' in sub_child.tag:
+                            col_names = dict()
                             for row in sub_child:
-                                if 'Row' in row.attrib:
-                                    for cell in row:
-                                        if 'Cell' in str(cell):
+                                if 'Row' in row.tag:
+                                    for cell_id, cell in enumerate(row):
+                                        if 'Cell' in cell.tag:
                                             for dat in cell:
                                                 if 'Data' in dat.tag:
                                                     for key_ii, val_ii in zip(dat.attrib.keys(), dat.attrib.values()):
                                                         if ('Type' in key_ii) and ('String' in val_ii):
-                                                            if ',' in val_ii.text:
-                                                                segments[dat.tag].append(dat.text.split(','))
+                                                            if ',' in dat.text:
+                                                                segments[col_names[cell_id]].append(dat.text.split(','))
                                                             else:
-                                                                segments[dat.tag] = list()
+                                                                col_names[cell_id] = dat.text
+                                                                segments[dat.text] = list()
                                                         else:
-                                                            segments[dat.tag].append(float(dat.text))
+                                                            segments[col_names[cell_id]].append(float(dat.text))
+
+        self.__nodes, self.__points, self.__segments = nodes, points, segments

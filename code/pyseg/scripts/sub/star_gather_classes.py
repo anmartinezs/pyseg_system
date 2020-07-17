@@ -25,16 +25,16 @@ import numpy as np
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-lucic2/in_situ_er'
+ROOT_PATH = '/fs/pool/pool-lucic2/antonio/radu'
 
 # Input STAR file with the list of files to gather or a directory
-in_star = ROOT_PATH + '/de_novo_klass_3d/mb_oriented_h_dose/trans_hold/'
+in_star = ROOT_PATH + '/class/noali_all_2/merge_big_gap'
 
 # Input STAR file with segmentation information to focus the masks
 in_seg = None # ROOT_PATH + '/two_segmentations.star'
 
 # Output file
-out_star = ROOT_PATH + '/de_novo_klass_3d/mb_oriented_h_dose/trans_hold.star'
+out_star = ROOT_PATH + '/class/noali_all_2/class_1_ap_r_ali_mbclean_merge_big_gap.star'
 
 ########################################################################################
 # MAIN ROUTINE

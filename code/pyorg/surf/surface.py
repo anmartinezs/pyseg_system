@@ -1,5 +1,5 @@
 '''
-Classes for representing a surface and a set of surfaces 
+Classes for representing a tomograms with particles
 
 '''
 
@@ -16,7 +16,7 @@ from pyorg import globals as gl
 # from pyorg.surf import gen_tlist, Model
 from utils import *
 from pyorg.spatial.sparse import nnde, cnnde
-from pyorg.globals.utils import unpickle_obj
+from pyorg.globals.utils import unpickle_obj, trilin3d
 from sklearn.cluster import AffinityPropagation
 import numpy as np
 import scipy as sp
@@ -54,6 +54,9 @@ CODE_POSITIVE_DST = 1
 CODE_NEGATIVE_DST = 2
 CODE_BORDER = 3
 CODE_STR = 'CODE'
+MB_DST = 'mb_dst'
+ANG_REF = 'ang_ref'
+RAD_TO_DEG = 180. / np.pi
 
 # GLOBAL FUNCTIONS
 
@@ -540,10 +543,20 @@ class ParticleL(object):
     def get_eu_angs(self):
         return self.__eu_angs
 
-    def get_vtp(self):
-        hold_vtp = self.__load_ref()
-        hold_vtp = self.__add_props_vtp(hold_vtp)
-        return self.__transform(hold_vtp)
+    def get_vtp(self, mode='surface'):
+        """
+        Get a vtkPolyData object to represent the particle
+        :param mode: if mode 'surface' (default) then particle surface shape is returned, if 'point' the just a
+        cell point is returned
+        :return: a vtkPolyData object
+        """
+        assert (mode == 'surface') or (mode == 'point')
+        if mode == 'surface':
+            hold_vtp = self.__load_ref()
+            hold_vtp = self.__transform(hold_vtp)
+        else:
+            hold_vtp = point_to_poly(self.get_center())
+        return self.__add_props_vtp(hold_vtp)
 
     def get_surf_point(self, point_id, ref_vtp):
         """
@@ -588,6 +601,14 @@ class ParticleL(object):
 
         return point_vtp.GetPoints().GetPoint(0)
 
+    def get_prop_value(self, key):
+        """
+        Get the value of a property
+        :param key: property key
+        :return: the property key, an integer or an array
+        """
+        return self.__props[key][1]
+
     def add_meta(self, meta):
         for key, val in zip(meta.iterkeys(), meta.itervalues()):
             self.__meta[key] = val
@@ -597,7 +618,7 @@ class ParticleL(object):
         if not issubclass(vtk_type, vtk.vtkAbstractArray):
             error_msg = 'Input vtk_type must be child class of vtkAbstractArray!'
             raise pexceptions.PySegInputError(expr='add_vtp_global_attribute (ParticleL)', msg=error_msg)
-        self.__props[key] = (vtk_type, val)
+        self.__props[key] = (vtk_type.__name__, val)
 
     # Check if a point with in the particle bounds
     # point: point to check
@@ -686,11 +707,13 @@ class ParticleL(object):
             # Initialization
             if isinstance(propt[1], str):
                 t_value, n_comp = propt[1], 1
+            elif isinstance(propt[1], np.ndarray):
+                t_value, n_comp = tuple(propt[1]), len(propt[1])
             elif not isinstance(propt[1], tuple):
                 t_value, n_comp = (propt[1],), 1
             else:
-                t_value, n_comp = propt[1], len(propt[1])
-            prop = propt[0]()
+                t_value, n_comp = map(tuple, propt[1])[0], len(propt[1])
+            prop = getattr(vtk, propt[0])()
             prop.SetNumberOfComponents(n_comp)
             prop.SetName(str(key))
 
@@ -808,6 +831,19 @@ class Particle(object):
             points_arr[i, :] = self.__vtp.GetPoint(i)
         return points_arr
 
+    def get_prop_value(self, key):
+        """
+        Get the value of a property
+        :param key: property key
+        :return: the property key, an integer or a tuples
+        """
+        prop = self.__vtp.GetCellData().AddArray(key)
+        hold_t = prop.GetTuple(0)
+        if len(hold_t) == 1:
+            return hold_t[0]
+        else:
+            return hold_t
+
     #### External functionality
 
     def add_meta(self, meta):
@@ -852,6 +888,34 @@ class Particle(object):
     #      this filter will try to reduce the data set to 10% of its original size).
     def decimation(self, dec):
         self.__vtp = poly_decimate(self.__vtp, dec)
+
+    def scale(self, scale_x, scale_y, scale_z):
+        """
+        Scaling tranformation
+        :param scale_x|y|z: scaling factor in X|Y|Z
+        :return:
+        """
+
+        # Transformation on the PolyData
+        box_tr = vtk.vtkTransform()
+        box_tr.Scale(scale_x, scale_y, scale_z)
+        tr_box = vtk.vtkTransformPolyDataFilter()
+        tr_box.SetInputData(self.__vtp)
+        tr_box.SetTransform(box_tr)
+        tr_box.Update()
+        self.__vtp = tr_box.GetOutput()
+
+        # Update center (does not apply to normals)
+        box_tr = vtk.vtkTransform()
+        box_tr.Translate(scale_x, scale_y, scale_z)
+        tr_box = vtk.vtkTransformPolyDataFilter()
+        tr_box.SetInputData(self.__center)
+        tr_box.SetTransform(box_tr)
+        tr_box.Update()
+        self.__center = tr_box.GetOutput()
+
+        # Update the bounds
+        self.__update_bounds()
 
     # Rigid translation
     # shift_i: translations in X, Y, Z axes respectively
@@ -1195,6 +1259,7 @@ class TomoParticles(object):
         :param lbl: label which marks the VOI (Volume Of Interest)
         :param voi: if None (default) unused, otherwise VOI is already available so 'lbl' will not be considered
         :param sg: sigma Gaussian smoothing to reduce surface stepping, default None. Only valid if VOI is None
+        :param meta_info: if not None (default) an input dictionary to add meta information
         """
 
         # Input parsing
@@ -1206,6 +1271,7 @@ class TomoParticles(object):
             raise pexceptions.PySegInputError(expr='__init__ (TomoParticles)', msg=error_msg)
         self.__parts = list()
         self.__fname = tomo_fname
+        self.__meta_info = dict()
         self.__df_voi, self.__df_dst_ids = None, None
 
         # Getting VOI
@@ -1245,6 +1311,17 @@ class TomoParticles(object):
         self.__parts_fname = None
 
     # GET/SET AREA
+
+    def add_meta_info(self, key, value):
+        self.__meta_info[key] = value
+
+    def get_meta_info(self, key):
+        """
+        To get meta information
+        :param key: dictionary key
+        :return: the meta information value
+        """
+        return self._TomoParticles__meta_info[key]
 
     # Decimate the VOI
     # dec: decimation factor (default None) for VOI surface
@@ -2335,12 +2412,14 @@ class TomoParticles(object):
         else:
             return float(self.get_num_particles()) / vol
 
-    # Append all particle surfaces in one vtkPolyData
-    # mode: (default 'surface') mode for generating the vtkPolyData for every particle,
-    #       see Particle.get_vtp()
-    # lbl: if not None (default) it is added as integer attribute for labeling
-    # Returns: a single vtkPolyData
     def append_particles_vtp(self, mode='surface', lbl=None):
+        """
+        Append all particle surfaces in one vtkPolyData
+        :param mode: (default 'surface') mode for generating the vtkPolyData for every particle,
+                     see Particle.get_vtp() and ParticleL.get_vtp()
+        :param lbl: if not None (default) it is added as integer attribute for labeling
+        :return: a single vtkPolyData
+        """
         is_empty = True
         appender = vtk.vtkAppendPolyData()
         for part in self.__parts:
@@ -2353,7 +2432,7 @@ class TomoParticles(object):
             if isinstance(part, Particle):
                 copy_vtp.DeepCopy(part.get_vtp(mode=mode))
             else:
-                copy_vtp.DeepCopy(part.get_vtp())
+                copy_vtp.DeepCopy(part.get_vtp(mode=mode))
             appender.AddInputData(copy_vtp)
             is_empty = False
         if is_empty:
@@ -2812,6 +2891,76 @@ class TomoParticles(object):
                     return False
         return True
 
+    def resize(self, factor):
+        """
+        Resize the tomogram, particle coordinates and VOI.
+        :param factor: resizing factor (default 1.)
+        :return:
+        """
+        # Resize the particles
+        for part in self.__parts:
+            # part.scale(factor, factor, factor)
+            v_t = (factor-1.) * np.asarray(part.get_center())
+            part.translation(v_t[0], v_t[1], v_t[2])
+        # Resize the VOI
+        if isinstance(self.__voi, np.ndarray):
+            self.__voi = sp.ndimage.zoom(self.__voi, factor, order=0)
+            self.__voi_dst_ids = sp.ndimage.zoom(self.__voi, factor, order=0)
+        else:
+            tr, tr_flt = vtk.vtkTransform(), vtk.vktTransformFilter()
+            tr.Scale(factor, factor, factor)
+            tr_flt.SetInputConnection(self.__voi)
+            tr_flt.SetTransform(tr)
+            self.__voi = tr_flt.GetOutputPort()
+            self.__voi_selector = vtk.vtkSelectEnclosedPoints()
+            self.__voi_selector.Initialize(self.__voi)
+        self.__update_bounds()
+
+    def compute_mb_seg_distances(self, mb_seg, do_ang=None):
+        """
+        Measure the nearest distance from each particle to on input membrane segmentation.
+        :param mb_seg: membrane segmentation (!=0 membrane, otherwise bg)
+        :param do_ang: if not None (default) it must be a 2-tuple (normal property key, reference vector, axis) then allows
+                       to compute the particles angle wrt a reference vector
+        :return: an array with all distances measures, one per each particles
+        """
+
+        # Initialization
+        dsts, angs = list(), None
+        ref_vect = None
+        if do_ang is not None:
+            assert len(do_ang) == 3
+            ref_vect = np.asarray(do_ang[1], dtype=np.float32)
+            angs = list()
+
+        # Computing the distances field
+        dsts_field = sp.ndimage.morphology.distance_transform_edt(mb_seg == 0, return_distances=True, return_indices=False)
+
+        # Filaments loop
+        for part in self.__parts:
+            coord = part.get_center()
+            hold_dst = trilin3d(dsts_field, coord)
+            dsts.append(hold_dst)
+            if isinstance(part, Particle):
+                part.add_vtp_global_attribute(MB_DST, vtk.vtkFloatArray, hold_dst)
+            elif isinstance(part, ParticleL):
+                part.add_prop(MB_DST, vtk.vtkFloatArray, hold_dst)
+            if ref_vect is not None:
+                hold_vec = np.asarray(part.get_prop_value(key=do_ang[0]), dtype=np.float32)
+                hold_ang = gl.angle_2vec_3D(hold_vec, ref_vect) * RAD_TO_DEG
+                if do_ang[2] and (hold_ang > 90):
+                    hold_ang = gl.angle_2vec_3D(hold_vec, -1. * ref_vect) * RAD_TO_DEG
+                if isinstance(part, Particle):
+                    part.add_vtp_global_attribute(ANG_REF, vtk.vtkFloatArray, hold_ang)
+                elif isinstance(part, ParticleL):
+                    part.add_prop(ANG_REF, vtk.vtkFloatArray, hold_ang)
+                angs.append(hold_ang)
+
+        if angs is None:
+            return np.asarray(dsts)
+        else:
+            return np.asarray(dsts), np.asarray(angs)
+
     # INTERNAL FUNCTIONALITY AREA
 
     def __update_bounds(self):
@@ -2863,6 +3012,7 @@ class ListTomoParticles(object):
 
     def __init__(self):
         self.__tomos = dict()
+        self.__meta_info = dict()
         # For pickling
         self.__pkls = None
 
@@ -2898,15 +3048,23 @@ class ListTomoParticles(object):
     def get_tomo_by_key(self, key):
         return self.__tomos[key]
 
-    # tomo_surf: TomoSurface object to add to the list
-    def add_tomo(self, tomo_surf):
+    def add_tomo(self, tomo_parts, meta_info=None):
+        """
+        Add at TomoParticles object
+        :param tomo_surf: TomoParticles object to add to the list
+        :param meta_info: dictionary with meta information to associate with the input TomoParticles
+        :return:
+        """
         # Input parsing
-        tomo_fname = tomo_surf.get_tomo_fname()
+        tomo_fname = tomo_parts.get_tomo_fname()
         if tomo_fname in self.get_tomo_fname_list():
             print 'WARNING: tomo_surf (ListTomoParticles): tomogram ' + tomo_fname + ' was already inserted.'
             return
+        if meta_info is not None:
+            assert isinstance(meta_info, dict)
         # Adding the tomogram to the list and dictionaries
-        self.__tomos[tomo_fname] = tomo_surf
+        self.__tomos[tomo_fname] = tomo_parts
+        self.__meta_info[tomo_fname] = meta_info
 
     # Delete a TomoSurface entry in the list
     # tomo_key: TomoSurface key
@@ -2915,7 +3073,7 @@ class ListTomoParticles(object):
         del self.__tomos[tomo_key]
 
     def insert_particle(self, part, tomo_fname, check_bounds=False, mode='full', voi_pj=True,
-                        voi_to_pj=None, meta=None):
+                        voi_to_pj=None, meta=None, check_inter=False):
         """
         Insert a new Particle object in the correspondent tomogram
         :param part: Particle object to insert
@@ -2928,11 +3086,12 @@ class ListTomoParticles(object):
             valid if voi_pj=True and used to set a VOI different from self's VOI. The only valid
             VOI is a vtkPolyData
         :param meta: a dictionary with meta information for the particle (default None)
+        :param check_inter: if True (default) a particle which overlaps with an already inserted one is not inserted
         :return:
         """
         try:
             self.__tomos[tomo_fname].insert_particle(part, check_bounds, mode=mode, voi_pj=voi_pj,
-                                                     voi_to_pj=voi_to_pj, meta=meta)
+                                                     voi_to_pj=voi_to_pj, meta=meta, check_inter=check_inter)
         except KeyError:
             error_msg = 'Tomogram ' + tomo_fname + ' is not added to list!'
             raise pexceptions.PySegInputError(expr='insert_particle (ListTomoParticles)', msg=error_msg)
@@ -3661,12 +3820,12 @@ class ListTomoParticles(object):
         for tomo in self.get_tomo_list():
             for part in tomo.get_particles():
                 hold_part = part
-                if hold_part is None:
+                if hold_part is not None:
                     break
-            if hold_part is None:
-                break
-        if hold_part is None:
-            return None
+        #     if hold_part is None:
+        #         break
+        # if hold_part is None:
+        #     return None
         meta_dic = hold_part.get_meta()
         for key in meta_dic.iterkeys():
             star_part.add_column(key)
@@ -3785,8 +3944,8 @@ class SetListTomoParticles(object):
     def add_list_tomos(self, ltomos, list_name):
         # Input parsing (compatible with older versions)
         if ltomos.__class__.__name__ != 'ListTomoParticles':
-            error_msg = 'WARNING: add_tomo (SetListTomoParticles): ltomos input must be ListTomoParticles object.'
-            raise pexceptions.PySegInputError(expr='add_tomo (SetListTomoParticles)', msg=error_msg)
+            error_msg = 'WARNING: add_tomo (ListTomoParticles): ltomos input must be ListTomoParticles object.'
+            raise pexceptions.PySegInputError(expr='add_tomo (ListTomoParticles)', msg=error_msg)
         # Adding the list to the dictionary
         self.__lists[str(list_name)] = ltomos
 

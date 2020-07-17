@@ -491,6 +491,23 @@ def angle_2vec_2D(v_p, v_q):
         hold = 1.
     return math.acos(hold)
 
+def closest_points(point, points, nn=1):
+    """
+    Find the closest points to an input reference by Euclidean distance
+    :param point: Input reference point
+    :param points: Array of points to look for the closest neighbour
+    :param nn: (default 1) number of neighbours to look for
+    :return: An array with the closest points found
+    """
+
+    eu_dsts = point - points
+    eu_dsts = np.sqrt((eu_dsts * eu_dsts).sum(axis=1))
+    n_ids = np.argsort(eu_dsts)
+    out_points = np.zeros(shape=(nn, 3))
+    for i in xrange(nn):
+        out_points[i] = points[n_ids[i], :]
+    return out_points
+
 # Flip cloud of points coordinates along specified dimensions
 # dim_id: dimensions index, it must in [0, 1, ..., nd]
 def flip_cloud(cloud, dim_id=0):
@@ -1151,6 +1168,30 @@ def rot_mat_eu_relion(A, deg=True):
     else:
         return alpha, beta, gamma
 
+def rot_mat_2_vectors(v_a, v_b):
+    """
+    Compute the rotation matrix to transform v_a into v_b
+    :param v_a: origin vector
+    :param v_b: destination vector
+    :return: the rotation matrix
+    """
+
+    # Input parsing
+    n_a, n_b = math.sqrt((v_a * v_a).sum()), math.sqrt((v_b * v_b).sum())
+    if (n_a <= 0) or (n_b <= 0):
+        raise ValueError
+    v_a_n, v_b_n = v_a / n_a, v_b / n_b
+
+    # Computing the matrix
+    v = np.cross(v_a_n, v_b_n)
+    c = np.dot(v_a_n, v_b_n)
+    c2 = 1. / (1. - c)
+    I = np.identity(3)
+    V = np.matrix([[0., -v[2], v[1]], [v[2], 0., -v[0]], [-v[1], v[0], 0.]])
+    R = I + V + V*V*c2
+
+    return R
+
 # Computes quaternion from an input rotation matrix
 # Code extracted: from http://www.lfd.uci.edu/~gohlke/code/transformations.py.html
 # rot: rotation numpy matrix
@@ -1566,6 +1607,38 @@ def vect_to_zrelion(v_in, mode='active'):
         rot, tilt, psi = rot_mat_eu_relion(M.T, deg=True)
 
     return rot, tilt, psi
+
+def relion_norm(tomo, mask=None, inv=True):
+    """
+    Relion tomogram normalization
+    :param tomo: input tomogram
+    :param mask: if None (default) the whole tomogram is used for computing the statistics otherwise just the masked region
+    :param inv: if True the values are inverted (default)
+    :return:
+    """
+
+    # Input parsing
+    if mask is None:
+        mask = np.ones(shape=tomo.shape, dtype=np.bool)
+
+    # Inversion
+    if inv:
+        hold_tomo = -1. * tomo
+    else:
+        hold_tomo = tomo
+
+    # Statistics
+    stat_tomo = hold_tomo[mask>0]
+    mn, st = stat_tomo.mean(), stat_tomo.std()
+
+    # Histogram equalization
+    tomo_out = np.zeros(shape=tomo.shape, dtype=np.float32)
+    if st > 0:
+        tomo_out = (hold_tomo-mn) / st
+    else:
+        print 'WARNING (relion_norm): standard deviation=' + str(st)
+
+    return tomo_out
 
 ################################################################################################
 #  Class for modelling a thresholding procedure

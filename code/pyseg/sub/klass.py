@@ -8,7 +8,7 @@ Set of classes for particle classification
 __author__ = 'Antonio Martinez-Sanchez'
 
 
-import cv2
+# import cv2
 
 import gc
 import sys
@@ -112,7 +112,7 @@ def pr_cc_2d(pr_id, ids, sym_ids, imgs, masks, metric, shared_mat):
     n_parts = len(imgs)
     if metric == 0:
         for idx in ids:
-            pair_ids = sym_ids[idx]
+            pair_ids = sym_ids[int(idx)]
 
             ## Extract the particle information
             # Particle 1
@@ -137,7 +137,7 @@ def pr_cc_2d(pr_id, ids, sym_ids, imgs, masks, metric, shared_mat):
 
     elif metric == 1:
         for idx in ids:
-            pair_ids = sym_ids[idx]
+            pair_ids = sym_ids[int(idx)]
 
             ## Extract the particle information
             # Particle 1
@@ -164,7 +164,7 @@ def pr_cc_2d(pr_id, ids, sym_ids, imgs, masks, metric, shared_mat):
     else:
         # print 'Metric F'
         for idx in ids:
-            pair_ids = sym_ids[idx]
+            pair_ids = sym_ids[int(idx)]
 
             ## Extract the particle information
             # Particle 1

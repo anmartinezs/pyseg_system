@@ -26,17 +26,24 @@ from variables import RadialAvg3D
 # Global functionality
 ###########################################################################################
 
-# Relion tomogram normalization
-# tomo: input tomogram
-# mask: if None (default) the whole tomogram is used for computing the statistics otherwise just the masked region
-def relion_norm(tomo, mask=None):
+def relion_norm(tomo, mask=None, inv=True):
+    """
+    Relion tomogram normalization
+    :param tomo: input tomogram
+    :param mask: if None (default) the whole tomogram is used for computing the statistics otherwise just the masked region
+    :param inv: if True the values are inverted (default)
+    :return:
+    """
 
     # Input parsing
     if mask is None:
         mask = np.ones(shape=tomo.shape, dtype=np.bool)
 
     # Inversion
-    hold_tomo = -1. * tomo
+    if inv:
+        hold_tomo = -1. * tomo
+    else:
+        hold_tomo = tomo
 
     # Statistics
     stat_tomo = hold_tomo[mask>0]

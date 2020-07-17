@@ -1,0 +1,1 @@
+This folder contains the scripts for produccing some of the results presented in [Trinkaus et al. (in revsion), In situ architecture of neuronal alpha-Synuclein inclusion bodies]

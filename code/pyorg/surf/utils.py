@@ -308,7 +308,7 @@ def list_tomoparticles_pvalues(rads, dic_exp, dic_sim):
 
 def line_2_pts(pt_1, pt_2, step):
     """
-    Generates the coordiantes in the line between pt_1 and pt_2
+    Generates the coordinates in the line between pt_1 and pt_2
     :param pt_1/2: line extrema
     :param step: point distance step
     :return: an array with size [n, 3] where n is the number of point coordiantes
@@ -356,6 +356,32 @@ def points_to_polyline(coords):
     poly.SetLines(cells)
     return poly
 
+def polyline_to_points(polyline, mode='verts'):
+    """
+    Extract an ordered list with the points in a polyline
+    :param polyline: input vtkPolyData with a polyline
+    :param mode: valid; 'verts' cell vertices, 'line' cell line
+    :return: numpy array with point coordinates ordered
+    """
+    assert (mode == 'verts') or (mode == 'line')
+    if mode == 'verts':
+        verts = polyline.GetVerts()
+        coords = np.zeros(shape=(verts.GetNumberOfCells(), 3), dtype=np.float32)
+        for vert_id in range(verts.GetNumberOfCells()):
+            cell = vtk.vtkGenericCell()
+            verts.GetCell(vert_id, cell)
+            pts = cell.GetPoints()
+            coords[vert_id, :] = pts.GetPoint(0)
+    elif mode == 'line':
+        lines = polyline.GetLines()
+        coords = list()
+        for line_id in range(lines.GetNumberOfCells()):
+            ids = vtk.vtkIdList()
+            lines.GetCell(line_id, ids)
+            for i in range(ids.GetNumberOfIds()):
+                coords.append(polyline.GetPoint(ids.GetId(i)))
+        coords = np.asarray(coords, dtype=np.float32)
+    return coords
 
 def is_point_inside_surf(point, selector, conv_iter, max_iter):
     """

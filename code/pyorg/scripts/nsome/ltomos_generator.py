@@ -30,35 +30,40 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Peng_Xu/Antonio/nucleasome'
+ROOT_PATH = '/fs/pool/pool-plitzko/Peng_Xu/Antonio/test_dst' # '/fs/pool/pool-plitzko/Peng_Xu/Antonio/nucleasome'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_T07.star'
+in_star = ROOT_PATH + '/in/test/in_ltomos_test.star' # '/in/in_ltomos_T07.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_T07.star'
+in_seg = ROOT_PATH + '/in/test/in_seg_test.star' # '/in/in_seg_T07.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/T07' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'T07_test_1' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/test_nointer' # '/ltomos/T07' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'test_1' # 'T07_test_1' # 'pre'
 
 pt_res = 0.896 # nm/vx - resolution
 
 #### Advanced settings
+
+# STAR file pre-processing
+st_scaling = (0.25, 0.25, 0.5) # (1, )
+st_origins = (4, 4, 2) # If not None, subtomoavg shiftings are considered,
+                   # then scale factor (one per each pattern in in_star) from picked particle to subtomograms
 
 # Segmentation pre-processing
 sg_lbl = 1 # segmented label
 sg_bc = True # False
 sg_bm = 'center' # Embedding checking mode
 sg_pj = False # Project particles to VOI's surfaces
-sg_origins = (1, ) # If not None, subtomoavg shiftings are considered,
-                    # then scale factor (one per each pattern in in_star) from picked particle to subtomograms
 sg_swap_xy = False # Swap X and Y coordinates of the input particle STAR files
 sg_voi_surf = False # It forces to convert VOI to a surface (vtkPolyData object)
 sg_sg = 0 # Gaussian filtering for surface conversion
 sg_dec = 0.9 # Decimation factor for the triangle mesh
 
 # Post-processing
+pt_normal_v = (1., .0, .0)
+pt_check_inter = True # Checks particle intersection
 pt_ssup = 5 # nm - scale suppression for the input particles
 pt_ss_ref = None # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = None # for using different scale-suppression distances for crossed scale suppression
@@ -82,6 +87,9 @@ print 'Options:'
 print '\tOutput directory: ' + str(out_dir)
 print '\tInput STAR file of particles: ' + str(in_star)
 print '\t\t-Input STAR file for segmentations: ' + str(in_seg)
+print '\tSTAR file pre-processing: '
+print '\t\t-Coordinates scaling: ' + str(sg_lbl)
+print '\t\t-Scale factor for subtomo-averaging origins: ' + str(st_origins)
 print '\tSegmentation pre-processing: '
 print '\t\t-Segmentation label: ' + str(sg_lbl)
 print '\t\t-Segmentation Gaussian smoothing sigma: ' + str(sg_sg)
@@ -91,14 +99,16 @@ if sg_bc:
     print '\t\t-Checking particles VOI boundary with mode: ' + str(sg_bm)
 if sg_pj:
     print '\t\t-Activated particles projecting on surface VOI.'
-if sg_origins is not None:
-    print '\t\t-Scale factor for subtomo-averaging origins: ' + str(sg_origins)
 if sg_voi_surf:
     print '\t\t-Forcing surface VOI mode activated!'
 if sg_swap_xy:
     print '\t\t-Swap X and Y particle coordinates.'
 print '\tPost-processing: '
+if pt_normal_v is not None:
+    print '\t\t-Particles normal reference: ' + str(pt_normal_v)
 print '\t\t-Resolution: ' + str(pt_res) + ' nm/vx'
+if pt_check_inter:
+    print '\t\t-Checks particles intersection.'
 print '\t\t-Scale suppression: ' + str(pt_ssup) + ' nm'
 if (pt_ss_ref is not None) and (pt_ss_ref_dst is not None):
     print '\t\t-Reference key for crossed scale suppresion: ' + str(pt_ss_ref)
@@ -144,13 +154,14 @@ star, star_out = sub.Star(), sub.Star()
 try:
     star.load(in_star)
     star_out.add_column('_psPickleFile')
+    star_out.add_column('_suSurfaceVtp')
 except pexceptions.PySegInputError as e:
     print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
     print 'Terminated. (' + time.strftime("%c") + ')'
     sys.exit(-1)
 
 print '\tLoop for generating tomograms VOIs: '
-vois, nvois = dict(), dict()
+vois, nvois, mbs = dict(), dict(), dict()
 for tomo_row in range(star_seg.get_nrows()):
     mic_str, seg_str = star_seg.get_element('_rlnMicrographName', tomo_row), \
                        star_seg.get_element('_psSegImage', tomo_row)
@@ -176,6 +187,8 @@ for tomo_row in range(star_seg.get_nrows()):
         disperse_io.save_numpy(voi, out_voi)
         # voi = disperse_io.load_tomo(out_voi, mmap=True)
         vois[seg_str] = out_voi
+    if star_seg.has_column('_omMbSegmentation'):
+        mbs[seg_str] = star_seg.get_element('_omMbSegmentation', tomo_row)
     nvois[seg_str] = 0
 
 print '\tLoop for tomograms in the list: '
@@ -199,8 +212,10 @@ for star_row in range(star.get_nrows()):
                 print 'ERROR: ' + voi_ext + ' not recognized extension for VOI ' + voi
                 print 'Terminated. (' + time.strftime("%c") + ')'
                 sys.exit(-1)
-        hold_tomo = surf.TomoParticles(tomo_fname, sg_lbl, voi=voi)
-        list_tomos.add_tomo(surf.TomoParticles(tomo_fname, sg_lbl, voi=voi))
+        hold_surf = surf.TomoParticles(tomo_fname, sg_lbl, voi=voi)
+        if len(mbs.values()) > 0:
+            hold_surf.add_meta_info('_omMbSegmentation', mbs[tomo_fname])
+        list_tomos.add_tomo(hold_surf)
 
     print '\t\tLoading particles STAR file(s):'
     star_part = sub.Star()
@@ -240,10 +255,11 @@ for star_row in range(star.get_nrows()):
         seg_mic_dir[seg_str] = mic_str
         mic = disperse_io.load_tomo(mic_str, mmap=True)
         if sg_swap_xy:
-            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=sg_origins[star_row], rots=True)
+            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=st_origins[star_row],
+                                                                           rots=True, c_scaling=st_scaling[star_row])
         else:
-            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=sg_origins[star_row],
-                                                                           rots=True)
+            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=st_origins[star_row],
+                                                                           rots=True, c_scaling=st_scaling[star_row])
         part_center, part_eu_angs = np.asarray((cx, cy, cz), dtype=np.float32), \
                                     np.asarray((rho, tilt, psi), dtype=np.float32)
 
@@ -281,11 +297,15 @@ for star_row in range(star.get_nrows()):
 
         # Insert the new particle in the proper tomogram
         try:
+            R = gl.rot_mat_relion(part_eu_angs[0], part_eu_angs[1], part_eu_angs[2], deg=True)
+            part_normal = np.asarray(R.T * np.asarray(pt_normal_v, dtype=np.float32).reshape(3, 1)).reshape(3)
             part = surf.ParticleL(part_surf_str, center=part_center, eu_angs=part_eu_angs)
+            part.add_prop('normal_v', vtk.vtkFloatArray, part_normal)
             # part = surf.Particle(part_vtp, center=(0, 0, 0))
             # part.rotation(part_eu_angs[0], part_eu_angs[1], part_eu_angs[2])
             # part.translation(part_center[0], part_center[1], part_center[2])
-            list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj)
+            list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj,
+                                       check_inter=pt_check_inter)
             parts_inserted += 1
             nvois[seg_str] += 1
         except pexceptions.PySegInputError as e:
@@ -387,7 +407,7 @@ for star_row in range(star.get_nrows()):
     print '\t\tPickling the list of tomograms in the file: ' + out_pkl
     try:
         list_tomos.pickle(out_pkl)
-        kwargs = {'_psPickleFile': out_pkl}
+        kwargs = {'_psPickleFile': out_pkl, '_suSurfaceVtp': part_surf_str}
         star_out.add_row(**kwargs)
     except pexceptions.PySegInputError as e:
         print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
@@ -422,6 +442,10 @@ tomos_vtp = set_lists.tomos_to_vtp(mode='surface')
 for key, poly in zip(tomos_vtp.iterkeys(), tomos_vtp.itervalues()):
     stem_tomo = os.path.splitext(os.path.split(key)[1])[0]
     disperse_io.save_vtp(poly, out_dir+'/'+stem_tomo+'_lists_app.vtp')
+tomos_vtp = set_lists.tomos_to_vtp(mode='point')
+for key, poly in zip(tomos_vtp.iterkeys(), tomos_vtp.itervalues()):
+    stem_tomo = os.path.splitext(os.path.split(key)[1])[0]
+    disperse_io.save_vtp(poly, out_dir+'/'+stem_tomo+'_lists_app_points.vtp')
 
 out_star = out_dir + '/' + out_stem + '_ltomos.star'
 print '\tOutput STAR file: ' + out_star

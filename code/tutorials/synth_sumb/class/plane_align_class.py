@@ -15,13 +15,17 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 ###### Global variables
 
+CDF_TH = 0.95 # Threshold for accumulated correlation
+
 ################# Package import
 
 import os
 import sys
 import time
+import numpy as np
 import pyseg as ps
 from scipy.misc import imsave
+from matplotlib import pyplot as plt
 
 ########################################################################################
 # PARAMETERS
@@ -61,20 +65,17 @@ pp_rln_norm = False
 pp_2d_norm = True
 pp_direct = True
 pp_n_sset = None # 3000
+pp_bin = None
 
 # CC 2d radial matrix computation parameters
 cc_metric = 'cc' # 'cc' or 'similarity'
 cc_npy = None # ROOT_PATH + '/test_whole/test_1_cc.npy'
-cc_npr = 20 # None # 1 # None # if None then auto
-
-# # Image moments
-# mo_mode = 'raw' # 'spatial', 'central', 'normalized', 'raw'
-# mo_pca_nfeat = 3 # None
-# mo_npr = 20 # None # 1 # bNone # if None then auto
 
 ## Clustering
-cu_alg = 'AP' # 'AP', 'AG'
-cu_mode = 'ncc_2dz' # 'moments' # 'ncc_2dz'
+cu_alg = 'AP' # 'AG' # 'Kmeans'
+cu_mode = 'ncc_2dz' # 'ncc_2dz' # (only valid for 'AP') # 'vectors' #
+# PCA dimensionality reduction (required for HAC and Kmeans)
+cu_n_comp = 20
 
 # Affinity Propagation clustering parameters
 ap_damp = 0.9
@@ -83,13 +84,16 @@ ap_conv_iter = 40
 ap_ref = 'exemplar' # 'average'
 ap_ref_per = 33 # %
 
-# Agglomerative Clustering
-ag_n_clusters = 12
+# Agglomerative Clustering (HAC)
+ag_n_clusters = 50
 ag_linkage = 'ward'
 
-# Classification post processing
+# Kmeans clustering
+km_n_clusters = 50
+
+# Classification post processing (requires AP)
 cp_min_cz = None # 16
-cp_min_ccap = None # 0.6 # 0.6 #
+cp_min_ccap = 0.4 # 0.6 # 0.6 #
 
 ########################################################################################
 # MAIN ROUTINE
@@ -122,6 +126,8 @@ elif in_ext == '.star':
         print '\tParticles pre-processing:'
         print '\t\t-Mask: ' + str(pp_mask)
         print '\t\t-Low pass Gaussian filter sigma: ' + str(pp_low_sg) + ' voxels'
+        if pp_bin:
+            print '\t\t-Binning particles by factor: ' + str(pp_bin)
         if pp_rln_norm:
             print '\t\t-Normalize particles according relion convention.'
         if pp_2d_norm:
@@ -138,25 +144,24 @@ elif in_ext == '.star':
             print '\t\t-Taking a random subset of: ' + str(pp_n_sset) + ' particles'
         print '\tCC Z-axis radially averages matrix parameters: '
         print '\t\t-Metric: ' + str(cc_metric)
-        if cc_npr is None:
-            print '\t\t-Number of processes: Auto'
-        else:
-            print '\t\t-Number of processes: ' + str(cc_npr)
-        # print '\tImage moments: '
-        # print '\t\t-Mode : ' + str(mo_mode)
-        # if mo_pca_nfeat is not None:
-        #     print '\t\t-PCA dimensionality reduction to: ' + str(mo_pca_nfeat)
-        # if mo_npr is None:
-        #     print '\t\t-Number of processes: Auto'
-        # else:
-        #     print '\t\t-Number of processes: ' + str(mo_npr)
 else:
     print 'ERROR: unrecognized extension for the input file, valid: .star, .pkl'
     print 'Terminated. (' + time.strftime("%c") + ')'
 print '\tClustering: '
+if cu_mode == 'ncc_2dz':
+    print '\t\t-CC used as distance.'
+    if cu_alg != 'AP':
+        print 'ERROR: ncc_2dz is a non-metric space only valid for AP clustering.'
+        print 'Terminated. (' + time.strftime("%c") + ')'
+elif cu_mode == 'vectors':
+    print '\t\t-Euclidean distance among image vectors used as distance metric.'
+    print '\t\t-Number of components for PCA dimensionality reduction: ' + str(cu_n_comp)
+else:
+    print 'ERROR: invalid input mode for clustering distance, valid: ncc_2dz or vectors'
+    print 'Terminated. (' + time.strftime("%c") + ')'
 print '\t\t-Mode: ' + str(cu_mode)
 if cu_alg == 'AP':
-    print '\t\tAffinity Propagation classification settings: '
+    print '\t\tAffinity Propagation clustering settings: '
     print '\t\t\t-Damping: ' + str(ap_damp)
     if ap_pref is not None:
         print '\t\t\t-Affinity propagation preference: ' + str(ap_pref)
@@ -165,17 +170,21 @@ if cu_alg == 'AP':
     print '\t\t\t-Reference for statistics: ' + str(ap_ref)
     print '\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %'
 elif cu_alg == 'AG':
-    print '\t\tAgglomerative clustering classificiation settings: '
+    print '\t\tHierarchical Ascending Clustering (or Agglomerative Clustering) settings: '
     print '\t\t\t-Number of clusters to find: ' + str(ag_n_clusters)
     print '\t\t\t-Linkage: ' + str(ag_linkage)
+elif (cu_alg == 'Kmeans') and (cu_mode == 'vectors') and (cc_npy is None):
+    print '\t\tKmeans clustering settings: '
+    print '\t\t\t-Number of clusters to find: ' + str(km_n_clusters)
 else:
-    print 'ERROR: invalid input mode for classification, valid: AP or AG'
+    print 'ERROR: invalid input mode for classification, valid: AP, AG or Kmeans (only with cu_mode==vectors)'
     print 'Terminated. (' + time.strftime("%c") + ')'
-print '\tClassification post-processing: '
-if cp_min_ccap is not None:
-    print '\t\t-Purge purge particles with CCAP against reference lower than: ' + str(cp_min_ccap)
-if cp_min_cz is not None:
-    print '\t\t-Purge classes with less than ' + str(cp_min_cz) + ' particles'
+if cu_alg == 'AG':
+    print '\tClassification post-processing: '
+    if cp_min_ccap is not None:
+        print '\t\t-Purge purge particles with CCAP against reference lower than: ' + str(cp_min_ccap)
+    if cp_min_cz is not None:
+        print '\t\t-Purge classes with less than ' + str(cp_min_cz) + ' particles'
 print ''
 
 ######### Process
@@ -220,34 +229,67 @@ else:
         try:
             mask = ps.disperse_io.load_tomo(pp_mask)
             star_class.load_particles(mask, low_sg=pp_low_sg, avg_norm=pp_2d_norm, rln_norm=pp_rln_norm, rad_3D=pp_3d,
-                                      npr=mp_npr, debug_dir=out_debug_dir, ref_dir=in_ref_dir, direct_rec=pp_direct)
+                                      npr=mp_npr, debug_dir=out_debug_dir, ref_dir=in_ref_dir, direct_rec=pp_direct,
+                                      bin=pp_bin)
             star_class.save_particles(out_dir+'/all_particles', out_stem, masks=True, stack=True)
-            imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
+            # imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
         except ps.pexceptions.PySegInputError as e:
             print 'ERROR: Particles could not be loaded because of "' + e.get_message() + '"'
             print 'Terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
 
-        print '\tBuilding the NCC matrix...'
-        try:
-            star_class.build_ncc_z2d(metric=cc_metric, npr=cc_npr)
-            star_class.save_cc(out_dir + '/' + out_stem + '_cc.npy')
-        except ps.pexceptions.PySegInputError as e:
-            print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
-            print 'Terminated. (' + time.strftime("%c") + ')'
-            sys.exit(-1)
-
-        # print '\tComputing the image moments...'
-        # try:
-        #     star_class.build_moments(mode=mo_mode, npr=mo_npr)
-        #     if mo_pca_nfeat is not None:
-        #         if cu_mode == 'ncc_2dz':
-        #             print '\t\t-WARNING: Dimensionality reduction is not used for ncc_2dz classification mode!'
-        #         star_class.moments_dim_reduction(n_comp=mo_pca_nfeat, method='ltsa')
-        # except ps.pexceptions.PySegInputError as e:
-        #     print 'ERROR: The moments could not be ccomputed because of "' + e.get_message() + '"'
-        #     print 'Terminated. (' + time.strftime("%c") + ')'
-        #     sys.exit(-1)
+        if cu_mode == 'ncc_2dz':
+            print '\tBuilding the NCC matrix...'
+            try:
+                star_class.build_ncc_z2d(metric=cc_metric, npr=mp_npr)
+                star_class.save_cc(out_dir + '/' + out_stem + '_cc.npy')
+            except ps.pexceptions.PySegInputError as e:
+                print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
+                print 'Terminated. (' + time.strftime("%c") + ')'
+                sys.exit(-1)
+        elif cu_mode == 'vectors':
+            print '\tBuilding vectors...'
+            try:
+                star_class.build_vectors()
+            except ps.pexceptions.PySegInputError as e:
+                print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
+                print 'Terminated. (' + time.strftime("%c") + ')'
+                sys.exit(-1)
+            if cu_n_comp is not None:
+                print '\tPCA dimensionality reduction...'
+                try:
+                    evs = star_class.vectors_dim_reduction(n_comp=cu_n_comp, method='pca')
+                    ids_evs_sorted = np.argsort(evs)[::-1]
+                except ps.pexceptions.PySegInputError as e:
+                    print 'ERROR: Classification failed because of "' + e.get_message() + '"'
+                    print 'Terminated. (' + time.strftime("%c") + ')'
+                    sys.exit(-1)
+                plt.figure()
+                plt.bar(np.arange(1, len(evs) + 1) - 0.25, evs[ids_evs_sorted], width=0.5, linewidth=2)
+                plt.xlim(0, len(evs) + 1)
+                plt.xticks(range(1, len(evs) + 1))
+                plt.xlabel('#eigenvalue')
+                plt.ylabel('fraction of total correlation')
+                plt.tight_layout()
+                plt.savefig(out_dir + '/' + out_stem + '_evs.png', dpi=300)
+                cdf_evs, evs_sorted = np.zeros(shape=len(evs), dtype=np.float32), np.sort(evs)[::-1]
+                cdf_evs[0] = evs_sorted[0]
+                th_x = None
+                for i in range(len(evs_sorted)):
+                    cdf_evs[i] = evs_sorted[:i + 1].sum()
+                    if (cdf_evs[i] >= CDF_TH) and (th_x is None):
+                        th_x = i + 1
+                plt.figure()
+                plt.bar(np.arange(1, len(evs) + 1) - 0.25, cdf_evs, width=0.5, linewidth=2)
+                plt.xlim(0, len(evs) + 1)
+                plt.ylim(0, 1)
+                if th_x is not None:
+                    plt.plot((th_x + 0.5, th_x + 0.5), (0, 1), color='k', linewidth=2, linestyle='--')
+                plt.xticks(range(1, len(evs) + 1))
+                plt.xlabel('#eigenvalue')
+                plt.ylabel('Accumulated fraction of total correlation')
+                plt.tight_layout()
+                plt.savefig(out_dir + '/' + out_stem + '_cdf_evs.png', dpi=300)
 
 print '\tClassification...'
 try:
@@ -258,33 +300,37 @@ try:
         star_class.compute_ccap_stat(reference=ap_ref)
         star_class.print_ccap_stat(percentile=ap_ref_per)
     elif cu_alg == 'AG':
-        star_class.agglomerative_clustering(mode_in=cu_mode, n_clusters=ag_n_clusters, linkage=ag_linkage,
-                                            knn=3,
+        star_class.agglomerative_clustering(mode_in=cu_mode, n_clusters=ag_n_clusters, linkage=ag_linkage, knn=None,
                                             verbose=True)
+    elif (cu_alg == 'Kmeans') and (cu_mode == 'vectors') and (cc_npy is None):
+        star_class.kmeans_clustering(n_clusters=km_n_clusters, verbose=True)
+    else:
+        raise ps.pexceptions.PySegInputError('ERROR', 'No valid classification settings!')
 except ps.pexceptions.PySegInputError as e:
     print 'ERROR: Classification failed because of "' + e.get_message() + '"'
     print 'Terminated. (' + time.strftime("%c") + ')'
     sys.exit(-1)
 star_class.update_relion_classes()
 
-print '\tClassification post-processing...'
-try:
-    if cp_min_ccap is not None:
-        print '\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap)
-        purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
-        print '\t\t\t+Purged output classes: '
-        for klass, nk_parts in purged_klasses.iteritems():
-            print '\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts)
-    if cp_min_cz is not None:
-        print '\t\t-Purging classes smaller than: ' + str(cp_min_cz)
-        purged_klasses = star_class.purge_small_classes(cp_min_cz)
-        print '\t\t\t+Purged output classes: '
-        for klass, nk_parts in purged_klasses.iteritems():
-            print '\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts)
-except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Post-processing failed because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
-    sys.exit(-1)
+if cu_alg == 'AP':
+    print '\tClassification post-processing...'
+    try:
+        if cp_min_ccap is not None:
+            print '\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap)
+            purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
+            print '\t\t\t+Purged output classes: '
+            for klass, nk_parts in purged_klasses.iteritems():
+                print '\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts)
+        if cp_min_cz is not None:
+            print '\t\t-Purging classes smaller than: ' + str(cp_min_cz)
+            purged_klasses = star_class.purge_small_classes(cp_min_cz)
+            print '\t\t\t+Purged output classes: '
+            for klass, nk_parts in purged_klasses.iteritems():
+                print '\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts)
+    except ps.pexceptions.PySegInputError as e:
+        print 'ERROR: Post-processing failed because of "' + e.get_message() + '"'
+        print 'Terminated. (' + time.strftime("%c") + ')'
+        sys.exit(-1)
 
 out_pkl = out_dir + '/' + out_stem + '_class_star.pkl'
 print '\tPickling classification object in: ' + out_pkl
@@ -296,10 +342,9 @@ try:
     star_class.save_star(out_dir, out_stem, parse_rln=True, mode='split')
     if cc_npy is None:
         star_class.save_star(out_dir, out_stem, mode='particle')
-        star_class.save_class(out_dir, out_stem, purge_k=16, mode='exemplars')
         star_class.save_class(out_dir, out_stem, purge_k=16, mode='averages')
-    # if star_class.get_moments_nfeatures() <= 3:
-    #     ps.disperse_io.save_vtp(star_class.moments_to_vtp(), out_dir+'/'+out_stem+'_moments.vtp')
+        if cu_alg == 'AP':
+            star_class.save_class(out_dir, out_stem, purge_k=16, mode='exemplars')
 except ps.pexceptions.PySegInputError as e:
     print 'ERROR: Result could not be stored because of "' + e.get_message() + '"'
     print 'Terminated. (' + time.strftime("%c") + ')'

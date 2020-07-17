@@ -394,9 +394,12 @@ class TomoPeaks(object):
         self.__peaks.append(peak)
         return
 
-    # Add in one call a list of peaks form its coordinates
-    # l_coords: iterable list or coords
     def add_peaks(self, l_coords):
+        """
+        Add in one call a list of peaks form its coordinates
+        :param l_coords: iterable list or coords
+        :return:
+        """
         for coords in l_coords:
             peak = Peak(coords)
             if len(self.__peaks) > 0:

@@ -8,7 +8,7 @@ Classes with additional functionality for applying the spatial analysis on stack
 __author__ = 'martinez'
 
 import os
-import cv2
+# import cv2
 import math
 import numpy as np
 import pyseg as ps

@@ -12,8 +12,8 @@
             - Path to CTF subvolume, required in case not already included
             - Particles gray-value pre-processing settings
 
-    Output: - A new column is added to the input STAR file with ListTomoParticles generated
-            - Intermediate information
+    Output: - The reconstructed particles
+            - An output particles STAR files
 
 """
 
@@ -42,31 +42,34 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
+####### Input data
+
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/carsten'
 
 # Input STAR file
-in_star = ROOT_PATH + '/pick/out/fil_mb_sources_to_no_mb_targets_net_parts.star'
-in_ctf = ROOT_PATH + '/rec/wedge_64_60.mrc'
+in_star = ROOT_PATH + '/class/noali_all/class_2_ap_r_noali_merge_blob_bin0.star' # '/pick/out/fil_mb_sources_to_no_mb_targets_net_parts.star'
+in_ctf = ROOT_PATH + '/rec/wedge_100_60.mrc' # '/rec/wedge_64_60.mrc'
 # Required if '_psSegImage' not in input STAR
-in_mask_norm = ROOT_PATH + '/rec/mask_sph_64_25.mrc'
+in_mask_norm = ROOT_PATH + '/rec/mask_sph_100_45.mrc' # '/rec/mask_sph_64_25.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/rec/particles'
-out_star = ROOT_PATH + '/rec/particles_rln.star'
+out_part_dir = ROOT_PATH + '/rec/particles_blob_bin0_16bit'
+out_star = ROOT_PATH + '/rec/particles_rln_blob_bin0_16bit.star'
 
 ####### Particles pre-processing settings
 
-do_bin = 1 # 4
+do_bin = 4 # 1
 do_ang_prior = ['Tilt', 'Psi'] # ['Rot', 'Tilt', 'Psi']
 do_ang_rnd = ['Rot']
 do_noise = False
 do_use_fg = True
 do_norm = True
+do_inv = False # True
 
 ####### Multiprocessing settings
 
-mp_npr = 1 # 5 # 10
+mp_npr = 10 # 5
 
 ########################################################################################
 # Local functions
@@ -77,6 +80,7 @@ class Settings(object):
     out_part_dir = None
     out_star = None
     do_bin = None
+    do_inv = False
     do_ang_prior = None
     do_ang_rnd = None
     do_noise = None
@@ -107,6 +111,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     do_noise = settings.do_noise
     do_use_fg = settings.do_use_fg
     do_norm = settings.do_norm
+    do_inv = settings.do_inv
     in_mask_norm = settings.in_mask_norm
     hold_ctf = settings.in_ctf
     tomo_bin = settings.do_bin
@@ -119,7 +124,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     for row in rows:
 
         # print '\t\t\t+Reading the entry...'
-        in_pick_tomo = star.get_element('_rlnImageName', row)
+        # in_pick_tomo = star.get_element('_rlnImageName', row)
         in_rec_tomo = star.get_element('_rlnMicrographName', row)
         if hold_ctf is not None:
             in_ctf = hold_ctf
@@ -186,9 +191,9 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
         if do_norm:
             # print '\t\t\t+Gray-values normalization...'
             if in_mask_norm is None:
-                part_svol = ps.sub.relion_norm(part_svol, seg_svol)
+                part_svol = ps.sub.relion_norm(part_svol, seg_svol, inv=do_inv)
             else:
-                part_svol = ps.sub.relion_norm(part_svol, seg_svol)
+                part_svol = ps.sub.relion_norm(part_svol, seg_svol, inv=do_inv)
 
         # Adding entry to particles STAR file
         out_part = out_part_dir + '/particle_rln_' + str(row) + '.mrc'
@@ -258,6 +263,8 @@ if do_norm:
     if in_mask_norm is not None:
         print '\t\t\t-Tomogram for FG: ' + in_mask_norm
         mask_norm = ps.disperse_io.load_tomo(in_mask_norm)
+    if do_inv:
+        print '\t\t-Invert density values.'
 if do_noise:
     print '\t\t-Set gray-values in background (BG) randomly.'
     if do_use_fg:
@@ -333,6 +340,7 @@ settings = Settings()
 settings.out_part_dir = out_part_dir
 settings.out_star = out_star
 settings.do_bin = do_bin
+settings.do_inv = do_inv
 settings.do_ang_prior = do_ang_prior
 settings.do_ang_rnd = do_ang_rnd
 settings.do_noise = do_noise

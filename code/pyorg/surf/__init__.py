@@ -12,3 +12,6 @@ from surface import Particle, ParticleL, TomoParticles, ListTomoParticles, SetLi
     ListSimulations, SetListSimulations
 from model import Model, ModelCSRV, ModelRR, gen_tlist
 from columns import ColumnsFinder, gen_layer_model
+from filaments import Filament, TomoFilaments, ListTomoFilaments, SetListTomoFilaments
+from segmentations import Segmentation, OMSegmentation, TomoOMSegmentations, ListTomoOMSegmentations, \
+    SetListTomoOMSegmentations

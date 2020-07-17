@@ -109,6 +109,16 @@ fi
 if [ -f $PWD/data/tutorials/synth_sumb/wedge_130_60.mrc ]; then
 	mv $PWD/data/tutorials/synth_sumb/wedge_130_60.mrc $PWD/data/tutorials/synth_sumb/rec/
 fi
+if [ -d $PWD/data/tutorials/synth_sumb/rec/particles ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/rec/particles/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/rec/particles
+fi
+if [ -d $PWD/data/tutorials/synth_sumb/rec/nali ]; then
+	rm -r $PWD/data/tutorials/synth_sumb/rec/nali/*
+else
+	mkdir -p $PWD/data/tutorials/synth_sumb/rec/nali
+fi
 rm -r $PWD/data/tutorials/synth_sumb/class/*
 rm -r $PWD/data/tutorials/synth_sumb/rln/*
 if [ -d $PWD/data/tutorials/synth_sumb/org/ltomos ]; then

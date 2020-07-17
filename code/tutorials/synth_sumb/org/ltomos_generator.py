@@ -55,7 +55,7 @@ sg_sg = 0 # Gaussian filtering for surface conversion
 sg_dec = 0.9 # Decimation factor for the triangle mesh
 
 # Post-processing
-pt_ssup = 8 # nm - scale suppression for the input particles
+pt_ssup = 5 # nm - scale suppression for the input particles
 pt_ss_ref = None # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = None # for using different scale-suppression distances for crossed scale suppression
 pt_min_parts = 1 # Tomograms with less particles are removed

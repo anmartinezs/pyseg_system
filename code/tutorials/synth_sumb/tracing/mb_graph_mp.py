@@ -289,20 +289,17 @@ def pr_worker(pr_id, ids, q_pkls):
 # Loop for processing the input data
 print 'Running main loop in parallel: '
 q_pkls = mp.Queue()
-if npr <= 1:
-    pr_worker(0, range(star.get_nrows()), q_pkls)
-else:
-    processes, pr_results = dict(), dict()
-    spl_ids = np.array_split(range(star.get_nrows()), npr)
-    for pr_id in range(npr):
-        pr = mp.Process(target=pr_worker, args=(pr_id, spl_ids[pr_id], q_pkls))
-        pr.start()
-        processes[pr_id] = pr
-    for pr_id, pr in zip(processes.iterkeys(), processes.itervalues()):
-        pr.join()
-        if pr_id != pr.exitcode:
-            print 'ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']'
-            print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+processes, pr_results = dict(), dict()
+spl_ids = np.array_split(range(star.get_nrows()), npr)
+for pr_id in range(npr):
+    pr = mp.Process(target=pr_worker, args=(pr_id, spl_ids[pr_id], q_pkls))
+    pr.start()
+    processes[pr_id] = pr
+for pr_id, pr in zip(processes.iterkeys(), processes.itervalues()):
+    pr.join()
+    if pr_id != pr.exitcode:
+        print 'ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']'
+        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
 
 count, n_rows = 0, star.get_nrows()
 while count < n_rows:
