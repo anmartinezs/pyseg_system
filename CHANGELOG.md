@@ -35,3 +35,5 @@
     + Bug fixed for code/tutorials/exp_somb/post_rec_particles.py for non-splitting mode
 * **26/05/2020**
     + Adding tutorial exp_domb (/{code,data}/tutorials/exp_domb)
+* **17/07/2020**
+    + Adding filament analysis scrits in code/pyorg/scripts/filaments
