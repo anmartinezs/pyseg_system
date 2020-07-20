@@ -6,7 +6,7 @@ This folder contains the scripts for describing quantitavely filament networks b
 
 - **ltomos_generator_fils.py**: prepares membrane and fibril segmentations for a further analysis of fibril-membrane nearest distances by **fil_simulate_density.py**.
 - **fil_simulate_density.py**: computes fibril-membrane nearest distances for experimental and simulated data.
-- **ltomos_generator_om_segs.py**: prepares membrane and fibril segmentations for further analysis to measure inter membranenearest distances.
+- **ltomos_generator_om_segs.py**: prepares membrane and fibril segmentations for further analysis to measure inter membrane nearest distances by **oms_dst_analysis.py**.
 - **oms_dst_analysis.py**: computes fibril-membrane nearest distances for experimental data.
 - **fil_simulate_density.py**: generates synthetic tomograms with fibrils distributed randomly.
 
@@ -16,4 +16,4 @@ This folder contains the scripts for describing quantitavely filament networks b
 
 ## References
 
-The results of this scripts on \alpha-Synuclein in situ inclusion are presented in [Trinkaus et al. (in revsion), In situ architecture of neuronal alpha-Synuclein inclusion bodies]
+The results of this scripts on \alpha-Synuclein *in situ* inclusion are presented in **[Trinkaus et al. (in revsion), In situ architecture of neuronal alpha-Synuclein inclusion bodies]**
