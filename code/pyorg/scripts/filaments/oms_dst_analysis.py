@@ -649,6 +649,26 @@ if len(lists_exp_occ.values()) >= 2:
     print '\t\t-Statistical test for organelle occupancy for the first two list: '
     print '\t\t\t\t-K-S 2 samples [100*(1-p)]: ' + str(100. * (1 - sp.stats.ks_2samp(lists_exp_occ.values()[0],
                                                                                  lists_exp_occ.values()[1])[1])) + '%'
+    print '\t\t\t\t-K-S 2 samples p: ' + str(sp.stats.ks_2samp(lists_exp_occ.values()[0], lists_exp_occ.values()[1])[1])
+
+print 'Plotting the number of membrane voxels analyzed per condition: '
+for lkey, vals in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
+    if lkey == '0':
+        hkey = 'WT'
+    elif lkey == '1':
+        hkey = 'MSA'
+    elif lkey == '2':
+        hkey = 'PFF'
+    elif lkey == '3':
+        hkey = 'CTRL'
+    elif lkey == '4':
+        hkey = 'FIL'
+    else:
+        hkey = lkey
+    count = 0
+    for arr in lists_exp_dsts[lkey]:
+        count += len(arr)
+    print '- ' + str(hkey) + ': ' + str(count) + ' vx'
 
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
 

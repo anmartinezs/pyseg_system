@@ -37,3 +37,5 @@
     + Adding tutorial exp_domb (/{code,data}/tutorials/exp_domb)
 * **17/07/2020**
     + Adding filament analysis scrits in code/pyorg/scripts/filaments
+* **03/09/2020**
+    + Correction bug in script /code/tutorials/exp_somb/pre_tomos_seg.py

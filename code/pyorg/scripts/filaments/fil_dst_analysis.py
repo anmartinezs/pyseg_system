@@ -584,6 +584,7 @@ print '\t\t-Statistical test up to ' + str(ana_max_test) + ' nm: '
 for lkey, exp_acc in zip(exp_acc_dic.iterkeys(), exp_acc_dic.itervalues()):
     print '\t\t\t+List ' + str(lkey) + ': '
     print '\t\t\t\t-K-S 2 samples [100*(1-p)]: ' + str(100. * (1 - sp.stats.ks_2samp(exp_acc, sim_acc_dic[lkey])[1])) + '%'
+    print '\t\t\t\t-K-S 2 samples p: ' + str(sp.stats.ks_2samp(exp_acc, sim_acc_dic[lkey])[1])
 
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
 

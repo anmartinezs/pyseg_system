@@ -152,11 +152,6 @@ for row in range(gl_star.get_nrows()):
     wide_y = off_mask_max_y - off_mask_min_y
     wide_z = off_mask_max_z - off_mask_min_z
 
-    if mode_oriented:
-        seg_center = np.asarray((gl_star.get_element('_rlnOriginX', row),
-                                 gl_star.get_element('_rlnOriginY', row),
-                                 gl_star.get_element('_rlnOriginZ', row)))
-
     if gl_star.has_column('_mtMtubesCsv'):
         in_csv = gl_star.get_element('_mtMtubesCsv', row)
         print '\tReading input CSV file: ' + in_csv
@@ -226,6 +221,14 @@ for row in range(gl_star.get_nrows()):
                 tomo_sz[ids] = feat_sz
         tomo_mb = tomo_sz > 0
         del tomo_sz
+
+    if mode_oriented:
+        seg_center = np.asarray((gl_star.get_element('_rlnOriginX', row),
+                                 gl_star.get_element('_rlnOriginY', row),
+                                 gl_star.get_element('_rlnOriginZ', row)))
+        seg_center[0] -= off_mask_min_x
+        seg_center[1] -= off_mask_min_y
+        seg_center[2] -= off_mask_min_z
 
     print '\tSegmenting the membranes...'
     if sp_split is None:
