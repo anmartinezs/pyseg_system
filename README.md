@@ -5,6 +5,7 @@ The code and data here is also available in CodeOcean (https://doi.org/10.24433/
 This GitHub repository have two branches (git checkout <feature_branch>):
 * **master**: (default) a permanent branch which always reflects the release history.
 * **nightly**: the latest develpments and corrections.
+* **python3**: temporary branch with the code modifications to migrate pyseg from Python 2.7 to 3.8, after a suscessfull validation it will be closed and master will be updated for Python 3.
 
 ### CONTENTS
 
