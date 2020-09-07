@@ -15,10 +15,12 @@ If a label that exists in the input label image is not specified among
 all_ids, it will be ignored. That means that it will not be present in the
 output label image and that the new region may be formed over it. 
 
-$Id: make_segmentation_region.py 1542 2019-04-16 14:44:12Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1542 $"
+from __future__ import unicode_literals
+
+__version__ = "$Revision$"
 
 #import sys
 #import os
@@ -71,8 +73,8 @@ if tomo_info is not None: labels_data_type = tomo_info.labels_data_type
 # labels file byteOrder ('<' for little-endian, '>' for big-endian)
 labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labels_array_order = 'FORTRAN'
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 ###############################################################
 #

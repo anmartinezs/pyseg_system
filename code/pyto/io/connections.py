@@ -2,6 +2,9 @@
 Contains class Connections for reading connections results from a file and
 parsing the results.
 
+Note: The use of this module is depreciated because connectio results are
+saved as pickle files.
+
 After executing the following statements:
 
 conn = pyto.io.Connections()
@@ -22,16 +25,20 @@ all data from the connections is saved in the following attributes:
 All attributes are ndarrays ordered in the same way as ids in conn.ids.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: connections.py 130 2008-05-08 16:36:56Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import range
 
-__version__ = "$Revision: 130 $"
+__version__ = "$Revision$"
 
 
 import numpy
 import scipy
 import scipy.io
-from results import Results
+from .results import Results
 
 
 class Connections(Results):
@@ -136,8 +143,8 @@ class Connections(Results):
                                                  dtype='object')
 
         # enter data from positive id lines to arrays
-        nam_ran = range(len(self.extraNames))
-        line_ran = range(len(data_line_nos))
+        nam_ran = list(range(len(self.extraNames)))
+        line_ran = list(range(len(data_line_nos)))
         for (line_ind, line_no, line) in \
                 zip(line_ran, data_line_nos, data_lines):
 

@@ -8,7 +8,7 @@ General definitions for the graph package
 
 __author__ = 'martinez'
 
-import geometry
+from . import geometry
 try:
     import disperse_io
 except:
@@ -404,12 +404,9 @@ class PropInfo(object):
 # Abstract class for the graphs which holds topological and geometrical information
 #
 #
-class Graph:
+class Graph(metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    # skel: vtk poly data with the topology
     def __init__(self, skel):
         self.__skel = skel
         self.__v_prop_info = PropInfo()

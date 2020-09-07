@@ -3,10 +3,12 @@ Contains class MultiCluster used to make and analyzes clusters of (already
 existing) boundaries and segments (here called connections).
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: multi_cluster.py 1059 2014-10-10 15:30:38Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import object
 
-__version__ = "$Revision: 1059 $"
+__version__ = "$Revision$"
 
 
 import warnings
@@ -14,7 +16,7 @@ import logging
 import numpy
 import scipy
 
-from pyto.segmentation.cluster import Cluster
+from ..segmentation.cluster import Cluster
 
 class MultiCluster(object):
     """
@@ -27,7 +29,7 @@ class MultiCluster(object):
 
     All boundaries that are linked to each other via connections (connectors) 
     form a boundary cluster. In the same way, all connections
-    that are connected to each other vie boundaries form a connections
+    that are connected to each other via boundaries form a connections
     cluster. These boundary and connection clusters are dual to each other,
     because one uniquely determines the other.
 

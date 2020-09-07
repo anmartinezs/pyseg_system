@@ -3,10 +3,17 @@ Contains class Segments for manipulation of segmented image where segments do
 not touch each other.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: segment.py 1396 2017-03-15 13:08:51Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1396 $"
+__version__ = "$Revision$"
 
 
 import warnings
@@ -18,10 +25,10 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from struct_el import StructEl
+from .struct_el import StructEl
 import pyto.util.numpy_plus as numpy_plus
 import pyto.util.nested as nested
-from labels import Labels
+from .labels import Labels
 
 class Segment(Labels):
     """
@@ -227,21 +234,6 @@ class Segment(Labels):
         # SE that determines segment connectivity (default connectivity 1)
         self.setStructEl()
 
-        # ToDo: make the same for all other structuring element
-
-        # SE used for contact determination (default connectivity 1)
-        #if self.contactStructEl is None:
-        #    self.contactStructElConn = 1
-        #    self.contactStructEl = \
-        #        ndimage.generate_binary_structure(rank=self.ndim, connectivity=1)
-
-        # SE used to count contacts (default connectivity equals self.ndim)
-        #if self.countContactStructEl is None:
-        #    self.countContactStructElConn = self.ndim
-        #    self.countContactStructEl = \
-        #        ndimage.generate_binary_structure(rank=self.ndim,
-        #                                          connectivity=self.ndim)
-
         # SE used to fill interior of a segment
         if self.fillStructEl is None:
             self.fillStructElConn = 1
@@ -323,11 +315,11 @@ class Segment(Labels):
         
         # remove id from _free
         freeInv = {}
-        freeInv.update([(val, key) for (key, val) in self._free.items()])
+        freeInv.update([(val, key) for (key, val) in list(self._free.items())])
         for id in ids:
-            if freeInv.has_key(id): freeInv.pop(id)
+            if id in freeInv: freeInv.pop(id)
         self._free.clear()
-        self._free.update([(val, key) for (key, val) in self._free.items()])
+        self._free.update([(val, key) for (key, val) in list(self._free.items())])
 
     def setProperties(self, props):
         """
@@ -352,9 +344,9 @@ class Segment(Labels):
         """
 
         # set indexed
-        self.indexed = [key for key in props.keys() if key != 'contacts']
+        self.indexed = [key for key in list(props.keys()) if key != 'contacts']
 
-        for name, value in props.items():
+        for name, value in list(props.items()):
 
             if name == 'contacts':
 
@@ -382,7 +374,7 @@ class Segment(Labels):
           - 'empty' : (list) ids of non-existing segments
         """
 
-        from topology import Topology
+        from .topology import Topology
 
         # find ids that don't exist in data
         existing_ids = self.extractIds()
@@ -393,7 +385,7 @@ class Segment(Labels):
 
         # find ids of disconnected segments 
         topo = Topology(segments=self, ids=ids)
-        n_connected = topo.getHomologyRank(dim=0)[ids]
+        n_connected = topo.calculateHomologyRank(dim=0)[ids]
         many = topo.ids[numpy.nonzero(n_connected>1)[0]]
         #empty = topo.ids[numpy.nonzero(n_connected<1)[0]]
  
@@ -432,9 +424,10 @@ class Segment(Labels):
         if len(empty) > 0:
             empty = numpy.array2string(empty)
             fil, line, meth = logging.Logger(name="").findCaller()
-            logging.warning('(%s:%d in %s) Segments with ids: %s do not' \
-                            + ' seem to exist. Removed from self.ids.', \
-                            self.__module__, line, meth, empty)
+            logging.warning(
+                '(%s:%d in %s) Segments with ids: %s do not' 
+                + ' seem to exist. Removed from self.ids.', 
+                self.__module__, line, meth, empty)
 
     def remove(self, ids, data=None, all=None, value=0, mode='auto'):
         """
@@ -467,7 +460,7 @@ class Segment(Labels):
         """
 
         # set ids
-        if isinstance(ids, int): ids = [ids]
+        if not isinstance(ids, (list, tuple, numpy.ndarray)): ids = [ids]
 
         # set data
         update = False
@@ -861,7 +854,7 @@ class Segment(Labels):
 
             # make a list of (id, size) pairs
             if isinstance(size, list) or isinstance(size, numpy.ndarray):
-                size_list = zip(ids, size) 
+                size_list = list(zip(ids, size)) 
             else:
                 size_list = [[id, size] for id in ids] 
 
@@ -912,13 +905,14 @@ class Segment(Labels):
                     free = (distance <= size) & mask
 
             else:
-                raise ValueError, "Mode " + mode + " is not valid. Allowed " \
-                  + " modes are intersect and add."
+                raise ValueError("Mode " + mode + " is not valid. Allowed " \
+                  + " modes are intersect and add.")
 
         # manage output
         if update:
             
             # update self.data, bounded table and other attributes
+            free = free.astype(self.data.dtype)
             self.add(new=free, relabel=False)
             newId = self.maxId
             self.freeIds.append(newId)
@@ -1155,14 +1149,14 @@ class Segment(Labels):
         #    layers[dist_1 + dist_2 > maxDistance] = 0
 
         # convert layers to an instance of this class
-        lay_obj = Segment(data=layers, ids=range(1,nLayers+1), copy=False)
+        lay_obj = Segment(data=layers, ids=list(range(1,nLayers+1)), copy=False)
         
         # add extra layers
         if nExtraLayers > 0:
 
             # relabel layers between
             lay_obj.data[lay_obj.data>0] += nExtraLayers
-            between_ids = range(1+nExtraLayers, 1+nLayers+nExtraLayers)
+            between_ids = list(range(1+nExtraLayers, 1+nLayers+nExtraLayers))
                       
             # layers on boundary_1
             mask_1 = (relabeled.data == id_1) | (relabeled.data == e_id_1)
@@ -1187,7 +1181,7 @@ class Segment(Labels):
                                        lay_obj.data)
             
             # set ids
-            lay_obj.setIds(ids=range(1, nLayers + 2*nExtraLayers + 1))
+            lay_obj.setIds(ids=list(range(1, nLayers + 2*nExtraLayers + 1)))
 
         # lay_obj positioning 
         #lay_obj.copyPositioning(image=relabeled, saveFull=True)
@@ -1309,14 +1303,14 @@ class Segment(Labels):
         layers[layers>nLayers] = 0
 
         # convert 'normal' layers to an instance of this class
-        lay_obj = Segment(data=layers, ids=range(1,nLayers+1), copy=False)
+        lay_obj = Segment(data=layers, ids=list(range(1,nLayers+1)), copy=False)
         
         # add extra layers
         if nExtraLayers > 0:
 
             # relabel layers between
             lay_obj.data[lay_obj.data>0] += nExtraLayers
-            normal_ids = range(1+nExtraLayers, 1+nExtraLayers+nLayers) 
+            normal_ids = list(range(1+nExtraLayers, 1+nExtraLayers+nLayers)) 
             
             # layers on boundary_1
             mask_1 = (relabeled.data == id_1) | (relabeled.data == e_id_1)
@@ -1328,7 +1322,7 @@ class Segment(Labels):
                                        lay_obj.data)
                       
             # set ids
-            lay_obj.setIds(ids=range(1, nLayers + nExtraLayers + 1))
+            lay_obj.setIds(ids=list(range(1, nLayers + nExtraLayers + 1)))
             
         # lay_obj positioning
         lay_obj.copyPositioning(relabeled, saveFull=True)
@@ -1467,9 +1461,8 @@ class Segment(Labels):
         for id in ids:
             label = (self.data==id)
             iterations = int( numpy.ceil(size / 2.) )
-            filled = ndimage.binary_closing(input=label,
-                                            structure=self.fillStructEl,
-                                            iterations=iterations)
+            filled = ndimage.binary_closing(
+                input=label, structure=self.fillStructEl, iterations=iterations)
             filledData[filled] = id        
 
         # update if needed
@@ -1544,8 +1537,8 @@ class Segment(Labels):
             dist_mask = numpy.ones(shape=inset.shape, dtype='int8')
             dist_mask[inset==id_] = 0
             if (dist_mask==0).sum() == 0:
-                raise ValueError, "Slice: " + str(slice_nd) + \
-                      " does not contain id_ " + str(id_) + "." 
+                raise ValueError("Slice: " + str(slice_nd) + \
+                      " does not contain id_ " + str(id_) + ".") 
             if (dist_mask > 0).all():  # workaround for scipy bug 1089
                 raise ValueError("Can't calculate distance_function ",
                                  "(no background)")
@@ -1677,7 +1670,7 @@ class Segment(Labels):
         elif mode == 'center':
 
             # distances to the segment centers
-            from morphology import Morphology
+            from .morphology import Morphology
             mor = Morphology(segments=seg_data, ids=ids)
             centers = mor.getCenter(real=False)
             for id_ in ids:
@@ -1720,10 +1713,10 @@ class Segment(Labels):
                 distances[id_] = numpy.median(dist_array[seg_data==id_])
 
         else:
-            raise ValueError, "Sorry, mode: " + mode + " is not recognized. " \
-                "Mode can be 'center', 'min', 'max', 'mean' or 'median'."
+            raise ValueError("Sorry, mode: " + mode + " is not recognized. " \
+                "Mode can be 'center', 'min', 'max', 'mean' or 'median'.")
 
-        logging.debug("segment.py (distanceToRegion): end") 
+        #logging.debug("segment.py (distanceToRegion): end") 
 
         return distances
 
@@ -1770,7 +1763,7 @@ class Segment(Labels):
                 dist = seg.distanceToRegion(ids=ids, regionId=main_id, 
                                             mode=mode)
             else:
-                raise ValueError, "Currently only 'min' mode is implemented."
+                raise ValueError("Currently only 'min' mode is implemented.")
 
             # append current distances
             try:
@@ -1890,9 +1883,10 @@ class Segment(Labels):
             if removeOverlap and \
                    ((seg.data > 0) & (regions.data == reg_id)).any():
                 seg.data = numpy.where(regions.data==reg_id, 0, seg.data)
-                logging.warning("Density.calculateNeighbourhood: region " \
-                                    + str(reg_id) + " overlap with segments." \
-                                    + "Removed the overlap from segments." )
+                logging.warning(
+                    "Density.calculateNeighbourhood: region " 
+                    + str(reg_id) + " overlap with segments." 
+                    + "Removed the overlap from segments." )
 
             # make a neighbourhood of current region on each segment
             if size is not None:
@@ -1925,8 +1919,8 @@ class Segment(Labels):
                             hood_in[fine_inset])
                     fine_hood_data = hood_data[fine_inset]
                     fine_seg = seg.data[fine_inset]
-                    fine_hood_data[(fine_seg == seg_id) \
-                                       & (hood_dist <= size/2.)] = seg_id
+                    fine_hood_data[
+                        (fine_seg == seg_id) & (hood_dist <= size/2.)] = seg_id
 
             else:
                 hood_data = seg.data
@@ -2019,7 +2013,7 @@ class Segment(Labels):
         elif metric == 'euclidean-geodesic':
 
             # Euclidean within geodesic
-            connectivity = range(1, self.ndim+1)
+            connectivity = list(range(1, self.ndim+1))
             distance = self.elementGeodesicDistanceToRegion(
                 ids=ids, region=region, connectivity=connectivity,
                 noDistance=noDistance)
@@ -2253,21 +2247,21 @@ class Segment(Labels):
         # set connectivities:
         if rimConnectivity == -1:
             rimConnectivity = self.ndim
-        rim_se = scipy.ndimage.generate_binary_structure(self.ndim, 
-                                                         rimConnectivity)
+        rim_se = scipy.ndimage.generate_binary_structure(
+            self.ndim, rimConnectivity)
 
         for id_ in ids:
 
             # form rim
             if rimLocation == 'out':
                 mask = (self.data == rimId)
-                rim = scipy.ndimage.binary_dilation(self.data==id_, 
-                                                    structure=rim_se, mask=mask)
+                rim = scipy.ndimage.binary_dilation(
+                    self.data==id_, structure=rim_se, mask=mask)
                 rim[~mask] = False
             elif rimLocation == 'in':
                 mask = (self.data == id_)
-                rim = scipy.ndimage.binary_dilation(self.data==rimId, 
-                                                    structure=rim_se, mask=mask)
+                rim = scipy.ndimage.binary_dilation(
+                    self.data==rimId, structure=rim_se, mask=mask)
                 rim[~mask] = False
             else:
                 raise ValueError(
@@ -2324,7 +2318,7 @@ class Segment(Labels):
             distance = numpy.zeros(shape=self.data.shape, 
                                    dtype=int) + noDistance
  
-        for id_, coord in origins.items():
+        for id_, coord in list(origins.items()):
 
             # make origins array
             orig_array = numpy.zeros(shape=self.data.shape, dtype=bool)
@@ -2349,7 +2343,7 @@ class Segment(Labels):
 
     @classmethod
     def read(cls, file, ids=None, clean=True, byteOrder=None, dataType=None,
-             arrayOrder=None, shape=None, memmap=False):
+             arrayOrder=None, shape=None, memmap=False, header=False):
         """
         Reads segmented image (label filed) from a file.
 
@@ -2371,6 +2365,7 @@ class Segment(Labels):
           - length: (list or ndarray) length in each dimension in nm
           - fileFormat: file format ('em', 'mrc', or 'raw')
           - memmap: from the argument
+          - header: header
 
         Arguments:
           - file: file name
@@ -2379,10 +2374,11 @@ class Segment(Labels):
           - byteOrder: '<' (little-endian), '>' (big-endian)
           - dataType: any of the numpy types, e.g.: 'int8', 'int16', 'int32',
             'float32', 'float64'
-          - arrayOrder: 'C' (z-axis fastest), or 'FORTRAN' (x-axis fastest)
+          - arrayOrder: 'C' (z-axis fastest), or 'F' (x-axis fastest)
           - shape: (x_dim, y_dim, z_dim)
           - memmap: Flag indicating if the data is read to a memory map,
           instead of reading it into a ndarray
+          - header: flag indicating if file header is saved
 
         Returns:
           - instance of Segment
@@ -2391,7 +2387,7 @@ class Segment(Labels):
         # call super to read the file 
         image = Labels.read(
             file=file, byteOrder=byteOrder, dataType=dataType,
-            arrayOrder=arrayOrder, shape=shape, memmap=memmap)
+            arrayOrder=arrayOrder, shape=shape, memmap=memmap, header=header)
 
         # deal with ids
         seg = cls(data=image.data, copy=False, ids=ids, clean=clean)
@@ -2399,6 +2395,7 @@ class Segment(Labels):
         # copy attributes
         seg.length = image.length
         seg.pixelsize = image.pixelsize
+        seg.header = image.header
         seg.memmap = image.memmap
 
         return seg

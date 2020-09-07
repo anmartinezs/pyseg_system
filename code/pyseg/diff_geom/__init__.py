@@ -7,4 +7,4 @@ Package for numerical implementation of differential geometry concepts
 
 __author__ = 'Antonio Martinez-Sanchez'
 
-from curve import SpaceCurve
+from .curve import SpaceCurve

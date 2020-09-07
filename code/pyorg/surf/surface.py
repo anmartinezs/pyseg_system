@@ -14,7 +14,7 @@ from shutil import rmtree
 from pyorg import pexceptions, sub
 from pyorg import globals as gl
 # from pyorg.surf import gen_tlist, Model
-from utils import *
+from .utils import *
 from pyorg.spatial.sparse import nnde, cnnde
 from pyorg.globals.utils import unpickle_obj, trilin3d
 from sklearn.cluster import AffinityPropagation
@@ -26,7 +26,7 @@ import abc
 import skfmm
 from vtk.util import numpy_support
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -156,7 +156,7 @@ def pr_2nd_tomo(pr_id, part_ids, part_centers_1, part_centers_2, distances, thic
                                         voi=voi_surf, selector_voi=selector_voi,
                                         conv_iter=conv_iter, max_iter=max_iter, fmm=fmm)
         except ValueError:
-            print 'WARNING: process ' + str(pr_id) + ' failed to process the particle ' + str(p_id) + ', skipping...'
+            print('WARNING: process ' + str(pr_id) + ' failed to process the particle ' + str(p_id) + ', skipping...')
             raise ValueError
             # continue
 
@@ -300,7 +300,7 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
                                             voi=voi_surf, selector_voi=selector_voi,
                                             conv_iter=conv_iter, max_iter=max_iter, fmm=fmm)
             except ValueError:
-                print 'WARNING: process ' + str(pr_id) + ' failed to process the particle ' + str(j) + ', skipping...'
+                print('WARNING: process ' + str(pr_id) + ' failed to process the particle ' + str(j) + ', skipping...')
                 raise ValueError
                 # continue
 
@@ -443,8 +443,8 @@ class ListSimulations(object):
         if not isinstance(key, str):
             error_msg = 'Input key must be a string.'
             raise pexceptions.PySegInputError(expr='insert_simulation (ListSimulations)', msg=error_msg)
-        if len(self.__sim_tomos.values()) > 0:
-            first_sim = self.__sim_tomos.values()[0]
+        if len(list(self.__sim_tomos.values())) > 0:
+            first_sim = list(self.__sim_tomos.values())[0]
             if not first_sim.is_compatible(sim):
                 error_msg = 'Input simulation is not compatible so it cannot be inserted.'
                 raise pexceptions.PySegInputError(expr='insert_simulation (ListSimulations)', msg=error_msg)
@@ -610,7 +610,7 @@ class ParticleL(object):
         return self.__props[key][1]
 
     def add_meta(self, meta):
-        for key, val in zip(meta.iterkeys(), meta.itervalues()):
+        for key, val in zip(iter(meta.keys()), iter(meta.values())):
             self.__meta[key] = val
 
     def add_prop(self, key, vtk_type, val):
@@ -660,7 +660,7 @@ class ParticleL(object):
 
     # fname: file name ended with .pkl
     def pickle(self, fname):
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:
@@ -702,7 +702,7 @@ class ParticleL(object):
     # Add properties
     def __add_props_vtp(self, vtp):
 
-        for key, propt in zip(self.__props.iterkeys(), self.__props.itervalues()):
+        for key, propt in zip(iter(self.__props.keys()), iter(self.__props.values())):
 
             # Initialization
             if isinstance(propt[1], str):
@@ -847,7 +847,7 @@ class Particle(object):
     #### External functionality
 
     def add_meta(self, meta):
-        for key, val in zip(meta.iterkeys(), meta.itervalues()):
+        for key, val in zip(iter(meta.keys()), iter(meta.values())):
             self.__meta[key] = val
 
     # Add and attribute with the same value for all cells
@@ -1178,7 +1178,7 @@ class Particle(object):
         stem, ext = os.path.splitext(fname)
         self.__vtp_fname = stem + '_surf.vtp'
         self.__center_fname = stem + '_center.vtp'
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:
@@ -1593,7 +1593,7 @@ class TomoParticles(object):
                 try:
                     lut_ex[ex_id] = False
                 except IndexError:
-                    print 'WARNING: compute_surface_props (TomoSurfaces): exclusion index not present!'
+                    print('WARNING: compute_surface_props (TomoSurfaces): exclusion index not present!')
             surfs_l = list()
             for i, hold_surf in enumerate(self.__parts):
                 if lut_ex[i]:
@@ -1624,7 +1624,7 @@ class TomoParticles(object):
             self.__voi_ids_fname = stem_path + '/' + stem_ + '_mask_ids.npy'
         # self.__parts_fname = stem_path + '/' + os.path.splitext(stem_)[0]+'_parts.star'
         self.__parts_fname = stem_path + '/' + stem_ + '_parts.star'
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:
@@ -1772,7 +1772,7 @@ class TomoParticles(object):
             npr = self.get_num_particles()
         processes = list()
         # Create the list on indices to split
-        spl_ids = np.array_split(range(self.get_num_particles()), npr)
+        spl_ids = np.array_split(list(range(self.get_num_particles())), npr)
         # Shared arrays
         voi_fname, voi_shape, voi_shared = None, None, None
         hold_voi = self.get_voi()
@@ -1787,7 +1787,7 @@ class TomoParticles(object):
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
-            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, voi_len)
+            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, int(voi_len))
             voi_shared = np.ctypeslib.as_array(voi_shared_raw)
             voi_shared[:] = hold_voi.reshape(voi_len).astype(np.uint8)
         shared_mat_1 = mp.Array('f', self.get_num_particles()*len(distances))
@@ -1891,7 +1891,7 @@ class TomoParticles(object):
             npr = self.get_num_particles()
         processes = list()
         # Create the list on indices to split
-        spl_ids = np.array_split(range(self.get_num_particles()), npr)
+        spl_ids = np.array_split(list(range(self.get_num_particles())), npr)
         # Shared arrays
         voi_fname, voi_shape, voi_shared = None, None, None
         hold_voi = self.get_voi()
@@ -2012,7 +2012,7 @@ class TomoParticles(object):
             npr = mp.cpu_count()
         processes, pr_ids = list(), list()
         # Create the list on indices to split
-        spl_ids = np.array_split(range(self.get_num_particles()), npr)
+        spl_ids = np.array_split(list(range(self.get_num_particles())), npr)
         # Shared arrays
         voi_fname, voi_shape, voi_shared = None, None, None
         hold_voi = self.get_voi()
@@ -2027,7 +2027,7 @@ class TomoParticles(object):
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
-            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, voi_len)
+            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, int(voi_len))
             voi_shared = np.ctypeslib.as_array(voi_shared_raw)
             voi_shared[:] = hold_voi.reshape(voi_len).astype(np.uint8)
         shared_mat_1 = mp.Array('f', self.get_num_particles() * len(distances))
@@ -2138,7 +2138,7 @@ class TomoParticles(object):
             npr = n_sims
         processes = list()
         # Create the list on indices to split
-        spl_ids = np.array_split(range(n_sims), npr)
+        spl_ids = np.array_split(list(range(n_sims)), npr)
         # Shared arrays
         voi_fname, voi_shape, voi_shared = None, None, None
         hold_voi = self.get_voi()
@@ -2153,7 +2153,7 @@ class TomoParticles(object):
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
-            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, voi_len)
+            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, int(voi_len))
             voi_shared = np.ctypeslib.as_array(voi_shared_raw)
             voi_shared[:] = hold_voi.reshape(voi_len).astype(np.uint8)
         n_dsts, n_parts = len(distances), self.get_num_particles()
@@ -2264,7 +2264,7 @@ class TomoParticles(object):
             npr = n_sims
         processes = list()
         # Create the list on indices to split
-        spl_ids = np.array_split(range(n_sims), npr)
+        spl_ids = np.array_split(list(range(n_sims)), npr)
         # Shared arrays
         voi_fname, voi_shape, voi_shared = None, None, None
         if switched:
@@ -2282,7 +2282,7 @@ class TomoParticles(object):
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
-            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, voi_len)
+            voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, int(voi_len))
             voi_shared = np.ctypeslib.as_array(voi_shared_raw)
             voi_shared[:] = hold_voi.reshape(voi_len).astype(np.uint8)
         if switched:
@@ -2454,7 +2454,7 @@ class TomoParticles(object):
         if n_tries < 10 * n_coords:
             n_tries = 10 * n_coords
         hold_coords = np.zeros(shape=(n_coords, 3), dtype=np.float32)
-        for i in range(n_tries):
+        for i in range(int(math.ceil(n_tries))):
             if count < n_coords:
                 x_rnd, y_rnd, z_rnd = random.randint(x_min, x_max), random.randint(y_min, y_max), \
                                       random.randint(z_min, z_max)
@@ -2564,7 +2564,7 @@ class TomoParticles(object):
             try:
                 part.translation(cg[0], cg[1], cg[2])
             except IndexError:
-                    print 'WARNING(TomoParticles.gen_newtomo_ap()): centroid ' + str(cg) + ' failed to be inserted!'
+                    print('WARNING(TomoParticles.gen_newtomo_ap()): centroid ' + str(cg) + ' failed to be inserted!')
             hold_tomo.insert_particle(part, check_bounds=None, voi_pj=pj)
 
         return hold_tomo
@@ -2606,7 +2606,7 @@ class TomoParticles(object):
         # mat_out = (-1) * np.ones(shape=(n_parts, n_points_in), dtype=np.float32)
         # pairs = np.zeros(shape=(n_parts, n_points_in), dtype=object)
         pairs = dict().fromkeys(np.arange(n_parts))
-        pairs_dsts = dict().fromkeys(pairs.keys())
+        pairs_dsts = dict().fromkeys(list(pairs.keys()))
         mat_out = np.ones(shape=(n_parts, n_points_in), dtype=object)
         mat_codes = np.ones(shape=(n_parts, n_points_in), dtype=object)
         for i in range(mat_out.shape[0]):
@@ -2698,8 +2698,8 @@ class TomoParticles(object):
                                 if dst < del_border:
                                     hold_code = CODE_BORDER
                             except IndexError:
-                                print 'WARNING (TomoParticles:compute_shortest_distances_matrix): incorrect indexing ' \
-                                      'for the distance map ' + str(time.time())
+                                print('WARNING (TomoParticles:compute_shortest_distances_matrix): incorrect indexing ' \
+                                      'for the distance map ' + str(time.time()))
                                 hold_code = CODE_BORDER
                         if hold_code == CODE_POSITIVE_DST:
                             # Check if point_2 is inside the reference particle ('negative' distance)
@@ -2832,7 +2832,7 @@ class TomoParticles(object):
         # Loop for connections
         count_l, count_p = 0, 0
         # for i in range(n_parts):
-        for i in pairs.iterkeys():
+        for i in pairs.keys():
             # Check particle code
             hold_code = CODE_POSITIVE_DST
             for ii in range(len(mat_codes[i, :])):
@@ -3023,27 +3023,27 @@ class ListTomoParticles(object):
 
     def get_num_particles(self):
         total = 0
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             total += tomo.get_num_particles()
         return total
 
     def get_num_particles_dict(self):
         nparts = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             nparts[key] = tomo.get_num_particles()
         return nparts
 
     def get_volumes_dict(self):
         vols = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             vols[key] = tomo.compute_voi_volume()
         return vols
 
     def get_tomo_fname_list(self):
-        return self.__tomos.keys()
+        return list(self.__tomos.keys())
 
     def get_tomo_list(self):
-        return self.__tomos.values()
+        return list(self.__tomos.values())
 
     def get_tomo_by_key(self, key):
         return self.__tomos[key]
@@ -3058,7 +3058,7 @@ class ListTomoParticles(object):
         # Input parsing
         tomo_fname = tomo_parts.get_tomo_fname()
         if tomo_fname in self.get_tomo_fname_list():
-            print 'WARNING: tomo_surf (ListTomoParticles): tomogram ' + tomo_fname + ' was already inserted.'
+            print('WARNING: tomo_surf (ListTomoParticles): tomogram ' + tomo_fname + ' was already inserted.')
             return
         if meta_info is not None:
             assert isinstance(meta_info, dict)
@@ -3159,7 +3159,7 @@ class ListTomoParticles(object):
         # Dump pickable objects and store the file names of the unpickable objects
         count = 0
         self.__pkls = dict()
-        for key, tomo in self.__tomos.iteritems():
+        for key, tomo in self.__tomos.items():
             key_stem = os.path.splitext(os.path.split(key)[1])[0]
             hold_file = tomos_dir + '/' + key_stem + '.pkl'
             try:
@@ -3171,7 +3171,7 @@ class ListTomoParticles(object):
             count += 1
 
         # Pickling
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:
@@ -3183,7 +3183,7 @@ class ListTomoParticles(object):
     # mode: mode for embedding, valid: 'full' and 'center'
     def gen_model_instance(self, model, part_surf, mode='full'):
         tomos = ListTomoParticles()
-        for i, tomo in enumerate(self.__tomos.itervalues()):
+        for i, tomo in enumerate(self.__tomos.values()):
             model_in = model(tomo.get_voi(), part_surf)
             tomo_name = 'tomo_model_' + model_in.get_type_name() + '_' + str(i)
             tomos.add_tomo(model.gen_instance(model_in.get_num_particles(), tomo_name, mode=mode))
@@ -3252,10 +3252,10 @@ class ListTomoParticles(object):
         mat = dict()
 
         # Call the counter within every tomogram
-        for i, tomo in enumerate(self.__tomos.itervalues()):
+        for i, tomo in enumerate(self.__tomos.values()):
             n_parts_tomo = tomo.get_num_particles()
             if verbose:
-                print '\t\t\t+ Processing tomo ' + tomo.get_tomo_fname()
+                print('\t\t\t+ Processing tomo ' + tomo.get_tomo_fname())
             if n_parts_tomo > 0:
                 hold_arr = tomo.compute_uni_2nd_order(dsts, thick, border, conv_iter, max_iter, npr=npr,
                                                       verbose=False)
@@ -3294,10 +3294,10 @@ class ListTomoParticles(object):
             t_nparts = 0
 
         # Call the counter within every tomogram
-        for i, tomo in enumerate(self.__tomos.itervalues()):
+        for i, tomo in enumerate(self.__tomos.values()):
             n_parts_tomo = tomo.get_num_particles()
             if verbose:
-                print '\t\t\t+ Processing tomo ' + tomo.get_tomo_fname()
+                print('\t\t\t+ Processing tomo ' + tomo.get_tomo_fname())
             if n_parts_tomo > 0:
                 hold_arr_num, hold_arr_dem = tomo.compute_uni_2nd_order(dsts, thick, border,
                                                                         conv_iter, max_iter, npr=npr,
@@ -3360,10 +3360,10 @@ class ListTomoParticles(object):
         mat = dict()
 
         # Loop for tomograms
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             if tomo.get_num_particles() > 0:
                 if verbose:
-                    print '\t\t\t+ Processing tomo ' + tomo.get_tomo_fname()
+                    print('\t\t\t+ Processing tomo ' + tomo.get_tomo_fname())
                 # Loop for simulations
                 sim_mat, n_real_sims = list(), 0
                 for i in range(n_sims):
@@ -3422,10 +3422,10 @@ class ListTomoParticles(object):
 
         # Loop for tomograms
         part_id = 0
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             if tomo.get_num_particles() > 0:
                 if verbose:
-                    print '\t\t\t+ Processing tomo ' + tomo.get_tomo_fname()
+                    print('\t\t\t+ Processing tomo ' + tomo.get_tomo_fname())
                 # Loop for simulations
                 for i in range(n_sims):
                     model = temp_model(tomo.get_voi(), part_vtp)
@@ -3437,7 +3437,7 @@ class ListTomoParticles(object):
                                                                          dens_gl=hold_dens, pointwise=pointwise,
                                                                          npr=npr, verbose=False)
                         if hold_mat is not None:
-                            for i in xrange(hold_mat.shape[0]):
+                            for i in range(hold_mat.shape[0]):
                                 mat[part_id, :] = hold_mat[i, :]
                                 part_id +=1
 
@@ -3471,12 +3471,12 @@ class ListTomoParticles(object):
         mat = dict()
 
         # Call the counter within every tomogram
-        for key, tomo_1 in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo_1 in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             try:
                 tomo_2 = ltomos.__tomos[key]
                 if (tomo_1.get_num_particles() > 0) and (tomo_2.get_num_particles() > 0):
                     if verbose:
-                        print '\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname()
+                        print('\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname())
                     for attempt in range(MP_NUM_ATTEMPTS):
                         hold_arr = None
                         try:
@@ -3495,8 +3495,8 @@ class ListTomoParticles(object):
                         raise pexceptions.PySegInputError(expr='compute_bi_2nd_order (ListTomoParticles)',
                                                           msg=error_msg)
             except KeyError:
-                print 'WARNING compute_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
-                    'not have counterpart on input list of tomograms'
+                print('WARNING compute_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
+                    'not have counterpart on input list of tomograms')
                 continue
 
         return mat
@@ -3537,13 +3537,13 @@ class ListTomoParticles(object):
             t_nparts = 0
 
         # Call the counter within every tomogram
-        for key, tomo_1 in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo_1 in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             try:
                 tomo_2 = ltomos.__tomos[key]
                 n_parts_tomo_1, n_parts_tomo_2 = tomo_1.get_num_particles(), tomo_2.get_num_particles()
                 if (tomo_1.get_num_particles() > 0) and (tomo_2.get_num_particles() > 0):
                     if verbose:
-                        print '\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname()
+                        print('\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname())
                     hold_arr_num, hold_arr_dem = tomo_1.compute_bi_2nd_order(tomo_2, dsts, thick,
                                                                              border, conv_iter, max_iter,
                                                                              out_sep=True,
@@ -3568,8 +3568,8 @@ class ListTomoParticles(object):
                         raise pexceptions.PySegInputError(expr='compute_bi_2nd_order (ListTomoParticles)',
                                                           msg=error_msg)
             except KeyError:
-                print 'WARNING compute_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
-                      'not have counterpart on input list of tomograms'
+                print('WARNING compute_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
+                      'not have counterpart on input list of tomograms')
                 continue
 
         # Compute metrics
@@ -3621,13 +3621,13 @@ class ListTomoParticles(object):
         mat = dict()
 
         # Loop for tomograms
-        for key, tomo_1 in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo_1 in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             try:
                 tomo_2 = ltomos.__tomos[key]
                 n_parts_tomo_1, n_parts_tomo_2 = tomo_1.get_num_particles(), tomo_2.get_num_particles()
                 if (n_parts_tomo_1 > 0) and (n_parts_tomo_2 > 0):
                     if verbose:
-                        print '\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname()
+                        print('\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname())
                     # Loop for simulations
                     sim_mat, n_real_sims = list(), 0
                     for i in range(n_sims):
@@ -3646,8 +3646,8 @@ class ListTomoParticles(object):
                         mat[tomo_1.get_tomo_fname()] = (1. / n_real_sims) * \
                                                            np.asarray(sim_mat, dtype=np.float).sum(axis=0)
             except KeyError:
-                print 'WARNING simulate_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
-                            'not have counterpart on input list of tomograms'
+                print('WARNING simulate_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
+                            'not have counterpart on input list of tomograms')
                 continue
 
         return mat
@@ -3693,13 +3693,13 @@ class ListTomoParticles(object):
 
         # Loop for tomograms
         part_id = 0
-        for key, tomo_1 in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo_1 in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             try:
                 tomo_2 = ltomos.__tomos[key]
                 n_parts_tomo_1, n_parts_tomo_2 = tomo_1.get_num_particles(), tomo_2.get_num_particles()
                 if (n_parts_tomo_1 > 0) and (n_parts_tomo_2 > 0):
                     if verbose:
-                        print '\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname()
+                        print('\t\t\t+ Processing tomo ' + tomo_2.get_tomo_fname())
                     # Loop for simulations
                     for i in range(n_sims):
                         n_real_sims = 0
@@ -3712,7 +3712,7 @@ class ListTomoParticles(object):
                                                                          dens_gl=hold_dens, pointwise=True,
                                                                          npr=npr, verbose=False)
                             if hold_mat is not None:
-                                for i in xrange(hold_mat.shape[0]):
+                                for i in range(hold_mat.shape[0]):
                                     mat[part_id, :] = hold_mat[i, :]
                                     part_id += 1
             except KeyError:
@@ -3726,7 +3726,7 @@ class ListTomoParticles(object):
     # surface: if False (default) then densities are estimated by volume, otherwise by surface
     def compute_global_densities(self, surface=False):
         dens = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             dens[key] = tomo.compute_global_density(surface=surface)
         return dens
 
@@ -3734,7 +3734,7 @@ class ListTomoParticles(object):
     # surface: if False (default) then densities are estimated by volume, otherwise by surface
     def compute_global_density(self, surface=False):
         n_parts, vol = 0, 0.
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             n_parts += tomo.get_num_particles()
             if surface:
                 vol += tomo.compute_voi_surface()
@@ -3750,7 +3750,7 @@ class ListTomoParticles(object):
     # out_dir: output directory to store the output tomograms
     # out_stem: (default '') output stem string added to the stored files
     def store_appended_tomos(self, out_dir, out_stem='', mode='surface'):
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             disperse_io.save_vtp(tomo.append_particles_vtp(mode=mode),
                                  out_dir+'/'+out_stem+key+'_append.vtp')
 
@@ -3758,7 +3758,7 @@ class ListTomoParticles(object):
     # min_num_particles: minimum number of particles, below that the tomogram is deleted (default 1)
     def filter_by_particles_num(self, min_num_particles=1):
         hold_dict = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             # print key + ': ' + str(tomo.get_num_particles())
             if tomo.get_num_particles() >= min_num_particles:
                 hold_dict[key] = tomo
@@ -3767,14 +3767,14 @@ class ListTomoParticles(object):
     # Clean tomogram with a low amount of particles
     # n_keep: number of tomograms to, the one with the highest amount of particles
     def clean_low_pouplated_tomos(self, n_keep):
-        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(self.__tomos.keys())):
+        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(list(self.__tomos.keys()))):
             return
         # Sorting loop
         n_parts = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             n_parts[key] = tomo.get_num_particles()
-        pargs_sort = np.argsort(np.asarray(n_parts.values()))[::-1]
-        keys = n_parts.keys()
+        pargs_sort = np.argsort(np.asarray(list(n_parts.values())))[::-1]
+        keys = list(n_parts.keys())
         # Cleaning loop
         hold_dict = dict()
         for parg in pargs_sort[:n_keep]:
@@ -3802,7 +3802,7 @@ class ListTomoParticles(object):
     # Compute total density combining al tomograms
     def total_density(self):
         num, vols = 0., 0.
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             num += tomo.get_num_particles()
             vols += tomo.compute_global_density()
         if vols <= 0:
@@ -3827,7 +3827,7 @@ class ListTomoParticles(object):
         # if hold_part is None:
         #     return None
         meta_dic = hold_part.get_meta()
-        for key in meta_dic.iterkeys():
+        for key in meta_dic.keys():
             star_part.add_column(key)
         star_part.add_column('_rlnGroupNumber')
 
@@ -3841,7 +3841,7 @@ class ListTomoParticles(object):
             tomo_fname = tomo.get_tomo_fname()
             for part in tomo.get_particles():
                 kwargs, meta_dic = dict(), part.get_meta()
-                for key, val in zip(meta_dic.iterkeys(), meta_dic.itervalues()):
+                for key, val in zip(iter(meta_dic.keys()), iter(meta_dic.values())):
                     kwargs[key] = val
                 kwargs['_rlnGroupNumber'] = mic_dic[tomo_fname]
                 # Insert the particles into the star file
@@ -3871,7 +3871,7 @@ class ListTomoParticles(object):
     # Purge particles by scale suppresion
     # ss: scale for supression
     def scale_suppression(self, ss):
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             if tomo.get_num_particles() > 0:
                 tomo.scale_suppression(ss)
 
@@ -3880,7 +3880,7 @@ class ListTomoParticles(object):
         Ensure that all inserted particles are embedded (actually only computed for VOI as array)
         :return: True if all are embedded
         """
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             if not tomo.ensure_embedding():
                 return False
         return True
@@ -3892,7 +3892,7 @@ class ListTomoParticles(object):
         self.__dict__.update(state)
         # Restore unpickable objects
         self.__tomos = dict()
-        for key, pkl in self.__pkls.iteritems():
+        for key, pkl in self.__pkls.items():
             self.__tomos[key] = unpickle_obj(pkl)
 
     # Copy the object's state from self.__dict__ which contains all instance attributes.
@@ -3920,7 +3920,7 @@ class SetListTomoParticles(object):
         return self.__lists[key]
 
     def get_key_from_short_key(self, short_key):
-        for lkey in self.__lists.iterkeys():
+        for lkey in self.__lists.keys():
             fkey = os.path.split(lkey)[1]
             hold_key_idx = fkey.index('_')
             hold_key = fkey[:hold_key_idx]
@@ -3928,13 +3928,13 @@ class SetListTomoParticles(object):
                 return lkey
 
     def get_lists_by_short_key(self, key):
-        for lkey, list in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for lkey, list in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             if self.get_key_from_short_key(lkey) == key:
                 return  list
 
     def get_tomos_fname(self):
         hold_list = list()
-        for ltomos in self.get_lists().values():
+        for ltomos in list(self.get_lists().values()):
             hold_list += ltomos.get_tomo_fname_list()
         return list(set(hold_list))
 
@@ -3952,7 +3952,7 @@ class SetListTomoParticles(object):
     # Returns: retuns a set with all tomos in all list
     def get_set_tomos(self):
         tomos_l = list()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 tomos_l.append(tomo.get_tomo_fname())
         return set(tomos_l)
@@ -3966,7 +3966,7 @@ class SetListTomoParticles(object):
 
         # Input parsing
         if list_names is None:
-            list_names = self.__lists.keys()
+            list_names = list(self.__lists.keys())
         out_list = ListTomoParticles()
 
         # Getting the list of all tomograms
@@ -3975,7 +3975,7 @@ class SetListTomoParticles(object):
             hold_list = self.__lists[list_name]
             for tomo_name in hold_list.get_tomo_fname_list():
                 tomo_names.append(tomo_name)
-                if not(tomo_name in vois.keys()):
+                if not(tomo_name in list(vois.keys())):
                     hold_tomo = hold_list.get_tomo_by_key(tomo_name)
                     vois[tomo_name] = hold_tomo.get_voi()
         tomo_names = list(set(tomo_names))
@@ -3997,14 +3997,14 @@ class SetListTomoParticles(object):
     # Returns a dictionary with the number of particles by list
     def particles_by_list(self):
         parts = dict()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             parts[key] = ltomos.get_num_particles()
         return parts
 
     # Returns a dictionary with the number of particles by tomogram
     def particles_by_tomos(self):
         parts = dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 try:
                     parts[tomo.get_tomo_fname()] += tomo.get_num_particles()
@@ -4015,7 +4015,7 @@ class SetListTomoParticles(object):
     # Returns a dictionary with the proportions for every tomogram
     def proportions_by_tomos(self):
         parts = dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 key_t = tomo.get_tomo_fname()
                 try:
@@ -4028,20 +4028,20 @@ class SetListTomoParticles(object):
     # Returns a dictionary with the proportions for every tomogram
     def proportions_by_list(self):
         # Initialization
-        parts_list, parts_tomo = dict.fromkeys(self.__lists.keys()), dict.fromkeys(self.get_set_tomos())
-        for key_t in parts_tomo.iterkeys():
+        parts_list, parts_tomo = dict.fromkeys(list(self.__lists.keys())), dict.fromkeys(self.get_set_tomos())
+        for key_t in parts_tomo.keys():
             parts_tomo[key_t] = 0
-        for key_l in parts_list.iterkeys():
-            parts_list[key_l] = np.zeros(shape=len(parts_tomo.keys()))
+        for key_l in parts_list.keys():
+            parts_list[key_l] = np.zeros(shape=len(list(parts_tomo.keys())))
         # Particles loop
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for i, key_t in enumerate(parts_tomo.keys()):
                 tomo = ltomos.get_tomo_by_key(key_t)
                 hold_parts = tomo.get_num_particles()
                 parts_tomo[key_t] += hold_parts
                 parts_list[key_l][i] += hold_parts
         # Proportions loop
-        for key_l in parts_list.iterkeys():
+        for key_l in parts_list.keys():
             for i, tomo_nparts in enumerate(parts_tomo.values()):
                 if tomo_nparts > 0:
                     parts_list[key_l][i] /= tomo_nparts
@@ -4052,14 +4052,14 @@ class SetListTomoParticles(object):
     # Returns a dictionary with the number of particles by list
     def density_by_list(self, surface=False):
         dens = dict()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             dens[key] = ltomos.compute_global_density(surface=surface)
         return dens
 
     # Returns a dictionary with the number of particles by tomograms
     def density_by_tomos(self, surface=False):
         dens, n_dens = dict(), dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 try:
                     dens[tomo.get_tomo_fname()] += tomo.compute_global_density(surface=surface)
@@ -4069,7 +4069,7 @@ class SetListTomoParticles(object):
                     n_dens[tomo.get_tomo_fname()] += 1.
                 except KeyError:
                     n_dens[tomo.get_tomo_fname()] = 1.
-        for key in dens.iterkeys():
+        for key in dens.keys():
             dens[key] /= n_dens[key]
         return dens
 
@@ -4088,9 +4088,9 @@ class SetListTomoParticles(object):
                                       npr=None, verbose=False):
         mats = dict()
         count = 1
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             if verbose:
-                print '\t\t+ Processing list ' + str(count) + ' of ' + str(len(self.__lists.keys()))
+                print('\t\t+ Processing list ' + str(count) + ' of ' + str(len(list(self.__lists.keys()))))
                 count += 1
             mats[key_l] = ltomos.compute_uni_2nd_order(distances=distances, thick=thick, border=border,
                                                        conv_iter=conv_iter, max_iter=max_iter, dens_gl=dens_gl,
@@ -4118,9 +4118,9 @@ class SetListTomoParticles(object):
                                       npr=None, verbose=False):
         mats = dict()
         count = 1
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             if verbose:
-                print '\t\t+ Processing list ' + str(count) + ' of ' + str(len(self.__lists.keys()))
+                print('\t\t+ Processing list ' + str(count) + ' of ' + str(len(list(self.__lists.keys()))))
                 count += 1
             mats[key_l] =ltomos.simulate_uni_2nd_order_matrix(n_sims, temp_model, part_vtp,
                                                               distances=distances, thick=thick, border=border,
@@ -4149,13 +4149,13 @@ class SetListTomoParticles(object):
         slists = stomos.get_lists()
         mats_o = dict()
         count = 1
-        for key_o, ltomos_o in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_o, ltomos_o in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             mats_i = dict()
-            for key_i, ltomos_i in zip(slists.iterkeys(), slists.itervalues()):
+            for key_i, ltomos_i in zip(iter(slists.keys()), iter(slists.values())):
                 if no_eq_name and (key_o == key_i):
                     continue
                 if verbose:
-                    print '\t\t+ Processing list ' + key_o + ' vs  list' + key_i
+                    print('\t\t+ Processing list ' + key_o + ' vs  list' + key_i)
                     count += 1
                 if keep is not None:
                     ltomos_o.clean_low_pouplated_tomos(keep)
@@ -4193,13 +4193,13 @@ class SetListTomoParticles(object):
         slists = stomos.get_lists()
         mats_o = dict()
         count = 1
-        for key_o, ltomos_o in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_o, ltomos_o in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             mats_i = dict()
-            for key_i, ltomos_i in zip(slists.iterkeys(), slists.itervalues()):
+            for key_i, ltomos_i in zip(iter(slists.keys()), iter(slists.values())):
                 if no_eq_name and (key_o == key_i):
                     continue
                 if verbose:
-                    print '\t\t+ Processing list ' + key_o + ' vs  list' + key_i
+                    print('\t\t+ Processing list ' + key_o + ' vs  list' + key_i)
                     count += 1
                 if keep is not None:
                     ltomos_o.clean_low_pouplated_tomos(keep)
@@ -4218,11 +4218,11 @@ class SetListTomoParticles(object):
 
         # Loop for initialization
         appenders = dict()
-        for key, ltomo in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomo in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             # Loop for tomos
             for tomo in ltomo.get_tomo_list():
                 tomo_fname = tomo.get_tomo_fname()
-                if not (tomo_fname in appenders.keys()):
+                if not (tomo_fname in list(appenders.keys())):
                     appenders[tomo_fname] = None
                 # Add a key only if ic can be converted to an integer
                 l_stem = os.path.splitext(os.path.split(key)[1])[0]
@@ -4240,7 +4240,7 @@ class SetListTomoParticles(object):
 
         # Loop for appending
         polys = dict()
-        for key, appender in zip(appenders.iterkeys(), appenders.itervalues()):
+        for key, appender in zip(iter(appenders.keys()), iter(appenders.values())):
             if appender is not None:
                 appender.Update()
                 polys[key] = appender.GetOutput()
@@ -4267,7 +4267,7 @@ class SetListTomoParticles(object):
         if hold_part is None:
             return None
         meta_dic = hold_part.get_meta()
-        for key in meta_dic.iterkeys():
+        for key in meta_dic.keys():
             star_part.add_column(key)
         star_part.add_column('_rlnGroupNumber')
         star_part.add_column('_rlnClassNumber')
@@ -4278,13 +4278,13 @@ class SetListTomoParticles(object):
             mic_dic[tomo_fname] = i
 
         # Lists loop
-        for i, lkey, list in zip(range(len(self.__lists)), self.__lists.iterkeys(), self.__lists.itervalues()):
+        for i, lkey, list_ in zip(list(range(len(self.__lists))), iter(self.__lists.keys()), iter(self.__lists.values())):
             # Tomograms loop
-            for tomo in list.get_tomo_list():
+            for tomo in list_.get_tomo_list():
                 tomo_fname = tomo.get_tomo_fname()
                 for part in tomo.get_particles():
                     kwargs, meta_dic = dict(), part.get_meta()
-                    for key, val in zip(meta_dic.iterkeys(), meta_dic.itervalues()):
+                    for key, val in zip(iter(meta_dic.keys()), iter(meta_dic.values())):
                         kwargs[key] = val
                     kwargs['_rlnGroupNumber'] = mic_dic[tomo_fname]
                     try:
@@ -4308,7 +4308,7 @@ class SetListTomoParticles(object):
         star_list.add_column('_psPickleFile')
 
         # Tomograms loop
-        for lname, ltomo in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for lname, ltomo in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             lkey = os.path.splitext(os.path.split(lname)[1])[0]
             out_star, out_list_dir = out_dir_pkl + '/' + lkey + '_tp.star', out_dir_pkl + '/' + lkey + '_tp'
             clean_dir(out_list_dir)
@@ -4324,7 +4324,7 @@ class SetListTomoParticles(object):
     # ref_list: reference list key for crossed scale suppression
     def scale_suppression(self, ss, ref_list=None):
         if ref_list is None:
-            for tlist in self.__lists.itervalues():
+            for tlist in self.__lists.values():
                 tlist.scale_suppression(ss)
         else:
             try:
@@ -4335,7 +4335,7 @@ class SetListTomoParticles(object):
                 rlist = self.__lists[sk_rlist]
             for tomo in rlist.get_tomo_list():
                 tomo.scale_suppression(ss)
-            for key, hlist in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for key, hlist in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
                 if key != sk_rlist:
                     for tomo in hlist.get_tomo_list():
                         try:
@@ -4356,19 +4356,19 @@ class SetListTomoParticles(object):
         # Computing total particles per tomogram loop
         if isinstance(min_num_particles, dict):
             tomos_dict = dict().fromkeys(self.get_set_tomos(), 0)
-            for lkey, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for lkey, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
                 hold_min = min_num_particles[lkey]
                 for tomo in ltomos.get_tomo_list():
                     if tomo.get_num_particles() >= hold_min:
                         tomos_dict[tomo.get_tomo_fname()] += 1
             tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-            for key in tomos_dict.iterkeys():
-                if tomos_dict[key] < len(min_num_particles.keys()):
+            for key in tomos_dict.keys():
+                if tomos_dict[key] < len(list(min_num_particles.keys())):
                     tomos_del[key] = True
         else:
             tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-            for tkey in tomos_del.keys():
-                for ltomos in self.__lists.itervalues():
+            for tkey in list(tomos_del.keys()):
+                for ltomos in self.__lists.values():
                     try:
                         tomo = ltomos.get_tomo_by_key(tkey)
                     except KeyError:
@@ -4377,8 +4377,8 @@ class SetListTomoParticles(object):
                         tomos_del[tkey] = True
 
         # Deleting loop
-        for ltomos in self.__lists.itervalues():
-            for tkey in tomos_del.keys():
+        for ltomos in self.__lists.values():
+            for tkey in list(tomos_del.keys()):
                 if tomos_del[tkey]:
                     try:
                         ltomos.del_tomo(tkey)
@@ -4391,7 +4391,7 @@ class SetListTomoParticles(object):
 
         # Computing total particles per tomogram loop
         hold_dict = dict()
-        for ltomos in self.__lists.itervalues():
+        for ltomos in self.__lists.values():
             for tomo in ltomos.get_tomo_list():
                 tkey, n_parts = tomo.get_tomo_fname(), tomo.get_num_particles()
                 try:
@@ -4400,9 +4400,9 @@ class SetListTomoParticles(object):
                     hold_dict[tkey] = n_parts
 
         # Deleting loop
-        for tkey, n_parts in zip(hold_dict.iterkeys(), hold_dict.itervalues()):
+        for tkey, n_parts in zip(iter(hold_dict.keys()), iter(hold_dict.values())):
             if n_parts < min_num_particles:
-                for ltomos in self.__lists.itervalues():
+                for ltomos in self.__lists.values():
                     ltomos.del_tomo(tkey)
 
     def print_tomo_particles(self, out_dir, shapes, seg_mic_dir=None, over=False, sg=None):
@@ -4423,12 +4423,12 @@ class SetListTomoParticles(object):
         shapes_tomo = dict()
 
         # Loading particle shapes
-        for ltomos_key, shape_path in zip(shapes.iterkeys(), shapes.itervalues()):
+        for ltomos_key, shape_path in zip(iter(shapes.keys()), iter(shapes.values())):
             shapes_tomo[ltomos_key] = disperse_io.load_tomo(shape_path)
 
         # Lists loop
         # lbl = int(0)
-        for ltomos_key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for ltomos_key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
 
             tomos = ltomos.get_tomo_list()
             if over:
@@ -4504,9 +4504,7 @@ class SetListTomoParticles(object):
 ############################################################################
 # Abstract class for defining neighbourhoods
 #
-class Nhood(object):
-
-    __metaclass__ = abc.ABCMeta
+class Nhood(object, metaclass=abc.ABCMeta):
 
     def __init__(self, center, rad, voi, conv_iter=None, max_iter=None, dst_field=None):
         """
@@ -4917,9 +4915,7 @@ class ShellNhood(Nhood):
 ############################################################################
 # Abstract for a List of Nhoods
 #
-class ListNhood(object):
-
-    __metaclass__ = abc.ABCMeta
+class ListNhood(object, metaclass=abc.ABCMeta):
 
     def __init__(self, center, radius_rg, voi=None, conv_iter=None, max_iter=None, fmm=False):
         """
@@ -4956,21 +4952,24 @@ class ListNhood(object):
                 field_found = False
                 if self.__voi[x, y, z]:
                     dst_field[x, y, z] = -1
-                    self.__dst_field = skfmm.travel_time(dst_field, self.__voi.astype(np.float32), dx=1)
+                    dst_field = np.ma.MaskedArray(dst_field, np.invert(self.__voi))
+                    self.__dst_field = skfmm.distance(dst_field, dx=1) # skfmm.travel_time(dst_field, self.__voi.astype(np.float32), dx=1)
                     field_found = True
-                # else:
+                # if not field_found:
                 #     # Look in the 3x3x3 neighborhood to ensure we are inside of the VOI
                 #     dst_field[x, y, z] = 1
+                #     import itertools
                 #     for off_x, off_y, off_z in itertools.product([-1, 0, 1], repeat=3):
                 #         dst_field[x + off_x, y + off_y, z + off_z] = -1
                 #         try:
                 #             self.__dst_field = skfmm.travel_time(dst_field, self.__voi.astype(np.float32), dx=1)
                 #             field_found = True
                 #             break
-                #         except ValueError:
+                #         except (ValueError, RuntimeError) as e:
+                #             print('Conde: ' + str(e))
                 #             dst_field[x + off_x, y + off_y, z + off_z] = 1
                 if field_found:
-                    self.__dst_field = self.__dst_field.data
+                    self.__dst_field = np.asarray(self.__dst_field)
                     self.__dst_field += .5
                     self.__dst_field[x, y, z] = 0
                     # disperse_io.save_numpy(self.__dst_field, '/fs/home/martinez/workspace/python/pyorg/surf/test/out/uni_2nd/dst_field_1.mrc')
@@ -5035,7 +5034,7 @@ class ListNhood(object):
         """
         n_hoods = len(self.__nhoods)
         nums, vols = np.zeros(shape=n_hoods, dtype=float), np.zeros(shape=n_hoods, dtype=float)
-        for i in xrange(n_hoods):
+        for i in range(n_hoods):
             hold = self.__nhoods[i].analyse(coords)
             nums[i], vols[i] = hold[0], hold[1]
         return nums, vols

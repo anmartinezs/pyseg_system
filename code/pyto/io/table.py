@@ -3,17 +3,21 @@ Contains class Table for read (write in the future?) or results in the
 table form.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: table.py 340 2008-12-30 17:17:19Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
 
-__version__ = "$Revision: 340 $"
+__version__ = "$Revision$"
 
 
 import string
 import re
 import numpy
 
-from multi_data import MultiData
+from .multi_data import MultiData
 
 
 class Table(MultiData):
@@ -39,7 +43,7 @@ class Table(MultiData):
                     'float']
         }
     profiles_db['vesicles'] = {\
-        'columns' : range(23),
+        'columns' : list(range(23)),
         'names' : ['ids', 
                    'vesicle_density_mean', 'vesicle_density_std',
                    'vesicle_density_min', 'vesicle_density_max',

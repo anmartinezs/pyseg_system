@@ -1,6 +1,7 @@
 """
 Segmentation and analysis meta-data
 """
+from __future__ import unicode_literals
 
 
 #######################################################
@@ -49,7 +50,7 @@ mitochondria = True
 # microscope
 microscope = 'polara_1'
 
-# pixel size
+# pixel size [nm]
 pixel_size = 1.888
 
 # person who recorded the series

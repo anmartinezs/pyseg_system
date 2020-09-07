@@ -2,12 +2,12 @@ __author__ = 'martinez'
 
 import math
 import shutil
-from variables import *
+from .variables import *
 import scipy as sp
 import random as rnd
 from pyorg import pexceptions
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -18,7 +18,7 @@ except:
 def unpickle_obj(fname):
 
     # Load pickable state
-    f_pkl = open(fname)
+    f_pkl = open(fname, 'rb')
     try:
         gen_obj = pickle.load(f_pkl)
     finally:
@@ -504,7 +504,7 @@ def closest_points(point, points, nn=1):
     eu_dsts = np.sqrt((eu_dsts * eu_dsts).sum(axis=1))
     n_ids = np.argsort(eu_dsts)
     out_points = np.zeros(shape=(nn, 3))
-    for i in xrange(nn):
+    for i in range(nn):
         out_points[i] = points[n_ids[i], :]
     return out_points
 
@@ -647,7 +647,7 @@ def clahe_array(array, N=256, clip_f=100, s_max=4):
     try:
         return ((N_f-1.) / M) * np.cumsum(hist), x_trans
     except ZeroDivisionError:
-        print 'WARNING (clahe_array): CDF is zero!'
+        print('WARNING (clahe_array): CDF is zero!')
         return np.zeros(shape=len(hist), dtype=hist.dtype), x_trans
 
 # Equal to clahe_array but now only transformation array is returned whose range are [0,N-1] and has
@@ -686,7 +686,7 @@ def clahe_array2(array, N=256, clip_f=100, s_max=4):
     try:
         return  ((N_f-1.) / M) * np.cumsum(hist)
     except ZeroDivisionError:
-        print 'WARNING (clahe_array): CDF is zero!'
+        print('WARNING (clahe_array): CDF is zero!')
         return np.zeros(shape=len(hist), dtype=hist.dtype)
 
 # Compute center of gravity from point coordinates in 2D
@@ -1461,7 +1461,7 @@ def clean_dir(dir):
 # Returns the sorted list of keys and values from dict1
 def sort_dict(dict1, dict2, reverse=False):
     s_keys, s_values = list(), list()
-    for h_key in sorted(dict2.keys(), key=dict2.get, reverse=reverse):
+    for h_key in sorted(list(dict2.keys()), key=dict2.get, reverse=reverse):
         try:
             s_values.append(dict1[h_key])
             s_keys.append(h_key)
@@ -1590,7 +1590,7 @@ def vect_to_zrelion(v_in, mode='active'):
     try:
         n = v_m / math.sqrt((v_m*v_m).sum())
     except ZeroDivisionError:
-        print 'WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!'
+        print('WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!')
         return 0., 0., 0.
 
     # Computing angles in Extrinsic ZYZ system
@@ -1636,7 +1636,7 @@ def relion_norm(tomo, mask=None, inv=True):
     if st > 0:
         tomo_out = (hold_tomo-mn) / st
     else:
-        print 'WARNING (relion_norm): standard deviation=' + str(st)
+        print('WARNING (relion_norm): standard deviation=' + str(st))
 
     return tomo_out
 

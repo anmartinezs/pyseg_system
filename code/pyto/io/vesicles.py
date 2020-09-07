@@ -2,6 +2,8 @@
 Contains class Vesicles for reading vesicles results from a file and
 parsing the results.
 
+Note: Depreciated because vesicles results are red from pickle files.
+
 After executing the following statements:
 
 ves = pyto.io.Vesicles()
@@ -33,16 +35,18 @@ all data from the vesicles is saved in the following attributes:
 All attributes are ndarrays ordered in the same way as ids in ves.ids.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: vesicles.py 63 2008-02-26 10:22:11Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 63 $"
+__version__ = "$Revision$"
 
 
 import numpy
 import scipy
 import scipy.io
-from results import Results
+from .results import Results
 
 
 class Vesicles(Results):

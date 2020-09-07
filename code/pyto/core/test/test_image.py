@@ -3,10 +3,11 @@
 Tests module image
 
 # Author: Vladan Lucic
-# $Id: test_image.py 1461 2017-10-12 10:10:49Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 1461 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import os.path
@@ -18,6 +19,7 @@ import numpy.testing as np_test
 import scipy
 
 from pyto.core.image import Image
+from pyto.io.image_io import ImageIO
 
 class TestImage(np_test.TestCase):
     """
@@ -40,6 +42,16 @@ class TestImage(np_test.TestCase):
         working_dir = os.getcwd()
         file_dir, name = os.path.split(__file__)
         self.dir = os.path.join(working_dir, file_dir)
+
+        # image file names
+        self.big_file_name = os.path.join(
+            self.dir, '../../io/test/big_head.mrc')
+        self.small_file_name = os.path.join(
+            self.dir, '../../io/test/small.mrc')
+        self.modified_file_name_mrc = os.path.join(
+            self.dir, '../../io/test/modified.mrc')
+        self.modified_file_name_raw = os.path.join(
+            self.dir, '../../io/test/modified.raw')
 
     def testRelativeToAbsoluteInset(self):
         """
@@ -172,7 +184,7 @@ class TestImage(np_test.TestCase):
         np_test.assert_equal(new_data[2,4], 100)
         np_test.assert_equal(new_data[9,9], 0)
         np_test.assert_equal(image.data[0,0], 100)
-        np_test.assert_equal(image.data[1:,:], self.image.data[inset][1:,:])
+        np_test.assert_equal(image.data[1:,:], self.image.data[tuple(inset)][1:,:])
         np_test.assert_equal(image.inset, inset)
 
         # use full, expand, update  
@@ -502,10 +514,23 @@ class TestImage(np_test.TestCase):
         Tests if copy/deepcopy of attrbutes works properly
         """
 
-        # tests if copy/deepcopy of attrbutes works properly
+        # tests default args
         inset = [slice(2,5), slice(4,6)]
-        new = self.image.newFromInset(inset=inset, copyData=True, deepcp=True, 
-                                 noDeepcp=['yyy'])
+        new = self.image.newFromInset(inset=inset, copyData=True, deepcp=True)
+        new.xxx[1] = 12
+        new.yyy[1] = 15
+        desired_array = numpy.array([[24, 25],
+                               [34, 35],
+                               [44, 45]])
+        np_test.assert_equal(new.data, desired_array)
+        np_test.assert_equal(new.inset, inset)
+        np_test.assert_equal(self.image.xxx, [1,2,3])
+        np_test.assert_equal(self.image.yyy, [4, 5, 6])
+        inset = [slice(2,5), slice(4,6)]
+
+        # tests if copy/deepcopy of attrbutes works properly
+        new = self.image.newFromInset(
+            inset=inset, copyData=True, deepcp=True, noDeepcp=['yyy'])
         new.xxx[1] = 12
         new.yyy[1] = 15
         desired_array = numpy.array([[24, 25],
@@ -557,6 +582,115 @@ class TestImage(np_test.TestCase):
         np_test.assert_equal(mrc.fileFormat, 'mrc')
         np_test.assert_equal(mrc.data[14,8,10], -14)
         np_test.assert_equal(mrc.memmap, True)
+
+    def test_modify(self):
+        """
+        Tests modify(), implicitely tests reading and writting
+        mrc header by pyto.io.ImageIO
+        """
+
+        # modify mrc image
+        def fun_1(image):
+            dat =  image.data + 1
+            return dat
+        # requires Image.modify(memmap=False) 
+        #def fun_1(image): return image.data + 1
+        Image.modify(
+            old=self.big_file_name, new=self.modified_file_name_mrc,
+            fun=fun_1, memmap=True)
+        new = Image.read(
+            file=self.modified_file_name_mrc, header=True, memmap=True)
+        old = Image.read(file=self.big_file_name, header=True, memmap=True)
+
+        # check data
+        np_test.assert_equal(
+            new.data[1, 10, :], numpy.arange(11001, 11101))
+        np_test.assert_equal(
+            new.data[2, :, 15], numpy.arange(20016, 30016, 100))
+        
+        # check header
+        np_test.assert_almost_equal(new.pixelsize, old.pixelsize)
+        np_test.assert_almost_equal(new.header[0:19], old.header[0:19])
+        np_test.assert_almost_equal(new.header[22:25], old.header[22:25])
+        np_test.assert_equal(True, new.header[25] == old.header[25])
+        header_len = len(new.header)
+        np_test.assert_almost_equal(
+            new.header[26:header_len-1], old.header[26:header_len-1])
+        np_test.assert_equal(
+            True, new.header[header_len-1] == old.header[header_len-1])
+        
+        # modify mrc image and write as raw
+        def fun_v(image, value):
+            data = image.data + value
+            return data
+        modified = Image.modify(
+            old=self.big_file_name, new=self.modified_file_name_raw,
+            fun=fun_v, fun_kwargs={'value' : 4})
+        new = Image.read(
+            file=self.modified_file_name_raw, shape=modified.data.shape,
+            dataType=modified.data.dtype, memmap=True)
+        old = Image.read(file=self.big_file_name, header=True, memmap=True)
+
+        # check data
+        np_test.assert_equal(
+            new.data[1, 10, :], numpy.arange(11004, 11104))
+        np_test.assert_equal(
+            new.data[2, :, 15], numpy.arange(20019, 30019, 100))
+        
+    def test_cut(self):
+        """
+        Tests cut(), implicitely tests reading and writting 
+        mrc header by pyto.io.ImageIO
+        """
+
+        # cut image
+        inset = [slice(1, 4), slice(10, 30), slice(50, 60)]
+        Image.cut(
+            old=self.big_file_name, new=self.small_file_name, inset=inset)
+
+        # check data
+        new = Image.read(file=self.small_file_name, header=True, memmap=True)
+        np_test.assert_equal(
+            new.data[1, 10, :], numpy.arange(22050, 22060))
+        np_test.assert_equal(
+            new.data[2, 6:16, 8], numpy.arange(31658, 32658, 100))
+
+        # check header
+        old = Image.read(file=self.big_file_name, header=True, memmap=True)
+        np_test.assert_almost_equal(new.pixelsize, old.pixelsize)
+        np_test.assert_equal(len(new.header), len(old.header))
+        np_test.assert_equal(new.header[0:3], [3, 20, 10])
+        np_test.assert_equal(new.header[7:10], [3, 20, 10])
+        np_test.assert_almost_equal(
+            new.header[10:13], numpy.array([3, 20, 10]) * old.pixelsize * 10,
+            decimal=5)
+        np_test.assert_equal(new.header[3:7], old.header[3:7])
+        np_test.assert_almost_equal(new.header[13:19], old.header[13:19])
+        np_test.assert_almost_equal(new.header[22:25], old.header[22:25])
+        np_test.assert_equal(True, new.header[25] == old.header[25])
+        #np_test.assert_string_equal(new.header[25], old.header[25])
+        header_len = len(new.header)
+        np_test.assert_almost_equal(
+            new.header[26:header_len-1], old.header[26:header_len-1])
+        np_test.assert_equal(
+            True, new.header[header_len-1] == old.header[header_len-1])
+
+    def tearDown(self):
+        """
+        Remove temporary files
+        """
+        try:
+            os.remove(self.small_file_name)
+        except OSError:
+            pass
+        try:
+            os.remove(self.modified_file_name_mrc)
+        except OSError:
+            pass
+        try:
+            os.remove(self.modified_file_name_raw)
+        except OSError:
+            pass
 
 
 if __name__ == '__main__':

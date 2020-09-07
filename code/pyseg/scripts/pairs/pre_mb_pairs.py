@@ -125,35 +125,35 @@ def label_mb_pair(seg_mb1, seg_mb2, res, max_dst, mode_2d=False, border=False):
 
 ########## Print initial message
 
-print 'Pre-processing membrane pairs segmentation.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput reference tomogram: ' + str(in_ref)
-print '\tInput segmentation tomogram 1: ' + str(in_seg_1)
-print '\tInput segmentation tomogram 2: ' + str(in_seg_2)
-print '\tOutput directory: ' + str(out_dir)
-print '\tOutput stem: ' + str(out_stem)
-print '\tSegmentation parameters: '
-print '\t\t-Tomograms resolution: ' + str(sg_res) + ' nm/voxel'
-print '\t\t-Intermembrane valid range of distances: ' + str(sg_mbp_rg)
-print '\tCropping parameters: '
-print '\t\t-Membrane thickness: ' + str(cp_mb_thick) + ' nm'
+print('Pre-processing membrane pairs segmentation.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput reference tomogram: ' + str(in_ref))
+print('\tInput segmentation tomogram 1: ' + str(in_seg_1))
+print('\tInput segmentation tomogram 2: ' + str(in_seg_2))
+print('\tOutput directory: ' + str(out_dir))
+print('\tOutput stem: ' + str(out_stem))
+print('\tSegmentation parameters: ')
+print('\t\t-Tomograms resolution: ' + str(sg_res) + ' nm/voxel')
+print('\t\t-Intermembrane valid range of distances: ' + str(sg_mbp_rg))
+print('\tCropping parameters: ')
+print('\t\t-Membrane thickness: ' + str(cp_mb_thick) + ' nm')
 if cp_mode_2d:
-    print '\t\t\t+Mode 2D for segmentation activated.'
-print '\t\t-Intermembranes gap maximum length: ' + str(cp_dst) + ' nm'
+    print('\t\t\t+Mode 2D for segmentation activated.')
+print('\t\t-Intermembranes gap maximum length: ' + str(cp_dst) + ' nm')
 if cp_border:
-    print '\t\t-Do not segment borders.'
-print ''
+    print('\t\t-Do not segment borders.')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
 sg_mbp_rg_v = [sg_mbp_rg[0] / float(sg_res), sg_mbp_rg[1] / float(sg_res)]
 cp_dst_v, cp_mb_thick_v = math.ceil(float(cp_dst)/float(sg_res)), math.ceil(float(cp_mb_thick)/float(sg_res))
 
-print '\tLoading input tomograms...'
+print('\tLoading input tomograms...')
 tomo_ref = ps.disperse_io.load_tomo(in_ref, mmap=True)
 star = ps.sub.Star()
 star.add_column(key='_rlnMicrographName')
@@ -165,19 +165,19 @@ star.add_column(key='_psSegOffX')
 star.add_column(key='_psSegOffY')
 star.add_column(key='_psSegOffZ')
 
-print '\tFinding membranes in input segmentation 1:'
+print('\tFinding membranes in input segmentation 1:')
 seg_1, seg_2 = ps.disperse_io.load_tomo(in_seg_1) > 0, ps.disperse_io.load_tomo(in_seg_2) > 0
 labelled_1, num_lbls_1 = sp.ndimage.measurements.label(seg_1)
 labelled_2, num_lbls_2 = sp.ndimage.measurements.label(seg_2)
 mb_lbls_1, mb_lbls_2 = np.arange(1, num_lbls_1), np.arange(1, num_lbls_2)
-print '\t\t-Number of membranes found: ' + str(num_lbls_1)
+print('\t\t-Number of membranes found: ' + str(num_lbls_1))
 
-print '\tVesicles loop: '
+print('\tVesicles loop: ')
 for mb_lbl in mb_lbls_1:
 
-    print '\t\t-Processing membrane with label: ' + str(mb_lbl)
+    print('\t\t-Processing membrane with label: ' + str(mb_lbl))
 
-    print '\t\t\t+Cropping membrane subvolume...'
+    print('\t\t\t+Cropping membrane subvolume...')
     cp_ids = np.where(labelled_1 == mb_lbl)
     x_min, x_max = cp_ids[0].min() - 2*cp_dst_v, cp_ids[0].max() + 2*cp_dst_v
     y_min, y_max = cp_ids[1].min() - 2*cp_dst_v, cp_ids[1].max() + 2*cp_dst_v
@@ -197,28 +197,28 @@ for mb_lbl in mb_lbls_1:
     sub_mb1 = labelled_1[x_min:x_max, y_min:y_max, z_min:z_max] == mb_lbl
     sub_lbl_mb2 = labelled_2[x_min:x_max, y_min:y_max, z_min:z_max]
 
-    print '\t\t\t+Finding pair membrane label: '
+    print('\t\t\t+Finding pair membrane label: ')
     mb_lbl_pair, dst_pair = find_lbl_pair(sub_mb1, sub_lbl_mb2, mb_lbls_2, sg_mbp_rg_v)
     if mb_lbl_pair is None:
-        print 'WARING: No pair label found!'
+        print('WARING: No pair label found!')
         continue
-    print '\t\t\t\t*Label found ' + str(mb_lbl_pair) + ' at distance ' + str(dst_pair/sg_res) + ' nm'
+    print('\t\t\t\t*Label found ' + str(mb_lbl_pair) + ' at distance ' + str(dst_pair/sg_res) + ' nm')
     sub_mb2 = sub_lbl_mb2 == mb_lbl_pair
 
     if cp_mb_thick > 0:
-        print '\t\t\t+Growing membranes by factor: ' + str(cp_mb_thick) + ' nm'
+        print('\t\t\t+Growing membranes by factor: ' + str(cp_mb_thick) + ' nm')
         sub_mb1 = ps.disperse_io.seg_dist_trans(sub_mb1) <= cp_mb_thick_v
         sub_mb2 = ps.disperse_io.seg_dist_trans(sub_mb2) <= cp_mb_thick_v
 
-    print '\t\t\t+Generating membranes pair segmentation (1-mb_1, 2-mb_2, 3-lummen, 4-cyto_1, 5-cyto_2)...'
+    print('\t\t\t+Generating membranes pair segmentation (1-mb_1, 2-mb_2, 3-lummen, 4-cyto_1, 5-cyto_2)...')
     try:
         sub_pair, sub_mask = label_mb_pair(sub_mb1, sub_mb2, sg_res, cp_dst, mode_2d=cp_mode_2d, border=cp_border)
     except ValueError:
-        print 'WARING: Segmentation failed for membrane labelled as: ' + str(mb_lbl)
+        print('WARING: Segmentation failed for membrane labelled as: ' + str(mb_lbl))
         continue
     sub_ref = tomo_ref[x_min:x_max, y_min:y_max, z_min:z_max].astype(np.float32)
 
-    print '\t\t-Storing sub-volumes...'
+    print('\t\t-Storing sub-volumes...')
     mbp_fname = out_dir+'/'+out_stem+'_mbp_'+str(mb_lbl)+'.mrc'
     mask_fname = out_dir+'/'+out_stem+'_mbp_'+str(mb_lbl)+'.fits'
     mbp_seg_fname = out_dir+'/'+out_stem+'_mbp_'+str(mb_lbl)+'_seg.mrc'
@@ -232,7 +232,7 @@ for mb_lbl in mb_lbls_1:
     gc.collect()
 
 out_star = out_dir + '/' + out_stem + '.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

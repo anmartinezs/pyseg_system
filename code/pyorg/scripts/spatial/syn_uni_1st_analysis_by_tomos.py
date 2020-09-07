@@ -27,7 +27,7 @@ from pyorg.surf.model import ModelCSRV, gen_tlist
 from pyorg.spatial.sparse import compute_cdf, compute_hist, compute_J
 import matplotlib.pyplot as plt
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -104,51 +104,51 @@ def compute_pvals(exp_med, sims):
 
 ########## Print initial message
 
-print 'Univariate first order analysis for a ListTomoParticles by tomograms.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput STAR file: ' + str(in_star)
+print('Univariate first order analysis for a ListTomoParticles by tomograms.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput STAR file: ' + str(in_star))
 if in_wspace is not None:
-    print '\tLoad workspace from: ' + in_wspace
-print '\tList pre-processing options: '
+    print('\tLoad workspace from: ' + in_wspace)
+print('\tList pre-processing options: ')
 if pr_ss is not None:
     pr_ss_v = pr_ss / ana_res
-    print '\t\t-Scale suppression: ' + str(pr_ss) + ' nm (' + str(pr_ss_v) + ' voxels)'
-print '\tOrganization analysis settings: '
-print '\t\t-Number of bins: ' + str(ana_nbins)
+    print('\t\t-Scale suppression: ' + str(pr_ss) + ' nm (' + str(pr_ss_v) + ' voxels)')
+print('\tOrganization analysis settings: ')
+print('\t\t-Number of bins: ' + str(ana_nbins))
 ana_rmax_v = float(ana_rmax) / ana_res
-print '\t\t-Maximum radius: ' + str(ana_rmax) + ' nm (' + str(ana_rmax_v) + ' voxels)'
-print '\t\t-Number of CSR points for F-function: ' + str(ana_f_npoints)
+print('\t\t-Maximum radius: ' + str(ana_rmax) + ' nm (' + str(ana_rmax_v) + ' voxels)')
+print('\t\t-Number of CSR points for F-function: ' + str(ana_f_npoints))
 if ana_npr_model is None:
     ana_npr_model = mp.cpu_count()
 elif ana_npr_model > p_nsims:
     ana_npr_model = p_nsims
-print '\t\t-Number of processors for models simulation: ' + str(ana_npr_model)
-print '\tP-Value computation setting:'
-print '\t\t-Percentile: ' + str(p_per) + ' %'
-print '\t\t-Highest value for Funciton-J: ' + str(p_jhigh)
-print '\t\t-Number of instances for simulations: ' + str(p_nsims)
-print '\t\t-Particle surface: ' + p_vtp
+print('\t\t-Number of processors for models simulation: ' + str(ana_npr_model))
+print('\tP-Value computation setting:')
+print('\t\t-Percentile: ' + str(p_per) + ' %')
+print('\t\t-Highest value for Funciton-J: ' + str(p_jhigh))
+print('\t\t-Number of instances for simulations: ' + str(p_nsims))
+print('\t\t-Particle surface: ' + p_vtp)
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print '\t\t-Colormap: ' + str(pt_cmap)
+    print('\tPlotting settings: ')
+print('\t\t-Colormap: ' + str(pt_cmap))
 if pt_sim_v:
-    print '\t\t-Verbose simulation activated!'
-print ''
+    print('\t\t-Verbose simulation activated!')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
 out_stem_dir = out_dir + '/' + out_stem
-print '\tCleaning the output dir: ' + out_stem
+print('\tCleaning the output dir: ' + out_stem)
 if os.path.exists(out_stem_dir):
     clean_dir(out_stem_dir)
 else:
@@ -156,13 +156,13 @@ else:
 
 if in_wspace is None:
 
-    print '\tLoading input data...'
+    print('\tLoading input data...')
     star = sub.Star()
     try:
         star.load(in_star)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     set_lists = surf.SetListTomoParticles()
     for row in range(star.get_nrows()):
@@ -172,15 +172,15 @@ if in_wspace is None:
     try:
         part_vtp = disperse_io.load_poly(p_vtp)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 
     if pr_ss is not None:
-        print '\tApplying scale suppression...'
+        print('\tApplying scale suppression...')
         set_lists.scale_suppression(pr_ss_v)
 
-    print '\tBuilding the dictionaries...'
+    print('\tBuilding the dictionaries...')
     lists_count, tomos_count = 0, 0
     lists_dic = dict()
     lists_hash, tomos_hash = dict(), dict()
@@ -188,12 +188,12 @@ if in_wspace is None:
     lists_exp_dsts, lists_sim_dsts, lists_exp_fdsts, lists_sim_fdsts, lists_color = dict(), dict(), dict(), dict(), dict()
     tmp_sim_folder = out_dir + '/tmp_gen_list_' + out_stem
     set_lists_dic = set_lists.get_lists()
-    for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+    for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
         fkey = os.path.split(lkey)[1]
-        print '\t\t-Processing list: ' + fkey
+        print('\t\t-Processing list: ' + fkey)
         short_key_idx = fkey.index('_')
         short_key = fkey[:short_key_idx]
-        print '\t\t\t+Short key found: ' + short_key
+        print('\t\t\t+Short key found: ' + short_key)
         try:
             lists_dic[short_key]
         except KeyError:
@@ -202,50 +202,50 @@ if in_wspace is None:
             lists_exp_dsts[short_key], lists_sim_dsts[short_key] = list(), list()
             lists_exp_fdsts[short_key], lists_sim_fdsts[short_key] = list(), list()
             lists_count += 1
-    for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+    for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
         llist_tomos_dic = llist.get_tomos()
-        for tkey, ltomo in zip(llist_tomos_dic.iterkeys(), llist_tomos_dic.itervalues()):
+        for tkey, ltomo in zip(iter(llist_tomos_dic.keys()), iter(llist_tomos_dic.values())):
             try:
                 tomos_exp_dsts[tkey]
             except KeyError:
                 tomos_hash[tkey] = tomos_count
-                tomos_exp_dsts[tkey], tomos_sim_dsts[tkey] = dict.fromkeys(lists_dic.keys()), dict.fromkeys(lists_dic.keys())
-                tomos_exp_fdsts[tkey], tomos_sim_fdsts[tkey] = dict.fromkeys(lists_dic.keys()), dict.fromkeys(lists_dic.keys())
+                tomos_exp_dsts[tkey], tomos_sim_dsts[tkey] = dict.fromkeys(list(lists_dic.keys())), dict.fromkeys(list(lists_dic.keys()))
+                tomos_exp_fdsts[tkey], tomos_sim_fdsts[tkey] = dict.fromkeys(list(lists_dic.keys())), dict.fromkeys(list(lists_dic.keys()))
                 tomos_count += 1
-    for tkey in tomos_exp_dsts.iterkeys():
-        for lkey in lists_dic.iterkeys():
+    for tkey in tomos_exp_dsts.keys():
+        for lkey in lists_dic.keys():
             tomos_exp_dsts[tkey][lkey], tomos_exp_fdsts[tkey][lkey] = list(), list()
             tomos_sim_dsts[tkey][lkey], tomos_sim_fdsts[tkey][lkey] = list(), list()
 
-    print '\tLIST COMPUTING LOOP:'
+    print('\tLIST COMPUTING LOOP:')
     sim_obj_set = surf.SetListSimulations()
-    for lkey in lists_hash.itervalues():
+    for lkey in lists_hash.values():
 
         llist = lists_dic[lkey]
         sim_obj_list = surf.ListSimulations()
-        print '\t\t-Processing list: ' + lkey
-        print '\t\t\t+Tomograms computing loop:'
-        for tkey in tomos_hash.iterkeys():
+        print('\t\t-Processing list: ' + lkey)
+        print('\t\t\t+Tomograms computing loop:')
+        for tkey in tomos_hash.keys():
 
-            print '\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1]
+            print('\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1])
             ltomo = llist.get_tomo_by_key(tkey)
             if ltomo.get_num_particles() <= 0:
-                print '\t\t\t\t\t-WARNING: no particles to process, continuing...'
+                print('\t\t\t\t\t-WARNING: no particles to process, continuing...')
                 continue
 
-            print '\t\t\t\t\t-Computing nearest inter particle distances...'
+            print('\t\t\t\t\t-Computing nearest inter particle distances...')
             hold_arr_dsts = ltomo.compute_uni_1st_order_dsts()
             if hold_arr_dsts is not None:
                 lists_exp_dsts[lkey].append(hold_arr_dsts)
                 tomos_exp_dsts[tkey][lkey].append(hold_arr_dsts)
 
-            print '\t\t\t\t\t-Computing CSR and particles nearest distances...'
+            print('\t\t\t\t\t-Computing CSR and particles nearest distances...')
             hold_arr_fdsts = ltomo.compute_uni_1st_order_dsts(ana_f_npoints)
             if hold_arr_fdsts is not None:
                 lists_exp_fdsts[lkey].append(hold_arr_fdsts)
                 tomos_exp_fdsts[tkey][lkey].append(hold_arr_fdsts)
 
-            print '\t\t\t\t\t-Generating the simulated instances...'
+            print('\t\t\t\t\t-Generating the simulated instances...')
             temp_model = ModelCSRV(ltomo.get_voi(), part_vtp)
             sim_tomos = gen_tlist(p_nsims, ltomo.get_num_particles(), temp_model, mode_emb='center', npr=ana_npr_model,
                                   tmp_folder=tmp_sim_folder)
@@ -263,7 +263,7 @@ if in_wspace is None:
                         lists_sim_fdsts[lkey].append(hold_arr_fdsts)
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
-    print '\tPickling computation workspace in: ' + out_wspace
+    print('\tPickling computation workspace in: ' + out_wspace)
     wspace = (lists_count, tomos_count,
               lists_hash, tomos_hash,
               tomos_exp_dsts, tomos_sim_dsts, tomos_exp_fdsts, tomos_sim_fdsts,
@@ -273,7 +273,7 @@ if in_wspace is None:
         fl.close()
 
 else:
-    print '\tLoading the workspace: ' + in_wspace
+    print('\tLoading the workspace: ' + in_wspace)
     with open(in_wspace, 'r') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
@@ -282,28 +282,28 @@ else:
     lists_exp_dsts, lists_sim_dsts, lists_exp_fdsts, lists_sim_fdsts, lists_color = wspace[8], wspace[9], wspace[10], \
                                                                                     wspace[11], wspace[12]
 
-print '\tPrinting lists hash: '
-for id, lkey in zip(lists_hash.iterkeys(), lists_hash.itervalues()):
-    print '\t\t-[' + str(id) + '] -> [' + lkey + ']'
-print '\tPrinting tomograms hash: '
-for tkey, val in zip(tomos_hash.iterkeys(), tomos_hash.itervalues()):
-    print '\t\t-[' + tkey + '] -> [' + str(val) + ']'
+print('\tPrinting lists hash: ')
+for id, lkey in zip(iter(lists_hash.keys()), iter(lists_hash.values())):
+    print('\t\t-[' + str(id) + '] -> [' + lkey + ']')
+print('\tPrinting tomograms hash: ')
+for tkey, val in zip(iter(tomos_hash.keys()), iter(tomos_hash.values())):
+    print('\t\t-[' + tkey + '] -> [' + str(val) + ']')
 
 # Getting the lists colormap
-n_lists = len(lists_hash.keys())
-for i, lkey in zip(lists_hash.iterkeys(), lists_hash.itervalues()):
+n_lists = len(list(lists_hash.keys()))
+for i, lkey in zip(iter(lists_hash.keys()), iter(lists_hash.values())):
     lists_color[lkey] = pt_cmap(1.*i/n_lists)
 
-print '\tTOMOGRAMS PLOTTING LOOP: '
+print('\tTOMOGRAMS PLOTTING LOOP: ')
 
 out_tomos_dir = out_stem_dir + '/tomos'
 os.makedirs(out_tomos_dir)
 
-print '\t\t-Plotting Histogram...'
+print('\t\t-Plotting Histogram...')
 pvals_glow, pvals_ghigh = dict(), dict()
-for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
+for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
-    for lkey, arr in zip(tomos_exp_dsts[tkey].iterkeys(), tomos_exp_dsts[tkey].itervalues()):
+    for lkey, arr in zip(iter(tomos_exp_dsts[tkey].keys()), iter(tomos_exp_dsts[tkey].values())):
         try:
             hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
@@ -315,7 +315,7 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             else:
                 raise ValueError
         except ValueError or IndexError:
-            print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         plt.title('Histogram Nearest distances for ' + tkey_short + ' and ' + lkey)
@@ -336,10 +336,10 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             plt.savefig(out_fig_dir + '/H_' + lkey + '.png')
         plt.close()
 
-print '\t\t-Plotting Function-G...'
+print('\t\t-Plotting Function-G...')
 pvals_glow, pvals_ghigh = dict(), dict()
-for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
-    for lkey, arr in zip(tomos_exp_dsts[tkey].iterkeys(), tomos_exp_dsts[tkey].itervalues()):
+for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values())):
+    for lkey, arr in zip(iter(tomos_exp_dsts[tkey].keys()), iter(tomos_exp_dsts[tkey].values())):
         try:
             cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
@@ -352,7 +352,7 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             else:
                 raise ValueError
         except ValueError or IndexError:
-            print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -374,16 +374,16 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             plt.savefig(out_fig_dir + '/G_' + lkey + '.png')
         plt.close()
 
-print '\t\t-Plotting Function-G p-values (tomo[s_low, s_high]= (min_pval, max_pval)):'
+print('\t\t-Plotting Function-G p-values (tomo[s_low, s_high]= (min_pval, max_pval)):')
 min_pvals, max_pvals = list(), list()
-for tkey, pvals_low, pvals_high in zip(pvals_glow.iterkeys(), pvals_glow.itervalues(), pvals_ghigh.itervalues()):
+for tkey, pvals_low, pvals_high in zip(iter(pvals_glow.keys()), iter(pvals_glow.values()), iter(pvals_ghigh.values())):
     pvals_hmin, pvals_hmax = np.copy(pvals_low), np.copy(pvals_high)
     pvals_hmin[cdf_bins <= pr_ss] = -1
     pvals_hmax[cdf_bins <= pr_ss] = -1
     idx_min, idx_max = np.argmax(pvals_hmin), np.argmax(pvals_hmax)
     min_pval, max_pval = pvals_hmin[idx_min], pvals_hmax[idx_max]
-    print '\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' \
-          + str(min_pval) + ', ' + str(max_pval) + ')'
+    print('\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' \
+          + str(min_pval) + ', ' + str(max_pval) + ')')
     min_pvals.append(pvals_hmin[idx_min])
     max_pvals.append(pvals_hmax[idx_max])
 plt.figure()
@@ -397,11 +397,11 @@ else:
     plt.savefig(out_tomos_dir + '/G_pvals.png')
 plt.close()
 
-print '\t\t-Plotting Function-F...'
+print('\t\t-Plotting Function-F...')
 pvals_flow, pvals_fhigh = dict(), dict()
-for tkey, ltomo in zip(tomos_exp_fdsts.iterkeys(), tomos_exp_fdsts.itervalues()):
+for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
-    for lkey, arr in zip(tomos_exp_fdsts[tkey].iterkeys(), tomos_exp_fdsts[tkey].itervalues()):
+    for lkey, arr in zip(iter(tomos_exp_fdsts[tkey].keys()), iter(tomos_exp_fdsts[tkey].values())):
         try:
             cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
             tomo_sim_fdsts = tomos_sim_fdsts[tkey][lkey]
@@ -414,7 +414,7 @@ for tkey, ltomo in zip(tomos_exp_fdsts.iterkeys(), tomos_exp_fdsts.itervalues())
             else:
                 raise ValueError
         except ValueError or IndexError:
-            print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
@@ -435,16 +435,16 @@ for tkey, ltomo in zip(tomos_exp_fdsts.iterkeys(), tomos_exp_fdsts.itervalues())
             plt.savefig(out_fig_dir + '/F_' + lkey + '.png')
         plt.close()
 
-print '\t\t-Plotting Function-F p-values (tomo[s_low, s_high]= (min_pval, max_pval)):'
+print('\t\t-Plotting Function-F p-values (tomo[s_low, s_high]= (min_pval, max_pval)):')
 min_pvals, max_pvals = list(), list()
-for tkey, pvals_low, pvals_high in zip(pvals_flow.iterkeys(), pvals_flow.itervalues(), pvals_fhigh.itervalues()):
+for tkey, pvals_low, pvals_high in zip(iter(pvals_flow.keys()), iter(pvals_flow.values()), iter(pvals_fhigh.values())):
     pvals_hmin, pvals_hmax = np.copy(pvals_low), np.copy(pvals_high)
     pvals_hmin[cdf_bins <= pr_ss] = -1
     pvals_hmax[cdf_bins <= pr_ss] = -1
     idx_min, idx_max = np.argmax(pvals_hmin), np.argmax(pvals_hmax)
     min_pval, max_pval = pvals_hmin[idx_min], pvals_hmax[idx_max]
-    print '\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' + \
-          str(min_pval) + ', ' + str(max_pval) + ')'
+    print('\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' + \
+          str(min_pval) + ', ' + str(max_pval) + ')')
     min_pvals.append(pvals_hmin[idx_min])
     max_pvals.append(pvals_hmax[idx_max])
 plt.figure()
@@ -458,10 +458,10 @@ else:
     plt.savefig(out_tomos_dir + '/F_pvals.png')
 plt.close()
 
-print '\t\t-Plotting Function-J...'
-for tkey, ltomo in zip(tomos_exp_fdsts.iterkeys(), tomos_exp_fdsts.itervalues()):
+print('\t\t-Plotting Function-J...')
+for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
-    for lkey, farr in zip(tomos_exp_fdsts[tkey].iterkeys(), tomos_exp_fdsts[tkey].itervalues()):
+    for lkey, farr in zip(iter(tomos_exp_fdsts[tkey].keys()), iter(tomos_exp_fdsts[tkey].values())):
         arr = tomos_exp_dsts[tkey][lkey]
         try:
             cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
@@ -481,7 +481,7 @@ for tkey, ltomo in zip(tomos_exp_fdsts.iterkeys(), tomos_exp_fdsts.itervalues())
             else:
                 raise ValueError
         except ValueError or IndexError:
-            print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
@@ -502,13 +502,13 @@ for tkey, ltomo in zip(tomos_exp_fdsts.iterkeys(), tomos_exp_fdsts.itervalues())
             plt.savefig(out_fig_dir + '/J_' + lkey + '.png')
         plt.close()
 
-print '\tLISTS PLOTTING LOOP: '
+print('\tLISTS PLOTTING LOOP: ')
 
 out_lists_dir = out_stem_dir + '/lists'
 os.makedirs(out_lists_dir)
 
-print '\t\t-Plotting Histogram...'
-for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
+print('\t\t-Plotting Histogram...')
+for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         hist_bins, hist_vals = compute_hist(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
@@ -521,8 +521,8 @@ for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
         else:
             raise ValueError
     except ValueError or IndexError:
-        print np.concatenate(np.asarray(ltomo))
-        print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+        print(np.concatenate(np.asarray(ltomo)))
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     plt.title('Nearest distance histogram for ' + lkey_short)
@@ -539,8 +539,8 @@ for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
         plt.savefig(out_lists_dir + '/H_' + lkey_short + '.png')
     plt.close()
 
-print '\t\t-Plotting Function-G...'
-for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
+print('\t\t-Plotting Function-G...')
+for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
@@ -553,7 +553,7 @@ for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
         else:
             raise ValueError
     except ValueError or IndexError:
-        print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     plt.title('Univariate 1st order for ' + lkey_short)
@@ -570,8 +570,8 @@ for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
         plt.savefig(out_lists_dir + '/G_' + lkey_short + '.png')
     plt.close()
 
-print '\t\t-Plotting Function-F...'
-for lkey, ltomo in zip(lists_exp_fdsts.iterkeys(), lists_exp_fdsts.itervalues()):
+print('\t\t-Plotting Function-F...')
+for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
@@ -584,7 +584,7 @@ for lkey, ltomo in zip(lists_exp_fdsts.iterkeys(), lists_exp_fdsts.itervalues())
         else:
             raise ValueError
     except ValueError or IndexError:
-        print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     plt.title('Univariate 1st order for ' + lkey_short)
@@ -601,8 +601,8 @@ for lkey, ltomo in zip(lists_exp_fdsts.iterkeys(), lists_exp_fdsts.itervalues())
         plt.savefig(out_lists_dir + '/F_' + lkey_short + '.png')
     plt.close()
 
-print '\t\t-Plotting Function-J...'
-for lkey, ltomo in zip(lists_exp_fdsts.iterkeys(), lists_exp_fdsts.itervalues()):
+print('\t\t-Plotting Function-J...')
+for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(lists_exp_dsts[lkey])), ana_nbins, ana_rmax)
@@ -622,7 +622,7 @@ for lkey, ltomo in zip(lists_exp_fdsts.iterkeys(), lists_exp_fdsts.itervalues())
         else:
             raise ValueError
     except ValueError or IndexError:
-        print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     plt.title('Univariate 1st order for ' + lkey_short)
@@ -639,5 +639,5 @@ for lkey, ltomo in zip(lists_exp_fdsts.iterkeys(), lists_exp_fdsts.itervalues())
         plt.savefig(out_lists_dir + '/J_' + lkey_short + '.png')
     plt.close()
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')
 

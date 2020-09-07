@@ -21,7 +21,7 @@ try:
     from globals import *
 except:
     from pyseg.globals import *
-import utils
+from . import utils
 import operator
 from abc import *
 import math
@@ -31,17 +31,9 @@ import math
 #   Abstract class for membrane factories
 #
 #
-class MembFactory(object):
+class MembFactory(object, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    #### Constructor Area
-    # By default vertex property STR_VERTEX_ID (id point in skeleton) and edges properties STR_EDGE_LENGTH and 'weight'
-    # skel: vtk poly data where lines will be used for building a graph (from DisPerSe)
-    # manifolds: numpy 3darray for extracting the geometry
-    # density: numpy 3darray with the original tomogram
-    # memb_seg: numpy 3darray with the segmentation of the membranes (>0: fg, 0: bg)
     def __init__(self, skel, manifolds, density, memb_seg):
         self.__skel = skel
         self.__filt_skel = None

@@ -59,41 +59,41 @@ cp_npr = 2 # None means Auto
 
 # Print initial message
 
-print 'Univariate 2nd order spatial 3D distribution.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput list of tomograms with surface particles: ' + str(in_pkl)
-print '\tOutput directory: ' + out_dir
-print '\tNeighborhood properties:'
-print '\t\t-Radius array: ' + str(nh_rad_rg) + ' nm'
+print('Univariate 2nd order spatial 3D distribution.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput list of tomograms with surface particles: ' + str(in_pkl))
+print('\tOutput directory: ' + out_dir)
+print('\tNeighborhood properties:')
+print('\t\t-Radius array: ' + str(nh_rad_rg) + ' nm')
 if nh_thick is None:
-    print '\t\t-Shape: sphere'
+    print('\t\t-Shape: sphere')
 else:
-    print '\t\t-Shell with thickness: ' + str(nh_thick) + ' nm'
-print '\t\t-Arc resolution (number samples circle): ' + str(nh_res_arc)
+    print('\t\t-Shell with thickness: ' + str(nh_thick) + ' nm')
+print('\t\t-Arc resolution (number samples circle): ' + str(nh_res_arc))
 if nh_border:
-    print '\t\t-Border compesation activated.'
+    print('\t\t-Border compesation activated.')
 else:
-    print '\t\t-NO border compensation.'
+    print('\t\t-NO border compensation.')
 if sim_model is not None:
-    print '\tRandom model simulation:'
-    print '\t\t-Simulator: ' + str(sim_model)
-    print '\t\t-Number of instances: ' + str(sim_nins)
-    print '\t\t-Particle surface: ' + str(sim_part_surf)
-    print '\t\t-VOI embedding mode: ' + str(sim_emb_mode)
-print '\tComputation:'
+    print('\tRandom model simulation:')
+    print('\t\t-Simulator: ' + str(sim_model))
+    print('\t\t-Number of instances: ' + str(sim_nins))
+    print('\t\t-Particle surface: ' + str(sim_part_surf))
+    print('\t\t-VOI embedding mode: ' + str(sim_emb_mode))
+print('\tComputation:')
 if cp_npr is None:
-    print '\t\t-Number of processes: Auto'
+    print('\t\t-Number of processes: Auto')
 else:
-    print '\t\t-Number of processes: ' + str(cp_npr)
-print ''
+    print('\t\t-Number of processes: ' + str(cp_npr))
+print('')
 
 # Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input data...'
+print('\tLoading input data...')
 ltomos = sd.globals.unpickle_obj(in_pkl)
 
 if sim_model is not None:
@@ -104,13 +104,13 @@ if sim_model is not None:
                                             npr=cp_npr)
     mat /= float(sim_nins)
 else:
-    print '\tComputing matrix from experimental data...'
+    print('\tComputing matrix from experimental data...')
     mat = ltomos.compute_uni_2nd_order(nh_rad_rg, nh_res_arc, thick=nh_thick, border=nh_border,
                                        npr=cp_npr)
 
 
 out_mat = out_dir + '/' + out_stem + '_uni_2nd_mat.npy'
-print '\tStoring computed matrix in:'
+print('\tStoring computed matrix in:')
 mat.save(out_mat)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

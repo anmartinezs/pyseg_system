@@ -3,10 +3,17 @@ Class Morphology for calculation of morphological quantities of a segmented
 image(label field).
 
 # Author: Vladan Lucic
-# $Id: morphology.py 1458 2017-07-04 16:09:33Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1458 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -18,10 +25,10 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from features import Features
-from statistics import Statistics
-from labels import Labels
-from segment import Segment
+from .features import Features
+from .statistics import Statistics
+from .labels import Labels
+from .segment import Segment
 
 class Morphology(Features):
     """
@@ -663,7 +670,7 @@ class Morphology(Features):
         else:
 
             # make axes if needed
-            if axes is None: axes = range(data.ndim)
+            if axes is None: axes = list(range(data.ndim))
 
             # instantiate output if needed 
             if self.__dict__[output] is None:
@@ -812,8 +819,8 @@ class Morphology(Features):
         ids = self.ids
         
         # set structuring element
-        struct_el = ndimage.generate_binary_structure(rank=self.ndim,
-                                                     connectivity=structElConn)
+        struct_el = ndimage.generate_binary_structure(
+            rank=self.ndim, connectivity=structElConn)
         
         # figure out expected number of boundaries
         if (distance == 'b-max') or (distance == 'c-max'):
@@ -920,8 +927,8 @@ class Morphology(Features):
 
         # make contacts
         if (distance == 'b-max'):
-            dilated = ndimage.binary_dilation(input=local_seg.data==id_, 
-                                              structure=structEl)
+            dilated = ndimage.binary_dilation(
+                input=local_seg.data==id_, structure=structEl)
             contact_1 = dilated & (local_bound.data == b_ids[0]) 
         elif (distance == 'c-max'):
             dilated_1 = ndimage.binary_dilation(
@@ -1006,8 +1013,8 @@ class Morphology(Features):
 
         # make contacts
         if (distance == 'b2b') or (distance == 'boundary'):
-            dilated = ndimage.binary_dilation(input=local_seg.data==id_, 
-                                              structure=structEl)
+            dilated = ndimage.binary_dilation(
+                input=local_seg.data==id_, structure=structEl)
             contact_1 = dilated & (local_bound.data == b_ids[0]) 
             contact_2 = dilated & (local_bound.data == b_ids[1])
         elif (distance == 'c2c') or (distance == 'contact'):
@@ -1018,8 +1025,8 @@ class Morphology(Features):
                 input=local_bound.data==b_ids[1], structure=structEl)
             contact_2 = dilated_2 & (local_seg.data == id_)
         elif (distance == 'b2c'):
-            dilated_1 = ndimage.binary_dilation(input=local_seg.data==id_, 
-                                              structure=structEl)
+            dilated_1 = ndimage.binary_dilation(
+                input=local_seg.data==id_, structure=structEl)
             contact_1 = dilated_1 & (local_bound.data == b_ids[0]) 
             dilated_2 = ndimage.binary_dilation(
                 input=local_bound.data==b_ids[1], structure=structEl)
@@ -1028,8 +1035,8 @@ class Morphology(Features):
             dilated_1 = ndimage.binary_dilation(
                 input=local_bound.data==b_ids[0], structure=structEl)
             contact_1 = dilated_1 & (local_seg.data == id_) 
-            dilated_2 = ndimage.binary_dilation(input=local_seg.data==id_, 
-                                              structure=structEl)
+            dilated_2 = ndimage.binary_dilation(
+                input=local_seg.data==id_, structure=structEl)
             contact_2 = dilated_2 & (local_bound.data == b_ids[1])
         else:
             raise ValueError(
@@ -1122,5 +1129,6 @@ class Morphology(Features):
             return length
 
         else:
-            raise ValueError("Line mode: " + line + " was not recognized. " \
-                             + "Available line modes are 'straight' and 'mid'.")
+            raise ValueError(
+                "Line mode: " + line + " was not recognized. " 
+                + "Available line modes are 'straight' and 'mid'.")

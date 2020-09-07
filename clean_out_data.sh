@@ -141,3 +141,30 @@ if [ -d $PWD/data/tutorials/synth_sumb/org/bi_2nd ]; then
 else
 	mkdir -p $PWD/data/tutorials/synth_sumb/org/bi_2nd
 fi
+
+if [ -d $PWD/code/pyorg/surf/test/out/nhood_num/ ]; then
+	rm -r $PWD/code/pyorg/surf/test/out/nhood_num/*
+else
+	mkdir -p $PWD/code/pyorg/surf/test/out/nhood_num
+fi
+if [ -d $PWD/code/pyorg/surf/test/out/nhood_vol/ ]; then
+	rm -r $PWD/code/pyorg/surf/test/out/nhood_vol/*
+else
+	mkdir -p $PWD/code/pyorg/surf/test/out/nhood_vol
+fi
+if [ -d $PWD/code/pyorg/surf/test/out/uni_2nd/ ]; then
+	rm -r $PWD/code/pyorg/surf/test/out/uni_2nd/*
+else
+	mkdir -p $PWD/code/pyorg/surf/test/out/uni_2nd
+fi
+if [ -d $PWD/code/pyorg/surf/test/out/bi_2nd/ ]; then
+	rm -r $PWD/code/pyorg/surf/test/out/bi_2nd/*
+else
+	mkdir -p $PWD/code/pyorg/surf/test/out/bi_2nd
+fi
+
+if [ -d $PWD/data/synthetic_grid/ ]; then
+	rm -r $PWD/data/synthetic_grid/*
+else
+	mkdir -p $PWD/data/synthetic_grid
+fi

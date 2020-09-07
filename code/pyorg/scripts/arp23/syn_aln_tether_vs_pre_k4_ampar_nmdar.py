@@ -31,7 +31,7 @@ from pyorg.surf.model import ModelCSRV
 from pyorg.surf.utils import list_tomoparticles_pvalues
 from matplotlib import pyplot as plt, rcParams
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -149,76 +149,76 @@ ana_max_dist_mask = ana_rg <= ana_max_dist
 
 ########## Print initial message
 
-print 'Second order analysis for colocalization to  ListTomoParticles by tomograms.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput reference STAR file: ' + str(in_star_ref)
-print '\t\t-Key: ' + key_ref
-print '\tInput analysis STAR file 1: ' + str(in_star_1)
-print '\t\t-Key: ' + key_1
-print '\tInput analysis STAR file 2: ' + str(in_star_2)
-print '\t\t-Key: ' + key_2
-print '\tInput analysis STAR file 3: ' + str(in_star_3)
-print '\t\t-Key: ' + key_2
-print '\tInput analysis STAR file 4: ' + str(in_star_4)
-print '\t\t-Key: ' + key_2
+print('Second order analysis for colocalization to  ListTomoParticles by tomograms.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput reference STAR file: ' + str(in_star_ref))
+print('\t\t-Key: ' + key_ref)
+print('\tInput analysis STAR file 1: ' + str(in_star_1))
+print('\t\t-Key: ' + key_1)
+print('\tInput analysis STAR file 2: ' + str(in_star_2))
+print('\t\t-Key: ' + key_2)
+print('\tInput analysis STAR file 3: ' + str(in_star_3))
+print('\t\t-Key: ' + key_2)
+print('\tInput analysis STAR file 4: ' + str(in_star_4))
+print('\t\t-Key: ' + key_2)
 if in_wspace is not None:
-    print '\tLoad workspace from: ' + in_wspace
+    print('\tLoad workspace from: ' + in_wspace)
 else:
-    print '\tPre-processing: '
+    print('\tPre-processing: ')
     if pre_ssup is not None:
-        print '\t\t-Scale supression: ' + str(pre_ssup) + ' nm'
-print '\tOrganization analysis settings: '
-print '\t\t-Range of radius: ' + str(ana_rg) + ' nm'
-print '\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels'
+        print('\t\t-Scale supression: ' + str(pre_ssup) + ' nm')
+print('\tOrganization analysis settings: ')
+print('\t\t-Range of radius: ' + str(ana_rg) + ' nm')
+print('\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels')
 if ana_shell_thick is None:
-    print '\t\t-Spherical neighborhood'
+    print('\t\t-Spherical neighborhood')
 else:
-    print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm'
-    print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels'
+    print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm')
+    print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels')
 if ana_global:
-    print '\t\t-Global computation mode activated.'
+    print('\t\t-Global computation mode activated.')
 if in_wspace is None:
-    print '\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter)
-    print '\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter)
+    print('\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter))
+    print('\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter))
     if ana_npr is None:
-        print '\t\t-Number of processors: Auto'
+        print('\t\t-Number of processors: Auto')
     else:
-        print '\t\t-Number of processors: ' + str(ana_npr)
+        print('\t\t-Number of processors: ' + str(ana_npr))
     if ana_npr_model:
-        print '\t\t-Number of processors for models simulation: Auto'
+        print('\t\t-Number of processors for models simulation: Auto')
     else:
-        print '\t\t-Number of processors for models simulation: ' + str(ana_npr)
-print '\tP-Value computation setting:'
-print '\t\t-Percentile: ' + str(p_per) + ' %'
-print '\t\t-Number of instances for simulations: ' + str(p_nsims)
-print '\t\t-Particle surface: ' + p_vtp
+        print('\t\t-Number of processors for models simulation: ' + str(ana_npr))
+print('\tP-Value computation setting:')
+print('\t\t-Percentile: ' + str(p_per) + ' %')
+print('\t\t-Number of instances for simulations: ' + str(p_nsims))
+print('\t\t-Particle surface: ' + p_vtp)
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print '\t\t-Colormap: ' + str(pt_cmap)
+    print('\tPlotting settings: ')
+print('\t\t-Colormap: ' + str(pt_cmap))
 if pt_sim_v:
-    print '\t\t-Verbose simulation activated!'
-print ''
+    print('\t\t-Verbose simulation activated!')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
 out_stem_dir = out_dir + '/' + out_stem
-print '\tCleaning the output dir: ' + out_stem
+print('\tCleaning the output dir: ' + out_stem)
 if os.path.exists(out_stem_dir):
     clean_dir(out_stem_dir)
 else:
     os.makedirs(out_stem_dir)
 
-print '\tLoading input data (only the first entry is loaded)...'
+print('\tLoading input data (only the first entry is loaded)...')
 star_1, star_2, star_3, star_4, star_ref = sub.Star(), sub.Star(), sub.Star(), sub.Star(), sub.Star()
 try:
     star_1.load(in_star_1)
@@ -227,8 +227,8 @@ try:
     star_4.load(in_star_4)
     star_ref.load(in_star_ref)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 ltomos_pkl = star_ref.get_element('_psPickleFile', 0)
 ref_list = unpickle_obj(ltomos_pkl)
@@ -255,11 +255,11 @@ set_lists.add_list_tomos(list_4, key_4)
 try:
     part_vtp = disperse_io.load_poly(p_vtp)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tSet pre-processing...'
+print('\tSet pre-processing...')
 if pre_ssup is not None:
     pre_ssup_v = pre_ssup / ana_res
     set_lists.scale_suppression(pre_ssup_v)
@@ -267,7 +267,7 @@ if pre_ssup is not None:
 if pre_min_parts > 0:
     set_lists.filter_by_particles_num_tomos(pre_min_parts)
 
-print '\tBuilding the dictionaries...'
+print('\tBuilding the dictionaries...')
 lists_count, tomos_count = 0, 0
 lists_dic = dict()
 lists_hash, tomos_hash = dict(), dict()
@@ -277,10 +277,10 @@ lists_np, lists_den, lists_gden, lists_exp, lists_sim, lists_color = dict(), dic
 lists_aln, lists_aln_sim = dict(), dict()
 tmp_sim_folder = out_dir + '/tmp_gen_list_' + out_stem
 set_lists_dic = set_lists.get_lists()
-for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
-    print '\t\t-Processing list: ' + lkey
+for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
+    print('\t\t-Processing list: ' + lkey)
     short_key = lkey
-    print '\t\t\t+Short key found: ' + short_key
+    print('\t\t\t+Short key found: ' + short_key)
     try:
         lists_dic[short_key]
     except KeyError:
@@ -295,11 +295,11 @@ for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
         else:
             lists_sim[short_key] = list()
         lists_count += 1
-for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
     llist_tomos_dic = llist.get_tomos()
-    print '\t\t-Processing list: ' + lkey
+    print('\t\t-Processing list: ' + lkey)
     short_key = lkey
-    for tkey, ltomo in zip(llist_tomos_dic.iterkeys(), llist_tomos_dic.itervalues()):
+    for tkey, ltomo in zip(iter(llist_tomos_dic.keys()), iter(llist_tomos_dic.values())):
         try:
             tomos_np[tkey]
         except KeyError:
@@ -319,7 +319,7 @@ for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
             lists_sim[short_key][tkey] = list()
             tomos_aln_sim[tkey][short_key] = list()
 
-print '\tComputing reference properties...'
+print('\tComputing reference properties...')
 vols = ref_list.get_volumes_dict()
 with open(in_tethers_csv, mode='r') as infile:
     reader = csv.reader(infile, delimiter='\t')
@@ -330,47 +330,47 @@ with open(in_tethers_csv, mode='r') as infile:
 if in_wspace is None:
 
     tomos_np_ref = dict()
-    print '\tLIST COMPUTING LOOP:'
+    print('\tLIST COMPUTING LOOP:')
     for li, lkey in enumerate(lists_hash.values()):
 
         llist = lists_dic[lkey]
         tomos_np_ref[lkey] = dict()
         lists_gden_np, lists_gden_vol = 0., 0.
-        print '\t\t-Processing list: ' + lkey
-        print '\t\t\t+Tomograms computing loop:'
+        print('\t\t-Processing list: ' + lkey)
+        print('\t\t\t+Tomograms computing loop:')
         for lt, tkey in enumerate(tomos_hash.keys()):
 
-            print '\t\t\t\t*Processing tomogram (list ' + str(li + 1) + ' of ' + str(
-                len(lists_hash.values())) + ', tomo ' + str(lt + 1) + ' of ' + str(len(tomos_hash.keys())) + ') : ' + \
-                  os.path.split(tkey)[1]
+            print('\t\t\t\t*Processing tomogram (list ' + str(li + 1) + ' of ' + str(
+                len(list(lists_hash.values()))) + ', tomo ' + str(lt + 1) + ' of ' + str(len(list(tomos_hash.keys()))) + ') : ' + \
+                  os.path.split(tkey)[1])
             ltomo = llist.get_tomo_by_key(tkey)
 
-            print '\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1]
+            print('\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1])
             try:
                 ltomo, ref_tomo = llist.get_tomo_by_key(tkey), ref_list.get_tomo_by_key(tkey)
             except KeyError:
-                print 'WARNING: tomogram not in a list (' + tkey + ')'
+                print('WARNING: tomogram not in a list (' + tkey + ')')
                 continue
             hold_np_ref = ref_tomo.get_num_particles()
-            print '\t\t\t\t\t-Computing the number of particles for reference [' + str(key_ref) + ']: ' + str(hold_np_ref)
+            print('\t\t\t\t\t-Computing the number of particles for reference [' + str(key_ref) + ']: ' + str(hold_np_ref))
             if ref_tomo.get_num_particles() < pre_min_parts:
-                print 'WARNING: reference tomogram with less than ' + str(pre_min_parts) + ' paticles.'
+                print('WARNING: reference tomogram with less than ' + str(pre_min_parts) + ' paticles.')
                 continue
 
             hold_np = ltomo.get_num_particles()
 
-            print '\t\t\t\t\t-Computing the number of particles [' + str(lkey) + ']: ' + str(hold_np)
+            print('\t\t\t\t\t-Computing the number of particles [' + str(lkey) + ']: ' + str(hold_np))
             tomos_np[tkey][lkey] = hold_np
             lists_np[lkey][tkey] = hold_np
             tomos_np_ref[lkey][tkey] = ref_tomo.get_num_particles()
             hold_den = ltomo.compute_global_density()
-            print '\t\t\t\t\t-Computing density by area [' + str(hold_den) + ']: ' + str(hold_den)
+            print('\t\t\t\t\t-Computing density by area [' + str(hold_den) + ']: ' + str(hold_den))
             tomos_den[tkey][lkey] = hold_den
             lists_den[lkey][tkey] = hold_den
             lists_gden_np += hold_np
             lists_gden_vol += ltomo.compute_voi_volume()
 
-            print '\t\t\t\t\t-Computing bivariate second order metrics...'
+            print('\t\t\t\t\t-Computing bivariate second order metrics...')
             if ana_global:
                 hold_arr_1, hold_arr_2 = ref_tomo.compute_bi_2nd_order(ltomo, ana_rg_v, thick=ana_shell_thick_v,
                                                                        border=ana_border, conv_iter=ana_conv_iter,
@@ -393,7 +393,7 @@ if in_wspace is None:
                     for npi in range(tomos_np_ref[lkey][tkey]):
                         lists_exp[lkey].append(hold_arr)
 
-            print '\t\t\t\t\t-Simulating bivariate second order metrics...'
+            print('\t\t\t\t\t-Simulating bivariate second order metrics...')
             if ana_global:
                 hold_arr_1, hold_arr_2 = ref_tomo.simulate_bi_2nd_order(ltomo, p_nsims, ModelCSRV, part_vtp,
                                                                     ana_rg_v, thick=ana_shell_thick_v, border=ana_border,
@@ -424,21 +424,21 @@ if in_wspace is None:
             lists_gden[lkey] = 0.
 
     if ana_global:
-        print '\tGathering alingment limulations...'
+        print('\tGathering alingment limulations...')
         hold_tomos_aln_sim, hold_lists_aln = copy.deepcopy(tomos_aln_sim), copy.deepcopy(lists_aln)
         del tomos_aln_sim
         del lists_aln_sim
         del lists_aln
         tomos_aln_sim, lists_aln_sim, lists_aln = dict(), dict(), dict()
-        for tkey in tomos_hash.iterkeys():
+        for tkey in tomos_hash.keys():
             tomos_aln_sim[tkey] = dict()
-            for lkey in lists_hash.itervalues():
+            for lkey in lists_hash.values():
                 tomos_aln_sim[tkey][lkey] = list()
-        for lkey in lists_hash.itervalues():
+        for lkey in lists_hash.values():
             lists_aln[lkey], lists_aln_sim[lkey] = list(), list()
             for n_sim in range(p_nsims):
                 hold_arr_l, np_l = list(), 0
-                for tkey in tomos_hash.iterkeys():
+                for tkey in tomos_hash.keys():
                     if len(hold_tomos_aln_sim[tkey][lkey]) > 0:
                         idl, idx = n_sim * tomos_np_ref[lkey][tkey], (n_sim + 1) * tomos_np_ref[lkey][tkey]
                         hold_arr = list()
@@ -459,17 +459,17 @@ if in_wspace is None:
                 prop_aln_l = float(hold_aln_l.sum()) / float(np_l)
                 lists_aln_sim[lkey].append(prop_aln_l)
 
-        print '\tGlobal computations by tomos...'
+        print('\tGlobal computations by tomos...')
         hold_tomos_exp, hold_tomos_sim = copy.deepcopy(tomos_exp), copy.deepcopy(tomos_sim)
         del tomos_exp
         del tomos_sim
         del lists_exp
         del lists_sim
         tomos_exp, tomos_sim, lists_exp, lists_sim = dict(), dict(), dict(), dict()
-        for tkey in hold_tomos_exp.iterkeys():
+        for tkey in hold_tomos_exp.keys():
             tomos_exp[tkey], tomos_sim[tkey] = dict(), dict()
             dens = tomos_den[tkey]
-            for lkey, mat in zip(hold_tomos_exp[tkey].iterkeys(), hold_tomos_exp[tkey].itervalues()):
+            for lkey, mat in zip(iter(hold_tomos_exp[tkey].keys()), iter(hold_tomos_exp[tkey].values())):
                 if hasattr(mat, '__len__') and (len(mat) > 0):
                     # By tomos
                     gden = lists_gden[lkey]
@@ -511,7 +511,7 @@ if in_wspace is None:
                                 lists_sim[lkey].append(gl_arr)
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
-    print '\tPickling computation workspace in: ' + out_wspace
+    print('\tPickling computation workspace in: ' + out_wspace)
     wspace = (lists_count, tomos_count,
               lists_hash, tomos_hash,
               tomos_np, tomos_den, tomos_exp, tomos_sim,
@@ -524,7 +524,7 @@ if in_wspace is None:
 
 else:
 
-    print '\tLoading the workspace: ' + in_wspace
+    print('\tLoading the workspace: ' + in_wspace)
     with open(in_wspace, 'r') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
@@ -534,12 +534,12 @@ else:
     vesicles, vols = wspace[13], wspace[14]
     tomos_aln, tomos_aln_sim, lists_aln, lists_aln_sim = wspace[15], wspace[16], wspace[17], wspace[18]
 
-print '\tPrinting lists hash: '
-for id, lkey in zip(lists_hash.iterkeys(), lists_hash.itervalues()):
-    print '\t\t-[' + str(id) + '] -> [' + lkey + ']'
-print '\tPrinting tomograms hash: '
-for tkey, val in zip(tomos_hash.iterkeys(), tomos_hash.itervalues()):
-    print '\t\t-[' + tkey + '] -> [' + str(val) + ']'
+print('\tPrinting lists hash: ')
+for id, lkey in zip(iter(lists_hash.keys()), iter(lists_hash.values())):
+    print('\t\t-[' + str(id) + '] -> [' + lkey + ']')
+print('\tPrinting tomograms hash: ')
+for tkey, val in zip(iter(tomos_hash.keys()), iter(tomos_hash.values())):
+    print('\t\t-[' + tkey + '] -> [' + str(val) + ']')
 
 # print '\tPrinting number of samples and volume for the reference by tomogram: '
 # for tomo in ref_list.get_tomo_list():
@@ -547,18 +547,18 @@ for tkey, val in zip(tomos_hash.iterkeys(), tomos_hash.itervalues()):
 #     print '\t\t-' + tkey + ': ' + str(tomo.get_num_particles()) + ' np, ' + str(tomo.compute_voi_volume()) + ' nm**3'
 
 # Getting the lists colormap
-n_lists = len(lists_hash.keys())
-for i, lkey in zip(lists_hash.iterkeys(), lists_hash.itervalues()):
+n_lists = len(list(lists_hash.keys()))
+for i, lkey in zip(iter(lists_hash.keys()), iter(lists_hash.values())):
     lists_color[lkey] = pt_cmap(1.*i/n_lists)
 
-print '\tTOMOGRAMS PLOTTING LOOP: '
+print('\tTOMOGRAMS PLOTTING LOOP: ')
 
 out_tomos_dir = out_stem_dir + '/tomos'
 os.makedirs(out_tomos_dir)
 
-print '\t\t-Plotting 2nd order metric...'
-for tkey, ltomo in zip(tomos_exp.iterkeys(), tomos_exp.itervalues()):
-    if len(ltomo.keys()) <= 0:
+print('\t\t-Plotting 2nd order metric...')
+for tkey, ltomo in zip(iter(tomos_exp.keys()), iter(tomos_exp.values())):
+    if len(list(ltomo.keys())) <= 0:
         continue
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
@@ -568,9 +568,9 @@ for tkey, ltomo in zip(tomos_exp.iterkeys(), tomos_exp.itervalues()):
     else:
         plt.ylabel('Ripley\'s O')
     plt.xlabel('Scale (nm)')
-    for lkey, arr in zip(tomos_exp[tkey].iterkeys(), tomos_exp[tkey].itervalues()):
+    for lkey, arr in zip(iter(tomos_exp[tkey].keys()), iter(tomos_exp[tkey].values())):
         if not hasattr(arr, '__len__'):
-            print '\t\t\t+WARNING: no experimental values for tomogram ' + tkey + ' and list ' + lkey
+            print('\t\t\t+WARNING: no experimental values for tomogram ' + tkey + ' and list ' + lkey)
             continue
         if lkey == key_1:
             plt.plot(ana_rg, arr, color='blue', label=lkey, linewidth=2)
@@ -583,7 +583,7 @@ for tkey, ltomo in zip(tomos_exp.iterkeys(), tomos_exp.itervalues()):
             plt.fill_between(ana_rg, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
             plt.plot(ana_rg, ic_med, 'gray', linewidth=2)
     except IndexError:
-        print '\t\t\t+WARNING: no simulations for tomogram: ' + tkey
+        print('\t\t\t+WARNING: no simulations for tomogram: ' + tkey)
     plt.legend(loc=4)
     plt.tight_layout()
     if fig_fmt is None:
@@ -595,9 +595,9 @@ for tkey, ltomo in zip(tomos_exp.iterkeys(), tomos_exp.itervalues()):
         plt.savefig(hold_dir + '/bi.png')
     plt.close()
 
-print '\t\t-Plotting alignment metric...'
-for tkey, ltomo in zip(tomos_aln.iterkeys(), tomos_aln.itervalues()):
-    if len(ltomo.keys()) <= 0:
+print('\t\t-Plotting alignment metric...')
+for tkey, ltomo in zip(iter(tomos_aln.keys()), iter(tomos_aln.values())):
+    if len(list(ltomo.keys())) <= 0:
         continue
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     fig, ax1 = plt.subplots()
@@ -606,7 +606,7 @@ for tkey, ltomo in zip(tomos_aln.iterkeys(), tomos_aln.itervalues()):
     ax1.set_xlabel('Tether centroid alignment (a.u.)')
     ax1.set_ylabel('proportion')
     ax2.set_ylabel('p-value')
-    for lkey, arr in zip(tomos_aln[tkey].iterkeys(), tomos_aln[tkey].itervalues()):
+    for lkey, arr in zip(iter(tomos_aln[tkey].keys()), iter(tomos_aln[tkey].values())):
         if lkey == key_1:
             ax1.bar(0.60, tomos_aln[tkey][lkey], BAR_WIDTH, color='blue', linewidth=2)
             ax1.bar(0.9, np.asarray(tomos_aln_sim[tkey][lkey]).mean(), BAR_WIDTH, color='blue', linewidth=2, hatch='\\')
@@ -634,13 +634,13 @@ for tkey, ltomo in zip(tomos_aln.iterkeys(), tomos_aln.itervalues()):
     plt.close()
 
 
-print '\tLISTS PLOTTING LOOP: '
+print('\tLISTS PLOTTING LOOP: ')
 
 out_lists_dir = out_stem_dir + '/lists'
 os.makedirs(out_lists_dir)
 
-print '\t\t-Plotting 2nd order metric...'
-for lkey, tlist in zip(lists_exp.iterkeys(), lists_exp.itervalues()):
+print('\t\t-Plotting 2nd order metric...')
+for lkey, tlist in zip(iter(lists_exp.keys()), iter(lists_exp.values())):
     plt.figure()
     # plt.title('Univariate 2nd order for ' + lkey)
     if ana_shell_thick is None:
@@ -667,11 +667,11 @@ for lkey, tlist in zip(lists_exp.iterkeys(), lists_exp.itervalues()):
         plt.savefig(out_lists_dir + '/uni_list_' + lkey + '.png')
     plt.close()
 
-print '\t\t-Plotting alignment metric...'
+print('\t\t-Plotting alignment metric...')
 plt.subplots()
 plt.xlabel('Tether alignment (a.u.)')
 plt.ylabel('proportion')
-for lkey in lists_aln.iterkeys():
+for lkey in lists_aln.keys():
     aln_sim_arr = np.asarray(lists_aln_sim[lkey])
     ic_low, ic_med, ic_high = np.percentile(aln_sim_arr, 5), np.percentile(aln_sim_arr, 50), np.percentile(aln_sim_arr, 95)
     if lkey == key_1:
@@ -700,4 +700,4 @@ else:
     plt.savefig(out_lists_dir + '/align_tether.png', dpi=300)
 plt.close()
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

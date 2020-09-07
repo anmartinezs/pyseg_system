@@ -40,23 +40,23 @@ help_msg = '    -i <file_name>: input Graph MCF in a pickle file. \n' + \
 def do_mcf_filter(input_file, output_dir, flt_file, scal_fld, arc_simp, verbose=False):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if verbose:
-        print '\tFiltering the graph...'
+        print('\tFiltering the graph...')
     parser = pio.Threshold(flt_file)
     keys = parser.get_key_prop_list()
     thres = parser.get_threshold_list()
     opers = parser.get_operator_list()
     for i, key in enumerate(keys):
-        print '\t\tFiltering property ' + key + ' with threshold ' + str(thres[i]) + ' ...'
+        print('\t\tFiltering property ' + key + ' with threshold ' + str(thres[i]) + ' ...')
         if key == STR_V_PER:
             graph_mcf.topological_simp(thres[i])
             # Update edge properties
@@ -75,15 +75,15 @@ def do_mcf_filter(input_file, output_dir, flt_file, scal_fld, arc_simp, verbose=
 
     if arc_simp:
         if verbose:
-            print '\tArcs simplification...'
+            print('\tArcs simplification...')
         graph_mcf.arc_simp()
 
     if verbose:
-        print '\tUpdate subgraph relevance...'
+        print('\tUpdate subgraph relevance...')
     graph_mcf.compute_sgraph_relevance()
 
     if verbose:
-        print '\tStoring the result.'
+        print('\tStoring the result.')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(output_dir + '/' + stem + '_th.pkl')
@@ -94,7 +94,7 @@ def do_mcf_filter(input_file, output_dir, flt_file, scal_fld, arc_simp, verbose=
 
     if scal_fld is not None:
         if verbose:
-            print '\tStoring segmentation...'
+            print('\tStoring segmentation...')
         disperse_io.save_numpy(graph_mcf.print_vertices(th_den=-1),
                                output_dir + '/' + stem + '_th_seg.vti')
         scalar_field = disperse_io.load_tomo(scal_fld)
@@ -110,7 +110,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvai:o:f:s:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -121,8 +121,8 @@ def main(argv):
     arc_simp = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -137,36 +137,36 @@ def main(argv):
         elif opt == "-a":
             arc_simp = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (output_dir is None) or (flt_file is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool drawing a graph.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput dir: ' + output_dir
-            print '\tFilter file: ' + flt_file
+            print('Running tool drawing a graph.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput dir: ' + output_dir)
+            print('\tFilter file: ' + flt_file)
             if arc_simp:
-                print '\tArcs simplification activated.'
+                print('\tArcs simplification activated.')
             if scal_fld is not None:
-                print '\tSegmentation will be stored, scalar field: ' + scal_fld
-            print ''
+                print('\tSegmentation will be stored, scalar field: ' + scal_fld)
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_mcf_filter(input_file, output_dir, flt_file, scal_fld, arc_simp, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

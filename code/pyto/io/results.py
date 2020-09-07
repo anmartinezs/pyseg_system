@@ -1,11 +1,15 @@
 """
 Contains class Results for read/write or results in the table form.
 
-# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: results.py 61 2008-02-25 09:30:21Z vladan $
-"""
+Note: Depreciated because results are stored in a pickle file.
 
-__version__ = "$Revision: 61 $"
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
+"""
+from builtins import zip
+from builtins import object
+
+__version__ = "$Revision$"
 
 
 import string
@@ -30,11 +34,11 @@ class Results(object):
 
     def read(self, file, names=None, columns=None, comment=None):
         """
-        Reads results from file, parses the data, assignes it to local arttributes
-        and orders them according to the ids.
+        Reads results from file, parses the data, assignes it to local 
+        arttributes and orders them according to the ids.
 
-        Columns should be set so that only the part of results that forms a table
-        (2d array) is read.
+        Columns should be set so that only the part of results that forms 
+        a table (2d array) is read.
         """
 
         # use attributes if arguments not set

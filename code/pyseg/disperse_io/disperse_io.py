@@ -8,7 +8,7 @@ __author__ = 'martinez'
 import vtk
 import numpy
 import scipy
-import pyfits
+from astropy.io import fits
 import math
 try:
     import pyseg.pexceptions
@@ -54,17 +54,17 @@ def manifold_from_vtk_to_img(filename, outputdir):
     field = output.GetAttributesAsFieldData(0)
     field_si = field.GetArray(0)
     if points.GetNumberOfPoints() != field_si.GetNumberOfTuples():
-        print "Error (1): input file \"%s\" is corrupted.\n" % filename
+        print("Error (1): input file \"%s\" is corrupted.\n" % filename)
         return -1
 
     # Create the image holder.
     points.ComputeBounds()
     (ox, nx, oy, ny, oz, nz) = points.GetBounds()
     if (ox != 0) or (oy != 0) or (oz != 0) or (nx <= 0) or (ny <= 0):
-        print "Error (2): input file \"%s\" is corrupted.\n" % filename
+        print("Error (2): input file \"%s\" is corrupted.\n" % filename)
         return -2
     if nz != 0:
-        print "Error (3): input file \"%s\" should be 2D.\n" % filename
+        print("Error (3): input file \"%s\" should be 2D.\n" % filename)
         return -3
     nx = math.ceil(nx)
     ny = math.ceil(ny)
@@ -89,7 +89,7 @@ def manifold_from_vtk_to_img(filename, outputdir):
     #holdi = numpy.int16(hold)
     #img = Image.fromarray(holdi)
     #img.convert('L').save(outputfile)
-    pyfits.writeto(outputfile, hold)
+    fits.writeto(outputfile, hold)
 
     # Return
     return 0
@@ -157,7 +157,7 @@ def manifold3d_from_vtu_to_img(filename, outputdir=None, format='vti', transpose
     pz = pad[2] - oz
     if pz < 0:
         pz = 0
-    if format is 'vti':
+    if format == 'vti':
         vtk_ver = vtk.vtkVersion().GetVTKVersion()
         image_manifold = vtk.vtkImageData()
         if nz == 0:
@@ -202,7 +202,7 @@ def manifold3d_from_vtu_to_img(filename, outputdir=None, format='vti', transpose
     # Save image in disk
     inputpath, file = os.path.split(filename)
     stem, ext = os.path.splitext(file)
-    if format is 'vti':
+    if format == 'vti':
         image_manifold.GetPointData().SetScalars(array_manifold)
         if outputdir is None:
             return image_manifold
@@ -217,7 +217,7 @@ def manifold3d_from_vtu_to_img(filename, outputdir=None, format='vti', transpose
                 writer.SetInputData(image_manifold)
             if writer.Write() != 1:
                 raise pyseg.pexceptions.PySegInputError(expr='manifold3d_from_vtu_to_img', msg='Error (3) writing the .vti file.')
-    elif format is 'mrc':
+    elif format == 'mrc':
         image_manifold = ImageIO()
         hold = hold.reshape((nx+1, ny+1, nz+1), order='F')
         image_manifold.setData(data=hold.astype(numpy.float32))
@@ -226,7 +226,7 @@ def manifold3d_from_vtu_to_img(filename, outputdir=None, format='vti', transpose
         else:
             outputfile = "%s/%s.mrc" % (outputdir, stem)
             image_manifold.writeMRC(file=outputfile)
-    elif format is 'em':
+    elif format == 'em':
         image_manifold = ImageIO()
         hold = hold.reshape((nx+1, ny+1, nz+1), order='F')
         image_manifold.setData(data=hold.astype(numpy.float32))
@@ -346,7 +346,7 @@ def vti_to_img(filename, outputdir, ext, mode=0):
     if ext == 'mrc':
         image = ImageIO()
         image.setData(array)
-        print outputfile
+        print(outputfile)
         try:
             image.writeMRC(outputfile)
         except:
@@ -362,7 +362,7 @@ def vti_to_img(filename, outputdir, ext, mode=0):
            raise pyseg.pexceptions.PySegInputError(expr='vti_to_img', msg=error_msg)
     elif ext == 'fits':
         try:
-            pyfits.writeto(outputfile, array, clobber=True, output_verify='silentfix')
+            fits.writeto(outputfile, array, overwrite=True, output_verify='silentfix')
         except:
             error_msg = 'File %s could not be writen.' % outputfile
             raise pyseg.pexceptions.PySegInputError(expr='vti_to_img', msg=error_msg)
@@ -386,7 +386,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
     if isinstance(tomo, str):
         fname, fext = os.path.splitext(tomo)
         if fext == '.fits':
-            tomo = pyfits.getdata(tomo)
+            tomo = fits.getdata(tomo)
         elif fext == '.mrc':
             hold = ImageIO()
             hold.readMRC(file=tomo)
@@ -432,7 +432,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
                     count += 1
 
     if verbose:
-        print 'Cloud of points loaded...'
+        print('Cloud of points loaded...')
 
     # Creating the isosurface
     surf = vtk.vtkSurfaceReconstructionFilter()
@@ -458,7 +458,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
     rsurf = reverse.GetOutput()
 
     if verbose:
-        print 'Isosurfaces generated...'
+        print('Isosurfaces generated...')
 
     # Translate and scale to the proper positions
     cloud.ComputeBounds()
@@ -484,7 +484,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
     tsurf = tpd.GetOutput()
 
     if verbose:
-        print 'Rescaled and translated...'
+        print('Rescaled and translated...')
 
     # Masking according to distance to the original segmentation
     if mask:
@@ -506,7 +506,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
         tsurf.RemoveDeletedCells()
 
         if verbose:
-            print 'Mask applied...'
+            print('Mask applied...')
 
         # Field distance
     if field:
@@ -582,12 +582,12 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
                         tomod[x, y, z] = tomod[x, y, z] * numpy.sign(dprod)
 
         if verbose:
-            print 'Distance field generated...'
+            print('Distance field generated...')
 
         return tsurf, tomod
 
     if verbose:
-        print 'Finished!'
+        print('Finished!')
 
     return tsurf
 
@@ -604,15 +604,15 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
 def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
 
     if verbose:
-        print 'Running pyseg.disperse_io.get_surface_test:'
+        print('Running pyseg.disperse_io.get_surface_test:')
         if isinstance(tomo, str):
-            print '\tinput file: ' + tomo
+            print('\tinput file: ' + tomo)
         else:
-            print '\tndarray'
-        print '\tlbl: ' + str(lbl)
-        print '\tpurge_ratio: ' + str(purge_ratio)
-        print '\tcloud: ' + str(cloud)
-        print ''
+            print('\tndarray')
+        print('\tlbl: ' + str(lbl))
+        print('\tpurge_ratio: ' + str(purge_ratio))
+        print('\tcloud: ' + str(cloud))
+        print('')
 
     # Check input format
     if isinstance(tomo, str):
@@ -645,7 +645,7 @@ def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
                     count += 1
 
     if verbose:
-        print 'Cloud of points loaded...'
+        print('Cloud of points loaded...')
 
     # Creating the isosurface
     surf = vtk.vtkSurfaceReconstructionFilter()
@@ -670,7 +670,7 @@ def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
     rsurf = reverse.GetOutput()
 
     if verbose:
-        print 'Isosurfaces generated...'
+        print('Isosurfaces generated...')
 
     # Translate and scale to the proper positions
     cloud.ComputeBounds()
@@ -696,7 +696,7 @@ def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
     tsurf = tpd.GetOutput()
 
     if verbose:
-        print 'Rescaled and translated...'
+        print('Rescaled and translated...')
 
     # Masking according to distance to the original segmentation
     tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(tomo.astype(numpy.bool)))
@@ -718,7 +718,7 @@ def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
     tsurf.RemoveDeletedCells()
 
     if verbose:
-        print 'Mask applied...'
+        print('Mask applied...')
 
     if cloud:
 
@@ -764,12 +764,12 @@ def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
         cloud_poly.GetPointData().AddArray(array_cloud)
 
         if verbose:
-            print 'Surface and points cloud successfully generated!'
+            print('Surface and points cloud successfully generated!')
 
         return tsurf, cloud_poly
 
     if verbose:
-        print 'Surface successfully generated!'
+        print('Surface successfully generated!')
 
     return tsurf
 
@@ -878,7 +878,7 @@ def load_tomo(fname, mmap=False):
         raise pyseg.pexceptions.PySegInputError(expr='load_tomo', msg=error_msg)
 
     if ext == '.fits':
-        im_data = pyfits.getdata(fname).transpose()
+        im_data = fits.getdata(fname).transpose()
     elif (ext == '.mrc') or (ext == '.rec'):
         image = ImageIO()
         if mmap:
@@ -1051,7 +1051,7 @@ def save_numpy(array, fname):
     elif ext == '.fits':
         warnings.resetwarnings()
         warnings.filterwarnings('ignore', category=UserWarning, append=True)
-        pyfits.writeto(fname, array, clobber=True, output_verify='silentfix')
+        fits.writeto(fname, array, overwrite=True, output_verify='silentfix')
         warnings.resetwarnings()
         warnings.filterwarnings('always', category=UserWarning, append=True)
     elif ext == '.mrc':

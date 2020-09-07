@@ -45,29 +45,29 @@ def do_ggf(input_file, output_dir, prop_v, prop_e, vinv, einv, vnorm, enorm, sig
            verbose):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if verbose:
-        print '\tGetting the GT graph...'
+        print('\tGetting the GT graph...')
     graph = GraphGT(graph_mcf)
 
     if verbose:
-        print '\tApplying GGF...'
+        print('\tApplying GGF...')
     graph.ggf(sig, prop_v, prop_e, vinv, einv, vnorm, enorm, energy)
 
     if verbose:
-        print '\tAdding property to GraphMCF...'
+        print('\tAdding property to GraphMCF...')
     graph.add_prop_to_GraphMCF(graph_mcf, STR_GGF, up_index=True)
 
     if verbose:
-        print '\tStoring the result in ' + output_dir
+        print('\tStoring the result in ' + output_dir)
     _, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(output_dir + '/' + stem + '.pkl')
@@ -82,7 +82,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvxywezi:o:s:V:E:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -98,8 +98,8 @@ def main(argv):
     energy = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -124,57 +124,57 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (output_dir is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for computing PSM centrality.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
-            print '\tSigma: ' + str(sig)
+            print('Running tool for computing PSM centrality.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
+            print('\tSigma: ' + str(sig))
             if prop_v is not None:
                 if vinv:
                     if vnorm:
-                        print '\tVertex weighting property ' + prop_v + ' (inverted and normalized).'
+                        print('\tVertex weighting property ' + prop_v + ' (inverted and normalized).')
                     else:
-                        print '\tVertex weighting property ' + prop_v + ' (inverted).'
+                        print('\tVertex weighting property ' + prop_v + ' (inverted).')
                 else:
                     if vnorm:
-                        print '\tVertex weighting property ' + prop_v + '(normalized).'
+                        print('\tVertex weighting property ' + prop_v + '(normalized).')
                     else:
-                        print '\tVertex weighting property ' + prop_v + '.'
+                        print('\tVertex weighting property ' + prop_v + '.')
             if prop_e is not None:
                 if einv:
                     if enorm:
-                        print '\tEdge weighting property ' + prop_e + ' (inverted and normalized).'
+                        print('\tEdge weighting property ' + prop_e + ' (inverted and normalized).')
                     else:
-                        print '\tEdge weighting property ' + prop_e + ' (inverted).'
+                        print('\tEdge weighting property ' + prop_e + ' (inverted).')
                 else:
                     if enorm:
-                        print '\tEdge weighting property ' + prop_e + '(normalized).'
+                        print('\tEdge weighting property ' + prop_e + '(normalized).')
                     else:
-                        print '\tEdge weighting property ' + prop_e + '.'
+                        print('\tEdge weighting property ' + prop_e + '.')
             if energy:
-                print '\tEnergy normalization activated.'
-            print ''
+                print('\tEnergy normalization activated.')
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_ggf(input_file, output_dir, prop_v, prop_e, vinv, einv, vnorm, enorm, sig, energy,
                verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

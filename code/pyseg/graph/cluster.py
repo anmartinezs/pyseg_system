@@ -7,13 +7,13 @@ Classes for building from a set of clusters contained by an GraphMCF object
 
 __author__ = 'martinez'
 
-from core import *
+from .core import *
 import disperse_io
 import graph_tool.all as gt
 import globals as gs
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 

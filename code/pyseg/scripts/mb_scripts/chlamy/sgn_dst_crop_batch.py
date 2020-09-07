@@ -20,7 +20,7 @@ import scipy
 import pyseg as ps
 import numpy as np
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -99,44 +99,44 @@ mb_thick = 5 # nm
 ########################################################################################
 
 # Print initial message
-print 'Membrane cropping and signed distance computation.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput density map: ' + in_tomo
-print '\tInput membrane segmentations: ' + str(in_seg_l) 
-print '\tOuput directory: ' + output_dir
-print '\tDistance computation: '
+print('Membrane cropping and signed distance computation.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput density map: ' + in_tomo)
+print('\tInput membrane segmentations: ' + str(in_seg_l)) 
+print('\tOuput directory: ' + output_dir)
+print('\tDistance computation: ')
 if mode_2d:
-    print '\t\t-Mode 2D active'
+    print('\t\t-Mode 2D active')
 else:
-    print '\t\t-Mode 3D active'
+    print('\t\t-Mode 3D active')
 if del_b:
-    print '\t\t-Deleting borders with no reliable distance computation active'
-print '\tCropping parameters: '
-print '\t\t-Resolution: ' + str(res) + ' nm/pix'
-print '\t\t-Maximum distance: ' + str(max_dst) + ' nm'
-print '\t\t-Membrane thickness: ' + str(mb_thick) + 'nm'
-print ''
+    print('\t\t-Deleting borders with no reliable distance computation active')
+print('\tCropping parameters: ')
+print('\t\t-Resolution: ' + str(res) + ' nm/pix')
+print('\t\t-Maximum distance: ' + str(max_dst) + ' nm')
+print('\t\t-Membrane thickness: ' + str(mb_thick) + 'nm')
+print('')
 
 f_path, f_name = os.path.split(in_tomo)
-print 'Loading density map: ' + f_name
+print('Loading density map: ' + f_name)
 density = ps.disperse_io.load_tomo(in_tomo) 
 
 # Loop for processing the input data
-print 'Running main loop: '
+print('Running main loop: ')
 for (in_seg, in_or) in zip(in_seg_l, in_or_l):
 
     f_path_s, f_name_s = os.path.split(in_seg)
     f_stem_s, f_ext_s = os.path.splitext(f_name_s)
-    print '\tLoading membrane segmentation: ' + f_name_s
+    print('\tLoading membrane segmentation: ' + f_name_s)
     mb_seg = ps.disperse_io.load_tomo(in_seg)
 
-    print '\tComputing signed distance...'
+    print('\tComputing signed distance...')
     tomo_s = ps.globals.signed_distance_2d(mb_seg, None, res, del_b=del_b, mode_2d=mode_2d)
     msk = (tomo_s==0) & (mb_seg==0)
 
-    print '\tComputing cropping dimensions...'
+    print('\tComputing cropping dimensions...')
     roi = compute_roi(tomo_s, max_dst)
     roi_den = density[roi[0]:roi[1], roi[2]:roi[3], roi[4]:roi[5]]
     roi_dst = tomo_s[roi[0]:roi[1], roi[2]:roi[3], roi[4]:roi[5]]
@@ -153,7 +153,7 @@ for (in_seg, in_or) in zip(in_seg_l, in_or_l):
     roi_seg[roi_dst_abs<=mb_thick_2] = 1
     roi_seg[roi_msk] = 4
 
-    print '\tStoring results...'
+    print('\tStoring results...')
     if out_fmt == '.fits':
         ps.disperse_io.save_numpy(roi_den.transpose().astype(np.float32), output_dir + '/' + f_stem_s + '_den' + out_fmt)
         ps.disperse_io.save_numpy(roi_dst.transpose().astype(np.float32), output_dir + '/' + f_stem_s + '_dst' + out_fmt)
@@ -164,4 +164,4 @@ for (in_seg, in_or) in zip(in_seg_l, in_or_l):
         ps.disperse_io.save_numpy(roi_seg.astype(np.float32), output_dir + '/' + f_stem_s + '_seg' + out_fmt)
     write_crop_info(output_dir, f_stem_s, f_name, roi)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

@@ -113,18 +113,18 @@ def pr_mcf_graph(pr_id, ids, std, mcf_out_dir, res, dims, eps, sp, ev, nsig_per,
         mcf_graph.main(main_args)
 
         # Load GraphMCF
-        print '\tPROCESS[' + str(pr_id) + ']: Unpickling the graph: ' + g3_graph_pkl
+        print('\tPROCESS[' + str(pr_id) + ']: Unpickling the graph: ' + g3_graph_pkl)
         graph_mcf = unpickle_obj(g3_graph_pkl)
 
         # Make topological simplification until fitting the number of features times residues percentage
-        print '\tPROCESS[' + str(pr_id) + ']: Simplifying the graph...'
+        print('\tPROCESS[' + str(pr_id) + ']: Simplifying the graph...')
         graph_mcf.topological_simp(0, n=grid.get_num_features()*res_per, prop_ref=STR_FIELD_VALUE)
         # Filter edges until fitting the number of edges
         # n_edges = float(len(graph_mcf.get_vertices_list())) * ev_ratio
         # i_edges = len(graph_mcf.get_edges_list())
         # if n_edges < i_edges:
         n_edges = int(math.ceil(grid.get_num_edges()*res_per))
-        print '\t\t-Number of edges to keep: ' + str(n_edges)
+        print('\t\t-Number of edges to keep: ' + str(n_edges))
         graph_mcf.threshold_edges_n(n_edges, STR_FIELD_VALUE, mode='low')
         # else:
         #     print 'WARNING [process:' + str(pr_id) + ']: Graph cannot be simplify to ' + str(n_edges) + \
@@ -136,17 +136,17 @@ def pr_mcf_graph(pr_id, ids, std, mcf_out_dir, res, dims, eps, sp, ev, nsig_per,
     if pr_id < 0:
         return -1
     else:
-        print '\tFinishing PROCESS[' + str(pr_id) + '] successfully!'
+        print('\tFinishing PROCESS[' + str(pr_id) + '] successfully!')
         return pr_id
 
 #################################################################################################
 # Main Routine
 #################################################################################################
 
-print 'Evaluating GraphMCF performance with synthetic data.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Running main loop:'
+print('Evaluating GraphMCF performance with synthetic data.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Running main loop:')
 
 hold_snr = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
 hold_t_p = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
@@ -162,19 +162,19 @@ thick2 = 2 * math.ceil(thick * G3_RESOLUTION)
 # Noise loop for computing the graphs
 for j in range(len(G3_STD_NOISE)):
 
-    print '\tProcessing noise entry: ' + str(j) + ' of ' + str(len(G3_STD_NOISE))
+    print('\tProcessing noise entry: ' + str(j) + ' of ' + str(len(G3_STD_NOISE)))
 
     if G3_GRAPHMCF_PKL:
 
-        print '\tGenerating grids and graphs...'
+        print('\tGenerating grids and graphs...')
         # MULTIPROCESSING
         if G3_NPR <= 1:
-            pr_mcf_graph(0, range(G3_NUM_REP), j, MCF_OUT_DIR, G3_RESOLUTION, G3_L, G3_EPS, G3_SP, G3_EV,
+            pr_mcf_graph(0, list(range(G3_NUM_REP)), j, MCF_OUT_DIR, G3_RESOLUTION, G3_L, G3_EPS, G3_SP, G3_EV,
                          G3_NSIG_PER, G3_RES_PER, G3_EDG_VER_RATIO)
         else:
             processes = list()
-            spl_ids = np.array_split(range(G3_NUM_REP), G3_NPR)
-            for pr_id, ids in zip(range(G3_NPR), spl_ids):
+            spl_ids = np.array_split(list(range(G3_NUM_REP)), G3_NPR)
+            for pr_id, ids in zip(list(range(G3_NPR)), spl_ids):
                 pr = mp.Process(target=pr_mcf_graph, args=(pr_id, ids, j, MCF_OUT_DIR, G3_RESOLUTION,
                                                            G3_L, G3_EPS, G3_SP,
                                                            G3_EV, G3_NSIG_PER, G3_RES_PER, G3_EDG_VER_RATIO))
@@ -188,11 +188,11 @@ for j in range(len(G3_STD_NOISE)):
             #     if pr_id != pr_results[pr_id]:
             #         error_msg = 'Process ' + str(pr_id) + ' exited unexpectedly!'
             #         sys.exit(-1)
-            print '\t\t-All processes are finished!'
+            print('\t\t-All processes are finished!')
     else:
-        print '\t\t-WARNING: tomograms are loaded from a previous running instance so some settings may not fit!'
+        print('\t\t-WARNING: tomograms are loaded from a previous running instance so some settings may not fit!')
 
-    print '\tGraphs computed!'
+    print('\tGraphs computed!')
 
     # Repetitions loop
     for i in range(G3_NUM_REP):
@@ -204,7 +204,7 @@ for j in range(len(G3_STD_NOISE)):
         g3_graph_pkl = mcf_out_dir2 + '/' + os.path.splitext(os.path.split(g3_tomo_file)[1])[0] + '.pkl'
 
         # Synthetic phantom generation
-        print '\tLoading the grid with STD=' + str(G3_STD_NOISE[j]) + ' and repetition ' + str(i) + '.'
+        print('\tLoading the grid with STD=' + str(G3_STD_NOISE[j]) + ' and repetition ' + str(i) + '.')
         grid = unpickle_obj(g3_grid_pkl)
         hold_snr[i, j] = grid.get_snr()
 
@@ -256,7 +256,7 @@ for j in range(len(G3_STD_NOISE)):
         #     if not grid.in_feature(point, G3_EPS):
         #         fp_picks_dog += 1
 
-        print '\tUnpickling GraphMCF...'
+        print('\tUnpickling GraphMCF...')
         graph_mcf = unpickle_obj(g3_graph_pkl)
 
         # Getting the starting points for tracing
@@ -403,15 +403,15 @@ for j in range(len(G3_STD_NOISE)):
                 hold_b_e[i, j] = 0
 
     # Printing the result
-    print ''
-    print '\tRESULTS: '
-    print '\tSNR: [' + str(hold_snr[:, j].min()) + ', ' + str(hold_snr[:, j].mean()) + ', ' + str(hold_snr[:, j].max()) + ']'
-    print '\tTrue positive picked: [' + str(hold_t_p[:, j].min()) + ', ' + str(hold_t_p[:, j].mean()) + ', ' + str(hold_t_p[:, j].max()) + ']'
-    print '\tFalse positive picked: [' + str(hold_f_p[:, j].min()) + ', ' + str(hold_f_p[:, j].mean()) + ', ' + str(hold_f_p[:, j].max()) + ']'
-    print '\tFalse negative picked: [' + str(hold_f_n[:, j].min()) + ', ' + str(hold_f_n[:, j].mean()) + ', ' + str(hold_f_n[:, j].max()) + ']'
-    print '\tFraction of correctly tracked paths over corrected ground truth: [' + str(hold_pp_e[:, j].min()) + ', ' + str(hold_pp_e[:, j].mean()) + ', ' + str(hold_pp_e[:, j].max()) + ']'
-    print '\tFraction of correctly tracked paths: [' + str(hold_p_e[:, j].min()) + ', ' + str(hold_p_e[:, j].mean()) + ', ' + str(hold_p_e[:, j].max()) + ']'
-    print '\tFraction of bad tracked paths: [' + str(hold_b_e[:, j].min()) + ', ' + str(hold_b_e[:, j].mean()) + ', ' + str(hold_b_e[:, j].max()) + ']'
+    print('')
+    print('\tRESULTS: ')
+    print('\tSNR: [' + str(hold_snr[:, j].min()) + ', ' + str(hold_snr[:, j].mean()) + ', ' + str(hold_snr[:, j].max()) + ']')
+    print('\tTrue positive picked: [' + str(hold_t_p[:, j].min()) + ', ' + str(hold_t_p[:, j].mean()) + ', ' + str(hold_t_p[:, j].max()) + ']')
+    print('\tFalse positive picked: [' + str(hold_f_p[:, j].min()) + ', ' + str(hold_f_p[:, j].mean()) + ', ' + str(hold_f_p[:, j].max()) + ']')
+    print('\tFalse negative picked: [' + str(hold_f_n[:, j].min()) + ', ' + str(hold_f_n[:, j].mean()) + ', ' + str(hold_f_n[:, j].max()) + ']')
+    print('\tFraction of correctly tracked paths over corrected ground truth: [' + str(hold_pp_e[:, j].min()) + ', ' + str(hold_pp_e[:, j].mean()) + ', ' + str(hold_pp_e[:, j].max()) + ']')
+    print('\tFraction of correctly tracked paths: [' + str(hold_p_e[:, j].min()) + ', ' + str(hold_p_e[:, j].mean()) + ', ' + str(hold_p_e[:, j].max()) + ']')
+    print('\tFraction of bad tracked paths: [' + str(hold_b_e[:, j].min()) + ', ' + str(hold_b_e[:, j].mean()) + ', ' + str(hold_b_e[:, j].max()) + ']')
 
 # Storing the results
 np.savez(MCF_OUT_DIR + '/grid3d_arrays.npz', hold_snr, hold_t_p, hold_p_e, hold_f_p, hold_f_n, hold_b_e)
@@ -446,8 +446,8 @@ plt.legend(loc=7)
 # ref_FR_ssup_mb.sh
 plt.tight_layout()
 out_fig = MCF_OUT_DIR + '/test_grid_conn.png'
-print 'Saving output figure in: ' + out_fig
+print('Saving output figure in: ' + out_fig)
 plt.savefig(out_fig, dpi=600)
 plt.close()
 
-print 'Terminated successfully. (' + time.strftime("%c") + ')'
+print('Terminated successfully. (' + time.strftime("%c") + ')')

@@ -2,11 +2,13 @@
 Test for util
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 880 2012-06-10 15:10:15Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 880 $"
+__version__ = "$Revision$"
 
 
-from test_bulk import TestBulk
-from test_numpy_plus import TestNumpyPlus
+from .test_bulk import TestBulk
+from .test_numpy_plus import TestNumpyPlus

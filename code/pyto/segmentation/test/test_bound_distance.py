@@ -2,11 +2,13 @@
 
 Tests module bound_distance
 
-# Author: Vladan Lucic
-# $Id: test_bound_distance.py 916 2012-10-26 16:22:13Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 916 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -15,7 +17,7 @@ import numpy
 import numpy.testing as np_test 
 import scipy
 
-import common
+#from pyto.segmentation.test import common
 from pyto.segmentation.segment import Segment
 from pyto.segmentation.contact import Contact
 from pyto.segmentation.bound_distance import BoundDistance

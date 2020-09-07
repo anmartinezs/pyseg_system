@@ -79,54 +79,54 @@ def inv_vals(vals):
 
 ########## Print initial message
 
-print 'Setting prior in a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file: ' + in_star
-print '\tOuput file: ' + out_star
-print '\tNumber of instances :' + str(num_copies)
+print('Setting prior in a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file: ' + in_star)
+print('\tOuput file: ' + out_star)
+print('\tNumber of instances :' + str(num_copies))
 if do_inv:
-    print '\t\t-Invert rotations'
-print '\tAngles to randomize: '
+    print('\t\t-Invert rotations')
+print('\tAngles to randomize: ')
 if do_rnd_rot:
-    print '\t\t-Rotation'
+    print('\t\t-Rotation')
 if do_rnd_tilt:
-    print '\t\t-Tilt'
+    print('\t\t-Tilt')
 if do_rnd_psi:
-    print '\t\t-Psi'
-print '\tAngles to set prior: '
+    print('\t\t-Psi')
+print('\tAngles to set prior: ')
 if do_rot:
-    print '\t\t-Rotation'
+    print('\t\t-Rotation')
 if do_tilt:
-    print '\t\t-Tilt'
+    print('\t\t-Tilt')
 if do_psi:
-    print '\t\t-Psi'
-print '\tAngles to delete: '
+    print('\t\t-Psi')
+print('\tAngles to delete: ')
 if del_rot:
-    print '\t\t-Rotation'
+    print('\t\t-Rotation')
 if del_tilt:
-    print '\t\t-Tilt'
+    print('\t\t-Tilt')
 if del_psi:
-    print '\t\t-Psi'
+    print('\t\t-Psi')
 if do_clean:
-    print '\tClean refinement columns.'
-print ''
+    print('\tClean refinement columns.')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be read because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+    print('ERROR: input STAR file could not be read because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
     sys.exit(-1)
 
 if do_inv:
-    print '\tInverting rotations...'
+    print('\tInverting rotations...')
     hold_rot = np.array(star.get_column_data('_rlnAngleRot'), dtype=np.float)
     hold_tilt = np.array(star.get_column_data('_rlnAngleTilt'), dtype=np.float)
     hold_psi = np.array(star.get_column_data('_rlnAnglePsi'), dtype=np.float)
@@ -135,107 +135,107 @@ if do_inv:
     star.add_column('_rlnAnglePsi', -1.*hold_rot)
 
 if do_rnd_rot:
-    print '\tRandomize Rotation angles...'
+    print('\tRandomize Rotation angles...')
     try:
         star.rnd_data_column('_rlnAngleRot', -180., 180)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: copying data for Rotation prior because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: copying data for Rotation prior because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 if do_rnd_tilt:
-    print '\tRandomize Tilt angles...'
+    print('\tRandomize Tilt angles...')
     try:
         star.rnd_data_column('_rlnAngleTilt', -180., 180)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: randomization for Tilt failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: randomization for Tilt failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 if do_rnd_psi:
-    print '\tRandomize Psi angles...'
+    print('\tRandomize Psi angles...')
     try:
         star.rnd_data_column('_rlnAnglePsi', -180., 180)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: randomization for Psi failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: randomization for Psi failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 
 if do_rot:
-    print '\tSetting prior for Rotation...'
+    print('\tSetting prior for Rotation...')
     try:
         star.copy_data_columns('_rlnAngleRot', '_rlnAngleRotPrior')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: copying data for Rotation prior failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: copying data for Rotation prior failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 # else:
 #     print '\tDeleting previous prior information for Rotation...'
 #     star.del_column('_rlnAngleRotPrior')
 if do_tilt:
-    print '\tSetting prior for Tilt...'
+    print('\tSetting prior for Tilt...')
     try:
         star.copy_data_columns('_rlnAngleTilt', '_rlnAngleTiltPrior')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: copying data for Tilt prior failed because of "' +str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: copying data for Tilt prior failed because of "' +str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 # else:
 #     print '\tDeleting previous prior information for Tilt...'
 #     star.del_column('_rlnAngleTiltPrior')
 if do_psi:
-    print '\tSetting prior for Psi...'
+    print('\tSetting prior for Psi...')
     try:
         star.copy_data_columns('_rlnAnglePsi', '_rlnAnglePsiPrior')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: copying data for Psi prior failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: copying data for Psi prior failed because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 # else:
 #     print '\tDeleting previous prior information for Psi...'
 #     star.del_column('_rlnAnglePsiPrior')
 
 if del_rot:
-    print '\tDeleting Rotation angles...'
+    print('\tDeleting Rotation angles...')
     try:
         star.del_column('_rlnAngleRot')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: deleting data for Rotation because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: deleting data for Rotation because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 if del_tilt:
-    print '\tDeleting Tilt angles...'
+    print('\tDeleting Tilt angles...')
     try:
         star.del_column('_rlnAngleTilt')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: deleting data for Tilt because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: deleting data for Tilt because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 if del_psi:
-    print '\tDeleting Psi angles...'
+    print('\tDeleting Psi angles...')
     try:
         star.del_column('_rlnAnglePsi')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: deleting data for Psi because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: deleting data for Psi because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-2)
 
 if do_clean:
-    print '\tCleaning refinement columns: '
+    print('\tCleaning refinement columns: ')
     if star.has_column('_rlnNormCorrection'):
-        print '\t\t-Column rlnNormCorrection found...'
+        print('\t\t-Column rlnNormCorrection found...')
         star.del_column('_rlnNormCorrection')
     if star.has_column('_rlnRandomSubset'):
-        print '\t\t-Column rlnRandomSubset found...'
+        print('\t\t-Column rlnRandomSubset found...')
         star.del_column('_rlnRandomSubset')
     if star.has_column('_rlnLogLikeliContribution'):
-        print '\t\t-Column rlnLogLikeliContribution found...'
+        print('\t\t-Column rlnLogLikeliContribution found...')
         star.del_column('_rlnLogLikeliContribution')
     if star.has_column('_rlnMaxValueProbDistribution'):
-        print '\t\t-Column rlnMaxValueProbDistribution found...'
+        print('\t\t-Column rlnMaxValueProbDistribution found...')
         star.del_column('_rlnMaxValueProbDistribution')
     if star.has_column('_rlnNrOfSignificantSamples'):
-        print '\t\t-Column rlnNrOfSignificantSamples found...'
+        print('\t\t-Column rlnNrOfSignificantSamples found...')
         star.del_column('_rlnNrOfSignificantSamples')
 
-print '\tStoring the results in: ' + out_star
+print('\tStoring the results in: ' + out_star)
 if num_copies <= 1:
     star.store(out_star)
 else:
     hold_star_name = os.path.splitext(out_star)[0]
-    print '\tStoring the results in bacth mode with stem: ' + hold_star_name
+    print('\tStoring the results in bacth mode with stem: ' + hold_star_name)
     for i in range(num_copies):
         hold_star = copy.deepcopy(star)
         star.rnd_data_column('_rlnAngleRot', -180., 180)
         star.store(hold_star_name+'_'+str(i)+'.star')
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

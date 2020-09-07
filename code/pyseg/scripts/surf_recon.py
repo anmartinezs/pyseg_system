@@ -45,7 +45,7 @@ def do_surf_recon(input_file, output_dir, p_ratio=1, cloud=False,  dist=False, f
 
     # Surface generation
     if verbose:
-        print '\tSurface generation...'
+        print('\tSurface generation...')
     input_tomo = disperse_io.load_tomo(input_file)
     if cloud or dist:
         surf_poly, cloud_poly = disperse_io.gen_surface_cloud(input_tomo, 1, p_ratio, True, False)
@@ -59,12 +59,12 @@ def do_surf_recon(input_file, output_dir, p_ratio=1, cloud=False,  dist=False, f
     # Signed distance measurement
     dist_tomo = None
     if dist:
-        print '\tSigned distance measurement...'
+        print('\tSigned distance measurement...')
         dist_tomo = disperse_io.signed_dist_cloud(cloud_poly, input_tomo.shape)
 
     # Store the results
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     if cloud_poly is not None:
         disperse_io.save_vtp(cloud_poly, output_dir + '/' + stem + '_cloud.vtp')
     if dist_tomo is not None:
@@ -77,7 +77,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvdci:o:p:f:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -89,8 +89,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -108,32 +108,32 @@ def main(argv):
             verbose = True
 
     if (input_file == '') or (output_dir == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for generating a surface from a membrane segmentation.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
-            print '\tPurge ratio: ' + str(p_ratio)
+            print('Running tool for generating a surface from a membrane segmentation.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
+            print('\tPurge ratio: ' + str(p_ratio))
             if cloud:
-                print '\tCloud of points generation activated.'
+                print('\tCloud of points generation activated.')
             if dist:
-                print '\tSigned distance generation activated.'
-                print '\tOutput segmentation format ' + fmt
-            print ''
+                print('\tSigned distance generation activated.')
+                print('\tOutput segmentation format ' + fmt)
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_surf_recon(input_file, output_dir, p_ratio, cloud,  dist, fmt, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed.'
+            print(cmd_name + ' successfully executed.')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

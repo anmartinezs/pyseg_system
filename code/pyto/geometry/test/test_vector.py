@@ -3,10 +3,13 @@
 Tests module vector
 
 # Author: Vladan Lucic
-# $Id: test_vector.py 1324 2016-07-12 15:03:34Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision: 1324 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -23,14 +26,14 @@ class TestVector(np_test.TestCase):
     def setUp(self):
         """
         """
-        self.cartesian = numpy.array([[1./2, numpy.sqrt(3)/2, 2],
-                                      [-1./2, numpy.sqrt(3)/2, 2],
-                                      [1./2, -numpy.sqrt(3)/2, -2]])
+        self.cartesian = numpy.array([[1/2, numpy.sqrt(3)/2, 2],
+                                      [-1/2, numpy.sqrt(3)/2, 2],
+                                      [1/2, -numpy.sqrt(3)/2, -2]])
 
         self.spherical = numpy.array(\
-            [[numpy.sqrt(5), numpy.pi / 3, numpy.arctan2(1, 2)],
+            [[numpy.sqrt(5), numpy.pi/3, numpy.arctan2(1, 2)],
              [numpy.sqrt(5), 2 * numpy.pi / 3, numpy.arctan2(1, 2)],
-             [numpy.sqrt(5), -numpy.pi / 3, numpy.pi - numpy.arctan2(1, 2)]])
+             [numpy.sqrt(5), -numpy.pi/3, numpy.pi - numpy.arctan2(1, 2)]])
 
         theta = 180 * numpy.arctan2(1, 2) / numpy.pi 
         self.degrees = numpy.array([[60, theta],
@@ -43,9 +46,9 @@ class TestVector(np_test.TestCase):
         """
 
         # one 2d vec
-        vec = Vector(data=[1./2, numpy.sqrt(3)/2])
+        vec = Vector(data=[1/2, numpy.sqrt(3)/2])
         np_test.assert_almost_equal([vec.r, vec.phi], 
-                                    numpy.array([1, numpy.pi / 3]))        
+                                    numpy.array([1, numpy.pi/3]))        
 
         # many 3d
         vec = Vector(data=self.cartesian)
@@ -99,8 +102,8 @@ class TestVector(np_test.TestCase):
         ve = Vector(points)
         cm, line = ve.bestFitLine()
         np_test.assert_almost_equal(cm.data, [3, 3, 2.])
-        np_test.assert_almost_equal(line.phi, numpy.pi / 4)
-        np_test.assert_almost_equal(line.theta, numpy.pi / 2)
+        np_test.assert_almost_equal(line.phi, numpy.pi/4)
+        np_test.assert_almost_equal(line.theta, numpy.pi/2)
 
         # 3D very slightly off
         points = numpy.array([[2, 2, 2],
@@ -109,8 +112,8 @@ class TestVector(np_test.TestCase):
         ve = Vector(points)
         cm, line = ve.bestFitLine()
         np_test.assert_almost_equal(cm.data, [3, 3, 2.], decimal=3)
-        np_test.assert_almost_equal(line.phi, numpy.pi / 4, decimal=3)
-        np_test.assert_almost_equal(line.theta, numpy.pi / 2, decimal=3)
+        np_test.assert_almost_equal(line.phi, numpy.pi/4, decimal=3)
+        np_test.assert_almost_equal(line.theta, numpy.pi/2, decimal=3)
 
     def testAngleBetween(self):
         """

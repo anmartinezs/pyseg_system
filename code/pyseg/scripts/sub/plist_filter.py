@@ -65,16 +65,16 @@ def str_to_oper(op):
 def do_plist_filter(in_file, out_file, elem, attrib, cte, dtype, op, verbose):
 
     if verbose:
-        print '\tLoading the input file...'
+        print('\tLoading the input file...')
     in_path, _ = os.path.split(in_file)
     plist_in = ps.sub.ParticleList(in_path)
     plist_in.load(in_file)
     out_path, _ = os.path.split(out_file)
     plist_out = ps.sub.ParticleList(out_path)
-    print '\t\t-Number of particles of the input particle list: ' + str(plist_in.get_num_particles())
+    print('\t\t-Number of particles of the input particle list: ' + str(plist_in.get_num_particles()))
 
     if verbose:
-        print '\tFilter loop...'
+        print('\tFilter loop...')
     for et in plist_in.get_elements():
         el = et.find(elem)
         if el is not None:
@@ -85,7 +85,7 @@ def do_plist_filter(in_file, out_file, elem, attrib, cte, dtype, op, verbose):
                     hold_cte = el.attrib[attrib]
                 except KeyError:
                     if verbose:
-                        print '\tWARNING: particle without attribute ' + attrib
+                        print('\tWARNING: particle without attribute ' + attrib)
                     continue
             if dtype == 'float':
                 hold_cte = float(hold_cte)
@@ -93,11 +93,11 @@ def do_plist_filter(in_file, out_file, elem, attrib, cte, dtype, op, verbose):
                 plist_out.import_particle(et)
         else:
             if verbose:
-                print '\tWARNING: particle without element ' + elem
-    print '\t\t-Number of particles for output particle list: ' + str(len(plist_out._ParticleList__parts))
+                print('\tWARNING: particle without element ' + elem)
+    print('\t\t-Number of particles for output particle list: ' + str(len(plist_out._ParticleList__parts)))
 
     if verbose:
-        print '\tStoring the output file...'
+        print('\tStoring the output file...')
     plist_out.store(out_file)
 
 
@@ -107,7 +107,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvi:o:e:a:c:t:p:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(0)
 
     in_file = None
@@ -120,8 +120,8 @@ def main(argv):
     verbose = True
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             in_file = arg
@@ -140,42 +140,42 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(1)
 
     if (in_file is None) or (out_file is None) or (elem is None) or (cte is None):
-        print 'Not all input requirement fulfilled.'
-        print usage_msg
+        print('Not all input requirement fulfilled.')
+        print(usage_msg)
         sys.exit(2)
     elif (dtype != 'float') and (dtype != 'str'):
-        print 'Unknown input for type \'-t\' option value ' + dtype
-        print usage_msg
+        print('Unknown input for type \'-t\' option value ' + dtype)
+        print(usage_msg)
         sys.exit(3)
     elif (op != 'ne') and (op != 'eq') and (op != 'lt') and \
         (op != 'le') and (op != 'gt') and (op != 'ge'):
-        print 'Unknown input for operation \'-p\' option value ' + op
-        print usage_msg
+        print('Unknown input for operation \'-p\' option value ' + op)
+        print(usage_msg)
         sys.exit(4)
     else:
         # Print init message
         if verbose:
-            print 'Filter for XML particle list.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + in_file
-            print '\tOutput file: ' + out_file
-            print '\tFilter criterium: '
-            print '\t\t-Particle element: ' + elem
+            print('Filter for XML particle list.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + in_file)
+            print('\tOutput file: ' + out_file)
+            print('\tFilter criterium: ')
+            print('\t\t-Particle element: ' + elem)
             if attrib is not None:
-                print '\t\t\t+Element attribute: ' + attrib
-                print '\t\t\t+Attribute constant value: ' + cte
+                print('\t\t\t+Element attribute: ' + attrib)
+                print('\t\t\t+Attribute constant value: ' + cte)
             else:
-                print '\t\t-Element constant value: ' + cte
-            print '\t\t-Data type: ' + dtype
-            print '\t\t-Operation: ' + op
-            print ''
+                print('\t\t-Element constant value: ' + cte)
+            print('\t\t-Data type: ' + dtype)
+            print('\t\t-Operation: ' + op)
+            print('')
 
         # Change input parameters format
         if dtype == 'float':
@@ -184,11 +184,11 @@ def main(argv):
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_plist_filter(in_file, out_file, elem, attrib, cte, dtype, op, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

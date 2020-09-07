@@ -18,7 +18,8 @@ import itertools as it
 from pyseg.globals import *
 from pyseg import disperse_io
 from .star import Star, relion_norm
-from scipy.misc import imsave, imread
+from imageio import imread, imwrite
+# from scipy.misc import imsave, imread # From PYthon 2.7
 import numpy as np
 from scipy import signal as sgn
 import multiprocessing as mp
@@ -26,12 +27,12 @@ from sklearn.cluster import AffinityPropagation, AgglomerativeClustering, KMeans
 from sklearn.decomposition import PCA
 from sklearn.neighbors import kneighbors_graph
 from sklearn.manifold import LocallyLinearEmbedding
-from variables import RadialAvg3D
+from .variables import RadialAvg3D
 
 from pyseg.pexceptions import *
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -231,7 +232,8 @@ def pr_load_parts(pr_id, p_ids, mask, star, low_sg, rln_norm, avg_norm, rad_3D, 
     hold_mask_2d = averager.avg_vol(mask)
     ids_h, ids_r = np.where(hold_mask_2d.sum(axis=1) > 0)[0], np.where(hold_mask_2d.sum(axis=0) > 0)[0]
     rg_h, rg_r = [ids_h.min(), ids_h.max()], [ids_r.min(), ids_r.max()]
-    mask_avg = averager.avg_vol(mask, rg_h=rg_h, rg_r=rg_r) > 0.5
+    # mask_avg = averager.avg_vol(mask, rg_h=rg_h, rg_r=rg_r) > 0.5
+    mask_avg = averager.avg_vol(mask, rg_h=rg_h, rg_r=rg_r) > 0
 
     # Update mask with segmentation information and rotations matrix construction
     count = 1
@@ -269,7 +271,7 @@ def pr_load_parts(pr_id, p_ids, mask, star, low_sg, rln_norm, avg_norm, rad_3D, 
             # particle_u = tomo_shift(particle_u, (-shift_y, -shift_x, -shift_z))
             if bin is not None:
                 particle_u = sp.ndimage.zoom(particle_u, ibin, order=3, mode='constant', cval=0.0, prefilter=True)
-        particle = r3d.transformArray(particle_u, origin=svol_cent, order=3, prefilter=True)
+        particle = r3d.transformArray(particle_u, center=svol_cent, order=3, prefilter=True)
         if low_sg_f > 0:
             particle = sp.ndimage.filters.gaussian_filter(particle, low_sg)
 
@@ -303,8 +305,8 @@ def pr_load_parts(pr_id, p_ids, mask, star, low_sg, rln_norm, avg_norm, rad_3D, 
             disperse_io.save_numpy(particle_u, debug_dir + '/' + stem_out + '_svol.mrc')
             disperse_io.save_numpy(particle, debug_dir + '/' + stem_out + '_rsvol.mrc')
             disperse_io.save_numpy(particle_mask, debug_dir + '/' + stem_out + '_mrsvol.mrc')
-            imsave(debug_dir + '/' + stem_out + '_avgz.png', particle_avg)
-            imsave(debug_dir + '/' + stem_out + '_mavgz.png', mask_avg)
+            imwrite(debug_dir + '/' + stem_out + '_avgz.png', lin_map(particle_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
+            imwrite(debug_dir + '/' + stem_out + '_mavgz.png', lin_map(mask_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
 
         # Set the shared arrays
         sh_id = row * part_sz
@@ -428,7 +430,7 @@ def pr_exemplars_cc(pr_id, p_ids, ex_temps, mask, star, low_sg, rln_norm, avg_no
                                         star.get_element('_rlnOriginZ', row)
             particle_u = tomo_shift(particle_u, (-shift_x, -shift_y, -shift_z))
             # particle_u = tomo_shift(particle_u, (-shift_y, -shift_x, -shift_z))
-        particle = r3d.transformArray(particle_u, origin=svol_cent, order=3, prefilter=True)
+        particle = r3d.transformArray(particle_u, center=svol_cent, order=3, prefilter=True)
         if low_sg_f > 0:
             particle = sp.ndimage.filters.gaussian_filter(particle, low_sg)
 
@@ -463,7 +465,7 @@ def pr_exemplars_cc(pr_id, p_ids, ex_temps, mask, star, low_sg, rln_norm, avg_no
 
         if out_dir is not None:
             out_fname = out_dir + '/particle_' + str(row) + '.png'
-            imsave(out_fname, particle_avg)
+            imwrite(out_fname, lin_map(particle_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
             out_fname = out_dir + '/particle_' + str(row) + '.npy'
             np.save(out_fname, particle_avg)
 
@@ -690,7 +692,7 @@ class ClassStar(object):
         npart = self.__star.get_nrows()
         part_h, part_r = averager.get_output_dim()
         part_sz = int(part_h * part_r)
-        particles_sh, masks_sh = mp.Array('f', part_h*part_r*npart), mp.Array('f', part_h*part_r*npart)
+        particles_sh, masks_sh = mp.Array('f', int(part_h*part_r*npart)), mp.Array('f', int(part_h*part_r*npart))
 
         # Loading particles loop (Parallel)
         if npr <= 1:
@@ -754,9 +756,9 @@ class ClassStar(object):
         processes = list()
         # Create the list on indices to split
         npart = self.__star.get_nrows()
-        sym_ids = list(it.combinations(range(npart), r=2))
-        spl_ids = np.array_split(range(len(sym_ids)), npr)
-        shared_mat = mp.Array('f', npart*npart)
+        sym_ids = list(it.combinations(list(range(npart)), r=2))
+        spl_ids = np.array_split(list(range(len(sym_ids))), npr)
+        shared_mat = mp.Array('f', int(npart*npart))
 
         # Particles loop (Parallel)
 
@@ -816,8 +818,8 @@ class ClassStar(object):
         # Create the list on indices to split
         npart = self.__star.get_nrows()
         sym_ids = list(np.arange(npart))
-        spl_ids = np.array_split(range(len(sym_ids)), npr)
-        shared_mat = mp.Array('f', nfeat*npart)
+        spl_ids = np.array_split(list(range(len(sym_ids))), npr)
+        shared_mat = mp.Array('f', int(nfeat*npart))
 
         # Particles loop (Parallel)
         if npr <= 1:
@@ -1014,21 +1016,21 @@ class ClassStar(object):
                                       preference=preference)
             aff.fit(self.__vectors)
         if aff.n_iter_ >= max_iter:
-            print 'WARNING: affinity_propagation (ClassStar): AP reached the maximum iterations (' + str(max_iter) + \
-                ') without converging, its results might be meaningless!'
+            print('WARNING: affinity_propagation (ClassStar): AP reached the maximum iterations (' + str(max_iter) + \
+                ') without converging, its results might be meaningless!')
         lbls, centers = np.asarray(aff.labels_, dtype=np.int), np.asarray(aff.cluster_centers_indices_, dtype=np.int)
         class_ids = np.asarray(list(set(lbls)))
         n_classes = len(class_ids)
 
         if verbose:
-            print 'Affinity Matrix statistics:'
-            print '\t\t-Percentile 5%: ' + str(np.percentile(aff.affinity_matrix_, 5))
-            print '\t\t-Median: ' + str(np.percentile(aff.affinity_matrix_, 50))
-            print '\t\t-Percentile 95%: ' + str(np.percentile(aff.affinity_matrix_, 95))
-            print 'AFFINITY PROPAGATION RESULTS: '
-            print '\tNumber of classes found: ' + str(n_classes)
+            print('Affinity Matrix statistics:')
+            print('\t\t-Percentile 5%: ' + str(np.percentile(aff.affinity_matrix_, 5)))
+            print('\t\t-Median: ' + str(np.percentile(aff.affinity_matrix_, 50)))
+            print('\t\t-Percentile 95%: ' + str(np.percentile(aff.affinity_matrix_, 95)))
+            print('AFFINITY PROPAGATION RESULTS: ')
+            print('\tNumber of classes found: ' + str(n_classes))
             for class_id in class_ids:
-                print '\t\t-Number of particles in class ' + str(class_id) + ': ' + str((lbls==class_id).sum())
+                print('\t\t-Number of particles in class ' + str(class_id) + ': ' + str((lbls==class_id).sum()))
 
         # AP classes grouped
         self.__ap_classes, self.__ap_centers = dict(), dict()
@@ -1061,26 +1063,26 @@ class ClassStar(object):
 
         # Input parsing
         if verbose:
-            print 'AP_memsafe: initialization...'
+            print('AP_memsafe: initialization...')
         if sset_size < 0:
             error_msg = 'Input subset size must be greater an zero!'
             raise pexceptions.PySegInputError(expr='affinity_propagation_memsafe (ClassStar)', msg=error_msg)
         elif sset_size >= self.__star.get_nrows():
-            print 'WARNING: it does not make sense called memory safe version of AP with the subset size greater or ' + \
-                'equal to the amount of particles. Calling standard implementation instead!'
+            print('WARNING: it does not make sense called memory safe version of AP with the subset size greater or ' + \
+                'equal to the amount of particles. Calling standard implementation instead!')
             self.affinity_propagation(damping=damping, preference=preference, max_iter=max_iter,
                                       convergence_iter=convergence_iter, verbose=verbose)
 
         # Getting the random subsets
         ssets, nparts = list(), self.__star.get_nrows()
-        for i in xrange(sset_iter):
+        for i in range(sset_iter):
             ssets.append(np.random.randint(0, high=nparts, size=sset_size))
 
         # Loop with call to standard of AP on random subsets
         ex_ids = list()
         for i, sset in enumerate(ssets):
             if verbose:
-                print 'AP_memsafe: AP on subset ' + str(i+1) + ' of ' + str(sset_iter)
+                print('AP_memsafe: AP on subset ' + str(i+1) + ' of ' + str(sset_iter))
             # Building current CC matrix
             hold_cc = self.__build_ncc_z2d_sset(sset, mask, metric=metric, npr=npr,
                                                 low_sg=low_sg, seg_dil_it=seg_dil_it, rln_norm=rln_norm,
@@ -1090,7 +1092,7 @@ class ClassStar(object):
             hold_exs = self.__affinity_propagation_cc(hold_cc, damping=damping, preference=preference,
                                                    max_iter=max_iter, convergence_iter=convergence_iter)[1]
             if verbose:
-                print '\t-Intermediate exemplars found: ' + str(len(hold_exs))
+                print('\t-Intermediate exemplars found: ' + str(len(hold_exs)))
             # Update list of exemplars
             for ex in hold_exs:
                 ex_ids.append(sset[ex])
@@ -1103,7 +1105,7 @@ class ClassStar(object):
         exs = self.__affinity_propagation_cc(cc, damping=damping, preference=preference,
                                              max_iter=max_iter, convergence_iter=convergence_iter)[1]
         if verbose:
-            print 'Final exemplars found: ' + str(len(exs))
+            print('Final exemplars found: ' + str(len(exs)))
         final_ex_ids = list()
         for ex in exs:
             final_ex_ids.append(ex_ids[ex])
@@ -1125,7 +1127,7 @@ class ClassStar(object):
                 self.__ap_classes[lbl] = list()
                 self.__ap_classes[lbl].append(row)
             self.__star.set_element('_psAPClass', row, lbl)
-        for lbl, rows in zip(self.__ap_classes.iterkeys(), self.__ap_classes.itervalues()):
+        for lbl, rows in zip(iter(self.__ap_classes.keys()), iter(self.__ap_classes.values())):
             self.__ap_centers[lbl] = final_ex_ids[lbl]
             self.__star.set_element('_psAPCenter', final_ex_ids[lbl], lbl)
 
@@ -1180,10 +1182,10 @@ class ClassStar(object):
         n_classes = len(class_ids)
 
         if verbose:
-            print 'AGGLOMERATIVE CLUSTERING RESULTS: '
-            print '\tNumber of classes found: ' + str(n_classes)
+            print('AGGLOMERATIVE CLUSTERING RESULTS: ')
+            print('\tNumber of classes found: ' + str(n_classes))
             for class_id in class_ids:
-                print '\t\t-Number of particles in class ' + str(class_id) + ': ' + str((lbls==class_id).sum())
+                print('\t\t-Number of particles in class ' + str(class_id) + ': ' + str((lbls==class_id).sum()))
 
         # Class assignment to the STAR file object
         self.__star.add_column('_psAPClass')
@@ -1222,7 +1224,7 @@ class ClassStar(object):
         for k_id in klass_ids:
             d_parts[k_id] = np.zeros(shape=self.__particles[0].shape, dtype=self.__particles[0].dtype)
             d_count[k_id] = 0
-        for row, k_id, k_cent in zip(range(len(klass_col)), klass_col, klass_cent):
+        for row, k_id, k_cent in zip(list(range(len(klass_col))), klass_col, klass_cent):
             d_parts[k_id] += self.__particles[row]
             d_count[k_id] += 1
             if k_cent > 0:
@@ -1265,12 +1267,12 @@ class ClassStar(object):
         n_classes = len(class_ids)
 
         if verbose:
-            print 'AGGLOMERATIVE REFINEMENT RESULTS: '
+            print('AGGLOMERATIVE REFINEMENT RESULTS: ')
             if pca_ncomp is not None:
-                print '\tPCA energy kept in ' + str(pca_ncomp) + ': ' + str(round(100*evs.sum(),2))
-            print '\tNumber of classes found: ' + str(n_classes)
+                print('\tPCA energy kept in ' + str(pca_ncomp) + ': ' + str(round(100*evs.sum(),2)))
+            print('\tNumber of classes found: ' + str(n_classes))
             for class_id in class_ids:
-                print '\t\t-Number of particles in class ' + str(class_id) + ': ' + str(np.where(lbls == class_id)[0])
+                print('\t\t-Number of particles in class ' + str(class_id) + ': ' + str(np.where(lbls == class_id)[0]))
 
         # Class assignment to the STAR file object
         self.__star.add_column('_psAPClass')
@@ -1300,10 +1302,10 @@ class ClassStar(object):
         n_classes = len(class_ids)
 
         if verbose:
-            print 'AFFINITY CLUSTERING RESULTS: '
-            print '\tNumber of classes found: ' + str(n_classes)
+            print('AFFINITY CLUSTERING RESULTS: ')
+            print('\tNumber of classes found: ' + str(n_classes))
             for class_id in class_ids:
-                print '\t\t-Number of particles in class ' + str(class_id) + ': ' + str((lbls == class_id).sum())
+                print('\t\t-Number of particles in class ' + str(class_id) + ': ' + str((lbls == class_id).sum()))
 
         # Class assignment to the STAR file object
         self.__star.add_column('_psAPClass')
@@ -1316,7 +1318,7 @@ class ClassStar(object):
 
         # Input parsing
         if not self.__star.has_column('_psAPClass'):
-            print 'WARNING update_relion_classes (ClassStar): No classification done yet, so class information is not modified!'
+            print('WARNING update_relion_classes (ClassStar): No classification done yet, so class information is not modified!')
             return
         if not self.__star.has_column('_rlnClassNumber'):
             self.__star.add_column(key='_rlnClassNumber', val=1)
@@ -1349,7 +1351,7 @@ class ClassStar(object):
         if reference == 'average':
             klass_col = self.__star.get_column_data('_psAPClass')
             d_parts, d_count, d_mask = dict(), dict(), dict()
-            for k_id in self.__ap_classes.keys():
+            for k_id in list(self.__ap_classes.keys()):
                 d_parts[k_id] = np.zeros(shape=self.__particles[0].shape, dtype=self.__particles[0].dtype)
                 d_count[k_id] = 0
                 d_mask[k_id] = np.ones(shape=self.__masks[0].shape, dtype=np.bool)
@@ -1357,20 +1359,20 @@ class ClassStar(object):
                 d_parts[k_id] += self.__particles[i]
                 d_count[k_id] += 1
                 d_mask[k_id] *= self.__masks[i]
-            for k_id in self.__ap_classes.keys():
+            for k_id in list(self.__ap_classes.keys()):
                 hold_avg, hold_nparts = d_parts[k_id], float(d_count[k_id])
                 if hold_nparts > 0:
                     hold_avg /= hold_nparts
                 particles_ref[k_id] = hold_avg
                 masks_ref[k_id] = d_mask[k_id]
         elif reference == 'exemplar':
-            for k_id, row in zip(self.__ap_centers.keys(), self.__ap_centers.values()):
+            for k_id, row in zip(list(self.__ap_centers.keys()), list(self.__ap_centers.values())):
                 particles_ref[k_id] = self.__particles[row]
                 masks_ref[k_id] = self.__masks[row]
 
         # Compute NCC to reference particle
         self.__ap_ref_cc = dict()
-        for k_id in self.__ap_classes.keys():
+        for k_id in list(self.__ap_classes.keys()):
             particle_ref, mask_ref = particles_ref[k_id], masks_ref[k_id]
             hold_ccs = np.zeros(shape=len(self.__ap_classes[k_id]), dtype=np.float)
             for i, row in enumerate(self.__ap_classes[k_id]):
@@ -1413,7 +1415,7 @@ class ClassStar(object):
         if reference == 'average':
             klass_col = self.__star.get_column_data('_psAPClass')
             d_parts, d_count, d_mask = dict(), dict(), dict()
-            for k_id in self.__ap_classes.keys():
+            for k_id in list(self.__ap_classes.keys()):
                 d_parts[k_id] = np.zeros(shape=img_zero.shape, dtype=imgs_dir.dtype)
                 d_count[k_id] = 0
                 d_mask[k_id] = np.ones(shape=mask_2d.shape, dtype=np.bool)
@@ -1423,14 +1425,14 @@ class ClassStar(object):
                 d_parts[k_id] += hold_particle
                 d_count[k_id] += 1
                 d_mask[k_id] *= mask_2d
-            for k_id in self.__ap_classes.keys():
+            for k_id in list(self.__ap_classes.keys()):
                 hold_avg, hold_nparts = d_parts[k_id], float(d_count[k_id])
                 if hold_nparts > 0:
                     hold_avg /= hold_nparts
                 particles_ref[k_id] = hold_avg
                 masks_ref[k_id] = d_mask[k_id]
         elif reference == 'exemplar':
-            for k_id, row in zip(self.__ap_centers.keys(), self.__ap_centers.values()):
+            for k_id, row in zip(list(self.__ap_centers.keys()), list(self.__ap_centers.values())):
                 in_fname = imgs_dir + '/particle_' + str(row) + '.npy'
                 hold_particle = np.load(in_fname)
                 particles_ref[k_id] = hold_particle
@@ -1438,7 +1440,7 @@ class ClassStar(object):
 
         # Compute NCC to reference particle
         self.__ap_ref_cc = dict()
-        for k_id in self.__ap_classes.keys():
+        for k_id in list(self.__ap_classes.keys()):
             particle_ref, mask_ref = particles_ref[k_id], masks_ref[k_id]
             hold_ccs = np.zeros(shape=len(self.__ap_classes[k_id]), dtype=np.float)
             for i, row in enumerate(self.__ap_classes[k_id]):
@@ -1469,13 +1471,13 @@ class ClassStar(object):
         per_msg = '[' + str(per_l) + ', ' + str(per_m) + ', ' + str(per_h) + ']'
 
         # Printing loop
-        print 'Cross-Correlation Statistics for Affinity Propagation classes: '
+        print('Cross-Correlation Statistics for Affinity Propagation classes: ')
         for k_id in self.__ap_classes:
             hold_ccs = self.__ap_ref_cc[k_id]
-            print '\t-Class ' + str(k_id) + ': '
-            print '\t\t+Mean, Std: ' + str(hold_ccs.mean()) + ', ' + str(hold_ccs.std())
-            print '\t\t+Percentiles ' + per_msg + ': ' + '[' + str(np.percentile(hold_ccs, per_l)) + ', ' + \
-                  str(np.percentile(hold_ccs, per_m)) + ', ' + str(np.percentile(hold_ccs, per_h)) + ']'
+            print('\t-Class ' + str(k_id) + ': ')
+            print('\t\t+Mean, Std: ' + str(hold_ccs.mean()) + ', ' + str(hold_ccs.std()))
+            print('\t\t+Percentiles ' + per_msg + ': ' + '[' + str(np.percentile(hold_ccs, per_l)) + ', ' + \
+                  str(np.percentile(hold_ccs, per_m)) + ', ' + str(np.percentile(hold_ccs, per_h)) + ']')
 
     # Store particles information in a STAR file
     # out_dir: output directory
@@ -1514,7 +1516,7 @@ class ClassStar(object):
                 try:
                     if len(self.__particles[count].shape) == 2:
                         part_name = hold_dir+'/particle_'+str(count)+'.png'
-                        imsave(part_name, self.__particles[count])
+                        imwrite(part_name, lin_map(self.__particles[count],0,np.iinfo(np.uint16).max).astype(np.uint16))
                     else:
                         part_name = hold_dir+'/particle_'+str(count)+'.mrc'
                         disperse_io.save_numpy(self.__particles[count], part_name)
@@ -1586,13 +1588,13 @@ class ClassStar(object):
         if th > 0:
             hold_star = copy.deepcopy(self.__star)
             klass_col = hold_star.get_column_data('_rlnClassNumber')
-            for k_id in self.__ap_classes.keys():
+            for k_id in list(self.__ap_classes.keys()):
                 d_rows[k_id], d_nparts[k_id] = list(), 0
             for row, k_id in enumerate(klass_col):
                 d_rows[k_id].append(row)
                 d_nparts[k_id] += 1
             rows_to_del, d_fnparts, del_mask = list(), dict(), np.ones(shape=len(self.__particles), dtype=np.bool)
-            for k_id, klass in zip(self.__ap_classes.keys(), self.__ap_classes.values()):
+            for k_id, klass in zip(list(self.__ap_classes.keys()), list(self.__ap_classes.values())):
                 d_fnparts[k_id] = 0
                 for j, row in enumerate(klass):
                     if self.__ap_ref_cc[k_id][j] < th:
@@ -1641,7 +1643,7 @@ class ClassStar(object):
                 if hold_nparts > 0:
                     hold_avg /= hold_nparts
                 if n_dim == 2:
-                    imsave(hold_dir+'/class_k'+str(k_id)+'.png', hold_avg)
+                    imwrite(hold_dir+'/class_k'+str(k_id)+'.png', lin_map(hold_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
                 else:
                     disperse_io.save_numpy(hold_avg, hold_dir+'/class_k'+str(k_id)+'.mrc')
 
@@ -1656,7 +1658,7 @@ class ClassStar(object):
                 hold = self.__star.get_element('_psAPCenter', row)
                 if hold >= 0:
                     if len(self.__particles[row].shape) == 2:
-                        imsave(hold_dir+'/class_k'+str(hold)+'.png', self.__particles[row])
+                        imwrite(hold_dir+'/class_k'+str(hold)+'.png', lin_map(self.__particles[row],0,np.iinfo(np.uint16).max).astype(np.uint16))
                     else:
                         disperse_io.save_numpy(self.__particles[row], hold_dir+'/class_k'+str(hold)+'.mrc')
 
@@ -1703,7 +1705,7 @@ class ClassStar(object):
                 hold_avg, hold_nparts = d_parts[k_id], float(d_count[k_id])
                 if hold_nparts > 0:
                     hold_avg /= hold_nparts
-                imsave(hold_dir+'/class_k'+str(k_id)+'.png', hold_avg)
+                imwrite(hold_dir+'/class_k'+str(k_id)+'.png', lin_map(hold_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
 
         elif mode == 'exemplars':
             if not self.__star.has_column('_psAPCenter'):
@@ -1717,7 +1719,7 @@ class ClassStar(object):
                 if hold >= 0:
                     in_fname = imgs_dir + '/particle_' + str(row) + '.npy'
                     hold_particle = np.load(in_fname)
-                    imsave(hold_dir+'/class_k'+str(hold)+'.png', hold_particle)
+                    imwrite(hold_dir+'/class_k'+str(hold)+'.png', lin_map(hold_particle,0,np.iinfo(np.uint16).max).astype(np.uint16))
 
         elif mode == 'classes':
             klass_col = self.__star.get_column_data('_rlnClassNumber')
@@ -1730,7 +1732,7 @@ class ClassStar(object):
                 in_fname = imgs_dir + '/particle_' + str(row) + '.png'
                 out_fname = out_dir + '/' + out_stem + '_class_k' + str(k_id) + '/particle_' + str(row) + '.png'
                 hold_particle = imread(in_fname)
-                imsave(out_fname, hold_particle)
+                imwrite(out_fname, lin_map(hold_particle,0,np.iinfo(np.uint16).max).astype(np.uint16))
 
         else:
             error_msg = 'Mode ' + str(mode) + ' is not valid!'
@@ -1778,13 +1780,13 @@ class ClassStar(object):
             else:
                 for i, part in enumerate(self.__particles):
                     hold_fname =out_dir + '/' + out_stem + '_particle_' + str(i)
-                    imsave(hold_fname+'.png', part)
+                    imwrite(hold_fname+'.png', lin_map(part,0,np.iinfo(np.uint16).max).astype(np.uint16))
                     if masks:
-                        imsave(hold_fname+'_mask.png', self.__masks[i])
+                        imwrite(hold_fname+'_mask.png', lin_map(self.__masks[i],0,np.iinfo(np.uint16).max).astype(np.uint16))
 
     # fname: file name ended with .pkl
     def pickle(self, fname):
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:
@@ -1830,8 +1832,8 @@ class ClassStar(object):
                                   preference=preference)
         aff.fit(cc)
         if aff.n_iter_ >= max_iter:
-            print 'WARNING: __affinity_propagation_cc (ClassStar): AP reached the maximum iterations (' + str(max_iter) + \
-                ') without converging, its results might be meaningless!'
+            print('WARNING: __affinity_propagation_cc (ClassStar): AP reached the maximum iterations (' + str(max_iter) + \
+                ') without converging, its results might be meaningless!')
         return aff.labels_, aff.cluster_centers_indices_
 
     # Classify particle by maximum CC to some exemplars, then the final number equals the number of exemplars
@@ -1875,8 +1877,8 @@ class ClassStar(object):
         # Create the list on indices to split
         npart, ntemps = self.__star.get_nrows(), len(ex_temps)
         sym_ids = np.arange(npart)
-        spl_ids = np.array_split(range(len(sym_ids)), npr)
-        shared_mat_cce = mp.Array('f', npart*ntemps)
+        spl_ids = np.array_split(list(range(len(sym_ids))), npr)
+        shared_mat_cce = mp.Array('f', int(npart*ntemps))
 
         # Particles loop (Parallel)
         if npr <= 1:
@@ -1946,7 +1948,7 @@ class ClassStar(object):
         # Create the list on indices to split
         part_h, part_r = averager.get_output_dim()
         part_sz = int(part_h * part_r)
-        particles_sh, masks_sh = mp.Array('f', part_h*part_r*npart), mp.Array('f', part_h*part_r*npart)
+        particles_sh, masks_sh = mp.Array('f', int(part_h*part_r*npart)), mp.Array('f', int(part_h*part_r*npart))
 
         # Loading particles loop (Parallel)
         if npr <= 1:

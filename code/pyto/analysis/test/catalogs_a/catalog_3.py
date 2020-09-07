@@ -3,23 +3,24 @@
 Catalog example for testing analysis.catalog
 
 # Author: Vladan Lucic
-# $Id: catalog_3.py 988 2013-09-27 07:50:48Z vladan $
+# $Id$
 """
+#from __future__ import unicode_literals
 
-__version__ = "$Revision: 988 $"
+__version__ = "$Revision$"
 
 
 
-identifier = 'exp_3'
+identifier = u'exp_3'
 
-results_file = 'results_3.dat'
-results_obj = 'results_3.pkl'
+results_file = u'results_3.dat'
+results_obj = u'results_3.pkl'
 
-cleft_columns_obj = 'cleft_columns_3.pkl'
+cleft_columns_obj = u'cleft_columns_3.pkl'
 
-category = 'first'
+category = u'first'
 
-feature = 'good'
+feature = u'good'
 
 pixel_size=3.3
 

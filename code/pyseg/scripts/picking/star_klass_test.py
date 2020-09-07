@@ -81,75 +81,75 @@ ag_linkage = 'average' # 'complete'
 
 ########## Print initial message
 
-print 'Test for deterministic classification of a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + str(in_star)
-print '\tOutput directory: ' + str(out_dir)
-print '\tOutput stem for AP: ' + str(out_stem_ap)
-print '\tOutput stem for AG: ' + str(out_stem_ag)
-print '\tParticles pre-processing:'
-print '\t\t-Mask: ' + str(pp_mask)
-print '\t\t-Low pass Gaussian filter sigma: ' + str(pp_low_sg) + ' voxels'
+print('Test for deterministic classification of a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + str(in_star))
+print('\tOutput directory: ' + str(out_dir))
+print('\tOutput stem for AP: ' + str(out_stem_ap))
+print('\tOutput stem for AG: ' + str(out_stem_ag))
+print('\tParticles pre-processing:')
+print('\t\t-Mask: ' + str(pp_mask))
+print('\t\t-Low pass Gaussian filter sigma: ' + str(pp_low_sg) + ' voxels')
 if pp_rln_norm:
-    print '\t\t-Normalize particles according relion convention.'
+    print('\t\t-Normalize particles according relion convention.')
 if pp_2d_norm:
-    print '\t\t-Renormalize particles after the radial averaging.'
+    print('\t\t-Renormalize particles after the radial averaging.')
 if pp_3d:
-    print '\t\t-Radial compensation for 3D.'
+    print('\t\t-Radial compensation for 3D.')
 if pp_npr is None:
-    print '\t\t-Number of processes: Auto'
+    print('\t\t-Number of processes: Auto')
 else:
-    print '\t\t-Number of processes: ' + str(pp_npr)
+    print('\t\t-Number of processes: ' + str(pp_npr))
 if pp_direct:
-    print '\t\t-Direct particles loading activated.'
+    print('\t\t-Direct particles loading activated.')
 if pp_n_sset:
-    print '\t\t-Taking a random subset of: ' + str(pp_n_sset) + ' particles'
+    print('\t\t-Taking a random subset of: ' + str(pp_n_sset) + ' particles')
 if cu_mode == 'ncc_2dz':
-    print '\tCC Z-axis radially averages matrix parameters: '
-    print '\t\t-Metric: ' + str(cc_metric)
+    print('\tCC Z-axis radially averages matrix parameters: ')
+    print('\t\t-Metric: ' + str(cc_metric))
     if cc_npr is None:
-        print '\t\t-Number of processes: Auto'
+        print('\t\t-Number of processes: Auto')
     else:
-        print '\t\t-Number of processes: ' + str(cc_npr)
-print '\tClustering: '
-print '\t\t-Mode: ' + str(cu_mode)
+        print('\t\t-Number of processes: ' + str(cc_npr))
+print('\tClustering: ')
+print('\t\t-Mode: ' + str(cu_mode))
 if cu_mode != 'ncc_2dz':
-    print '\t\t-Number of components: ' + str(cu_n_comp)
-print '\t\tAffinity Propagation classification settings: '
-print '\t\t\t-Damping: ' + str(ap_damp)
+    print('\t\t-Number of components: ' + str(cu_n_comp))
+print('\t\tAffinity Propagation classification settings: ')
+print('\t\t\t-Damping: ' + str(ap_damp))
 if ap_pref is not None:
-    print '\t\t\t-Affinity propagation preference: ' + str(ap_pref)
-print '\t\t\t-Maximum number of iterations: ' + str(ap_max_iter)
-print '\t\t\t-Iterations for convergence: ' + str(ap_conv_iter)
-print '\t\t\t-Reference for statistics: ' + str(ap_ref)
-print '\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %'
-print '\t\tAgglomerative clustering classificiation settings: '
-print '\t\t\t-Number of clusters to find: ' + str(ag_n_clusters)
-print '\t\t\t-Linkage: ' + str(ag_linkage)
-print '\tClassification post-processing: '
-print ''
+    print('\t\t\t-Affinity propagation preference: ' + str(ap_pref))
+print('\t\t\t-Maximum number of iterations: ' + str(ap_max_iter))
+print('\t\t\t-Iterations for convergence: ' + str(ap_conv_iter))
+print('\t\t\t-Reference for statistics: ' + str(ap_ref))
+print('\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %')
+print('\t\tAgglomerative clustering classificiation settings: ')
+print('\t\t\t-Number of clusters to find: ' + str(ag_n_clusters))
+print('\t\t\t-Linkage: ' + str(ag_linkage))
+print('\tClassification post-processing: ')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading STAR file...'
+print('\tLoading STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
     if pp_n_sset:
-        print '\t\tCurrent STAR file has ' + str(star.get_nrows()) + ' particles'
-        print '\t\tGetting a random subset of ' + str(pp_n_sset) + ' particles'
+        print('\t\tCurrent STAR file has ' + str(star.get_nrows()) + ' particles')
+        print('\t\tGetting a random subset of ' + str(pp_n_sset) + ' particles')
         star = star.gen_random_subset(pp_n_sset)
     star_class = ps.sub.ClassStar(star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tLoading and pre-processing the particles...'
+print('\tLoading and pre-processing the particles...')
 try:
     mask = ps.disperse_io.load_tomo(pp_mask)
     star_class.load_particles(mask, low_sg=pp_low_sg, avg_norm=pp_2d_norm, rln_norm=pp_rln_norm, rad_3D=pp_3d,
@@ -157,48 +157,48 @@ try:
     star_class.save_particles(out_dir+'/all_particles', out_stem_ap, masks=True, stack=True)
     imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Particles could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Particles could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if cu_mode == 'ncc_2dz':
-    print '\tBuilding the NCC matrix...'
+    print('\tBuilding the NCC matrix...')
     try:
         star_class.build_ncc_z2d(metric=cc_metric, npr=cc_npr)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 elif cu_mode == 'vectors':
-    print '\tBuilding vectors...'
+    print('\tBuilding vectors...')
     try:
         star_class.build_vectors()
         if cu_n_comp is not None:
             star_class.vectors_dim_reduction(n_comp=cu_n_comp, method='pca')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 
-print '\tPreparing the ground truth...'
+print('\tPreparing the ground truth...')
 gt_imgs = list()
 for i in range(gt_mask.shape[0]):
     if gt_mask[i]:
         gt_imgs.append(star.get_element(key='_rlnImageName', row=i))
 
-print '\tAffinity Propagation classification...'
+print('\tAffinity Propagation classification...')
 try:
         star_class.affinity_propagation(mode_in=cu_mode, damping=ap_damp, preference=ap_pref,
                                         max_iter=ap_max_iter, convergence_iter=ap_conv_iter,
                                         verbose=True)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Classification failed because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Classification failed because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star_class.update_relion_classes()
 split_stars = star_class.get_split_stars()
 
-print '\t\tEvaluating the classification:'
+print('\t\tEvaluating the classification:')
 n_pos, n_tot = float(gt_mask.sum()), float(gt_mask.shape[0])
 tp_lut, np_lut = np.zeros(shape=len(split_stars), dtype=np.float32), np.zeros(shape=len(split_stars), dtype=np.float32)
 fp_lut = np.zeros(shape=len(split_stars), dtype=np.float32)
@@ -215,12 +215,12 @@ for k_id in range(tp_lut.shape[0]):
 fpr = fp / float(n_tot-n_pos)
 tp = tp_lut[k_max_id]
 tpr = tp / float(n_pos)
-print '\t\t-Principal class found ' + str(k_max_id) + ' P=' + str(np_lut[k_max_id]) + ': [TP=' + str(int(tp)) + \
-      ', TPR=' + str(tpr) + ']' + '/ [FP=' + str(int(fp)) + ', FPR=' + str(fpr) + ']'
+print('\t\t-Principal class found ' + str(k_max_id) + ' P=' + str(np_lut[k_max_id]) + ': [TP=' + str(int(tp)) + \
+      ', TPR=' + str(tpr) + ']' + '/ [FP=' + str(int(fp)) + ', FPR=' + str(fpr) + ']')
 for k_id in np.argsort(tp_lut)[::-1]:
-    print '\t\t\t-Class ' + str(k_id) + ' NP=' + str(np_lut[k_id]) + ' Pk=' + str(float(tp_lut[k_id])/np_lut[k_id])
+    print('\t\t\t-Class ' + str(k_id) + ' NP=' + str(np_lut[k_id]) + ' Pk=' + str(float(tp_lut[k_id])/np_lut[k_id]))
 
-print '\t\tStoring the results...'
+print('\t\tStoring the results...')
 try:
     star_class.save_star(out_dir, out_stem_ap, parse_rln=True, mode='gather')
     star_class.save_star(out_dir, out_stem_ap, parse_rln=True, mode='split')
@@ -228,24 +228,24 @@ try:
     star_class.save_class(out_dir, out_stem_ap, purge_k=0, mode='exemplars')
     star_class.save_class(out_dir, out_stem_ap, purge_k=0, mode='averages')
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Result could not be stored because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Result could not be stored because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if cu_mode == 'ncc_2dz':
 
-    print '\tAgglomerative clustering classification...'
+    print('\tAgglomerative clustering classification...')
     try:
             star_class.agglomerative_clustering(mode_in=cu_mode, n_clusters=ag_n_clusters, linkage=ag_linkage,knn=3,
                                             verbose=True)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: Classification failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Classification failed because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     star_class.update_relion_classes()
     split_stars = star_class.get_split_stars()
 
-    print '\t\tEvaluating the classification:'
+    print('\t\tEvaluating the classification:')
     n_pos, n_tot = float(gt_mask.sum()), float(gt_mask.shape[0])
     tp_lut, np_lut = np.zeros(shape=len(split_stars), dtype=np.float32), np.zeros(shape=len(split_stars), dtype=np.float32)
     fp_lut = np.zeros(shape=len(split_stars), dtype=np.float32)
@@ -262,12 +262,12 @@ if cu_mode == 'ncc_2dz':
     fpr = fp / float(n_tot-n_pos)
     tp = tp_lut[k_max_id]
     tpr = tp / float(n_pos)
-    print '\t\t-Principal class found ' + str(k_max_id) + ' P=' + str(np_lut[k_max_id]) + ': [TP=' + str(int(tp)) + \
-          ', TPR=' + str(tpr) + ']' + '/ [FP=' + str(int(fp)) + ', FPR=' + str(fpr) + ']'
+    print('\t\t-Principal class found ' + str(k_max_id) + ' P=' + str(np_lut[k_max_id]) + ': [TP=' + str(int(tp)) + \
+          ', TPR=' + str(tpr) + ']' + '/ [FP=' + str(int(fp)) + ', FPR=' + str(fpr) + ']')
     for k_id in np.argsort(tp_lut)[::-1]:
-        print '\t\t\t-Class ' + str(k_id) + ' NP=' + str(np_lut[k_id]) + ' Pk=' + str(float(tp_lut[k_id]) / np_lut[k_id])
+        print('\t\t\t-Class ' + str(k_id) + ' NP=' + str(np_lut[k_id]) + ' Pk=' + str(float(tp_lut[k_id]) / np_lut[k_id]))
 
-print '\t\tStoring the results...'
+print('\t\tStoring the results...')
 try:
     star_class.save_star(out_dir, out_stem_ag, parse_rln=True, mode='gather')
     star_class.save_star(out_dir, out_stem_ag, parse_rln=True, mode='split')
@@ -275,8 +275,8 @@ try:
     star_class.save_class(out_dir, out_stem_ag, purge_k=16, mode='exemplars')
     star_class.save_class(out_dir, out_stem_ag, purge_k=16, mode='averages')
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Result could not be stored because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Result could not be stored because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

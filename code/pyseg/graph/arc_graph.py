@@ -7,13 +7,13 @@ Clases for reducing the size of a SkelGraph but keeping its topology
 
 __author__ = 'martinez'
 
-from core import *
+from .core import *
 try:
     import disperse_io
 except:
     import pyseg.disperse_io
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 

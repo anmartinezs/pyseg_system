@@ -2,10 +2,18 @@
 Contains class Gray for segmentation related analysis of grayscale (3D) images.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: grey.py 1061 2014-10-10 15:30:53Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1061 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -18,7 +26,7 @@ import scipy.ndimage as ndimage
 
 from pyto.grey.image import Image
 #from density import Density
-from statistics import Statistics
+from .statistics import Statistics
 #from segment import Segment
 #from morphology import Morphology
 
@@ -94,11 +102,11 @@ class Grey(Image):
             else: 
                 t_data = self.data >= threshold
         except AttributeError:
-            print "Data not found."
+            print("Data not found.")
             raise
 
         # make a Segment instance and preserve offset and inset
-        from segment import Segment
+        from .segment import Segment
         seg = Segment(data=t_data, copy=False, clean=False)
         seg.copyPositioning(self, saveFull=True)
 
@@ -166,7 +174,7 @@ class Grey(Image):
             else:
                 values = values_data
             labels, bin_ids = cls.labelByBins(values, [bins])
-            bin_ids = dict([(key, value[0]) for key, value in bin_ids.items()])
+            bin_ids = dict([(key, value[0]) for key, value in list(bin_ids.items())])
             return labels, bin_ids
 
         # make explicit bins and max values for each binning
@@ -187,7 +195,7 @@ class Grey(Image):
 
             # label for the current combination
             tmp_labels = numpy.ones(shape=new_shape, dtype=bool)
-            for one_bin, index in zip(combination, range(n_dim)):
+            for one_bin, index in zip(combination, list(range(n_dim))):
                 tmp_labels = tmp_labels & (values[index] >= one_bin[0])
 
             # update
@@ -196,7 +204,7 @@ class Grey(Image):
             bin_ids[id_] = combination
 
         # limit lables for highest bins
-        for one_max, index in zip(bin_max, range(n_dim)):
+        for one_max, index in zip(bin_max, list(range(n_dim))):
             labels[values[index] > one_max] = 0
 
         # make sure masked elements are 0
@@ -326,7 +334,7 @@ class Grey(Image):
           max, minPos, maxPos). 
         """
 
-        from segment import Segment
+        from .segment import Segment
 
         # set segment related
         if segment is None: 
@@ -405,8 +413,8 @@ class Grey(Image):
         Returns (Density) density with attributes mean, std, min, max and volume
         """
         
-        from morphology import Morphology 
-        from density import Density
+        from .morphology import Morphology 
+        from .density import Density
 
         # set ids
         if ids is None:
@@ -492,7 +500,7 @@ class Grey(Image):
         """
 
         # here to avoid circular imports
-        from density import Density
+        from .density import Density
 
         # parse arguments
         if ids is None:
@@ -606,8 +614,8 @@ class Grey(Image):
         ids = numpy.asarray(ids)
 
         # get centers
-        from morphology import Morphology 
-        from segment import Segment 
+        from .morphology import Morphology 
+        from .segment import Segment 
         mor = pyto.segmentation.Morphology(segments=segments)
         seg_centers = mor.getCenter(real=True, inset=True)
         

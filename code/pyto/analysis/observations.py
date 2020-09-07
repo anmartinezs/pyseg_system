@@ -3,10 +3,19 @@ Defines class Observations that can hold data form one or more observations
 (experiments). 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: observations.py 1517 2019-02-20 11:33:20Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1517 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -17,9 +26,13 @@ from copy import copy, deepcopy
 
 import numpy
 import scipy
-
-import pyto.util.nested
-from experiment import Experiment
+try:
+    import pandas as pd
+except ImportError:
+    pass # Python 2
+import pyto
+from ..util import nested
+from .experiment import Experiment
 
 
 class Observations(object):
@@ -45,7 +58,7 @@ class Observations(object):
     of index attribute.
 
     Meta-data attributes (obligatory):
-      - properties: set of paroperties (names), indexed and non-indexed
+      - properties: set of properties (names), indexed and non-indexed
       - indexed: set of indexed properties (names)
 
     Observation related, non-indexed attributes:
@@ -88,7 +101,7 @@ class Observations(object):
                              + " only on objects that have no identifiers.")
 
         # initialize
-        if isinstance(names, str):
+        if isinstance(names, basestring):
             names = [names]
         for nam in names:
             self.properties.add(nam)
@@ -145,7 +158,7 @@ class Observations(object):
         """
         if catalog is None: return
 
-        for property, values in catalog._db.items():
+        for property, values in list(catalog._db.items()):
             for identifier in self.identifiers:
                 one_value = catalog._db[property].get(identifier, default)
                 self.setValue(identifier=identifier, property=property,
@@ -301,7 +314,7 @@ class Observations(object):
             
         # get observation values
         exp_index = self.getExperimentIndex(identifier=identifier)
-        if exp_index == None:
+        if exp_index is None:
             raise ValueError("Experiment identifier " + str(identifier) + 
                              " doesn't exist.") 
         value = getattr(self, property)[exp_index]
@@ -511,6 +524,142 @@ class Observations(object):
                     cur_value.append(default)
                     setattr(self, cur_prop, cur_value)
 
+    def get_indexed_data(self, identifiers=None, names=None, additional=[]):
+        """
+        Returns pandas.DataFrame that contains all indexed data.
+
+        Columns correspond to properties. A row corresponds to a single element
+        of one experiment and it is uniquely specified by identifier, index
+        pair.
+
+        If the current object does not contain any experiment identifier
+        (self.identifiers), None is returned.
+
+        Arguments:
+          - identifiers: list of identifiers, if None self.identifiers are used 
+          - names: list of indexed properties, if None self.indexed is used
+          - additional: list of other properties
+
+        Returns DataFrame, the columns are:
+          - identifier
+          - self.index (usually ids)
+          - indexed properties, elements of self.indexed (sorted) or names, 
+          except self.index 
+          - all properties listed in arg additional
+        """
+
+        # sort out identifiers
+        if identifiers is None:
+            identifiers = self.identifiers
+        if (identifiers is None) or (len(identifiers) == 0):
+            return None
+
+        # properties to includefigure out columns
+        ids_name = self.index
+        if names is None:
+            names = sorted(self.indexed)
+        try:
+            names.remove('identifiers')
+        except ValueError: pass
+        try:
+            names.remove(ids_name)
+        except ValueError: pass
+        columns_clean = names + additional
+        columns = ['identifiers', ids_name] + columns_clean
+
+        # get data for all experiments
+        for ident in identifiers:
+            if ident not in self.identifiers: continue
+            
+            data = {}
+            data['identifiers'] = ident
+            data[ids_name] = self.getValue(identifier=ident, name=ids_name)
+
+            # get data for all indexed properties
+            for name in columns_clean:
+                data_value = self.getValue(identifier=ident, name=name)
+
+                # deal with data >1 dimensional nd arrays
+                if (isinstance(data_value, numpy.ndarray)
+                    and len(data_value.shape) > 1):
+                    data_value = [
+                        data_value[ind] for ind
+                        in list(range(data_value.shape[0]))]
+
+                data[name] = data_value
+                        
+            # update data
+            data_indexed_local = pd.DataFrame(data, columns=columns)
+            try:
+                data_indexed = data_indexed.append(
+                    data_indexed_local, ignore_index=True)
+            except (NameError, AttributeError):
+                data_indexed = pd.DataFrame(data, columns=columns)
+
+        return data_indexed
+
+    indexed_data = property(
+        get_indexed_data, doc="Indexed data in pandas.DataFrame")
+                
+    def get_scalar_data(self, identifiers=None, names=None):
+        """
+        Returns pandas.DataFrame that contains scalar (non-indexed) data.
+
+        Columns correspond to properties. Rows correspond to individual 
+        experiments (observations).
+
+        Arguments:
+          - identifiers: list of identifiers, if None self.identifiers is used
+          - names: list of properties, if None all scalar properties
+          are returned
+
+        Returns dataframe having the following columns:
+          - identifiers
+          - other properties sorted by name, except identifiers
+        """
+
+        # sort out identifiers
+        if identifiers is None:
+            identifiers = self.identifiers
+        if (identifiers is None) or (len(identifiers) == 0):
+            return None
+
+        # figure out columns
+        if names is None:
+            names = sorted(self.properties.difference(self.indexed))
+        try: 
+            names.remove('identifiers')
+        except ValueError: pass
+        columns_clean = names
+        columns = ['identifiers'] + columns_clean
+
+        # get data for all experiments
+        data = {}
+        for ident in identifiers:
+            if ident not in self.identifiers: continue
+
+            # get identifier
+            try:
+                data['identifiers'].append(ident)
+            except (NameError, KeyError):
+                data['identifiers'] = [ident]
+
+            # get data for all properties
+            for name in columns_clean:
+                value = self.getValue(identifier=ident, name=name)
+                try:
+                    data[name].append(value)
+                except (NameError, KeyError):
+                    data[name] = [value]
+
+        # set data
+        data_scalar = pd.DataFrame(data, columns=columns)
+
+        return data_scalar
+        
+    scalar_data = property(
+        get_scalar_data, doc="Scalar data in pandas.DataFrame")
+                
 
     #######################################################
     #
@@ -523,7 +672,7 @@ class Observations(object):
         Adds properties listed in arg names of another Observations object
         (arg source) to this instance. 
 
-        In arg names is a list added properties retain their names, and so 
+        If arg names is a list added properties retain their names, and so 
         will overwrite the properties having same names of this instance (if 
         they exist). Otherwise, if names is a dictionary, the keys are the 
         property names in source object and values are the corresponding names 
@@ -637,7 +786,7 @@ class Observations(object):
         """
 
         # wrap this instance in a Group
-        from groups import Groups
+        from .groups import Groups
         groups = Groups()
         groups['_dummy'] = self
 
@@ -1197,7 +1346,20 @@ class Observations(object):
                 if (n - ddof) < 0:
                     std = numpy.nan
                 else:
-                    std = numpy.std(data, ddof=ddof)
+                    # don't show warning if too few data elements
+                    if len(data) > ddof:
+                        std = numpy.std(data, ddof=ddof)
+                    else:
+                        std = numpy.NaN
+                    # nicer but doesn't work
+                    #try:
+                    #    std = numpy.std(data, ddof=ddof)
+                    #except RuntimeWarning:
+                    #    if len(data) > ddof:
+                    #        raise
+                    #    else:
+                    #        pass                        
+                        
                 observ.setValue(property='std', identifier=ident, value=std)
                 sem = std / numpy.sqrt(n)
                 observ.setValue(property='sem', identifier=ident, value=sem)
@@ -1397,6 +1559,8 @@ class Observations(object):
  
                 # other tests
                 try:
+                    # generates RuntimeWarning if too few data
+                    # better not catch
                     test_value, confid = test_method(data, ref_data)
                 except ValueError:
                     # deals with Kruskal
@@ -1662,7 +1826,7 @@ class Observations(object):
         # set output 
         if out is None:
             return
-        elif isinstance(out, str):
+        elif isinstance(out, basestring):
             out = open(out)
 
         # print title

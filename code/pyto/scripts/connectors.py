@@ -45,10 +45,19 @@ and adjust the value if needed, and comment out the other options.
 because they most likely arise from calculating denisty of a 0-volume segment
 and are also a consequence of the changed behavior of scipy. 
 
-$Id: connectors.py 1493 2018-11-08 16:23:38Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1493 $"
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+from builtins import next
+#from builtins import str
+from builtins import range
+#from past.utils import old_div
+from past.builtins import basestring
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -69,7 +78,7 @@ from pyto.scene.segmentation_analysis import SegmentationAnalysis
 tomo_info = common.__import__(name='tomo_info', path='../common')
 
 # to debug replace INFO by DEBUG
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%d %b %Y %H:%M:%S')
 
@@ -125,8 +134,8 @@ if tomo_info is not None: labels_data_type = tomo_info.labels_data_type
 # labels file byteOrder ('<' for little-endian, '>' for big-endian)
 labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labels_array_order = 'FORTRAN'
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 # offset of labels in respect to the data (experimental)
 labels_offset = None             # no offset
@@ -318,14 +327,15 @@ class_1_mode = 'new'
 
 # classification 2
 class_2_type = 'contacted_ids'
-class_2_ids = [1]
+if tomo_info is not None: class_2_ids = [tomo_info.distance_id]
+#class_2_ids = [1]
 class_2_rest = True
-class_2_names = ['AZ', 'rest']
+class_2_names = ['tethers', 'connectors']
 
 # classification 3
-#class_3_type = 'volume'
-#class_3_volumes = [5, 100, 1000]
-#class_3_names = ['small', 'big']
+class_3_type = 'volume'
+class_3_volumes = [0, 3, 600, 100000]  # in pixels
+class_3_names = ['small', 'good', 'big']
 
 
 ###########################################################
@@ -353,8 +363,7 @@ where_length = 'both'
 #     points on boundaries, 'c2c' on segments, 'b2c' between boundary contact
 #     points on one end and segment contact points on the other end and
 #     'c2b' the other way round
-length_contact_mode = 'c2c'
-#length_contact_mode = 'b2c' expected to become the default in the future
+length_contact_mode = 'b2c'
 
 # segment length line mode:
 #   - 'straight': straight-line distance between contacts (two boundaries) or
@@ -375,7 +384,8 @@ where_distance_to = 'segmentation'
 # Region id, or if more than one distance region is specified, for each segment 
 # the distance to the closest region is calculated. In case of multiple labels 
 # files this id is understood after the ids of the labels files are shifted.
-distance_id = 1   # one region
+if tomo_info is not None: distance_id = tomo_info.distance_id
+#distance_id = 1   # one region
 #distance_id = range(2,20)   # multiple regions
 
 # the way distance is calculated ('center', 'mean' or 'min')
@@ -528,6 +538,8 @@ def do_segmentation(image, bound, bound_ids, sa_file_name, inset):
         thresh = threshold
     else:
         thresh = [threshold]
+    if len(thresh) == 0:
+        raise ValueError("Threshold parameter has no values") 
 
     # prepare for segmentation and analysis
     sa = SegmentationAnalysis(boundary=bound)
@@ -561,7 +573,7 @@ def do_segmentation(image, bound, bound_ids, sa_file_name, inset):
                      + tr_str)
 
         # segment at this threshold
-        sa_level, level, curr_thresh = tc_iter.next()
+        sa_level, level, curr_thresh = next(tc_iter)
 
         # set analysis parameters
         sa.setAnalysisParameters(
@@ -767,7 +779,7 @@ def set_classifications(analysis, max_class=100):
         # parse classification parameters
         prefix = 'class_' + str(ind) + '_'
         args = {}
-        for name, value in globals().items():
+        for name, value in list(globals().items()):
             if name.startswith(prefix):
                 class_arg_name = name.lstrip(prefix)
                 if class_arg_name != 'type':
@@ -849,14 +861,15 @@ def is_multi_boundaries():
 
     Depreciated
     """
-    if isinstance(labels_file_name, str):
+    if isinstance(labels_file_name, basestring):
         return False
     elif (isinstance(labels_file_name, tuple) 
           or isinstance(labels_file_name, list)):
         return True
     else:
-        raise ValueError("Labels_file_name has to be either a string (one " 
-                         + "labels file) or a tuple (multiple labels files).")
+        raise ValueError(
+            "Labels_file_name has to be either a string (one " 
+            + "labels file) or a tuple (multiple labels files).")
 
 def read_single_boundaries():
     """
@@ -1043,7 +1056,7 @@ def write_results(analysis, thresh=None, ref_name=None, name='', ids=None):
     out_format = ' %3u'
 
     # threshold
-    if mode is 'hierarchy':
+    if mode == 'hierarchy':
         tab_head[0] += " Thresh"
         tab_head[1] += "       "
         out_vars += [labels.thresh]
@@ -1148,7 +1161,7 @@ def write_results(analysis, thresh=None, ref_name=None, name='', ids=None):
             out_vars = (reg_dens.mean, reg_dens.std, reg_dens.min, 
                         reg_dens.max, reg_dens.volume)
             out_format = '    %7.3f %6.3f %7.3f %7.3f %6u'
-            if mode is 'hierarchy':
+            if mode == 'hierarchy':
                 out_format = '       ' + out_format
             cleft_line = out_format % out_vars
             fd.write('#' + cleft_line + os.linesep)

@@ -7,7 +7,7 @@ import numpy as np
 import vtk
 import math
 import graph_tool.all as gt
-from variables import *
+from .variables import *
 import scipy as sp
 import matplotlib.pylab as plt
 import random as rnd
@@ -58,7 +58,7 @@ def read_csv_mts(fname, coords_cols, id_col, swap_xy=False):
 
         # Dictionary creation
         mt_dict = dict.fromkeys(set(ids))
-        for key in mt_dict.iterkeys():
+        for key in mt_dict.keys():
             mt_dict[key] = list()
         for key, coord in zip(ids, coords):
             mt_dict[key].append(coord)
@@ -871,7 +871,7 @@ def clahe_array(array, N=256, clip_f=100, s_max=4):
     try:
         return ((N_f-1.) / M) * np.cumsum(hist), x_trans
     except ZeroDivisionError:
-        print 'WARNING (clahe_array): CDF is zero!'
+        print('WARNING (clahe_array): CDF is zero!')
         return np.zeros(shape=len(hist), dtype=hist.dtype), x_trans
 
 # Equal to clahe_array but now only transformation array is returned whose range are [0,N-1] and has
@@ -910,7 +910,7 @@ def clahe_array2(array, N=256, clip_f=100, s_max=4):
     try:
         return  ((N_f-1.) / M) * np.cumsum(hist)
     except ZeroDivisionError:
-        print 'WARNING (clahe_array): CDF is zero!'
+        print('WARNING (clahe_array): CDF is zero!')
         return np.zeros(shape=len(hist), dtype=hist.dtype)
 
 # Compute center of gravity from point coordinates in 2D
@@ -924,7 +924,7 @@ def cgravity_points_2d(points):
 
 # Applies digital low pass Butterworth filter to a tomogram
 # tomo: input tomogram 3D
-# cl: cut of frequency (voxels)
+# cl: cut off frequency (voxels)
 # n: filter order (default 5)
 # fs: if fs is True, default False then the filter is return in the fourier space (zero shifted) instead the filtered version of
 #     the input tomogram
@@ -974,9 +974,9 @@ def tomo_butter_low(tomo, cl, n=5, fs=False):
     del Y
     del Z
     Hl = 1. / (1.+np.power(R/cl, 2*n))
+    del R
     if fs:
         return Hl
-    del R
 
     # pyseg.disperse_io.save_numpy(Hl, '/home/martinez/workspace/disperse/data/marion/cluster/out/Hl.mrc')
     # hold = np.zeros(tomo.shape, dtype=np.float32)
@@ -985,6 +985,83 @@ def tomo_butter_low(tomo, cl, n=5, fs=False):
 
     # Filtering
     return np.real(np.fft.ifftn(np.fft.fftn(tomo) * np.fft.fftshift(Hl)))
+
+
+def gaussian_low(img, c_res, c=0.5, vx_size=1):
+    """
+    Gaussian low-pass filter set up by its cut off resolution (1/frequency)
+    :param img: input numpy 3D image
+    :param c_res: cut-off resolution (1/fcut-off)
+    :param c: amplituded at cut-off (default 0.5)
+    :param vx_size: voxel size size (1/sampling_rate)
+    :return: The filtered image
+    """
+
+    # Input parsing
+    assert (c_res > 0) and (c > 0) and (vx_size > 0)
+
+    # Initialization
+    f_c = vx_size / c_res
+    s_f = f_c / math.sqrt(2. * math.log(1. / c))
+    s = 1. / (2. * np.pi * s_f)
+
+    # Filtering
+    return sp.ndimage.gaussian_filter(img, s)
+
+def gen_gaussian_low(img, c_res, c=0.5, vx_size=1):
+    """
+    Generates a 3D Gaussian low-pass filter set up by its cut off resolution (1/frequency) in the Fourier space
+    :param img: input numpy 3D image
+    :param c_res: cut-off resolution (1/fcut-off)
+    :param c: amplituded at cut-off (default 0.5)
+    :param vx_size: voxel size (1/sampling_rate)
+    :return: The filtered image
+    """
+
+    # Input parsing
+    assert (c_res > 0) and (c > 0) and (vx_size > 0)
+    assert isinstance(img, np.ndarray) and (len(img.shape) == 3)
+
+    # Initialization
+    f_vx = c_res / vx_size
+    ff_vx = min(img.shape) / (2. * np.pi * f_vx)
+    sf_vx = ff_vx / math.sqrt(2. * math.log(1. / c))
+
+    # Meshgrid generation
+    nx, ny, nz = (img.shape[0] - 1) * .5, (img.shape[1] - 1) * .5, (img.shape[2] - 1) * .5
+    if (nx % 1) == 0:
+        arr_x = np.concatenate((np.arange(-nx, 0, 1), np.arange(0, nx + 1, 1)))
+    else:
+        if nx < 1:
+            arr_x = np.arange(0, 1)
+        else:
+            nx = math.ceil(nx)
+            arr_x = np.concatenate((np.arange(-nx, 0, 1), np.arange(0, nx, 1)))
+    if (ny % 1) == 0:
+        arr_y = np.concatenate((np.arange(-ny, 0, 1), np.arange(0, ny + 1, 1)))
+    else:
+        if ny < 1:
+            arr_y = np.arange(0, 1)
+        else:
+            ny = math.ceil(ny)
+            arr_y = np.concatenate((np.arange(-ny, 0, 1), np.arange(0, ny, 1)))
+    if (nz % 1) == 0:
+        arr_z = np.concatenate((np.arange(-nz, 0, 1), np.arange(0, nz + 1, 1)))
+    else:
+        if nz < 1:
+            arr_z = np.arange(0, 1)
+        else:
+            nz = math.ceil(nz)
+            arr_z = np.concatenate((np.arange(-nz, 0, 1), np.arange(0, nz, 1)))
+    [X, Y, Z] = np.meshgrid(arr_x, arr_y, arr_z, indexing='ij')
+    X = X.astype(np.float32, copy=False)
+    Y = Y.astype(np.float32, copy=False)
+    Z = Z.astype(np.float32, copy=False)
+    R = np.sqrt(X * X + Y * Y + Z * Z)
+
+    # Building
+    return np.exp(-R / (2.*sf_vx*sf_vx))
+
 
 def signed_distance_2d(tomo, lbl=None, res=1, del_b=True, mode_2d=True, get_point=False, set_point=None):
     """
@@ -1528,7 +1605,7 @@ def closest_points(point, points, nn=1):
     eu_dsts = np.sqrt((eu_dsts * eu_dsts).sum(axis=1))
     n_ids = np.argsort(eu_dsts)
     out_points = np.zeros(shape=(nn, 3))
-    for i in xrange(nn):
+    for i in range(nn):
         out_points[i] = points[n_ids[i], :]
     return out_points
 
@@ -1615,7 +1692,7 @@ def vect_to_zrelion(v_in, mode='active'):
     try:
         n = v_m / math.sqrt((v_m*v_m).sum())
     except ZeroDivisionError:
-        print 'WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!'
+        print('WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!')
         return 0., 0., 0.
 
     # Computing angles in Extrinsic ZYZ system
@@ -1672,7 +1749,7 @@ def read_csv_mts(fname, coords_cols, id_col):
 
         # Dictionary creation
         mt_dict = dict.fromkeys(set(ids))
-        for key in mt_dict.iterkeys():
+        for key in mt_dict.keys():
             mt_dict[key] = list()
         for key, coord in zip(ids, coords):
             mt_dict[key].append(coord)
@@ -1701,7 +1778,7 @@ def randomize_voxel_mask(vol, mask, ref='fg'):
 
     # Randomization
     rnd_ids = np.random.randint(0, len(ref_ids[0]), size=len(bg_ids[0]))
-    for i in xrange(len(bg_ids[0])):
+    for i in range(len(bg_ids[0])):
         rnd_id = rnd_ids[i]
         x, y, z = bg_ids[0][i], bg_ids[1][i], bg_ids[2][i]
         rnd_x, rnd_y, rnd_z = ref_ids[0][rnd_id], ref_ids[1][rnd_id], ref_ids[2][rnd_id]

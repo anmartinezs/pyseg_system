@@ -3,7 +3,7 @@ from pyseg.globals import *
 from pyseg.graph import SkelGraph
 from pyseg.disperse_io import *
 import vtk
-import pyfits
+from astropy.io import fits
 
 __author__ = 'martinez'
 
@@ -13,7 +13,7 @@ class TestPointGeometry(TestCase):
 
         # TODO: skel_small.vtp is not a proper input
         # Reading the DISPERSE skeleton
-        print 'Loading skeleton...'
+        print('Loading skeleton...')
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName(DATA_DIR + '/skel_small.vtp')
         reader.Update()
@@ -21,7 +21,7 @@ class TestPointGeometry(TestCase):
         del reader
 
         # Reading the image with the manifolds
-        print 'Loading manifolds...'
+        print('Loading manifolds...')
         reader = vtk.vtkXMLImageDataReader()
         reader.SetFileName(DATA_DIR + '/manifolds.vti')
         reader.Update()
@@ -29,17 +29,17 @@ class TestPointGeometry(TestCase):
         del reader
 
         # Reading the density map
-        print 'Loading density...'
-        density = pyfits.getdata(DATA_DIR + '/density.fits')
+        print('Loading density...')
+        density = fits.getdata(DATA_DIR + '/density.fits')
 
         # Building the SkelGraph object
-        print 'Building the graph from the skeleton...'
+        print('Building the graph from the skeleton...')
         sgraph = SkelGraph(skel)
         sgraph.add_geometry(manifolds, density)
         sgraph.update()
 
         # Print the segmentation: densities and vertex labels
-        print 'Printing vertices in a image...'
+        print('Printing vertices in a image...')
         segs = sgraph.print_vertices()
         lbls = sgraph.print_vertices(STR_VERTEX_ID)
 

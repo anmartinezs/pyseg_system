@@ -7,10 +7,14 @@ ToDo:
   redundant by positioning in core.Image.
 
 # Author: Vladan Lucic, Max Planck Institute for Biochemistry
-# $Id: numpy_plus.py 880 2012-06-10 15:10:15Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+#from past.utils import old_div
 
-__version__ = "$Revision: 880 $"
+__version__ = "$Revision$"
 
 
 import numpy
@@ -40,11 +44,11 @@ def intersect_arrays(shape_1, shape_2, offset_1=None, offset_2=None):
         shape_1 = numpy.array(shape_1, dtype=defaultType)
     if not isinstance(shape_2, numpy.ndarray):
         shape_2 = numpy.array(shape_2, dtype=defaultType)
-    if offset_1 == None:
+    if offset_1 is None:
         offset_1 = numpy.zeros_like(shape_1)
     if not isinstance(offset_1, numpy.ndarray):
         offset_1 = numpy.array(offset_1, dtype=defaultType)
-    if offset_2 == None:
+    if offset_2 is None:
         offset_2 = numpy.zeros_like(shape_2)
     if not isinstance(offset_2, numpy.ndarray):
         offset_2 = numpy.array(offset_2, dtype=defaultType)
@@ -196,7 +200,7 @@ def wvar(array, weight, ddof=0):
 
     x2w = numpy.inner(array*array, weight)
     xw = numpy.inner(array, weight)
-    res = (x2w - xw * xw / weight.sum()) / (len(array) - ddof)
+    res = (x2w - xw * xw / weight.sum()) / float(len(array) - ddof)
     return res
 
 def update(a, b, mask, value=0):

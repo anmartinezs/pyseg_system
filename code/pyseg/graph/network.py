@@ -328,7 +328,7 @@ class NetFilaments(Network):
             for j in range(i+1, n_arcs):
                 a_i = arcs[i]
                 a_j = arcs[j]
-                if arcs[i] is arcs[j]:
+                if arcs[i] == arcs[j]:
                     a_i.set_property(STR_ARC_REDUNDANCY,
                                          a_i.get_property(STR_ARC_REDUNDANCY) + 1)
                     a_j.set_property(STR_ARC_REDUNDANCY,
@@ -619,7 +619,7 @@ class NetArcGraphs(Network):
         if len(arc_graphs) > 0:
             self.__skel = arc_graphs[0].get_skel()
             for i in range(1, len(arc_graphs)):
-                if self.__skel is not arc_graphs[i].get_skel():
+                if self.__skel != arc_graphs[i].get_skel():
                     error_msg = 'The skel must be the same object in all ArcGraphs.'
                     raise pexceptions.PySegInputWarning(expr='print_mask (NetArcGraphs)',
                                                         msg=error_msg)

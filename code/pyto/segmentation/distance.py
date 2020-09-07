@@ -1,9 +1,11 @@
 """
 Contains class Distance for the calculation of distances between given segments.
 
-# Author: Vladan Lucic
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
 # $Id$
 """
+from __future__ import unicode_literals
+from builtins import object
 
 __version__ = "$Revision$"
 
@@ -91,7 +93,7 @@ class Distance(object):
           - new: another instance
         """
 
-        for ids, value in new.distance.items():
+        for ids, value in list(new.distance.items()):
             self.setDistance(id_1=ids[0], id_2=ids[1], value=value)
 
     def calculate(self, segments, ids, force=False, mode='min'):

@@ -68,55 +68,55 @@ import matplotlib.pyplot as plt
 
 ########## Print initial message
 
-print 'Histogram analysis a STAR file(s).'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file 1: ' + in_star_1
+print('Histogram analysis a STAR file(s).')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file 1: ' + in_star_1)
 if in_col_1 == '_rlnRotation':
-    print '\tAnalyzing distance rotations'
+    print('\tAnalyzing distance rotations')
     if in_star_2 is not None:
-        print '\tInput file 2: ' + in_star_2
+        print('\tInput file 2: ' + in_star_2)
 else:
-    print '\t\t-Input column: ' + in_col_1
+    print('\t\t-Input column: ' + in_col_1)
     if in_star_2 is not None:
-        print '\tInput file 2: ' + in_star_2
-        print '\t\t-Input column: ' + in_col_2
-        print '\t\t-Operator: ' + str(in_op)
-print '\tHistogram parameters: '
-print '\t\t-Number of bins: ' + str(hist_nbins)
+        print('\tInput file 2: ' + in_star_2)
+        print('\t\t-Input column: ' + in_col_2)
+        print('\t\t-Operator: ' + str(in_op))
+print('\tHistogram parameters: ')
+print('\t\t-Number of bins: ' + str(hist_nbins))
 if hist_norm:
-    print '\t\t-Normalized'
-print ''
+    print('\t\t-Normalized')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR file(s)...'
+print('\tLoading input STAR file(s)...')
 star_1 = ps.sub.Star()
 try:
     star_1.load(in_star_1)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file \'' + str(in_star_1) +  '\' could not be read because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+    print('ERROR: input STAR file \'' + str(in_star_1) +  '\' could not be read because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
     sys.exit(-1)
 if in_star_2 is not None:
     star_2 = ps.sub.Star()
     try:
         star_2.load(in_star_2)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: input STAR file \'' + str(in_star_2) +  '\' could not be read because of "' + str(e.msg) + ', ' + str(e.expr) + '"'
+        print('ERROR: input STAR file \'' + str(in_star_2) +  '\' could not be read because of "' + str(e.msg) + ', ' + str(e.expr) + '"')
         sys.exit(-1)
 
-print '\tLoading column(s) data...'
+print('\tLoading column(s) data...')
 if in_col_1 == '_rlnRotation':
     if in_star_2 is None:
         rots, tilts, psis = star_1.get_column_data('_rlnAngleRot'), star_1.get_column_data('_rlnAngleTilt'), \
                             star_1.get_column_data('_rlnAnglePsi')
         if (rots is None) or (tilts is None) or (psis is None):
-            print 'ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_1
+            print('ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_1)
             sys.exit(-1)
-        print '\t\t-Performing data column operation...'
+        print('\t\t-Performing data column operation...')
         dat = list()
         rot_ref = np.zeros(shape=3, dtype=np.float)
         for i in range(star_1.get_nrows()):
@@ -125,9 +125,9 @@ if in_col_1 == '_rlnRotation':
         dat = list()
         dat_2 = star_2.get_column_data(in_col_2)
         if dat is None:
-            print 'ERROR: column \'' + str(in_col_2) + '\' is not present in STAR file \'' + str(in_star_2) + '\''
+            print('ERROR: column \'' + str(in_col_2) + '\' is not present in STAR file \'' + str(in_star_2) + '\'')
             sys.exit(-1)
-        print '\t\t-Performing data column operation (pairing)...'
+        print('\t\t-Performing data column operation (pairing)...')
         for row in range(star_1.get_nrows()):
             mic = star_1.get_element('_rlnImageName', row)
             try:
@@ -137,12 +137,12 @@ if in_col_1 == '_rlnRotation':
             rot1, tilt1, psi1 = star_1.get_element('_rlnAngleRot', row), star_1.get_element('_rlnAngleTilt', row), \
                                 star_1.get_element('_rlnAnglePsi', row)
             if (rot1 is None) or (tilt1 is None) or (psi1 is None):
-                print 'ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_1
+                print('ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_1)
                 sys.exit(-1)
             rot2, tilt2, psi2 = star_2.get_element('_rlnAngleRot', row_2), star_2.get_element('_rlnAngleTilt', row_2), \
                                 star_2.get_element('_rlnAnglePsi', row_2)
             if (rot2 is None) or (tilt2 is None) or (psi2 is None):
-                print 'ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_2
+                print('ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_2)
                 sys.exit(-1)
             dat.append(op_ang_eu_degs(np.asarray((rot1, tilt1, psi1), dtype=np.float),
                                       np.asarray((rot2, tilt2, psi2), dtype=np.float)))
@@ -150,15 +150,15 @@ else:
     if in_star_2 is None:
         dat = star_1.get_column_data(in_col_1)
         if dat is None:
-            print 'ERROR: column \'' + str(in_col_1) + '\' is not present in STAR file \'' + str(in_star_1) + '\''
+            print('ERROR: column \'' + str(in_col_1) + '\' is not present in STAR file \'' + str(in_star_1) + '\'')
             sys.exit(-1)
     else:
         dat = list()
         dat_2 = star_2.get_column_data(in_col_2)
         if dat is None:
-            print 'ERROR: column \'' + str(in_col_2) + '\' is not present in STAR file \'' + str(in_star_2) + '\''
+            print('ERROR: column \'' + str(in_col_2) + '\' is not present in STAR file \'' + str(in_star_2) + '\'')
             sys.exit(-1)
-        print '\t\t-Performing data column operation (pairing)...'
+        print('\t\t-Performing data column operation (pairing)...')
         for row in range(star_1.get_nrows()):
             mic = star_1.get_element('_rlnImageName', row)
             try:
@@ -169,12 +169,12 @@ else:
             dat.append(in_op(dat_1, dat_2))
 
 if len(dat) == 0:
-    print 'WARNING: Nothing to plot'
+    print('WARNING: Nothing to plot')
 else:
-    print '\tPlotting the histogram...'
+    print('\tPlotting the histogram...')
     dat = np.asarray(dat, dtype=np.float)
     plt.hist(dat, bins=hist_nbins, range=hist_rg, normed=hist_norm)
     plt.show(block=True)
     plt.close()
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

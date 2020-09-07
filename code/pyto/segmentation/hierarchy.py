@@ -4,10 +4,18 @@ Provides class Hiarrchy for the analysis of multiple segementations orgainized
 in a hierarchy (each segmentation is a subset of the next one).
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: hierarchy.py 1296 2016-05-09 08:58:02Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import range
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1296 $"
+__version__ = "$Revision$"
 
 
 from copy import deepcopy
@@ -16,10 +24,10 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from labels import Labels
-from connected import Connected
-from statistics import Statistics
-from grey import Grey
+from .labels import Labels
+from .connected import Connected
+from .statistics import Statistics
+from .grey import Grey
 import pyto.util.nested as nested
 
 class Hierarchy(Labels):
@@ -239,7 +247,7 @@ class Hierarchy(Labels):
 
         # check (prevents infinite loop in findHigherIds)
         if check and not self.checkIds():
-            raise ValueError, "Id-structures are not consistent"
+            raise ValueError("Id-structures are not consistent")
 
         try:
             higher = self._higherIds[id_]
@@ -506,8 +514,7 @@ class Hierarchy(Labels):
             return [l_id for l_id in lower_ids if (self.data == l_id).sum() > 0]
 
         else:
-            raise ValueError, \
-                "Argument mode can be 'any' or 'all' but not " + mode 
+            raise ValueError("Argument mode can be 'any' or 'all' but not " + mode) 
         
     def addHigherIds(self, lower, higher):
         """
@@ -528,7 +535,7 @@ class Hierarchy(Labels):
             if (not isinstance(higher, list)) \
                    and (not isinstance(higher, numpy.ndarray)):
                 higher = [higher]*len(lower)
-            self._higherIds.update(zip(lower, higher))
+            self._higherIds.update(list(zip(lower, higher)))
         else:
             self._higherIds[lower] = higher
 
@@ -569,7 +576,7 @@ class Hierarchy(Labels):
             else:
                 ids = self.getIds(level)
         else:
-            raise ValueError, "Either ids ot level has to be given."
+            raise ValueError("Either ids ot level has to be given.")
 
         # in each item that has any of ids as a value, replace the value by the
         # corresponding higher id or remove the item if no higher id
@@ -669,7 +676,7 @@ class Hierarchy(Labels):
                 higher_ids[ind] = 0
 
         # make a self-consistent dictionary
-        order = dict(zip(ids, higher_ids))
+        order = dict(list(zip(ids, higher_ids)))
         order = nested.resolve_dict(order)
         
         # replace and remove
@@ -797,7 +804,7 @@ class Hierarchy(Labels):
                      for s_id in segment.ids]
             
         else:
-            raise ValueError, "Argument mode can be either 'above' or 'below'."
+            raise ValueError("Argument mode can be either 'above' or 'below'.")
 
         # check if segment fits this hierarchy
         if check:
@@ -813,8 +820,8 @@ class Hierarchy(Labels):
             if mode == 'below':
                 overlap_id_set = set([o_id[0] for o_id in overlap_ids])
                 if not overlap_id_set.issubset(set(self.getIds(level))):
-                    raise ValueError, "Segments gien by the argument segment " \
-                          "do not fit at level " + str(level) + "."
+                    raise ValueError("Segments gien by the argument segment " \
+                          "do not fit at level " + str(level) + ".")
 
         # pick only 0-th elements 
         overlap_ids = [o_id[0] for o_id in overlap_ids] 
@@ -842,7 +849,7 @@ class Hierarchy(Labels):
         if mode is None:
 
             # need to implement
-            raise NotImplementedError, "Sorry, mode=None not implemented yet."
+            raise NotImplementedError("Sorry, mode=None not implemented yet.")
 
         elif mode == 'volume':
             
@@ -857,7 +864,7 @@ class Hierarchy(Labels):
                         deepcopy(self.contacts._n._mask)
                 except AttributeError:
                     pass
-            levels = range(self.topLevel+1)
+            levels = list(range(self.topLevel+1))
             levels.reverse()            
             for lev in levels:
 
@@ -873,7 +880,7 @@ class Hierarchy(Labels):
                 return 0
 
         else:
-            raise ValueError, "Sorry mode has to be 'volume'."
+            raise ValueError("Sorry mode has to be 'volume'.")
 
     ###############################################################
     #
@@ -1110,15 +1117,15 @@ class Hierarchy(Labels):
         # figure out level
         if level is None:
             level = self.findLevel(segment, mode='volume')
-        elif isinstance(level, str):
+        elif isinstance(level, basestring):
             if level == 'top':
                 level = self.topLevel+1
             elif level == 'bottom':
                 level = 0
             else:
-                raise ValueError, "Argument level: " + level + " is not " \
+                raise ValueError("Argument level: " + level + " is not " \
                       "understood. Valid choices are 'top', 'bottom', and " \
-                      " and integers."
+                      " and integers.")
                 
         # find segment ids that overlap with level-1 ids
         if level > 0:
@@ -1300,7 +1307,7 @@ class Hierarchy(Labels):
         #inst.data = inst.reorder(order=rm_order, data=inst.data)
 
         # remove properties and ids
-        rm_levels = range(level)
+        rm_levels = list(range(level))
         inst.removeProperties(level=rm_levels)
         inst.removeIds(level=rm_levels)
 
@@ -1338,7 +1345,7 @@ class Hierarchy(Labels):
             inst = self
 
         # remove levels from top down
-        rm_levels = range(level+1, self.topLevel+1)
+        rm_levels = list(range(level+1, self.topLevel+1))
         rm_levels.reverse()
 
         # remove segments from data
@@ -1482,7 +1489,7 @@ class Hierarchy(Labels):
         """
 
         # get and order levels
-        levels = range(self.topLevel+1)
+        levels = list(range(self.topLevel+1))
         if (order == 'ascend') or (order == '<'):
             levels.sort()
             level_str = 'bottom'
@@ -1564,7 +1571,7 @@ class Hierarchy(Labels):
             ids = numpy.intersect1d(ids, self.getIds(level))
 
         # pick only those that are not among higher ids
-        higher_ids = self._higherIds.values()
+        higher_ids = list(self._higherIds.values())
         return numpy.setdiff1d(ids, higher_ids)
 
     def findNewBranchTops(self):
@@ -1681,7 +1688,7 @@ class Hierarchy(Labels):
             vol = self.getVolume()
         if surface is None:
             sur = self.getSurface(size=size)
-        sv_ratio = sur/vol
+        sv_ratio = sur / vol
 
         # impose limits
         ids = self.ids
@@ -1707,7 +1714,7 @@ class Hierarchy(Labels):
          """
 
         # get volumes of segment extensions over lower levels
-        from morphology import Morphology
+        from .morphology import Morphology
         mor = Morphology(segments=self.data, ids=self.ids)
         vol = mor.getVolume()
 
@@ -1742,12 +1749,12 @@ class Hierarchy(Labels):
 
         # find levels to which ids belong
         if ids is None:
-            levels = range(self.topLevel+1)
+            levels = list(range(self.topLevel+1))
         else:
             levels = set(self.getIdLevels(ids))
 
         # get surfaces
-        from morphology import Morphology
+        from .morphology import Morphology
         mor = Morphology()
         for level in levels:
 
@@ -1836,7 +1843,7 @@ class Hierarchy(Labels):
         else:
 
             id_ = ids
-            if contacts == None:
+            if contacts is None:
                 contacts = self.contacts
             b_ids = contacts.findBoundaries(segmentIds=id_, nSegment=1,
                                             mode='at_least', update=False)
@@ -1870,7 +1877,7 @@ class Hierarchy(Labels):
 
         # find levels to which ids belong
         if ids is None:
-            levels = range(self.topLevel+1)
+            levels = list(range(self.topLevel+1))
         else:
             levels = set(self.getIdLevels(ids))
 
@@ -1919,7 +1926,7 @@ class Hierarchy(Labels):
         """
         
         # set data and ids
-        from segment import Segment
+        from .segment import Segment
         seg = Segment(data=self.data, ids=self.ids, copy=copy)
 
         # set positionong
@@ -1988,14 +1995,14 @@ class Hierarchy(Labels):
 
         # plot nodes
         if nodes is None:
-            node_ar = numpy.array(node.values())
+            node_ar = numpy.array(list(node.values()))
         elif nodes == 'all':
-            node_ar = numpy.array(node.values())
+            node_ar = numpy.array(list(node.values()))
             plt.plot(node_ar[:,0], node_ar[:,1], linestyle='None', 
                      marker='o', markersize=nodesize)
         elif nodes == 'new':
             new_ids = self.findNewIds()
-            node_ar = [value for key, value in node.items() if key in new_ids]
+            node_ar = [value for key, value in list(node.items()) if key in new_ids]
             node_ar = numpy.array(node_ar)
             plt.plot(node_ar[:,0], node_ar[:,1], 'o', linestyle='None', 
                      markersize=nodesize)
@@ -2006,7 +2013,7 @@ class Hierarchy(Labels):
 
         # label nodes by ids
         if ids:
-            for (id_, pos) in node.iteritems():
+            for (id_, pos) in node.items():
                 plt.text(pos[0]+0.1, pos[1], str(id_)) 
 
         # plot lines
@@ -2026,7 +2033,7 @@ class Hierarchy(Labels):
         if not new_plot: return
         plt.ylabel('Level')
         try:
-            thr = dict(zip(range(ordered.topLevel+1), self.threshold))
+            thr = dict(list(zip(list(range(ordered.topLevel+1)), self.threshold)))
             thr_format = '%6.3f'
             tick_pos = numpy.asarray(plt.yticks()[0], dtype='int')
             tick_pos = [x for x in tick_pos if thr.get(x, None) is not None]

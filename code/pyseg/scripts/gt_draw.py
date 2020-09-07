@@ -46,17 +46,17 @@ def do_gt_draw(input_file, output_file=None, v_color=None, v_size=None, e_color=
                cmap='hot', layout='sfdp', verbose=False):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if verbose:
-        print '\tGenerating the GT graph...'
+        print('\tGenerating the GT graph...')
     graph_gt = GraphGT(graph_mcf).get_gt()
 
     # Get largest component
@@ -65,7 +65,7 @@ def do_gt_draw(input_file, output_file=None, v_color=None, v_size=None, e_color=
     # gt.make_maximal_planar(graph_gt)
 
     if verbose:
-        print '\tDrawing the graph...'
+        print('\tDrawing the graph...')
     # Parsing layouts
     if layout == 'sfdp':
         pos = gt.sfdp_layout(graph_gt)
@@ -76,11 +76,11 @@ def do_gt_draw(input_file, output_file=None, v_color=None, v_size=None, e_color=
     elif layout == 'random':
         pos = gt.random_layout(graph_gt)
     elif layout == 'radial':
-        print '\tRadial tree layout selected -> computing tree root...'
+        print('\tRadial tree layout selected -> computing tree root...')
         bet, _ = gt.betweenness(graph_gt)
         bet_max_id = np.argmax(bet.get_array())
         graph_gt.vertex_properties[SGT_BETWEENNESS] = bet
-        print '\tVertex betweenness updated.'
+        print('\tVertex betweenness updated.')
         pos = gt.radial_tree_layout(graph_gt, root=bet_max_id)
     graph_draw(graph_gt, pos,
                v_color, (0, 1), None,
@@ -96,7 +96,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvri:o:w:x:y:z:m:l:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -110,8 +110,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -132,45 +132,45 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if input_file == '':
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool drawing a graph.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
+            print('Running tool drawing a graph.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
             if output_file is not None:
-                print '\tOutput file: ' + output_file
+                print('\tOutput file: ' + output_file)
             else:
-                print '\tInteractive mode activated.'
+                print('\tInteractive mode activated.')
             if v_color is not None:
-                print '\tProperty for vertices color: ' + v_color
+                print('\tProperty for vertices color: ' + v_color)
             if v_size is not None:
-                print '\tProperty for vertices diameters: ' + v_size
+                print('\tProperty for vertices diameters: ' + v_size)
             if e_color is not None:
-                print '\tProperty for vertices color: ' + e_color
+                print('\tProperty for vertices color: ' + e_color)
             if e_size is not None:
-                print '\tProperty for vertices diameters: ' + e_size
+                print('\tProperty for vertices diameters: ' + e_size)
             if (v_color is not None) or (e_color is not None):
-                print '\tColor map: ' + cmap
-            print '\tLayout scheme: ' + layout
-            print ''
+                print('\tColor map: ' + cmap)
+            print('\tLayout scheme: ' + layout)
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_gt_draw(input_file, output_file, v_color, v_size, e_color, e_size, cmap, layout, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

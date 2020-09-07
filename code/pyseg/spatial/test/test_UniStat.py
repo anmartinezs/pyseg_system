@@ -44,9 +44,9 @@ class TestUniStat(TestCase):
 
     def test_Execute(self):
 
-        print '\tRunning test for sparse point spatial analysis:'
+        print('\tRunning test for sparse point spatial analysis:')
 
-        print '\t\tBuilding the mask...'
+        print('\t\tBuilding the mask...')
         size_nm = np.asarray(SIZE) * RES
         X, Y, Z = np.meshgrid(np.linspace(-.5*size_nm[1], .5*size_nm[1], SIZE[1]),
                               np.linspace(-.5*size_nm[0], .5*size_nm[0], SIZE[0]),
@@ -54,25 +54,25 @@ class TestUniStat(TestCase):
         mask = (X*X + Y*Y + Z*Z) < (MASK_R*MASK_R)
         ps.disperse_io.save_numpy(mask, './results/mask.mrc')
 
-        print '\t\tGenerating the random patterns:'
+        print('\t\tGenerating the random patterns:')
         pat_1 = gen_sin_points(N_PST_1, CYCLES_1, mask, STD_1, phase=(.5*np.pi,.5*np.pi,.5*np.pi))
         pat_2 = gen_sin_points(N_PST_2, CYCLES_2, mask, STD_2, phase=(.5*np.pi,.5*np.pi,.5*np.pi))
         pat_3 = gen_rand_in_mask(N_PST_1, mask)
         pat_4 = gen_rand_in_mask(N_PST_2, mask)
-        print '\t\t\t-Number of points for pattern 1: ' + str(pat_1.shape[0])
-        print '\t\t\t-Number of points for pattern 2: ' + str(pat_2.shape[0])
-        print '\t\t\t-Number of points for pattern 3: ' + str(pat_3.shape[0])
-        print '\t\t\t-Number of points for pattern 4: ' + str(pat_4.shape[0])
+        print('\t\t\t-Number of points for pattern 1: ' + str(pat_1.shape[0]))
+        print('\t\t\t-Number of points for pattern 2: ' + str(pat_2.shape[0]))
+        print('\t\t\t-Number of points for pattern 3: ' + str(pat_3.shape[0]))
+        print('\t\t\t-Number of points for pattern 4: ' + str(pat_4.shape[0]))
 
-        print '\t\tCreating the objects for analysis...'
+        print('\t\tCreating the objects for analysis...')
         uni1, uni2 = UniStat(pat_1, mask, RES), UniStat(pat_2, mask, RES)
         uni3, uni4 = UniStat(pat_3, mask, RES), UniStat(pat_4, mask, RES)
         n_bins = N_BINS
         if n_bins > uni1.get_n_points():
-            print '\t\t\t-WARNING: Number of bins decreased to: ' + str(pat_1.shape[0])
+            print('\t\t\t-WARNING: Number of bins decreased to: ' + str(pat_1.shape[0]))
             n_bins = uni1.get_n_points()
         if n_bins > uni2.get_n_points():
-            print '\t\t\t-WARNING: Number of bins decreased to: ' + str(pat_2.shape[0])
+            print('\t\t\t-WARNING: Number of bins decreased to: ' + str(pat_2.shape[0]))
             n_bins = uni2.get_n_points()
         uni1.set_name('Pattern 1')
         uni2.set_name('Pattern 2')
@@ -92,21 +92,21 @@ class TestUniStat(TestCase):
         uni3.plot_points(block=False, out_file='./results/pat3_pts.png')
         uni4.plot_points(block=False, out_file='./results/pat4_pts.png')
 
-        print '\t\tAnalysis:'
-        print '\t\t\t-G'
+        print('\t\tAnalysis:')
+        print('\t\t\t-G')
         analyzer.analyze_G(MAX_D_1, n_bins, N_SIM_1, PER, block=False, out_file='./results/G.png', legend=True)
-        print '\t\t\t-F'
+        print('\t\t\t-F')
         analyzer.analyze_F(MAX_D_1, n_bins, N_SAMP_F, N_SIM_1, PER, block=False, out_file='./results/F.png')
-        print '\t\t\t-J'
+        print('\t\t\t-J')
         analyzer.analyze_J(block=False, out_file='./results/J.png', p=PER)
-        print '\t\t\t-K'
+        print('\t\t\t-K')
         analyzer.analyze_K(MAX_D_2, N_SAMP_K, N_SIM_K, PER, tcsr=TCSR, block=False, out_file='./results/K.png')
-        print '\t\t\t-L'
+        print('\t\t\t-L')
         analyzer.analyze_L(block=False, out_file='./results/L.png', p=PER)
-        print '\t\t\t-O'
+        print('\t\t\t-O')
         analyzer.analyze_O(W_O, block=False, out_file='./results/O.png', p=PER)
         for uni in (uni1, uni2, uni3, uni4):
             if uni.is_2D():
-                print '\t\t\t-W ' + uni.get_name() + ':'
+                print('\t\t\t-W ' + uni.get_name() + ':')
                 uni.analyze_W(rads, N_SAMP_W, block=False, out_file='./results/W_'+uni.get_name()+'.png',
                               legend=True, pimgs=True)

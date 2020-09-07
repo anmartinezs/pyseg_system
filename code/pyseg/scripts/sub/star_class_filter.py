@@ -56,44 +56,44 @@ import copy
 
 ########## Print initial message
 
-print 'Filtering entries by classes in a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tFile to split: ' + in_star
-print '\tFile with classes: ' + in_star_c
-print '\tClasses an grouping tuples: '
+print('Filtering entries by classes in a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tFile to split: ' + in_star)
+print('\tFile with classes: ' + in_star_c)
+print('\tClasses an grouping tuples: ')
 for i, tup in enumerate(tuples):
-    print '\t-Tuple ' + str(i) + ': ' + str(tup)
-print ''
+    print('\t-Tuple ' + str(i) + ': ' + str(tup))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR files...'
+print('\tLoading input STAR files...')
 hold_star = ps.sub.Star()
 try:
     hold_star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"'
+    print('ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"')
     sys.exit(-1)
 star_c = ps.sub.Star()
 try:
     star_c.load(in_star_c)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file for classes could not be read because of "' + str(e.msg, e.expr) + '"'
+    print('ERROR: input STAR file for classes could not be read because of "' + str(e.msg, e.expr) + '"')
     sys.exit(-1)
 
-print '\tLoop for processing the input tuples...'
+print('\tLoop for processing the input tuples...')
 for i, tup in enumerate(tuples):
     star = copy.deepcopy(hold_star)
-    print '\tProcessing tuple ' + str(i) + ':'
+    print('\tProcessing tuple ' + str(i) + ':')
     classes = tup[0]
     if classes is None:
         classes = star_c.get_column_data(key_col)
     classes = set(classes)
-    print '\t\t-Keeping classes in set: ' + str(classes)
+    print('\t\t-Keeping classes in set: ' + str(classes))
     n_rows = star.get_nrows()
     del_rows = list()
     for i in range(star_c.get_nrows()):
@@ -107,16 +107,16 @@ for i, tup in enumerate(tuples):
                     break
             if idx_row is not None:
                 del_rows.append(idx_row)
-    print '\t\t-Rows to delete: ' + str(len(del_rows)) + ' of ' + str(n_rows) + ' (survivors ' \
-          + str(n_rows-len(del_rows)) + ')'
-    print '\t\t-Deleting rows...'
+    print('\t\t-Rows to delete: ' + str(len(del_rows)) + ' of ' + str(n_rows) + ' (survivors ' \
+          + str(n_rows-len(del_rows)) + ')')
+    print('\t\t-Deleting rows...')
     star.del_rows(del_rows)
     min_gp = tup[1]
     if min_gp is None:
-        print '\t\t-Particle grouping, minimum group size: ' + str(min_gp)
+        print('\t\t-Particle grouping, minimum group size: ' + str(min_gp))
         star.particle_group(min_gp)
         out_star = str(tup[2])
-    print '\t\t-Storing the results in: ' + out_star
+    print('\t\t-Storing the results in: ' + out_star)
     star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

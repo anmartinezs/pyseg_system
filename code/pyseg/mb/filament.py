@@ -15,13 +15,13 @@ from pyseg import pexceptions # as pexceptions
 from scipy.ndimage.morphology import distance_transform_edt
 from skimage.morphology import convex_hull_image
 from pyseg.factory import SubGraphVisitor
-from variables import *
+from .variables import *
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from pyseg.filament import Filament
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -129,7 +129,7 @@ class Contact(object):
                     found = True
                     break
         if not found:
-            print '\tWarning: Unexpected event creating a Contact'
+            print('\tWarning: Unexpected event creating a Contact')
             curr_p = ids[-1]
             self.__coords = np.asarray(skel.GetPoint(curr_p))
             self.__id = curr_p

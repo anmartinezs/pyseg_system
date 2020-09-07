@@ -80,41 +80,41 @@ from pyseg.sub import TomoPeaks, SetTomoPeaks
 
 ########## Print initial message
 
-print 'Extracting slices from synapses.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tSTAR file with the segmentations: ' + str(in_star)
-print '\tOutput directory: ' + str(output_dir)
-print '\tSlices file: ' + slices_file
+print('Extracting slices from synapses.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tSTAR file with the segmentations: ' + str(in_star))
+print('\tOutput directory: ' + str(output_dir))
+print('\tSlices file: ' + slices_file)
 if plane:
-    print '\tMode 2D (plane projection) activated.'
+    print('\tMode 2D (plane projection) activated.')
     if peak_prop is not None:
         peak_prop = None
-        print 'WARNING: peaks detection is deactivated because is not compatible with 2D mode.'
+        print('WARNING: peaks detection is deactivated because is not compatible with 2D mode.')
 else:
-    print '\tMode 3D activated.'
+    print('\tMode 3D activated.')
 if del_v_sl:
-    print '\tProgressive vertex deleting active.'
+    print('\tProgressive vertex deleting active.')
 if peak_prop is not None:
-    print '\tPeaks detection active, settings:'
-    print '\t\t-Vertices property: ' + peak_prop
-    print '\t\t\t+Threshold (percentile): ' + str(peak_th) + ' %'
-    print '\t\t-Edge property for distance measuring: ' + peak_dst
-    print '\t\t\t+Neighbourhood radius: ' + str(peak_ns)
+    print('\tPeaks detection active, settings:')
+    print('\t\t-Vertices property: ' + peak_prop)
+    print('\t\t\t+Threshold (percentile): ' + str(peak_th) + ' %')
+    print('\t\t-Edge property for distance measuring: ' + peak_dst)
+    print('\t\t\t+Neighbourhood radius: ' + str(peak_ns))
     if peak_conn:
-        print '\t\t\t-Peak connectivity active.'
+        print('\t\t\t-Peak connectivity active.')
     if peak_off:
-        print '\t\t\t-Peak normal offset: ' + str(peak_off) + ' nm'
+        print('\t\t\t-Peak normal offset: ' + str(peak_off) + ' nm')
 if st_ctf is not None:
-    print '\t\t-STAR file:'
-    print '\t\t\t+Ctf correction: ' + str(st_ctf)
-    print '\t\t\t+Normalization mask file: ' + str(st_mask)
-print ''
+    print('\t\t-STAR file:')
+    print('\t\t\t+Ctf correction: ' + str(st_ctf))
+    print('\t\t\t+Normalization mask file: ' + str(st_mask))
+print('')
 
 ######### Process
 
-print '\tParing input STAR files...'
+print('\tParing input STAR files...')
 star = ps.sub.Star()
 star.load(in_star)
 in_tomo_refs, in_seg_l = star.get_column_data('_rlnMicrographName'), star.get_column_data('_psSegImage')
@@ -128,68 +128,68 @@ for( offx, offy, offz, rot, tilt, psi) in zip(in_offx_l, in_offy_l, in_offz_l, i
     in_offs.append((offx, offy, offz))
     in_rots.append((rot, tilt, psi))
 
-print '\tLoading XML file with the slices...'
+print('\tLoading XML file with the slices...')
 slices = SynSliceSet(slices_file)
 
 set_tpeaks = SetTomoPeaks()
-print '\tTomograms loop:'
+print('\tTomograms loop:')
 for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
         zip(input_pkl_l, in_tomo_refs, in_seg_l, in_offs, in_rots):
 
-    print '\t\tLoading the input graph: ' + input_pkl
+    print('\t\tLoading the input graph: ' + input_pkl)
 
-    print '\t\tUnpicking graph...'
+    print('\t\tUnpicking graph...')
     path, fname = os.path.split(input_pkl)
     stem_name, _ = os.path.splitext(fname)
     graph = ps.factory.unpickle_obj(input_pkl)
     tomo_f = ps.disperse_io.load_tomo(in_seg)
 
     if not del_v_sl:
-        print '\t\tUpdating GraphGT...'
+        print('\t\tUpdating GraphGT...')
         graph.compute_graph_gt()
         graph_gt = graph.get_gt(fupdate=True)
 
-    print '\t\tSlices loop (' + str(slices.get_num_slices()) + ' slices found):'
+    print('\t\tSlices loop (' + str(slices.get_num_slices()) + ' slices found):')
     for sl in slices.get_slices_list():
 
         if del_v_sl:
-            print '\t\tUpdating GraphGT...'
+            print('\t\tUpdating GraphGT...')
             graph_gtt = ps.graph.GraphGT(graph)
             graph_gt = graph_gtt.get_gt()
 
-        print '\t\tProcessing slice ' + sl.get_name() + ':'
-        print '\t\tSegmentation label: ' + str(sl.get_seg())
-        print '\t\tMembrane: ' + str(sl.get_mb())
-        print '\t\t\t-Euclidean distance: (' + sl.get_eu_dst_sign() + ')[' \
-              + str(sl.get_eu_dst_low()) + ', ' + str(sl.get_eu_dst_high()) + '] nm'
-        print '\t\t\t-Geodesic distance: (' + sl.get_geo_dst_sign() + ')[' \
-              + str(sl.get_geo_dst_low()) + ', ' + str(sl.get_geo_dst_high()) + '] nm'
-        print '\t\t\t-Geodesic length: (' + sl.get_geo_len_sign() + ')[' \
-              + str(sl.get_geo_len_low()) + ', ' + str(sl.get_geo_len_high()) + '] nm'
-        print '\t\t\t-Sinuosity: (' + sl.get_sin_sign() + ')[' \
-              + str(sl.get_sin_low()) + ', ' + str(sl.get_sin_high()) + '] nm'
-        print '\t\t\t-Cluster number of points: (' + sl.get_cnv_sign() + ')[' \
-              + str(sl.get_cnv_low()) + ', ' + str(sl.get_cnv_high()) + ']'
+        print('\t\tProcessing slice ' + sl.get_name() + ':')
+        print('\t\tSegmentation label: ' + str(sl.get_seg()))
+        print('\t\tMembrane: ' + str(sl.get_mb()))
+        print('\t\t\t-Euclidean distance: (' + sl.get_eu_dst_sign() + ')[' \
+              + str(sl.get_eu_dst_low()) + ', ' + str(sl.get_eu_dst_high()) + '] nm')
+        print('\t\t\t-Geodesic distance: (' + sl.get_geo_dst_sign() + ')[' \
+              + str(sl.get_geo_dst_low()) + ', ' + str(sl.get_geo_dst_high()) + '] nm')
+        print('\t\t\t-Geodesic length: (' + sl.get_geo_len_sign() + ')[' \
+              + str(sl.get_geo_len_low()) + ', ' + str(sl.get_geo_len_high()) + '] nm')
+        print('\t\t\t-Sinuosity: (' + sl.get_sin_sign() + ')[' \
+              + str(sl.get_sin_low()) + ', ' + str(sl.get_sin_high()) + '] nm')
+        print('\t\t\t-Cluster number of points: (' + sl.get_cnv_sign() + ')[' \
+              + str(sl.get_cnv_low()) + ', ' + str(sl.get_cnv_high()) + ']')
         for th in sl.get_list_th():
-            print '\t\t\t\tVertices threshold: ' + th.get_name()
-            print '\t\t\t\t\t-Property: ' + th.get_prop_key()
-            print '\t\t\t\t\t-Mode: ' + th.get_mode()
-            print '\t\t\t\t\t-Range: ' + str(th.get_range()) + ' %'
+            print('\t\t\t\tVertices threshold: ' + th.get_name())
+            print('\t\t\t\t\t-Property: ' + th.get_prop_key())
+            print('\t\t\t\t\t-Mode: ' + th.get_mode())
+            print('\t\t\t\t\t-Range: ' + str(th.get_range()) + ' %')
 	try:
 	    if sl.get_cont():
-                print '\t\t\t-Contact points mode active.'
+                print('\t\t\t-Contact points mode active.')
                 cloud, cloud_ids, mask, cloud_w = graph.get_cloud_mb_slice(sl, cont_mode=True, graph_gt=graph_gt,
                                                                            cont_prop=peak_prop)
-                print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+                print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
             else:
                 cloud, cloud_ids, mask = graph.get_cloud_mb_slice(sl, cont_mode=False, graph_gt=graph_gt)
-                print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+                print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
         except ValueError:
-            print 'WARNING: no points found in the slice for pickle: ' + input_pkl
+            print('WARNING: no points found in the slice for pickle: ' + input_pkl)
             continue
 
         if peak_prop is not None:
-            print '\t\tFiltering points with ' + peak_prop + ' and percentile ' + str(peak_th) + ' %'
+            print('\t\tFiltering points with ' + peak_prop + ' and percentile ' + str(peak_th) + ' %')
             if sl.get_cont():
                 cloud_cc = graph.get_prop_values(peak_prop, cloud_ids)
             else:
@@ -198,17 +198,17 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
             hold_cloud, hold_cloud_ids, hold_cloud_cc = cloud, cloud_ids, cloud_cc
             cloud, cloud_ids, cloud_cc = list(), list(), list()
             per_th = np.percentile(hold_cloud_cc, peak_th)
-            print '\t\t\t-Threshold found: ' + str(per_th)
+            print('\t\t\t-Threshold found: ' + str(per_th))
             for (point, cloud_id, c_cc) in zip(hold_cloud, hold_cloud_ids, hold_cloud_cc):
                 if c_cc >= per_th:
                     cloud.append(point)
                     cloud_ids.append(cloud_id)
                     cloud_cc.append(c_cc)
-            print '\t\t\t-Peaks thresholded: ' + str(len(cloud)) + ' of ' + str(len(hold_cloud))
-            print '\t\tTemporal copy of current graph...'
+            print('\t\t\t-Peaks thresholded: ' + str(len(cloud)) + ' of ' + str(len(hold_cloud)))
+            print('\t\tTemporal copy of current graph...')
             hold_graph = graph.gen_subgraph(cloud_ids)
             graph_gtt = ps.graph.GraphGT(hold_graph)
-            print '\t\tScale suppresion...'
+            print('\t\tScale suppresion...')
             h_cloud_ids, h_cloud, h_cloud_cc = list(), list(), list()
             if not sl.get_cont():
                 del_ids = graph_gtt.vertex_scale_supression(peak_ns, peak_prop, peak_conn)
@@ -217,7 +217,7 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
                         h_cloud_ids.append(cloud_id)
                         h_cloud.append(coord)
                         h_cloud_cc.append(c_cc)
-                print '\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud))
+                print('\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud)))
                 cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=np.int), np.asarray(h_cloud, dtype=np.float32)
             else:
                 del_ids = coords_scale_supression(cloud, peak_ns/graph.get_resolution(), weights=cloud_cc)
@@ -227,7 +227,7 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
                         h_cloud_ids.append(cloud_ids[i])
                         h_cloud.append(coord)
                         h_cloud_cc.append(cloud_cc[i])
-                print '\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud))
+                print('\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud)))
                 cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=np.int), np.asarray(h_cloud, dtype=np.float32)
             cloud_cc = np.asarray(h_cloud_cc, dtype=np.float32)
         elif del_v_sl:
@@ -235,13 +235,13 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
 
         output_seg = stem_name + '_' + sl.get_name()
         if peak_prop is not None:
-            print '\t\tCreating the peaks container...'
+            print('\t\tCreating the peaks container...')
             tomo_peaks = TomoPeaks(shape=mask.shape, name=output_seg, mask=mask)
             tomo_peaks.add_peaks(cloud)
             tomo_peaks.add_prop(peak_prop, n_comp=1, vals=cloud_cc)
-            print '\t\t\t-Number of peaks found: ' + str(tomo_peaks.get_num_peaks())
+            print('\t\t\t-Number of peaks found: ' + str(tomo_peaks.get_num_peaks()))
             if tomo_peaks.get_num_peaks() == 0:
-                print 'WARNING: number of peaks for this slice is 0 no further analysis can be applied, slice skipped!'
+                print('WARNING: number of peaks for this slice is 0 no further analysis can be applied, slice skipped!')
                 continue
             tomo_seg = None
             if sl.get_mb()==1:
@@ -258,39 +258,39 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
                 tomo_peaks.seg_shortest_pt(tomo_seg, peak_prop_pt)
             set_tpeaks.add_tomo_peaks(tomo_peaks, in_tomo_ref, swap_xy=True, ctf=st_ctf)
         elif len(cloud_ids) == 0:
-            print 'WARNING: number of points for this slice is 0 no further analysis can be applied, slice skipped!'
+            print('WARNING: number of points for this slice is 0 no further analysis can be applied, slice skipped!')
             continue
 
-        print '\t\tBuilding statistical analyzer...'
-        print '\t\t\tCurrent number of points: ' + str(len(cloud_ids))
-        print '\t\t\tPrint mask size (n voxels): ' + str(mask.sum())
+        print('\t\tBuilding statistical analyzer...')
+        print('\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
+        print('\t\t\tPrint mask size (n voxels): ' + str(mask.sum()))
         pkl_lbl = stem_name[:stem_name.rfind('_bin')]
         unisp = UniStat(cloud, mask, graph.get_resolution(), name=sl.get_name()+'_'+pkl_lbl)
         # unisp.save_dense(output_dir+'/hold.mrc')
 
-        print '\t\t\t-Vertices found: ' + str(cloud.shape[0])
+        print('\t\t\t-Vertices found: ' + str(cloud.shape[0]))
         output_sp = stem_name + '_' + sl.get_name() + '_unisp.pkl'
-        print '\t\t\t-Storing spatial analyzer as : ' + output_sp
+        print('\t\t\t-Storing spatial analyzer as : ' + output_sp)
         output_sp = output_dir + '/' + output_sp
         unisp.pickle(output_sp)
         if (store_seg == 1) or (store_seg == 2):
-            print '\t\t\t-Storing slices graph with name: ' + output_seg
-            print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+            print('\t\t\t-Storing slices graph with name: ' + output_seg)
+            print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
             out_seg = output_dir + '/' + output_seg
             ps.disperse_io.save_vtp(graph.slice_to_vtp(cloud_ids, mb_id=sl.get_mb()), out_seg+'.vtp')
         if store_seg == 2:
-            print '\t\t\t-Printing slices vertices with name: ' + output_seg
+            print('\t\t\t-Printing slices vertices with name: ' + output_seg)
             ps.disperse_io.save_numpy(graph.print_slice(cloud_ids, th_den=0, slc=True), out_seg+'.vti')
 
         if peak_prop is not None:
             out_vtp = output_dir + '/' + output_seg + '_peak.vtp'
-            print '\t\t\t-Storing peaks (vtp): ' + out_vtp
+            print('\t\t\t-Storing peaks (vtp): ' + out_vtp)
             tomo_peaks.vect_2pts(ps.sub.PK_COORDS, peak_prop_pt, peak_prop_norm)
             ps.disperse_io.save_vtp(tomo_peaks.to_vtp(), out_vtp)
             out_sub = output_dir + '/' + output_seg + '_sta'
 
             if in_tomo_ref:
-                print '\t\t\t-Converting graph coordinate to reference tomogram coordinates...'
+                print('\t\t\t-Converting graph coordinate to reference tomogram coordinates...')
                 out_vtp = output_dir + '/' + output_seg + '_ref_peak.vtp'
                 ps.disperse_io.save_vtp(tomo_peaks.to_vtp(), out_vtp)
                 tomo_ref = ps.disperse_io.load_tomo(in_tomo_ref, mmap=True)
@@ -315,11 +315,11 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
 
 if peak_prop is not None:
     out_star = output_dir + '/' + peak_prop + '.star'
-    print '\tStoring peaks STAR file and subvolumes in directory: ' + out_star
+    print('\tStoring peaks STAR file and subvolumes in directory: ' + out_star)
     star = set_tpeaks.gen_star(n_key=peak_prop_rot)
     if st_mask is not None:
         st_mask = ps.disperse_io.load_tomo(st_mask)
     star.store(out_star, sv=sv_shape, mask=st_mask, swap_xy=False, del_ang=(0,0,0))
-    print '\t\t-Number of particles found: ' + str(star.get_nrows())
+    print('\t\t-Number of particles found: ' + str(star.get_nrows()))
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

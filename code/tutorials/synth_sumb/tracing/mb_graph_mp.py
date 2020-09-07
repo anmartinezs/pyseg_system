@@ -26,7 +26,7 @@ import numpy as np
 import multiprocessing as mp
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -87,34 +87,34 @@ prop_topo = ps.globals.STR_FIELD_VALUE  # ps.globals.STR_FIELD_VALUE_EQ # None i
 ########################################################################################
 
 # Print initial message
-print 'Extracting GraphMCF and NetFilament objects from tomograms'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
+print('Extracting GraphMCF and NetFilament objects from tomograms')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
 # print '\tDisPerSe persistence threshold (nsig): ' + str(nsig)
-print '\tSTAR file with the segmentations: ' + str(in_star)
-print '\tNumber of parallel processes: ' + str(npr)
-print '\tDisPerSe persistence threshold (csig): ' + str(csig)
+print('\tSTAR file with the segmentations: ' + str(in_star))
+print('\tNumber of parallel processes: ' + str(npr))
+print('\tDisPerSe persistence threshold (csig): ' + str(csig))
 if ang_rot is not None:
-    print 'Missing wedge edge compensation (rot, tilt): (' + str(ang_rot) + ', ' + str(ang_tilt) + ')'
-print '\tSigma for gaussian pre-processing: ' + str(s_sig)
-print '\tSigma for contrast enhancement: ' + str(nstd)
-print '\tSkeleton smoothing factor: ' + str(smooth)
-print '\tData resolution: ' + str(res) + ' nm/pixel'
-print '\tMask offset: ' + str(mb_dst_off) + ' nm'
-print '\tOutput directory: ' + output_dir
-print 'Graph density thresholds:'
+    print('Missing wedge edge compensation (rot, tilt): (' + str(ang_rot) + ', ' + str(ang_tilt) + ')')
+print('\tSigma for gaussian pre-processing: ' + str(s_sig))
+print('\tSigma for contrast enhancement: ' + str(nstd))
+print('\tSkeleton smoothing factor: ' + str(smooth))
+print('\tData resolution: ' + str(res) + ' nm/pixel')
+print('\tMask offset: ' + str(mb_dst_off) + ' nm')
+print('\tOutput directory: ' + output_dir)
+print('Graph density thresholds:')
 if v_prop is None:
-    print '\tTarget vertex density (membrane) ' + str(v_den) + ' vertex/nm^3 for topological simplification'
+    print('\tTarget vertex density (membrane) ' + str(v_den) + ' vertex/nm^3 for topological simplification')
 else:
-    print '\tTarget vertex density (membrane) ' + str(
-        v_den) + ' vertex/nm^3 for property ' + v_prop + ' with mode ' + v_mode
-print '\tTarget edge/vertex ratio (non membrane) ' + str(ve_ratio) + ' for property ' + e_prop + ' with mode ' + e_mode
+    print('\tTarget vertex density (membrane) ' + str(
+        v_den) + ' vertex/nm^3 for property ' + v_prop + ' with mode ' + v_mode)
+print('\tTarget edge/vertex ratio (non membrane) ' + str(ve_ratio) + ' for property ' + e_prop + ' with mode ' + e_mode)
 if do_clahe:
-    print '\t-Computing CLAHE.'
-print ''
+    print('\t-Computing CLAHE.')
+print('')
 
-print 'Paring input star file...'
+print('Paring input star file...')
 star = ps.sub.Star()
 star.load(in_star)
 in_seg_l = star.get_column_data('_psSegImage')
@@ -129,19 +129,19 @@ def pr_worker(pr_id, ids, q_pkls):
 
         input_seg, input_tomo = in_seg_l[row], in_tomo_l[row]
 
-        print '\tP[' + str(pr_id) + '] Sub-volume to process found: ' + input_tomo
-        print '\tP[' + str(pr_id) + '] Computing paths for ' + input_tomo + ' ...'
+        print('\tP[' + str(pr_id) + '] Sub-volume to process found: ' + input_tomo)
+        print('\tP[' + str(pr_id) + '] Computing paths for ' + input_tomo + ' ...')
         path, stem_tomo = os.path.split(input_tomo)
         stem_pkl, _ = os.path.splitext(stem_tomo)
         input_file = output_dir + '/' + stem_pkl + '_g' + str(s_sig) + '.fits'
         _, stem = os.path.split(input_file)
         stem, _ = os.path.splitext(stem)
 
-        print '\tP[' + str(pr_id) + '] Loading input data: ' + stem_tomo
+        print('\tP[' + str(pr_id) + '] Loading input data: ' + stem_tomo)
         tomo = ps.disperse_io.load_tomo(input_tomo).astype(np.float32)
         segh = ps.disperse_io.load_tomo(input_seg)
 
-        print '\tP[' + str(pr_id) + '] Computing distance, mask and segmentation tomograms...'
+        print('\tP[' + str(pr_id) + '] Computing distance, mask and segmentation tomograms...')
         tomod = ps.disperse_io.seg_dist_trans(segh == SEG_MB) * res
         maskh = np.ones(shape=segh.shape, dtype=np.int)
         maskh[DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER] = 0
@@ -161,14 +161,14 @@ def pr_worker(pr_id, ids, q_pkls):
             seg = segh
         mask_den = np.asarray(tomod <= mb_dst_off, dtype=np.bool)
 
-        print '\tP[' + str(pr_id) + '] Smoothing input tomogram (s=' + str(s_sig) + ')...'
+        print('\tP[' + str(pr_id) + '] Smoothing input tomogram (s=' + str(s_sig) + ')...')
         density = sp.ndimage.filters.gaussian_filter(tomo, s_sig)
         density = ps.globals.cont_en_std(density, nstd=nstd, lb=0, ub=1)
         ps.disperse_io.save_numpy(tomo, output_dir + '/' + stem_pkl + '.vti')
         ps.disperse_io.save_numpy(density.transpose(), input_file)
         ps.disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
 
-        print '\tP[' + str(pr_id) + '] Initializing DisPerSe...'
+        print('\tP[' + str(pr_id) + '] Initializing DisPerSe...')
         work_dir = output_dir + '/disperse_pr_' + str(pr_id)
         disperse = ps.disperse_io.DisPerSe(input_file, work_dir)
         try:
@@ -176,7 +176,7 @@ def pr_worker(pr_id, ids, q_pkls):
         # except ps.pexceptions.PySegInputWarning as e:
         #     print e.get_message()
         except Warning:
-            print 'Jol!!!'
+            print('Jol!!!')
 
         # Manifolds for descending fields with the inverted image
         disperse.set_manifolds('J0a')
@@ -184,67 +184,67 @@ def pr_worker(pr_id, ids, q_pkls):
         disperse.set_dump_arcs(-1)
         # disperse.set_nsig_cut(nsig)
         rcut = round(density[mask_den].std() * csig, 4)
-        print '\tP[' + str(pr_id) + '] Persistence cut thereshold set to: ' + str(rcut) + ' grey level'
+        print('\tP[' + str(pr_id) + '] Persistence cut thereshold set to: ' + str(rcut) + ' grey level')
         disperse.set_cut(rcut)
         disperse.set_mask(input_msk)
         disperse.set_smooth(smooth)
 
-        print '\tP[' + str(pr_id) + '] Running DisPerSe...'
+        print('\tP[' + str(pr_id) + '] Running DisPerSe...')
         disperse.mse(no_cut=False, inv=False)
         skel = disperse.get_skel()
         manifolds = disperse.get_manifolds(no_cut=False, inv=False)
 
         # Build the GraphMCF for the membrane
-        print '\tP[' + str(pr_id) + '] Building MCF graph...'
+        print('\tP[' + str(pr_id) + '] Building MCF graph...')
         graph = ps.mb.MbGraphMCF(skel, manifolds, density, seg)
         graph.set_resolution(res)
         graph.build_from_skel(basic_props=False)
         graph.filter_self_edges()
         graph.filter_repeated_edges()
 
-        print '\tP[' + str(pr_id) + '] Filtering nodes close to mask border...'
+        print('\tP[' + str(pr_id) + '] Filtering nodes close to mask border...')
         mask = sp.ndimage.morphology.binary_dilation(mask, iterations=DILATE_NITER)
         for v in graph.get_vertices_list():
             x, y, z = graph.get_vertex_coords(v)
             if mask[int(round(x)), int(round(y)), int(round(z))]:
                 graph.remove_vertex(v)
-        print '\tP[' + str(pr_id) + '] Building geometry...'
+        print('\tP[' + str(pr_id) + '] Building geometry...')
         graph.build_vertex_geometry()
 
         if do_clahe:
-            print '\tP[' + str(pr_id) + '] CLAHE on filed_value_inv property...'
+            print('\tP[' + str(pr_id) + '] CLAHE on filed_value_inv property...')
             graph.compute_edges_length(ps.globals.SGT_EDGE_LENGTH, 1, 1, 1, False)
             graph.clahe_field_value(max_geo_dist=50, N=256, clip_f=100., s_max=4.)
 
-        print '\tP[' + str(pr_id) + '] Computing vertices and edges properties...'
+        print('\tP[' + str(pr_id) + '] Computing vertices and edges properties...')
         graph.compute_vertices_dst()
         graph.compute_edge_filamentness()
         graph.add_prop_inv(prop_topo, edg=True)
         graph.compute_edge_affinity()
 
-        print '\tP[' + str(pr_id) + '] Applying general thresholds...'
+        print('\tP[' + str(pr_id) + '] Applying general thresholds...')
         if ang_rot is not None:
-            print '\tDeleting edges in MW area...'
+            print('\tDeleting edges in MW area...')
             graph.filter_mw_edges(ang_rot, ang_tilt)
 
-        print '\tP[' + str(pr_id) + '] Computing graph global statistics (before simplification)...'
+        print('\tP[' + str(pr_id) + '] Computing graph global statistics (before simplification)...')
         nvv, nev, nepv = graph.compute_global_stat(mask=mask_den)
-        print '\t\t-P[' + str(pr_id) + '] Vertex density: ' + str(round(nvv, 5)) + ' nm^3'
-        print '\t\t-P[' + str(pr_id) + '] Edge density: ' + str(round(nev, 5)) + ' nm^3'
-        print '\t\t-P[' + str(pr_id) + '] Edge/Vertex ratio: ' + str(round(nepv, 5))
+        print('\t\t-P[' + str(pr_id) + '] Vertex density: ' + str(round(nvv, 5)) + ' nm^3')
+        print('\t\t-P[' + str(pr_id) + '] Edge density: ' + str(round(nev, 5)) + ' nm^3')
+        print('\t\t-P[' + str(pr_id) + '] Edge/Vertex ratio: ' + str(round(nepv, 5)))
 
-        print '\tP[' + str(pr_id) + '] Graph density simplification for vertices...'
+        print('\tP[' + str(pr_id) + '] Graph density simplification for vertices...')
         if prop_topo != ps.globals.STR_FIELD_VALUE:
-            print '\t\tProperty used: ' + prop_topo
+            print('\t\tProperty used: ' + prop_topo)
             graph.set_pair_prop(prop_topo)
         try:
             graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=np.int), v_den=v_den,
                                          v_prop=v_prop, v_mode=v_mode)
         except ps.pexceptions.PySegInputWarning as e:
-            print 'P[' + str(pr_id) + '] WARNING: graph density simplification failed:'
-            print '\t-' + e.get_message()
+            print('P[' + str(pr_id) + '] WARNING: graph density simplification failed:')
+            print('\t-' + e.get_message())
 
-        print '\tP[' + str(pr_id) + '] Graph density simplification for edges in the membrane...'
+        print('\tP[' + str(pr_id) + '] Graph density simplification for edges in the membrane...')
         mask_mb = (seg == 1) * (~mask)
         nvv, nev, nepv = graph.compute_global_stat(mask=mask_mb)
         if nepv > ve_ratio:
@@ -253,14 +253,14 @@ def pr_worker(pr_id, ids, q_pkls):
             graph.graph_density_simp_ref(mask=np.asarray(mask_mb, dtype=np.int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
 
-        print '\tP[' + str(pr_id) + '] Computing graph global statistics (after simplification)...'
+        print('\tP[' + str(pr_id) + '] Computing graph global statistics (after simplification)...')
         nvv, _, _ = graph.compute_global_stat(mask=mask_den)
         _, nev_mb, nepv_mb = graph.compute_global_stat(mask=mask_mb)
-        print '\t\t-P[' + str(pr_id) + '] Vertex density (membrane): ' + str(round(nvv, 5)) + ' nm^3'
-        print '\t\t-P[' + str(pr_id) + '] Edge density (membrane):' + str(round(nev_mb, 5)) + ' nm^3'
-        print '\t\t-P[' + str(pr_id) + '] Edge/Vertex ratio (membrane): ' + str(round(nepv_mb, 5))
+        print('\t\t-P[' + str(pr_id) + '] Vertex density (membrane): ' + str(round(nvv, 5)) + ' nm^3')
+        print('\t\t-P[' + str(pr_id) + '] Edge density (membrane):' + str(round(nev_mb, 5)) + ' nm^3')
+        print('\t\t-P[' + str(pr_id) + '] Edge/Vertex ratio (membrane): ' + str(round(nepv_mb, 5)))
 
-        print '\tComputing graph properties (2)...'
+        print('\tComputing graph properties (2)...')
         graph.compute_mb_geo(update=True)
         graph.compute_mb_eu_dst()
         graph.compute_edge_curvatures()
@@ -269,7 +269,7 @@ def pr_worker(pr_id, ids, q_pkls):
         graph.compute_edge_filamentness()
         graph.compute_edge_affinity()
 
-        print '\tSaving intermediate graphs...'
+        print('\tSaving intermediate graphs...')
         ps.disperse_io.save_vtp(graph.get_vtp(av_mode=True, edges=True),
                                 output_dir + '/' + stem + '_edges.vtp')
         ps.disperse_io.save_vtp(graph.get_vtp(av_mode=False, edges=True),
@@ -278,7 +278,7 @@ def pr_worker(pr_id, ids, q_pkls):
         #                         output_dir + '/' + stem + '_sch.vtp')
 
         out_pkl = output_dir + '/' + stem_pkl + '.pkl'
-        print '\tP[' + str(pr_id) + '] Pickling the graph as: ' + out_pkl
+        print('\tP[' + str(pr_id) + '] Pickling the graph as: ' + out_pkl)
         graph.pickle(out_pkl)
         # star.set_element('_psGhMCFPickle', row, out_pkl)
         q_pkls.put((row, out_pkl))
@@ -287,19 +287,19 @@ def pr_worker(pr_id, ids, q_pkls):
     sys.exit(pr_id)
 
 # Loop for processing the input data
-print 'Running main loop in parallel: '
+print('Running main loop in parallel: ')
 q_pkls = mp.Queue()
 processes, pr_results = dict(), dict()
-spl_ids = np.array_split(range(star.get_nrows()), npr)
+spl_ids = np.array_split(list(range(star.get_nrows())), npr)
 for pr_id in range(npr):
     pr = mp.Process(target=pr_worker, args=(pr_id, spl_ids[pr_id], q_pkls))
     pr.start()
     processes[pr_id] = pr
-for pr_id, pr in zip(processes.iterkeys(), processes.itervalues()):
+for pr_id, pr in zip(iter(processes.keys()), iter(processes.values())):
     pr.join()
     if pr_id != pr.exitcode:
-        print 'ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
 
 count, n_rows = 0, star.get_nrows()
 while count < n_rows:
@@ -308,7 +308,7 @@ while count < n_rows:
     count += 1
 
 out_star = output_dir + '/' + os.path.splitext(os.path.split(in_star)[1])[0] + '_mb_graph.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

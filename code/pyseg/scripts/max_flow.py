@@ -41,31 +41,31 @@ help_msg = '    -i <string>: input Graph MCF in a pickle file. \n' + \
 def do_max_flow(input_file, output_dir, mask_file, prop_w, einv, alg, verbose):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if verbose:
-        print '\tLoading the mask file...'
+        print('\tLoading the mask file...')
     mask = disperse_io.load_tomo(mask_file)
     graph_mcf.threshold_edges_in_mask(mask)
     graph_mcf.simp_vertices(0)
 
     if verbose:
-        print '\tGetting the GT graph...'
+        print('\tGetting the GT graph...')
     graph_gt = GraphGT(graph_mcf)
 
     if verbose:
-        print '\tSolving max flow problem...'
+        print('\tSolving max flow problem...')
     graph_gt.compute_max_flow(graph_mcf, mask, prop_w, einv, alg)
 
     if verbose:
-        print '\tAssign the clusters to the graph...'
+        print('\tAssign the clusters to the graph...')
     if alg == 'ek':
         graph_gt.add_prop_to_GraphMCF(graph_mcf, STR_MFLOW_EK, up_index=True)
     elif alg == 'bk':
@@ -75,7 +75,7 @@ def do_max_flow(input_file, output_dir, mask_file, prop_w, einv, alg, verbose):
     graph_gt.add_prop_to_GraphMCF(graph_mcf, STR_FLOW_SS, up_index=True)
 
     if verbose:
-        print '\tStoring the result in ' + output_dir
+        print('\tStoring the result in ' + output_dir)
     _, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(output_dir + '/' + stem + '.pkl')
@@ -90,7 +90,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvxi:o:w:m:a:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -102,8 +102,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -115,8 +115,8 @@ def main(argv):
             if (arg == 'ek') or (arg == 'pr') or (arg == 'bk'):
                 alg = arg
             else:
-                print 'Unknown argument for -a ' + arg
-                print usage_msg
+                print('Unknown argument for -a ' + arg)
+                print(usage_msg)
                 sys.exit(3)
         elif opt == "-w":
             prop_w = arg
@@ -125,43 +125,43 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (output_dir is None) or (mask_file is None)\
             or (prop_w is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool computing max flow network.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tMask file: ' + mask_file
-            print '\tOutput directory: ' + output_dir
+            print('Running tool computing max flow network.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tMask file: ' + mask_file)
+            print('\tOutput directory: ' + output_dir)
             if einv:
-                print '\tEdge weighting property (inverted): ' + prop_w
+                print('\tEdge weighting property (inverted): ' + prop_w)
             else:
-                print '\tEdge weighting property: ' + prop_w
+                print('\tEdge weighting property: ' + prop_w)
             if alg == 'ek':
-                print '\tAlgorithm: Edmonds-Karp'
+                print('\tAlgorithm: Edmonds-Karp')
             elif alg == 'bk':
-                print '\tAlgorithm: Boykov-Kolmogorov'
+                print('\tAlgorithm: Boykov-Kolmogorov')
             else:
-                print '\tAlgorithm: Push relabel'
-            print ''
+                print('\tAlgorithm: Push relabel')
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_max_flow(input_file, output_dir, mask_file, prop_w, einv, alg, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

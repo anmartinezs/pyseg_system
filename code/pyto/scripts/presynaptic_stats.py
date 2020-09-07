@@ -20,8 +20,8 @@ only when a new individual segmentation & analysis pickle is added.
   This should create few pickle files in this directory (tethers.pkl, 
   sv.pkl, ...)
 
-2) Create profile in order to keep profile-specific history. Not required, 
-can be used only in IPython qtconsole before it became Jupyter and doesn't 
+2) (depreciated) Create profile in order to keep profile-specific history. 
+Not required, can be used only in IPython qtconsole. Doesn't 
 work with Jupyter. Need to be done only once.
  
   - Create ipython profile for your project: 
@@ -61,10 +61,18 @@ work with Jupyter. Need to be done only once.
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: presynaptic_stats.py 1538 2019-04-16 12:05:34Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+#from builtins import str
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1538 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -88,8 +96,9 @@ import pyto
 from pyto.analysis.groups import Groups
 from pyto.analysis.observations import Observations
 
+# to debug replace INFO by DEBUG
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(levelname)s %(module)s.%(funcName)s():%(lineno)d %(message)s',
     datefmt='%d %b %Y %H:%M:%S')
 
@@ -137,6 +146,11 @@ reference = {'ko_1' : 'wt_1',
              'wt_2' : 'wt_2'}
 
 # catalog directory
+# Important note: Catalog files have to be in a directory parallel to this
+# one (because relative paths specified in catalog files are not converted
+# to be relative to this file). This isn't needed if paths specified in
+# catalog files are absolute, but that is discouraged because it causes
+# portability problems. 
 catalog_directory = '../catalog'
 
 # catalogs file name pattern (can be a list of patterns) 
@@ -152,7 +166,8 @@ layers_name = 'layers_file'
 clusters_name = 'cluster_file'   
 
 # names of pyto.analysis.Connections, Vesicles and Layers pickle files that
-# are generated and further analyzed by this script
+# are generated and further analyzed by this script (names in respect to this
+# directory)
 sv_pkl = 'sv.pkl'
 tethers_pkl = 'tether.pkl'
 connectors_pkl = 'conn.pkl'
@@ -280,7 +295,7 @@ print_format = {
 plot_ = True 
 
 # legend
-legend = False
+legend = True
 
 # data color
 color = {
@@ -437,7 +452,8 @@ def analyze_occupancy(
 
 def stats_list(
     data, dataNames, name, join='join', bins=None, fraction=1, groups=None, 
-    identifiers=None, test=None, reference=None, ddof=1, out=sys.stdout, 
+    identifiers=None, test=None, reference=None, ddof=1, out=sys.stdout,
+    plot_name=None,
     label=None, outNames=None, plot_=True, yerr='sem', confidence='stars',
     plot_type='bar', randomized_x=False, title='', x_label=None, y_label=None):
     """
@@ -452,13 +468,16 @@ def stats_list(
       - dataNames: (list of strs) names corrensponfing to elements of arg data, 
       have to be in the same order as the data
       - name: name of the analyzed property
-      - join: 'join' to join experiments, otherwise None
+      - join: 'join' to join experiments, 'mean' to make mean of 
+      experements or 'mean_bin' to make means within bins (arg bins required)
       - bins: (list) bins for making histogram
       - fraction: bin index for which the fraction is calculated
       - groups: list of group names
       - identifiers: list of identifiers
       - test: statistical inference test type
       - reference: specifies reference data
+      - plot_name: name of the statistical property to plot
+      - plot_type: plot type, 'bar' or 'boxplot'
       - ddof: differential degrees of freedom used for std
       - out: output stream for printing data and results
       - outNames: list of statistical properties that are printed
@@ -482,7 +501,7 @@ def stats_list(
         data=together, name=name, join=None, bins=bins, fraction=fraction, 
         groups=dataNames, identifiers=groups, test=test, reference=reference, 
         ddof=ddof, out=out, outNames=outNames, yerr=yerr, label='experiment', 
-        plot_type=plot_type, randomized_x=randomized_x,
+        plot_name=plot_name, plot_type=plot_type, randomized_x=randomized_x,
         confidence=confidence, title=title, x_label=x_label, y_label=y_label)
 
     return result
@@ -609,14 +628,21 @@ def stats(
     If specified, args groups and identifiers specify the order of groups
     and experiments on the x axis. 
 
-    Arg plot_name specifies which statistical property to plot. If it is not 
-    specified the property to plot is determined in the following way: if arg
-    bins are not given 'mean' is plotted, otherwise if bin_names is specified
-    'histogram' is plotted and 'fraction' in case bin_names is not specified. 
-    Therefore, most often arg plot_name doesn't need to be given. Notable 
-    exception is for a histogram when instead of numer of occurences a 
-    probability (fraction) of occurences needs to be plotted, in which 
-    case 'fraction' should be specified.
+    Arg plot_name specifies the statistical property to be plotted. It has 
+    to be specified only if arg bins is specified and arg fraction is not. 
+    In this case it can be:
+      - 'histogram' (default): plot histogram (number of occurences)
+      - 'probability': plot probability (total occurences within a group
+      are normalized to 1)
+
+    In other cases, arg plot_name should not be specified, except for 
+    advanced usage. For a reference, the property to be plotted is 
+    determined in the following way:
+      - 'mean' / 'data', if arg bins are not given for bar / boxplot 
+      - 'fraction' / 'fraction_data'. if args bins and fraction are specified 
+      and arg join is 'join'
+      - 'mean' / 'data'. if args bins and fraction are specified 
+      and arg join is 'mean-bin'
 
     Arguments:
       - data: (Groups or Observations) data structure
@@ -639,7 +665,7 @@ def stats(
           * bar: barplot
           * boxplot: Tukey boxplot with whiskers (at 1.5 IQR) and outliers,
             box filled with color
-          * boxplot_data: boxplot without fliers, box empty together with
+          * boxplot_data: boxplot without outliers, box empty together with
             all data
       - randomized_x: Flag indicating if x values should be randomized for
       boxplot_data, so that data don't overlap
@@ -655,10 +681,16 @@ def stats(
     ToDo: include stats_x in stats
     """
 
+    # sanity check:
+    if (fraction is not None) and (plot_name is None) and (join == 'join'):
+        plot_name = 'fraction'
+        #print("Arg plot_name was None, set to 'fraction'")
+
     # prepare for plotting
     if plot_:
-        plt.figure()
-
+        #plt.figure()
+        fig, axes = plt.subplots()
+        
     # makes sure elements of bin_names are different from those of 
     # category_label (appends space(s) to make bin_names different)
     if bin_names is not None:
@@ -690,23 +722,29 @@ def stats(
                 "Plot_type 'boxplot' requires plot_name 'fraction' or 'mean'.")
         
     # figure out if indexed
-    indexed = name in data.values()[0].indexed
+    indexed = name in list(data.values())[0].indexed
 
     if isinstance(data, Groups):
         if not indexed:
 
             # not indexed
             if join is None:
+
+                # non-implemented argument combination
+                if bins is not None:
+                    raise ValueError(
+                        "Binning is not implemented for scalar data") 
                 
                 # groups, scalar property, no joining
                 data.printStats(
                     out=out, names=[name], groups=groups, 
                     identifiers=identifiers, format_=print_format, title=title)
                 if plot_:
-                    plot_stats(
+                    plot_stats_dict = plot_stats(
                         stats=data, name=name, groups=groups,
                         plot_type=plot_type, randomized_x=randomized_x,
-                        identifiers=identifiers, yerr=None, confidence=None)
+                        identifiers=identifiers, yerr=None, confidence=None,
+                        axes=axes)
 
             elif join == 'join':
 
@@ -717,9 +755,10 @@ def stats(
                     ddof=ddof, out=out, outNames=outNames,
                     format_=print_format, title=title)
                 if plot_:
-                    plot_stats(
+                    plot_stats_dict = plot_stats(
                         stats=stats, name=plot_name, randomized_x=randomized_x,
-                        plot_type=plot_type, yerr=yerr, confidence=confidence)
+                        plot_type=plot_type, yerr=yerr, confidence=confidence,
+                        axes=axes)
 
             else:
                 raise ValueError(
@@ -733,7 +772,7 @@ def stats(
 
                 # stats between groups and  between observations
                 if groups is None:
-                    groups = data.keys()
+                    groups = list(data.keys())
 
                 # between experiments
                 exp_ref = {}
@@ -771,18 +810,65 @@ def stats(
                     stats_x = None
                     names_x = None
 
-                # print and plot
+                # print 
                 stats.printStats(
                     out=out, groups=groups, identifiers=identifiers, 
                     format_=print_format, title=title, 
                     other=stats_x, otherNames=names_x)
-                if plot_:
-                    plot_stats(
-                        stats=stats, name=plot_name, groups=groups,
-                        plot_type=plot_type, randomized_x=randomized_x,
-                        identifiers=identifiers, yerr=yerr, label=label,
-                        confidence=confidence, stats_between=stats_x)
 
+                # plot
+                if ((plot_name != 'histogram') 
+                    and (plot_name != 'probability')):
+
+                    # just plot
+                    if plot_:
+                        plot_stats_dict = plot_stats(
+                            stats=stats, name=plot_name, groups=groups,
+                            plot_type=plot_type, randomized_x=randomized_x,
+                            identifiers=identifiers, yerr=yerr, label=label,
+                            confidence=confidence, stats_between=stats_x,
+                            axes=axes)
+
+                else:
+
+                    if fraction is not None:
+                        
+                        # fraction given so split histogram and plot
+                        stats_split = stats.splitIndexed()
+                        histo_groups = stats_split[fraction]
+                        #histo_groups = Groups()
+                        #histo_groups.fromList(
+                           # groups=stats_split, names=bin_names)
+                        if plot_:
+                            plot_stats_dict = plot_stats(
+                                stats=histo_groups, name=plot_name, 
+                                groups=groups, identifiers=identifiers,
+                                yerr=yerr, randomized_x=randomized_x,
+                                confidence=confidence, label='experiment',
+                                axes=axes)
+
+                    else:
+
+                        # fraction not given
+                        if join is None:
+                            # should not be here
+                            raise ValueError(
+                                "Unsupported plotting case: indexed variable, "
+                                + " join=None, but bins specified.")
+
+                        else:
+                            # not sure if should get here
+                            logging.warning(
+                                "This plotting case needs to be checked.")
+                            if plot_:
+                                plot_stats_dict = plot_stats(
+                                    stats=histo_groups, name=plot_name, 
+                                    groups=bin_names, identifiers=groups,
+                                    yerr=yerr, 
+                                    randomized_x=randomized_x,
+                                    confidence=confidence, label='experiment',
+                                    axes=axes)
+                    
             elif (join == 'join') or (join == 'mean') or (join == 'mean_bin'):
 
                 # groups, indexed property, join or mean
@@ -792,28 +878,33 @@ def stats(
                     identifiers=identifiers,
                     ddof=ddof, out=out, format_=print_format, title=title)
 
-                if ((plot_name is not 'histogram') 
-                    and (plot_name is not 'probability')):
+                # include sem of the stats ananlysis obtained by join=mean_bin 
+                if ((join == 'join') and (bins is not None)
+                    and (fraction is not None)):
+                    title_mean_bin = (
+                        title + " (statistics for join='mean_bin', sem used "
+                        + "for the graph)")
+                    stats_mean_bin = data.joinAndStats(
+                        name=name, bins=bins, fraction=fraction,
+                        mode='mean_bin', test='t', reference=reference,
+                        groups=groups, identifiers=identifiers,
+                        ddof=ddof, out=out, format_=print_format,
+                        title=title_mean_bin)
+                    stats.addData(
+                        source=stats_mean_bin, names={'sem':'sem_mean_bin'},
+                        identifiers=groups)
+                    yerr = 'sem_mean_bin'
+
+                if ((plot_name != 'histogram') 
+                    and (plot_name != 'probability')):
 
                     # just plot
                     if plot_:
-                        # to remove
-                        #if ((plot_type is None) or (plot_type == 'bar')):
-                        #    pass
-                        #elif ((plot_type == 'boxplot') or
-                        #        (plot_type == 'boxplot_data')):
-                        #    if plot_name == 'fraction':
-                        #        plot_name = 'fraction_data'
-                        #    elif plot_name == 'mean':
-                        #        plot_name = 'data'
-                        #    else:
-                        #        raise ValueError(
-                        #            "Plot_type 'boxplot' requires plot_name "
-                        #            + "'fraction' or 'mean'.")
-                        plot_stats(
+                        plot_stats_dict = plot_stats(
                             stats=stats, name=plot_name, identifiers=groups,
                             randomized_x=randomized_x, yerr=yerr,
-                            plot_type=plot_type, confidence=confidence)
+                            plot_type=plot_type, confidence=confidence,
+                            axes=axes)
 
                 else:
                     
@@ -823,11 +914,12 @@ def stats(
                     histo_groups.fromList(groups=stats_split, names=bin_names)
 
                     if plot_:
-                        plot_stats(
+                        plot_stats_dict = plot_stats(
                             stats=histo_groups, name=plot_name, 
                             groups=bin_names, identifiers=groups, yerr=yerr, 
                             randomized_x=randomized_x,
-                            confidence=confidence, label='experiment')
+                            confidence=confidence, label='experiment',
+                            axes=axes)
                     stats = histo_groups
 
             else:
@@ -846,14 +938,19 @@ def stats(
 
     # finish plotting
     if plot_:
-        plt.title(title)
+        axes.set_title(title)
         if y_label is None:
             y_label = name
-        plt.ylabel(y_label)
+        axes.set_ylabel(y_label)
         if x_label is not None:
-            plt.xlabel(x_label)
+            axes.set_xlabel(x_label)
         if legend:
-            plt.legend()
+            # don't plot legend only if plot_stats says 'legend_done'
+            try:
+                if not plot_stats_dict.get('legend_done', False):
+                    axes.legend()
+            except (NameError, AttributeError):
+                axes.legend()
         plt.show()
 
     if indexed or (join is not None):
@@ -865,7 +962,8 @@ def count_histogram(
     plot_name='fraction', confidence='stars', title='', x_label=None, 
     y_label=None):
     """
-    Analyses and plots the number of data items specified by arg name.
+    Analyses and plots number of data points of a property specified by 
+    arg name, of multiple data objects.
 
     If (arg) data is a list of Groups objects, makes a histogram of the number 
     of items for each group, so a histogram is calculated for each group. Bins 
@@ -944,12 +1042,14 @@ def count_histogram(
     if plot_:
 
         # prepare for plotting
-        plt.figure()
+        #plt.figure()
+        fig, axes = plt.subplots()
 
         # plot
         plot_stats(
             stats=stats, name=plot_name, yerr=None, groups=loc_groups, 
-            identifiers=loc_identifiers, label=label, confidence=confidence)
+            identifiers=loc_identifiers, label=label, confidence=confidence,
+            axes=axes)
 
         # finish plotting
         plt.title(title)
@@ -1013,7 +1113,8 @@ def correlation(
 
     # start plotting
     if plot_:
-        fig = plt.figure()
+        #fig = plt.figure()
+        fig, axes = plt.subplots()
 
     if isinstance(data, Groups):
         
@@ -1026,8 +1127,9 @@ def correlation(
 
         # plot
         if plot_:
-            plot_2d(x_data=corr, x_name='xData', y_name='yData', groups=None,
-                    identifiers=groups, graph_type='scatter', fit=fit)
+            plot_2d(
+                x_data=corr, x_name='xData', y_name='yData', groups=None,
+                identifiers=groups, graph_type='scatter', fit=fit, axes=axes)
 
     elif isinstance(data, Observations):
 
@@ -1039,8 +1141,9 @@ def correlation(
 
         # plot
         if plot_:
-            plot_2d(x_data=corr, x_name='xData', y_name='yData', 
-                    identifiers=identifiers, graph_type='scatter', fit=fit)
+            plot_2d(
+                x_data=corr, x_name='xData', y_name='yData', axes=axes,
+                identifiers=identifiers, graph_type='scatter', fit=fit)
 
     else:
         raise ValueError("Argument data has to be an instance of " 
@@ -1048,15 +1151,15 @@ def correlation(
 
     # finish plotting
     if plot_:
-        plt.title(title)
+        axes.set_title(title)
         if x_label is None:
             x_label = xName
-        plt.xlabel(x_label)
+        axes.set_xlabel(x_label)
         if y_label is None:
             y_label = yName
-        plt.ylabel(y_label)
+        axes.set_ylabel(y_label)
         if legend:
-            plt.legend()
+            axes.legend()
         plt.show()
 
     return corr
@@ -1102,7 +1205,7 @@ def plot_layers(
     # if data is Groups, print a separate figure for each group
     if isinstance(data, Groups):
         if groups is None:
-            groups = data.keys()
+            groups = list(data.keys())
 
         if (mode == 'all') or (mode == 'all&mean'): 
 
@@ -1168,7 +1271,8 @@ def plot_layers_one(
       - title: title
     """
     # from here on plotting an Observations object
-    fig = plt.figure()
+    #fig = plt.figure()
+    fig, axes = plt.subplots()
 
     # set identifiers
     if identifiers is None:
@@ -1180,7 +1284,7 @@ def plot_layers_one(
 
         # plot data for the current experiment 
         line = plot_2d(x_data=data, x_name=xName, y_name=yName, yerr=yerr, 
-                       identifiers=[ident], graph_type=graphType)
+                       identifiers=[ident], graph_type=graphType, axes=axes)
 
     # calculate and plot mean
     if mode == 'all&mean':
@@ -1200,16 +1304,16 @@ def plot_layers_one(
             # plot
             line = plot_2d(
                 x_data=exp, x_name=xName, y_data=exp, y_name='mean', 
-                yerr=yerr, graph_type=graphType, line_width_='thick')
+                yerr=yerr, graph_type=graphType, line_width_='thick', axes=axes)
 
     # finish plotting
-    plt.title(title)
-    plt.ylabel(y_label)
-    plt.xlabel(x_label)
-    ends = plt.axis()
-    plt.axis([0, 250, 0, 0.3])
+    axes.set_title(title)
+    axes.set_ylabel(y_label)
+    axes.set_xlabel(x_label)
+    #ends = list(axes.axis())
+    axes.axis([0, 250, 0, 0.3])
     if legend:
-        plt.legend()
+        axes.legend()
     plt.show()
 
 def plot_histogram(data, name, bins, groups=None, identifiers=None, 
@@ -1247,7 +1351,7 @@ def plot_histogram(data, name, bins, groups=None, identifiers=None,
             if len(groups)==1:
                 facecolor = color.get(groups[0], None)
         else:
-            if isinstance(groups, str):
+            if isinstance(groups, basestring):
                 facecolor = color.get(groups, None)
 
     # plot
@@ -1262,7 +1366,7 @@ def plot_histogram(data, name, bins, groups=None, identifiers=None,
     plt.show()
 
 def plot_stats(
-        stats, name, groups=None, identifiers=None, yerr='sem', 
+        stats, name, groups=None, identifiers=None, axes=None, yerr='sem', 
         plot_type='bar', randomized_x=False, confidence='stars',
         stats_between=None, label=None):
     """
@@ -1280,10 +1384,12 @@ def plot_stats(
       - name: property name
       - groups: list of group names, None for all groups
       - identifiers: experiment identifier names, None for all identifiers 
+      - axes: matplotlib.axes object (experimental)
       - yerr: attribute name of stats that is used to plot y error 
       - plot_type: plot type, currently:
           * bar: barplot
-          * boxplot: Tukey boxplot with whiskers (at 1.5 IQR) and outliers,
+          * boxplot: Tukey boxplot showing IQR = Q3 - Q1, whiskers (at 
+            the last point within Q3 + 1.5 IQR and Q1 - 1.5 IQR) and outliers,
             box filled with color
           * boxplot_data: boxplot without fliers, box empty together with
             all data
@@ -1311,7 +1417,7 @@ def plot_stats(
 
     # set group order
     if groups is None:
-        group_names = stats.keys() 
+        group_names = list(stats.keys()) 
     else:
         group_names = groups
 
@@ -1350,7 +1456,13 @@ def plot_stats(
     y_max = 0
     group_left = []
     label_done = False
-    for group_nam, group_ind in zip(group_names, range(len(group_names))):
+    legend_lines = []
+    legend_labels = []
+    fake_list = []
+    if axes is None:
+        axes = plt.gca()
+        print("Debug: axes not specified")
+    for group_nam, group_ind in zip(group_names, list(range(len(group_names)))):
         group = stats[group_nam]
 
         # set experiment order
@@ -1368,7 +1480,7 @@ def plot_stats(
             group_left.append(left + bar_width)
 
         # loop over experiments
-        for ident, exp_ind in zip(loc_identifs, range(len(loc_identifs))):
+        for ident, exp_ind in zip(loc_identifs, list(range(len(loc_identifs)))):
 
             # label
             if label is None:
@@ -1386,12 +1498,17 @@ def plot_stats(
 
             # y values
             value = group.getValue(identifier=ident, property=name)
+            if numpy.isnan(value): continue
+            #print("value {}".format(value))
                 
             # y error and y limits
             if ((yerr is not None) and (yerr in group.properties)
                     and (plot_type != 'boxplot')
                 and (loc_alpha == 1)):
                 yerr_num = group.getValue(identifier=ident, property=yerr)
+                if numpy.isnan(yerr_num):
+                    yerr_num = 0
+                    yerr_one = 0
                 yerr_one = yerr_num
                 y_max = max(y_max, value+yerr_num)
                 if one_side_yerr:
@@ -1416,34 +1533,44 @@ def plot_stats(
 
             if plot_type == 'bar':
                 if label_done:
-                    bar = plt.bar(
+                    bar = axes.bar(
                         x=left, height=value, yerr=yerr_num, width=bar_width,
                         color=color[label_code], ecolor=color[label_code],
                         alpha=loc_alpha)[0]
                 else:
-                    bar = plt.bar(
+                    bar = axes.bar(
                         x=left, height=value, yerr=yerr_num, width=bar_width,
                         label=category_label.get(label_code, ''), 
                         color=color[label_code], ecolor=color[label_code],
                         alpha=loc_alpha)[0]
-                x_confid = bar.get_x() + bar.get_width()/2.
+                x_confid = bar.get_x() + bar.get_width() / 2.
                 y_confid_base = bar.get_height() + yerr_one
 
             elif plot_type == 'boxplot':
-                x_value = left + bar_width/2.
-                bplot = plt.boxplot(
+                x_value = left + bar_width / 2.
+                bplot = axes.boxplot(
                     value, positions=(x_value,), widths=(bar_width,),
-                    #labels=category_label.get(label_code, ''),
+                    #labels=[category_label.get(label_code, '')],
                     patch_artist=True)
-                bplot['boxes'][0].set_facecolor(color[label_code])
+                bplot['boxes'][0].set_color(color[label_code])
                 x_confid = x_value
                 y_confid_base = bplot['whiskers'][1].get_ydata()[1]
                 y_confid_base = max(y_confid_base, y_max)
-                
+                if not label_done:
+                    legend_lines.append(bplot['boxes'][0])
+                    legend_labels.append(category_label.get(label_code, ''))
+                    # alternative to make legend
+                    #fake, = axes.bar(
+                    #    x=0, height=0, color=color[label_code],
+                    #    label=category_label.get(label_code, ''))
+                    #fake_list.append(fake)
+                    #legend_lines.append(fake)
+                    #axes.legend(legend_lines, legend_labels) 
+
             elif plot_type == 'boxplot_data':
                 squeeze = 0.5 # IMPORTANT: Change if needed
-                x_value = left + bar_width/2.
-                bplot = plt.boxplot(
+                x_value = left + bar_width / 2.
+                bplot = axes.boxplot(
                     value, positions=(x_value,), widths=(squeeze*bar_width,),
                     #labels=category_label.get(label_code, ''),
                     patch_artist=True, showfliers=False)
@@ -1454,13 +1581,16 @@ def plot_stats(
                     bplot_el.set_color(color[label_code])
                 bplot['boxes'][0].set_facecolor('none')
                 x_value_all = [x_value] * len(value) 
+                if not label_done:
+                    legend_lines.append(bplot['boxes'][0])
+                    legend_labels.append(category_label.get(label_code, ''))
 
                 if randomized_x:
                     #box_x = bplot['boxes'][0].get_xdata()
                     x_value_all = numpy.random.normal(
                         loc=x_value, scale=0.5*0.8*bar_width/2.,
                         size=len(x_value_all))
-                dataplot = plt.plot(
+                dataplot = axes.plot(
                     x_value_all, value, marker='o', markerfacecolor='none',
                     markeredgecolor=color[label_code], linestyle=' ')
 
@@ -1497,7 +1627,7 @@ def plot_stats(
                 ref_ident = group.getValue(identifier=ident,   
                                            property='reference')
                 ref_color = color.get(ref_ident, label_code) 
-                plt.text(x_confid, y_confid, confid, ha='center', va='bottom',
+                axes.text(x_confid, y_confid, confid, ha='center', va='bottom',
                          size=conf_size, color=ref_color)
 
             # confidence between groups
@@ -1529,19 +1659,19 @@ def plot_stats(
                 # plot
                 y_confid = 0.04 * rough_y_range + y_confid_base
                 ref_color = color[ident]
-                plt.text(x_confid, y_confid, confid, ha='center', va='bottom',
+                axes.text(x_confid, y_confid, confid, ha='center', va='bottom',
                          size=conf_size, color=ref_color)
 
         # set flag that prevents adding further labels to legend
         label_done = True
 
     # adjust axes
-    axis_limits = list(plt.axis())
+    axis_limits = list(axes.axis())
     if bar_arrange == 'uniform':
         x_min = axis_limits[0]-bar_width
     if bar_arrange == 'grouped':
         x_min = -bar_width
-    plt.axis([x_min, max(axis_limits[1], 4), y_min, 1.1*y_max])
+    axes.axis([x_min, max(axis_limits[1], 4), y_min, 1.1*y_max])
     if bar_arrange == 'uniform':
         group_left.append(left)
         x_tick_pos = [
@@ -1552,11 +1682,25 @@ def plot_stats(
         x_tick_pos = numpy.arange(len(group_names)) + bar_width*(exp_ind+1)/2.
     group_labels = [category_label.get(g_name, g_name) 
                     for g_name in group_names]
-    plt.xticks(x_tick_pos, group_labels)
+    axes.set_xticks(x_tick_pos)
+    axes.set_xticklabels(group_labels)
+    #plt.xticks(x_tick_pos, group_labels) old
 
+    # make legend first, and then remove fake graphs
+    legend_done = False
+    if len(legend_labels) > 0:
+        axes.legend(legend_lines, legend_labels)
+        for fa in fake_list: fa.set_visible(False)
+        legend_done = True
+
+    # return some info
+    result = {}
+    result['legend_done'] = legend_done
+    return result
+        
 def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
             groups=None, identifiers=None, graph_type='scatter', 
-            line_width_=None, fit=None):
+            line_width_=None, fit=None, axes=None):
     """
     Min part for plottings a 2d graph.
 
@@ -1571,6 +1715,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
       same class
       - x_name, y_name: names of properties of x_data and y_data that are 
       plotted on x and y axis  
+      - axes: matplotlib.axes object (experimental)
     """
 
     # y data
@@ -1581,7 +1726,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
     if (isinstance(x_data, Groups) and isinstance(y_data, Groups)):
         data_type = 'groups'
         if groups is None:
-            group_names = x_data.keys() 
+            group_names = list(x_data.keys()) 
         else:
             group_names = groups
     elif (isinstance(x_data, Observations) 
@@ -1613,7 +1758,10 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
     # loop over groups
     figure = None
     markers_default_copy = copy(markers_default)
-    for group_nam, group_ind in zip(group_names, range(len(group_names))):
+    if axes is None:
+        axes = plt.gca()
+        print("Debug: axes not specified")
+    for group_nam, group_ind in zip(group_names, list(range(len(group_names)))):
 
         # get data
         if data_type == 'groups':
@@ -1638,7 +1786,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
             loc_identifs = identifiers[group_nam]
 
         # loop over experiments
-        for ident, exp_ind in zip(loc_identifs, range(len(loc_identifs))):
+        for ident, exp_ind in zip(loc_identifs, list(range(len(loc_identifs)))):
 
             # values
             if (data_type == 'groups') or (data_type == 'observations'):
@@ -1668,13 +1816,13 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
             #label = (group_nam + ' ' + ident).strip()
             loc_label = category_label.get(ident, ident)
             if loc_color is not None:
-                figure = plt.plot(
+                figure = axes.plot(
                     x_value, y_value, linestyle=loc_line_style, color=loc_color,
                     linewidth=loc_line_width, marker=loc_marker, 
                     markersize=marker_size, alpha=loc_alpha, label=loc_label)
 
             else:
-                figure = plt.plot(
+                figure = axes.plot(
                     x_value, y_value, linestyle=loc_line_style,
                     linewidth=loc_line_width, marker=loc_marker, 
                     markersize=marker_size, alpha=loc_alpha, label=loc_label)
@@ -1683,7 +1831,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
             if yerr is not None:
                 yerr_value = y_group.getValue(identifier=ident, property=yerr)
                 # arg color needed otherwise makes line with another color
-                plt.errorbar(
+                axes.errorbar(
                     x_value, y_value, yerr=yerr_value, 
                     color=loc_color, ecolor=loc_color, label='_nolegend_')
 
@@ -1718,12 +1866,12 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
                             break
                 # plot fit
                 if loc_color is not None:
-                    plt.plot(
+                    axes.plot(
                         x_fit, y_fit, linestyle=default_line_style, 
                         color=loc_color, linewidth=loc_line_width, marker='', 
                         alpha=loc_alpha)
                 else:
-                    plt.plot(
+                    axes.plot(
                         x_fit, y_fit, linestyle=default_line_style,
                         linewidth=loc_line_width, marker='', alpha=loc_alpha)
 
@@ -1766,7 +1914,7 @@ def save_data(object, base, name=['mean', 'sem'], categories=categories):
     # find shortest ids
     if 'ids' in object.indexed:
         ids = object.ids[0]
-        for group, group_ind in zip(categories, range(len(categories))):
+        for group, group_ind in zip(categories, list(range(len(categories)))):
             current_ids = object.getValue(identifier=group, name='ids')
             if len(current_ids) < len(ids):
                 ids = current_ids
@@ -1786,7 +1934,7 @@ def save_data(object, base, name=['mean', 'sem'], categories=categories):
             result[0,0] = 1
 
         # make array that contains all values for current property
-        for group, group_ind in zip(categories, range(len(categories))):
+        for group, group_ind in zip(categories, list(range(len(categories)))):
             values =  object.getValue(identifier=group, name=one_name)
 
             if one_name in object.indexed:
@@ -1824,7 +1972,7 @@ def getSpecialThreshold(cleft, segments, fraction,
 
     # get groups
     if groups is None:
-        groups = cleft.keys()
+        groups = list(cleft.keys())
 
     # loop over groups
     fract_thresholds = {}
@@ -1851,16 +1999,16 @@ def getSpecialThreshold(cleft, segments, fraction,
                 identifier=identif, property='mean', ids=bound_ids)
             bound_volume = cleft[categ].getValue(
                 identifier=identif, property='volume', ids=bound_ids)
-            bound_density = numpy.dot(bound_densities, 
-                                      bound_volume) / bound_volume.sum() 
+            bound_density = (
+                numpy.dot(bound_densities, bound_volume) / bound_volume.sum()) 
             cleft_densities = cleft[categ].getValue(
                 identifier=identif, property='mean', ids=cleft_ids)
             cleft_volume = cleft[categ].getValue(
                 identifier=identif, property='volume', ids=cleft_ids)
-            cleft_density = numpy.dot(cleft_densities, 
-                                      cleft_volume) / cleft_volume.sum() 
-            fract_density = bound_density + (cleft_density 
-                                             - bound_density) * fraction
+            cleft_density = (
+                numpy.dot(cleft_densities, cleft_volume) / cleft_volume.sum()) 
+            fract_density = (
+                bound_density + (cleft_density - bound_density) * fraction)
             
             # get closest threshold
             # ERROR thresholds badly formated in segments
@@ -2090,17 +2238,17 @@ def anova_factorial(data_11, data_12, data_21, data_22):
     # ss between columns
     ss_col = (
         numpy.hstack((data_11, data_21)).sum()**2 /
-            (float(len(data_11) + len(data_21))) 
-        + numpy.hstack((data_12, data_22)).sum()**2 / 
-            (float(len(data_12) + len(data_22))) 
+        (float(len(data_11) + len(data_21))) 
+        + numpy.hstack((data_12, data_22)).sum()**2 /
+        (float(len(data_12) + len(data_22)))
         - tot.sum()**2 / float(len(tot)) )
 
     # ss between rows
     ss_row = (
-        numpy.hstack((data_11, data_12)).sum()**2 / 
+        numpy.hstack((data_11, data_12)).sum()**2 /
             (float(len(data_11) + len(data_12)))  
-        + numpy.hstack((data_21, data_22)).sum()**2 / 
-            (float(len(data_21) + len(data_22)))  
+        + numpy.hstack((data_21, data_22)).sum()**2 /
+            (float(len(data_21) + len(data_22)))
         - tot.sum()**2 / float(len(tot)) )
         
     # ss interaction
@@ -2114,8 +2262,8 @@ def anova_factorial(data_11, data_12, data_21, data_22):
 
     # ss error
     ss_err = ss_tot - (ss_col + ss_row + ss_int)
-    ms_err = ss_err / float(len(data_11) + len(data_12) + len(data_21) 
-                            + len(data_22) - 4)
+    ms_err = ss_err / float(
+        len(data_11) + len(data_12) + len(data_21) + len(data_22) - 4)
 
     # f values and significances
     f_col = ss_col / ms_err
@@ -2147,21 +2295,33 @@ def main(individual=False, save=False, analyze=False):
       - analyze: do complete analysis
     """
 
-    # make catalog and groups
+    # read catalogs and make groups
     global catalog
     if __name__ == '__main__':
         try:
             curr_dir, base = os.path.split(os.path.abspath(__file__))
         except NameError:
-            # needed for running from ipython
+            # needed for running from ipython - don't understand why
             curr_dir = os.getcwd()
     else:
-        curr_dir = os.getcwd()
+        curr_dir, base = os.path.split(os.path.abspath(__file__))
+        #curr_dir = os.getcwd()
     cat_dir = os.path.normpath(os.path.join(curr_dir, catalog_directory))
     catalog = pyto.analysis.Catalog(
         catalog=catalog_pattern, dir=cat_dir, identifiers=identifiers)
     catalog.makeGroups(feature='treatment')
-                                   
+
+    # ToDo: convert relative paths from catalog (relative to catalog
+    # files) so that they are relative to this file. Currently, this
+    # file has to be relative to catalog files
+    
+    # make absolute paths for pickle files
+    sv_pkl_abs = os.path.join(curr_dir, sv_pkl)
+    tethers_pkl_abs = os.path.join(curr_dir, tethers_pkl)
+    connectors_pkl_abs = os.path.join(curr_dir, connectors_pkl)
+    layers_pkl_abs = os.path.join(curr_dir, layers_pkl)
+    clusters_pkl_abs = os.path.join(curr_dir, clusters_pkl)
+
     # prepare for making or reading data pickles
     global sv, tether, conn, layer, clust
                                    
@@ -2252,22 +2412,38 @@ def main(individual=False, save=False, analyze=False):
 
         # pickle
         if save:
-            pickle.dump(sv, open(sv_pkl, 'wb'), -1)
-            pickle.dump(tether, open(tethers_pkl, 'wb'), -1)
-            pickle.dump(conn, open(connectors_pkl, 'wb'), -1)
-            pickle.dump(layer, open(layers_pkl, 'wb'), -1)
+            pickle.dump(sv, open(sv_pkl_abs, 'wb'), -1)
+            pickle.dump(tether, open(tethers_pkl_abs, 'wb'), -1)
+            pickle.dump(conn, open(connectors_pkl_abs, 'wb'), -1)
+            pickle.dump(layer, open(layers_pkl_abs, 'wb'), -1)
             if clust is not None:
-                pickle.dump(clust, open(clusters_pkl, 'wb'), -1)
+                pickle.dump(clust, open(clusters_pkl_abs, 'wb'), -1)
 
     else:
 
         # unpickle
-        sv = pickle.load(open(sv_pkl))
-        tether = pickle.load(open(tethers_pkl))
-        conn = pickle.load(open(connectors_pkl))
-        layer = pickle.load(open(layers_pkl))
         try:
-            clust = pickle.load(open(clusters_pkl))
+            # python 3
+            sv = pickle.load(open(sv_pkl_abs, 'rb'), encoding='latin1')
+            tether = pickle.load(
+                open(tethers_pkl_abs, 'rb'), encoding='latin1')
+            conn = pickle.load(
+                open(connectors_pkl_abs, 'rb'), encoding='latin1')
+            layer = pickle.load(open(layers_pkl_abs, 'rb'), encoding='latin1')
+        except TypeError:
+            # python 2
+            sv = pickle.load(open(sv_pkl_abs))
+            tether = pickle.load(open(tethers_pkl_abs))
+            conn = pickle.load(open(connectors_pkl_abs))
+            layer = pickle.load(open(layers_pkl_abs))
+        try:
+            try:
+                # python 3
+                clust = pickle.load(
+                    open(clusters_pkl_abs, 'rb'), encoding='latin1')
+            except TypeError:
+                # python2
+                clust = pickle.load(open(clusters_pkl_abs))
         except IOError:
             clust = None
 

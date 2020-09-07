@@ -55,22 +55,22 @@ VL_INNER = 3
 def do_loc_bet(input_file, output_dir, key_p, val_p, dist_max, dist_min, key_e, verbose):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if verbose:
-        print '\tGetting the GT graph...'
+        print('\tGetting the GT graph...')
     graph = GraphGT(graph_mcf)
     graph_gt = graph.get_gt()
 
     if verbose:
-        print '\tMarking the sources...'
+        print('\tMarking the sources...')
     prop_s = graph_gt.new_vertex_property('int')
     prop_p = graph_gt.vertex_properties[key_p]
     if key_p is None:
@@ -81,16 +81,16 @@ def do_loc_bet(input_file, output_dir, key_p, val_p, dist_max, dist_min, key_e, 
                 prop_s[v] = 1
 
     if verbose:
-        print '\tComputing betweenness...'
+        print('\tComputing betweenness...')
     graph.fix_len_path_centrality(STR_LOC_BET, key_e, dist_min, dist_max, prop_s)
 
     if verbose:
-        print '\tAdding the new computed properties...'
+        print('\tAdding the new computed properties...')
     graph.add_prop_to_GraphMCF(graph_mcf, STR_LOC_BET, up_index=True)
     graph.add_prop_to_GraphMCF(graph_mcf, 'edge_'+STR_LOC_BET, up_index=True)
 
     if verbose:
-        print '\tStoring the result in ' + output_dir
+        print('\tStoring the result in ' + output_dir)
     _, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(output_dir + '/' + stem + '.pkl')
@@ -105,7 +105,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvi:o:e:p:P:d:D:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -118,8 +118,8 @@ def main(argv):
     dist_min = None
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -140,37 +140,37 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (output_dir is None) or (prop_e is None) or \
             (dist_max is None) or (dist_min is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for suppressing not transmembrane structures in a membrane.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
-            print '\tMinimum distance: ' + str(dist_min) + 'nm'
-            print '\tMaximum distance: ' + str(dist_max) + 'nm'
-            print '\tProperty for edge weighting: ' + prop_e
+            print('Running tool for suppressing not transmembrane structures in a membrane.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
+            print('\tMinimum distance: ' + str(dist_min) + 'nm')
+            print('\tMaximum distance: ' + str(dist_max) + 'nm')
+            print('\tProperty for edge weighting: ' + prop_e)
             if prop_p is not None:
-                print '\tSources segmentation property ' + prop_p + ' with label ' + str(val_p)
-            print ''
+                print('\tSources segmentation property ' + prop_p + ' with label ' + str(val_p))
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_loc_bet(input_file, output_dir, prop_p, val_p, dist_max, dist_min, prop_e, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

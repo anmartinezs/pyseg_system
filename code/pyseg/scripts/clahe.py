@@ -24,7 +24,7 @@ import getopt
 import pyseg as ps
 from factory import unpickle_obj
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -49,24 +49,24 @@ def do_clahe(input_pkl, prop_key, N, clip_f, s_max, verbose):
 
     # Initialization
     if verbose:
-        print '\tLoading graph...'
+        print('\tLoading graph...')
     path, stem = os.path.split(input_pkl)
     stem, _ = os.path.splitext(stem)
     graph = unpickle_obj(input_pkl)
 
     if verbose:
-        print '\tApplying CLAHE...'
+        print('\tApplying CLAHE...')
     graph.clahe_prop(prop_key, N, clip_f, s_max)
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     graph.pickle(input_pkl)
     ps.disperse_io.save_vtp(graph.get_vtp(av_mode=True, edges=True),
                             path + '/' + stem + '_edges.vtp')
     ps.disperse_io.save_vtp(graph.get_scheme_vtp(nodes=True, edges=True),
                             path + '/' + stem + '_sch.vtp')
     if verbose:
-        print '\tFile ' + input_pkl + ' overwritten.'
+        print('\tFile ' + input_pkl + ' overwritten.')
 
 
 ################# Main call
@@ -75,7 +75,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvi:p:n:c:s")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_pkl = None
@@ -86,8 +86,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_pkl = arg
@@ -102,35 +102,35 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_pkl is None) or (prop_key is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for CLAHE.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput GraphMCF: ' + input_pkl
-            print '\tProperty to equalize: ' + prop_key
-            print '\tCLAHE parameters:'
-            print '\t\tNumber of neighbors and greyscales: ' + str(N)
-            print '\t\tClipping factor: ' + str(clip_f)
-            print '\t\tMaximum slope: ' + str(s_max)
-            print ''
+            print('Running tool for CLAHE.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput GraphMCF: ' + input_pkl)
+            print('\tProperty to equalize: ' + prop_key)
+            print('\tCLAHE parameters:')
+            print('\t\tNumber of neighbors and greyscales: ' + str(N))
+            print('\t\tClipping factor: ' + str(clip_f))
+            print('\t\tMaximum slope: ' + str(s_max))
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_clahe(input_pkl, prop_key, N, clip_f, s_max, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

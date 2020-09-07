@@ -20,7 +20,7 @@ class TestMembTransSkelGraph(TestCase):
     def test_Class(self):
 
         # Read the DisPerSe skeleton
-        print 'Loading skeleton...'
+        print('Loading skeleton...')
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName(DATA_DIR + '/skel.vtp')
         reader.Update()
@@ -34,11 +34,11 @@ class TestMembTransSkelGraph(TestCase):
         skel = red_filt.GetOutput()
 
         # Read the density
-        print 'Loading density...'
-        density = pyfits.getdata(DATA_DIR + '/density.fits')
+        print('Loading density...')
+        density = fits.getdata(DATA_DIR + '/density.fits')
 
         # Read the manifolds
-        print 'Loading manifolds...'
+        print('Loading manifolds...')
         reader = vtk.vtkXMLImageDataReader()
         reader.SetFileName(DATA_DIR + '/manifolds2.vti')
         reader.Update()
@@ -57,21 +57,21 @@ class TestMembTransSkelGraph(TestCase):
         # hold.writeMRC(DATA_DIR + '/hold.mrc')
 
         # Read the segmented membrane
-        print 'Loading membrane segmentation...'
-        seg = pyfits.getdata(DATA_DIR + '/mb_seg.fits')
+        print('Loading membrane segmentation...')
+        seg = fits.getdata(DATA_DIR + '/mb_seg.fits')
 
         # Factoring a MembSideSkelGraph object
-        print 'Factoring the MembSideSkelGraph object...'
+        print('Factoring the MembSideSkelGraph object...')
         mb_skel = MembTransSkelGraph(skel, manifolds, density, seg)
         mb_skel.set_resolution(TEST_RESOLUTION)
         mb_skel.set_memb_thickness(TEST_MB_THICK)
         mb_skel.build_skelgraph()
 
-        print 'Getting the ArcGraph...'
+        print('Getting the ArcGraph...')
         mb_skel.build_arcgraph()
 
         # Write the output skel graph
-        print 'Storing the graphs as VTK poly data...'
+        print('Storing the graphs as VTK poly data...')
         sgraph = mb_skel.get_SkelGraph()
         poly = sgraph.get_vtp()
         writer = vtk.vtkXMLPolyDataWriter()
@@ -98,7 +98,7 @@ class TestMembTransSkelGraph(TestCase):
 
         # Check that the geometries have been built properly
         # Print the segmentation: densities and vertex labels
-        print 'Printing vertices in a image...'
+        print('Printing vertices in a image...')
         segs = sgraph.print_vertices(STR_VERTEX_ID, th_den=None)
         lbls = sgraph.print_vertices(STR_VERTEX_ID, th_den=None)
         # Store result
@@ -119,7 +119,7 @@ class TestMembTransSkelGraph(TestCase):
         self.assertEqual(out_writer, 1, 'Labels stored properly.')
 
         # Check that all vertex coordinates are within the final segmentation
-        print 'Checking the object has been printed properly...'
+        print('Checking the object has been printed properly...')
         good_lbls = 0
         for i in range(skel.GetNumberOfPoints()):
             v = sgraph.get_vertex(i)

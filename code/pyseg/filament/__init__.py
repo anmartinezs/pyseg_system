@@ -7,10 +7,10 @@ Set of specific utilities for processing filaments in tomograms
 
 __author__ = 'Antonio Martinez-Sanchez'
 
-from globals import Filament
-from globals import FilamentU
-from globals import FilamentL
-from globals import FilamentLDG
-from globals import FilamentUDG
-from globals import FilPerVisitor
-from net import NetFilaments, NetFilamentsSyn, SetSpaceCurve
+from .globals import Filament
+from .globals import FilamentU
+from .globals import FilamentL
+from .globals import FilamentLDG
+from .globals import FilamentUDG
+from .globals import FilPerVisitor
+from .net import NetFilaments, NetFilamentsSyn, SetSpaceCurve

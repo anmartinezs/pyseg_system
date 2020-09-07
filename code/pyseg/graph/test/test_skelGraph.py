@@ -12,7 +12,7 @@ class TestSkelGraph(TestCase):
     def test_Class(self):
 
         # Reading the DISPERSE skeleton
-        print 'Loading skeleton...'
+        print('Loading skeleton...')
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName(DATA_DIR + '/skel.vtp')
         # reader.SetFileName(DATA_DIR + '/skel_small.vtp')
@@ -21,12 +21,12 @@ class TestSkelGraph(TestCase):
         del reader
 
         # Building the SkelGraph object
-        print 'Building the graph from the skeleton...'
+        print('Building the graph from the skeleton...')
         sgraph = SkelGraph(skel)
         sgraph.update()
 
         # Getting VTK poly data
-        print 'Storing the graph as VTK poly data...'
+        print('Storing the graph as VTK poly data...')
         poly = sgraph.get_vtp()
         writer = vtk.vtkXMLPolyDataWriter()
         writer.SetFileName(DATA_DIR + '/skel_graph.vtp')
@@ -40,7 +40,7 @@ class TestSkelGraph(TestCase):
         self.assertEqual(out_writer, 1, 'Graph not stored properly.')
 
         # Rebuilding the graph
-        print 'Rebuilding a new graph from the stored poly data...'
+        print('Rebuilding a new graph from the stored poly data...')
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName(DATA_DIR + '/skel_graph.vtp')
         reader.Update()
@@ -49,7 +49,7 @@ class TestSkelGraph(TestCase):
         sgraph2.update()
 
         # Comparing booth graphs
-        print 'Comparing both graphs...'
+        print('Comparing both graphs...')
         error = False
         vprops1, eprops1 = sgraph.get_prop_info()
         vprops2, eprops2 = sgraph.get_prop_info()

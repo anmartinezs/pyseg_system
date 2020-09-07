@@ -71,10 +71,13 @@ If you use this script, please consider citing:
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: correlation_simple_fileio.py 1311 2016-06-13 12:41:50Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+#from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 1311 $"
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -227,7 +230,7 @@ def write_results(corr, res_file_name):
                 corr.correlated_1_to_2[:,0], corr.correlated_1_to_2[:,1]]
             out_format = ' %3u   %6.2f %6.2f   %6.2f %6.2f  '
             n_res = corr.targets_1.shape[0]
-            ids = range(n_res)
+            ids = list(range(n_res))
             res_tab = pyto.io.util.arrayFormat(
                 arrays=out_vars, format=out_format, indices=ids, 
                 prependIndex=True)
@@ -248,7 +251,7 @@ def write_results(corr, res_file_name):
                 corr.targets_2[:,0], corr.targets_2[:,1]]
             out_format = ' %3u   %6.2f %6.2f   %6.2f %6.2f  '
             n_res = corr.targets_2.shape[0]
-            ids = range(n_res)
+            ids = list(range(n_res))
             res_tab = pyto.io.util.arrayFormat(
                 arrays=out_vars, format=out_format, indices=ids, 
                 prependIndex=True)

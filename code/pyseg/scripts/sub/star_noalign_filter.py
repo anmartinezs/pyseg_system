@@ -287,50 +287,50 @@ import matplotlib.pyplot as plt
 
 ########## Print initial message
 
-print 'Filtering miss-aligned entries in a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file: ' + in_star
-print '\tReference file: ' + ref_star
-print '\tOutput directory: ' + out_dir
-print '\tOutput stem: ' + out_stem
-print '\tInput segmentation:'
-print '\t\t-Micrograph names:' + str(in_mics)
-print '\t\t-Segmentation tomograms:' + str(in_segs)
+print('Filtering miss-aligned entries in a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file: ' + in_star)
+print('\tReference file: ' + ref_star)
+print('\tOutput directory: ' + out_dir)
+print('\tOutput stem: ' + out_stem)
+print('\tInput segmentation:')
+print('\t\t-Micrograph names:' + str(in_mics))
+print('\t\t-Segmentation tomograms:' + str(in_segs))
 if seg_save:
-    print '\t\t-Save segmentation active.'
-print '\t\t-Surface estimation options:'
-print '\t\t\t-Sigma for smoothing: ' + str(seg_sg) + ' voxels'
-print '\t\t\t-Threshold: ' + str(seg_th)
-print '\t\t-Rigid body transformation:'
-print '\t\t\t-Segmentation offsets (voxels):' + str(in_offs)
-print '\t\t\t-Segmentation rotations (degrees):' + str(in_rots)
-print '\tMiss-alignment parameters:'
-print '\t\t-Reference vector: ' + str(ref_vect)
-print '\t\t-Maximum angle: ' + str(max_angle) + ' deg'
-print '\t\t-Reference surface distance range: ' + str(dst_rg) + ' voxels'
-print ''
+    print('\t\t-Save segmentation active.')
+print('\t\t-Surface estimation options:')
+print('\t\t\t-Sigma for smoothing: ' + str(seg_sg) + ' voxels')
+print('\t\t\t-Threshold: ' + str(seg_th))
+print('\t\t-Rigid body transformation:')
+print('\t\t\t-Segmentation offsets (voxels):' + str(in_offs))
+print('\t\t\t-Segmentation rotations (degrees):' + str(in_rots))
+print('\tMiss-alignment parameters:')
+print('\t\t-Reference vector: ' + str(ref_vect))
+print('\t\t-Maximum angle: ' + str(max_angle) + ' deg')
+print('\t\t-Reference surface distance range: ' + str(dst_rg) + ' voxels')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input and reference STAR files...'
+print('\tLoading input and reference STAR files...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"'
+    print('ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"')
     sys.exit(-1)
 r_star = ps.sub.Star()
 try:
     r_star.load(ref_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"'
+    print('ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"')
     sys.exit(-1)
 
-print '\tCreating the poly data...'
+print('\tCreating the poly data...')
 nrows = star.get_nrows()
 ref_vect = np.asarray(ref_vect, dtype=np.float)
 points = np.zeros(shape=len(in_segs), dtype=object)
@@ -376,8 +376,8 @@ for row in range(nrows):
         rot, psi, tilt = star.get_element('_rlnAngleRot', row), star.get_element('_rlnAnglePsi', row), \
                          star.get_element('_rlnAngleTilt', row)
     except KeyError:
-        print 'ERROR: invalid input STAR file!'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: invalid input STAR file!')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
     try:
         o_x, o_y, o_z = star.get_element('_rlnOriginX', row), star.get_element('_rlnOriginY', row), \
                         star.get_element('_rlnOriginZ', row)
@@ -403,11 +403,11 @@ for row in range(nrows):
     vects_r[mic_idx].InsertNextTuple((0., 0., 0))
     curr_pts[mic_idx] += 1
 
-print '\tComputing miss-alignment:'
+print('\tComputing miss-alignment:')
 el_to_del = np.ones(shape=nrows, dtype=np.bool)
 dsts, angs = list(), list()
 for mic_idx, mic in enumerate(in_mics):
-    print '\t\t-Processing micrograph: ' + str(mic)
+    print('\t\t-Processing micrograph: ' + str(mic))
     if isinstance(points[mic_idx], vtk.vtkPoints):
         # Polydata creation
         row_id = row_ids[mic_idx]
@@ -449,20 +449,20 @@ for mic_idx, mic in enumerate(in_mics):
         poly.GetPointData().AddArray(pang)
         poly.GetPointData().AddArray(pdst)
         poly.GetPointData().AddArray(vect_r)
-        print '\t\t\t' + str(del_parts) + ' of ' + str(parts) + ' will be deleted in this micrograph'
+        print('\t\t\t' + str(del_parts) + ' of ' + str(parts) + ' will be deleted in this micrograph')
         mic_stem = os.path.splitext(os.path.split(mic)[1])[0]
         out_poly = out_dir + '/' + out_stem + '_' + mic_stem + '.vtp'
-        print '\t\t\tPoly data stored in: ' + out_poly
+        print('\t\t\tPoly data stored in: ' + out_poly)
         ps.disperse_io.save_vtp(poly, out_poly)
         if seg_save:
             out_seg = out_dir + '/' + out_stem + '_' + mic_stem + '_seg_surf.vtp'
-            print '\t\t\tReference region segmentation saved in: ' + out_poly
+            print('\t\t\tReference region segmentation saved in: ' + out_poly)
             ps.disperse_io.save_vtp(surf, out_seg)
 
-print '\tPlotting statistics...'
+print('\tPlotting statistics...')
 if (len(dsts) == 0) or (len(angs) == 0):
-    print '\tWARNING: Nothing to plot'
-    print 'Successfully terminated. (' + time.strftime("%c") + ')'
+    print('\tWARNING: Nothing to plot')
+    print('Successfully terminated. (' + time.strftime("%c") + ')')
 dsts, angs = np.asarray(dsts, dtype=np.float), np.asarray(angs, dtype=np.float)
 plt.hist(angs, normed=1)
 plt.xlabel('Degrees')
@@ -479,21 +479,21 @@ plt.xlim(0, dst_rg[0]+dst_rg[1])
 plt.grid(True)
 plt.show(block=True)
 
-print '\tFinding entries to delete...'
+print('\tFinding entries to delete...')
 del_rows = list()
 for i, to_del in enumerate(el_to_del):
     if to_del:
         del_rows.append(i)
 
-print '\tParticles marked for deletion: ' + str(len(del_rows)) + ' of ' + str(star.get_nrows())
+print('\tParticles marked for deletion: ' + str(len(del_rows)) + ' of ' + str(star.get_nrows()))
 
 if do_del:
-    print '\tDeleting rows...'
+    print('\tDeleting rows...')
     star.del_rows(del_rows)
 
     out_file = out_dir + '/' + out_stem + '_' + os.path.splitext(os.path.split(in_star)[1])[0] + '_malign.star'
-    print '\tStoring the results in: ' + out_file
+    print('\tStoring the results in: ' + out_file)
     star.store(out_file)
 
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

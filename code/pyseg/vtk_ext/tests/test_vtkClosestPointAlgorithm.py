@@ -40,8 +40,8 @@ class TestVtkClosestPointAlgorithm(TestCase):
             distance.InsertNextValue(dist)
             dist_t1 += dist
         elapsed1 = time.time() - tic
-        print 'Slow mode time = %.2f s' % (elapsed1)
-        print 'Slow mode accumulated result = %.3f' % (dist_t1)
+        print('Slow mode time = %.2f s' % (elapsed1))
+        print('Slow mode accumulated result = %.3f' % (dist_t1))
         poly.GetPointData().AddArray(distance)
 
         # Measure distance to poly points (fast way)
@@ -56,8 +56,8 @@ class TestVtkClosestPointAlgorithm(TestCase):
             distance2.InsertNextValue(dist)
             dist_t2 += dist
         elapsed2 = time.time() - tic
-        print 'Fast mode time = %.2f s' % (elapsed2)
-        print 'Fast mode accumulated result = %.3f' % (dist_t2)
+        print('Fast mode time = %.2f s' % (elapsed2))
+        print('Fast mode accumulated result = %.3f' % (dist_t2))
         poly.GetPointData().AddArray(distance2)
 
         # Measuring distance and dotproduct
@@ -72,8 +72,8 @@ class TestVtkClosestPointAlgorithm(TestCase):
             dprod.InsertNextValue(dprodv)
             dist_t3 += dist
         elapsed2 = time.time() - tic
-        print 'Dot product mode time = %.2f s' % (elapsed2)
-        print 'Dot product mode accumulated result = %.3f' % (dist_t3)
+        print('Dot product mode time = %.2f s' % (elapsed2))
+        print('Dot product mode accumulated result = %.3f' % (dist_t3))
         poly.GetPointData().AddArray(dprod)
 
         # Assertion and results storing

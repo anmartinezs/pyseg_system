@@ -324,7 +324,7 @@ class NetFilaments(object):
         for source in graph_gt.vertices():
 
             prog = (100. * int(source)) / graph_gt.num_vertices()
-            print '\t\tProgress ' + str(round(prog, 2)) + '% ...'
+            print('\t\tProgress ' + str(round(prog, 2)) + '% ...')
 
             # An isolated vertex cannot be a Filament
             if sum(1 for _ in source.all_edges()) <= 0:

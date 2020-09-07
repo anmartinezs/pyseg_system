@@ -2,12 +2,14 @@
 Test for segmentation
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 840 2011-02-15 17:55:24Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 840 $"
+__version__ = "$Revision$"
 
-import common
+from . import common
 #from test_statistics import TestStatistics
 #from test_grey import TestGrey
 #from test_density import TestDensity

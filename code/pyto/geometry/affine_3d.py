@@ -3,10 +3,13 @@ Contains class Affine3D for preforming affine transformation (general linear
 transformation followed by translation) on points (vectors) in 3D.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: affine_3d.py 1367 2016-12-14 15:51:56Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from past.builtins import basestring
 
-__version__ = "$Revision: 1367 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -14,9 +17,9 @@ import numpy
 import scipy
 import scipy.linalg as linalg
 
-from vector import Vector
-from points import Points
-from affine import Affine
+from .vector import Vector
+from .points import Points
+from .affine import Affine
 
 class Affine3D(Affine):
     """
@@ -94,7 +97,7 @@ class Affine3D(Affine):
         Returns: (3x3 ndarray) rotation matrix
         """
 
-        if isinstance(axis, str):
+        if isinstance(axis, basestring):
 
             # rotation about one of the main axes
             if axis == 'x':

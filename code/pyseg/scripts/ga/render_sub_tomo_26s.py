@@ -334,71 +334,71 @@ import time
 
 ########## Print initial message
 
-print 'Rendering a template in a tomogram.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
-print '\tInput template tomogram: ' + in_temp
-print '\tOutput directory: ' + out_dir
+print('Rendering a template in a tomogram.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + in_star)
+print('\tInput template tomogram: ' + in_temp)
+print('\tOutput directory: ' + out_dir)
 if out_stem is None:
     _, temp_fname = os.path.split(in_temp)
     out_stem, _ = os.path.splitext(temp_fname)
-print '\tOutput suffix: ' + out_stem
-print '\tReference tomogram:'
-print '\t\tFile: ' + in_tomo
-print '\t\tResolution: ' + str(rf_res) + ' nm/voxel'
-print '\tMask: '
+print('\tOutput suffix: ' + out_stem)
+print('\tReference tomogram:')
+print('\t\tFile: ' + in_tomo)
+print('\t\tResolution: ' + str(rf_res) + ' nm/voxel')
+print('\tMask: ')
 if in_mask is None:
-    print '\t\tNo mask, the whole tomogram volume is considered!'
+    print('\t\tNo mask, the whole tomogram volume is considered!')
 else:
-    print '\t\tFile: ' + str(in_mask)
+    print('\t\tFile: ' + str(in_mask))
     if mk_rsc != 1:
-        print '\t\tRe-scaling factor: ' + str(mk_rsc)
-    print '\t\tDistance to grow: ' + str(mk_dst) + ' nm'
-print '\tTemplate Pre-processing: '
+        print('\t\tRe-scaling factor: ' + str(mk_rsc))
+    print('\t\tDistance to grow: ' + str(mk_dst) + ' nm')
+print('\tTemplate Pre-processing: ')
 if tp_cube:
-    print '\t\t-Cube surface'
+    print('\t\t-Cube surface')
 else:
-    print '\t\t-Iso-surface threshold: ' + str(tp_th)
-print '\t\t-Initial decimation factor: ' + str(tp_dec)
-print '\t\t-Re-scaling factor: ' + str(tp_rsc)
+    print('\t\t-Iso-surface threshold: ' + str(tp_th))
+print('\t\t-Initial decimation factor: ' + str(tp_dec))
+print('\t\t-Re-scaling factor: ' + str(tp_rsc))
 if tp_cmass:
-    print '\t\t-Points in the center of mass.'
+    print('\t\t-Points in the center of mass.')
 else:
-    print '\t\t-Points in the picked postions.'
-print '\tRigid transformations: '
+    print('\t\t-Points in the picked postions.')
+print('\tRigid transformations: ')
 if rt_flip:
-    print '\t\t-Template flipping active.'
+    print('\t\t-Template flipping active.')
 if rt_orig:
-    print '\t\t-Origin compensation.'
+    print('\t\t-Origin compensation.')
 if rt_swapxy:
-    print '\t\t-Swapping XY coordinates.'
-print ''
+    print('\t\t-Swapping XY coordinates.')
+print('')
 
 ######### Process
 
-print 'Main procedure:'
+print('Main procedure:')
 
-print '\tLoading the input STAR file...'
+print('\tLoading the input STAR file...')
 star = ps.sub.Star()
 star.load(in_star)
 
 if classes is not None:
-    print '\tFiltering to keep classes ' + str(classes) + '...'
+    print('\tFiltering to keep classes ' + str(classes) + '...')
     del_rows = list()
     for i in range(star.get_nrows()):
         if not(star.get_element(key_col, i) in classes):
             del_rows.append(i)
     star.del_rows(del_rows)
 
-print '\tScaling particle coordinates...'
+print('\tScaling particle coordinates...')
 star.scale_coords(tp_rsc)
 
-print '\tGeneration tomogram peaks object...'
+print('\tGeneration tomogram peaks object...')
 tpeaks = star.gen_tomo_peaks(in_tomo, klass=None, orig=rt_orig, full_path=False, micro=False)
 
-print '\tGenerate an instance template poly data...'
+print('\tGenerate an instance template poly data...')
 temp = ps.disperse_io.load_tomo(in_temp)
 if tp_cube:
     temp_poly = tomo_poly_iso_cube(temp, tp_dec)
@@ -407,24 +407,24 @@ else:
 temp_poly = poly_scale(temp_poly, tp_rsc)
 ps.disperse_io.save_vtp(temp_poly, out_dir+'/'+out_stem+'_temp.vtp')
 
-print '\tRender templates in the reference tomogram...'
+print('\tRender templates in the reference tomogram...')
 temp_rss = np.asarray(temp.shape, dtype=np.float) * tp_rsc
 ref_poly, cmass = tomo_poly_peaks(tpeaks, temp_poly, (ROT_COL, TILT_COL, PSI_COL), temp_rss, rt_orig,
                                   do_cmass=tp_cmass)
 
-print '\tRigid body translations...'
+print('\tRigid body translations...')
 if rt_swapxy:
     ref_poly = tomo_poly_swapxy(ref_poly)
 gc.collect()
 
-print '\tMasking the particles center of masses...'
+print('\tMasking the particles center of masses...')
 tomo = ps.disperse_io.load_tomo(in_tomo, mmap=True)
 tomo_dst = None
 if in_mask is None:
-    print '\t\t-Creating the trivial mask...'
+    print('\t\t-Creating the trivial mask...')
     mask = np.ones(shape=tomo.shape, dtype=np.bool)
 else:
-    print '\t\t-Loading input mask...'
+    print('\t\t-Loading input mask...')
     mask = ps.disperse_io.load_tomo(in_mask) > 0
     # mask = np.transpose(mask)
     mask = np.swapaxes(mask, 0, 2)
@@ -435,15 +435,15 @@ else:
         mask = sp.ndimage.interpolation.zoom(mask, mk_rsc)
     tomo_dst = sp.ndimage.morphology.distance_transform_edt(np.invert(mask)) * rf_res
     mask = tomo_dst <= mk_dst
-print '\t\t-Number of particles in the tomogram: ' + str(len(cmass))
+print('\t\t-Number of particles in the tomogram: ' + str(len(cmass)))
 cmass_poly = cmass_poly_mask(cmass, mask, tomo_dst, rt_swapxy)
 if rt_swapxy:
     mask = np.swapaxes(mask, 0, 1)
-print '\t\t-Number of particles in the mask: ' + str(cmass_poly.GetNumberOfCells())
-print '\t\t-Segmentation volume: ' + str(float(mask.sum())*(rf_res*rf_res*rf_res)*1e-9) + ' um**3'
+print('\t\t-Number of particles in the mask: ' + str(cmass_poly.GetNumberOfCells()))
+print('\t\t-Segmentation volume: ' + str(float(mask.sum())*(rf_res*rf_res*rf_res)*1e-9) + ' um**3')
 gc.collect()
 
-print '\tStoring the results...'
+print('\tStoring the results...')
 ps.disperse_io.save_vtp(cmass_poly, out_dir+'/'+out_stem+'_cmass.vtp')
 ps.disperse_io.save_vtp(ref_poly, out_dir+'/'+out_stem+'.vtp')
 # ps.disperse_io.save_numpy(tpeaks.to_tomo_cloud(), out_dir+'/'+out_stem+'.mrc')

@@ -3,10 +3,11 @@
 Tests module experiments
  
 # Author: Vladan Lucic
-# $Id: test_experiment.py 1275 2015-12-23 14:31:51Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 1275 $"
+__version__ = "$Revision$"
 
 import sys
 from copy import copy, deepcopy

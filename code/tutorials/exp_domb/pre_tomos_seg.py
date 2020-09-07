@@ -82,38 +82,38 @@ mt_swap_xy = False
 
 ########## Print initial message
 
-print 'Pre-processing for SEG analysis of un-oriented membranes from TomoSegMemTV output.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tInput STAR file: ' + str(in_star)
-print '\tData resolution: ' + str(sg_res) + ' nm/vx'
-print '\tMembrane segmentation:'
-print '\t\t-Segmentation labels:'
-print '\t\t\t+Membrane 1: ' + str(sg_lbl_mb1)
-print '\t\t\t+Membrane 2: ' + str(sg_lbl_mb2)
-print '\t\t\t+External 1: ' + str(sg_lbl_ext1)
-print '\t\t\t+External 2: ' + str(sg_lbl_ext2)
-print '\t\t\t+Gap: ' + str(sg_lbl_gap)
-print '\t\t-Segmentation resolution: ' + str(sg_res) + ' nm/vx'
-print '\t\t-Membrane thickness: ' + str(sg_mb_thick) + ' nm'
-print '\t\t-External neighbourhood maximum distance: ' + str(sg_mb_neigh) + ' nm'
-print '\t\t-Gap maximum distance: ' + str(sg_mb_gap) + ' nm'
-print '\t\t-Minum number of voxels per segmentation: ' + str(sg_min_vx_seg)
-print '\tSub-volume splitting settings: '
-print '\t\t-Number of splits (X, Y, Z): ' + str(sp_split)
-print '\t\t-Offset voxels: ' + str(sp_off_voxels)
-print '\tMicrotubule settings:'
-print '\t\t-Microtube luminal radius: ' + str(mt_rad) + ' nm'
-print '\tCSV pre-processing: '
-print '\t\t-Columns for samples coordinates (X, Y, Z): ' + str(cv_coords_cools)
-print '\t\t-Column for microtubule ID: ' + str(cv_id_col)
-print ''
+print('Pre-processing for SEG analysis of un-oriented membranes from TomoSegMemTV output.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tInput STAR file: ' + str(in_star))
+print('\tData resolution: ' + str(sg_res) + ' nm/vx')
+print('\tMembrane segmentation:')
+print('\t\t-Segmentation labels:')
+print('\t\t\t+Membrane 1: ' + str(sg_lbl_mb1))
+print('\t\t\t+Membrane 2: ' + str(sg_lbl_mb2))
+print('\t\t\t+External 1: ' + str(sg_lbl_ext1))
+print('\t\t\t+External 2: ' + str(sg_lbl_ext2))
+print('\t\t\t+Gap: ' + str(sg_lbl_gap))
+print('\t\t-Segmentation resolution: ' + str(sg_res) + ' nm/vx')
+print('\t\t-Membrane thickness: ' + str(sg_mb_thick) + ' nm')
+print('\t\t-External neighbourhood maximum distance: ' + str(sg_mb_neigh) + ' nm')
+print('\t\t-Gap maximum distance: ' + str(sg_mb_gap) + ' nm')
+print('\t\t-Minum number of voxels per segmentation: ' + str(sg_min_vx_seg))
+print('\tSub-volume splitting settings: ')
+print('\t\t-Number of splits (X, Y, Z): ' + str(sp_split))
+print('\t\t-Offset voxels: ' + str(sp_off_voxels))
+print('\tMicrotubule settings:')
+print('\t\t-Microtube luminal radius: ' + str(mt_rad) + ' nm')
+print('\tCSV pre-processing: ')
+print('\t\t-Columns for samples coordinates (X, Y, Z): ' + str(cv_coords_cools))
+print('\t\t-Column for microtubule ID: ' + str(cv_id_col))
+print('')
 
 ######### Process
 
-print 'Parsing input parameters...'
+print('Parsing input parameters...')
 sp_res, mt_rad, sp_off_voxels = float(sg_res), float(mt_rad), int(sp_off_voxels)
 out_stem = os.path.splitext(os.path.split(in_star)[1])[0]
 conn_mask = np.ones(shape=(3,3,3))
@@ -121,13 +121,13 @@ out_seg_dir = out_dir + '/segs'
 if not os.path.isdir(out_seg_dir):
     os.makedirs(out_seg_dir)
 
-print 'Loading input STAR file...'
+print('Loading input STAR file...')
 gl_star = ps.sub.Star()
 try:
     gl_star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star = ps.sub.Star()
 star.add_column(key='_rlnMicrographName')
@@ -140,15 +140,15 @@ star.add_column(key='_psSegOffX')
 star.add_column(key='_psSegOffY')
 star.add_column(key='_psSegOffZ')
 
-print 'Main Routine: tomograms loop'
+print('Main Routine: tomograms loop')
 tomo_id = 0
 for row in range(gl_star.get_nrows()):
 
     in_ref = gl_star.get_element('_rlnMicrographName', row)
-    print '\tProcessing tomogram: ' + in_ref
+    print('\tProcessing tomogram: ' + in_ref)
     out_ref_stem = os.path.splitext(os.path.split(in_ref)[1])[0]
     in_seg = gl_star.get_element('_psSegImage', row)
-    print '\t\t-Loading segmentation: ' + in_seg
+    print('\t\t-Loading segmentation: ' + in_seg)
     orig_seg = ps.disperse_io.load_tomo(gl_star.get_element('_psSegImage', row))
     tomo_ref = ps.disperse_io.load_tomo(in_ref, mmap=True)
     off_mask_min_x, off_mask_max_x = 0, tomo_ref.shape[0]
@@ -160,19 +160,19 @@ for row in range(gl_star.get_nrows()):
 
     if gl_star.has_column('_mtMtubesCsv'):
         in_csv = gl_star.get_element('_mtMtubesCsv', row)
-        print '\tReading input CSV file: ' + in_csv
+        print('\tReading input CSV file: ' + in_csv)
         mt_dic = ps.globals.read_csv_mts(in_csv, cv_coords_cools, cv_id_col, swap_xy=mt_swap_xy)
         mts_points = list()
-        for mt_id, mt_samps in zip(mt_dic.iterkeys(), mt_dic.itervalues()):
+        for mt_id, mt_samps in zip(iter(mt_dic.keys()), iter(mt_dic.values())):
             mts_points += mt_samps
         mts_points = np.asarray(mts_points, dtype=np.float32) * (1./sg_res)
 
-        print '\tSegmenting the microtubules...'
+        print('\tSegmenting the microtubules...')
         mt_mask = ps.globals.points_to_mask(mts_points, orig_seg.shape, inv=True)
         mt_mask = sp.ndimage.morphology.distance_transform_edt(mt_mask, sampling=sg_res, return_indices=False)
         mt_mask = mt_mask > mt_rad
 
-    print '\t\t-Membranes pair segmentation...'
+    print('\t\t-Membranes pair segmentation...')
     sg_mb_thick_2 = 0.5 * sg_mb_thick
     tomo_seg = np.zeros(shape=orig_seg.shape, dtype=np.int8)
     mb1_dst = sp.ndimage.morphology.distance_transform_edt(orig_seg != sg_lbl_mb1, sampling=sg_res, return_indices=False)
@@ -209,7 +209,7 @@ for row in range(gl_star.get_nrows()):
     del hold_mask
     del ids_mask
 
-    print '\tSegmenting the membranes...'
+    print('\tSegmenting the membranes...')
     if sp_split is None:
         svol_seg = tomo_seg[off_mask_min_x:off_mask_max_x, off_mask_min_y:off_mask_max_y, off_mask_min_z:off_mask_max_z]
         if ((svol_seg == MB_LBL_1).sum() >= sg_min_vx_seg) and ((svol_seg == MB_LBL_2).sum() > sg_min_vx_seg) \
@@ -233,7 +233,7 @@ for row in range(gl_star.get_nrows()):
             row_dic['_psSegOffZ'] = off_mask_min_z
             star.add_row(**row_dic)
     else:
-        print '\tSplitting into subvolumes:'
+        print('\tSplitting into subvolumes:')
         if sp_split[0] > 1:
             hold_wide = int(math.ceil(wide_x / sp_split[0]))
             hold_pad = int(math.ceil((off_mask_max_x - off_mask_min_x) / sp_split[0]))
@@ -289,7 +289,7 @@ for row in range(gl_star.get_nrows()):
         for off_x in offs_x:
             for off_y in offs_y:
                 for off_z in offs_z:
-                    print '\t\t-Splitting subvolume: [' + str(off_x) + ', ' + str(off_y) + ', ' + str(off_z) + ']'
+                    print('\t\t-Splitting subvolume: [' + str(off_x) + ', ' + str(off_y) + ', ' + str(off_z) + ']')
                     svol_seg = tomo_seg[off_x[0]:off_x[1], off_y[0]:off_y[1], off_z[0]:off_z[1]]
                     if ((svol_seg == MB_LBL_1).sum() >= sg_min_vx_seg) and ((svol_seg == MB_LBL_2).sum() > sg_min_vx_seg) \
                             and ((svol_seg == EXT_LBL_1).sum() >= sg_min_vx_seg) and ((svol_seg == EXT_LBL_2).sum() > sg_min_vx_seg) and \
@@ -317,7 +317,7 @@ for row in range(gl_star.get_nrows()):
     tomo_id += 1
 
 out_star = out_dir + '/' + out_stem + '_pre.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

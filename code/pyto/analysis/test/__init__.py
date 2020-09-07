@@ -2,14 +2,16 @@
 Test for analysis
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 1001 2013-12-09 09:41:11Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1001 $"
+__version__ = "$Revision$"
 
-import common
-from test_catalog import TestCatalog
-from test_observations import TestObservations
-from test_groups import TestGroups
-from test_cleft_regions import TestCleftRegions
+from . import common
+from .test_catalog import TestCatalog
+from .test_observations import TestObservations
+from .test_groups import TestGroups
+from .test_cleft_regions import TestCleftRegions
 #from test_cleft_layers import TestCleftLayers

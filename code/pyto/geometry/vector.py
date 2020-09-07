@@ -4,10 +4,14 @@ Currently, it contains methods for conversion between cartesian and spherical
 coordinates.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: vector.py 1324 2016-07-12 15:03:34Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import object
+#from past.utils import old_div
 
-__version__ = "$Revision: 1324 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -50,9 +54,9 @@ class Vector(object):
         elif coordinates == 'spherical':
             self.setSpherical(data, oneD=oneD)
         else: 
-            raise ValueError("Argument cooddinates: ", coordinates, " was not ",
-                             "understood. Valid choices are 'cartesian' ",
-                             " and 'spherical'.")
+            raise ValueError(
+                "Argument cooddinates: ", coordinates, " was not understood.",
+                " Valid choices are 'cartesian' and 'spherical'.")
 
     def setCartesian(self, data, oneD=False):
         """
@@ -312,7 +316,7 @@ class Vector(object):
 
     def bestFitLine(self):
         """
-        Determines the best fit line for points specivfed by self.data.
+        Determines the best fit line for points specified by self.data.
 
         The best fit line minimizes the sum of squared distances from each 
         point to the line. It is calculated using singular value decomposition.

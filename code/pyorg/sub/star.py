@@ -13,7 +13,7 @@ import pyto
 import errno
 from pyorg.globals import *
 # from plist import TomoPeaks
-from plist import *
+from .plist import *
 from pyorg import disperse_io
 import numpy as np
 
@@ -44,7 +44,7 @@ def relion_norm(tomo, mask=None):
     if st > 0:
         tomo_out = (hold_tomo-mn) / st
     else:
-        print 'WARNING (relion_norm): standard deviation=' + str(st)
+        print('WARNING (relion_norm): standard deviation=' + str(st))
 
     return tomo_out
 
@@ -484,7 +484,7 @@ class Star(object):
     # all columns, every column key and data pair is introduced via kwargs
     def add_row(self, **kwargs):
         if kwargs is not None:
-            keys, values = kwargs.keys(), kwargs.values()
+            keys, values = list(kwargs.keys()), list(kwargs.values())
             if len(keys) != self.get_ncols():
                 error_msg = 'Number of columns introduced for this row, ' + str(len(keys)) + ' does not ' + \
                     ' fit the current number of columns, ' + str(self.get_ncols())
@@ -1019,7 +1019,7 @@ class Star(object):
                 try:
                     y, x, z = float(pos.attrib['X']), float(pos.attrib['Y']), float(pos.attrib['Z'])
                 except KeyError:
-                    print 'WARNING: gen_TomoPeaks() (ParticleList), a Particle without Pick position cannot be converted into a Peak'
+                    print('WARNING: gen_TomoPeaks() (ParticleList), a Particle without Pick position cannot be converted into a Peak')
                     continue
                 rot_eu = part.find('Rotation')
                 rot, tilt, psi = 0, 0, 0
@@ -1064,8 +1064,8 @@ class Star(object):
                         try:
                             svol = r3d_a.transformArray(svol_ref, origin=ref_cent, order=3, prefilter=True, mode='reflect')
                         except np.linalg.linalg.LinAlgError:
-                            print('WARNING: particle in row ' + str(i) + ', with angles' + str((rot, tilt, psi)) +
-                                  ' could not be rotated.')
+                            print(('WARNING: particle in row ' + str(i) + ', with angles' + str((rot, tilt, psi)) +
+                                  ' could not be rotated.'))
                             continue
                     # Translation
                     svol = tomo_shift(svol, (-shift_x, -shift_y, -shift_z))
@@ -1163,8 +1163,8 @@ class Star(object):
                     svol = r3d_a.transformArray(svol, origin=svol_cent, order=2, prefilter=True, mode='reflect')
 
                 except np.linalg.linalg.LinAlgError:
-                    print('WARNING: particle in row ' + str(row) + ', with angles' + str((rot, tilt, psi)) +
-                          ' could not be rotated.')
+                    print(('WARNING: particle in row ' + str(row) + ', with angles' + str((rot, tilt, psi)) +
+                          ' could not be rotated.'))
                     continue
             # Average
             avg += svol

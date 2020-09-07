@@ -411,53 +411,53 @@ import scipy
 
 ########## Print initial message
 
-print 'Rendering a template in a tomogram.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR files: ' + str(in_stars)
-print '\tInput masks: ' + str(in_masks)
-print '\tOutput directory: ' + out_dir
-print '\tReference Resolution: ' + str(rf_res) + ' nm/voxel'
-print '\tMasks: ' + str(in_masks)
+print('Rendering a template in a tomogram.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR files: ' + str(in_stars))
+print('\tInput masks: ' + str(in_masks))
+print('\tOutput directory: ' + out_dir)
+print('\tReference Resolution: ' + str(rf_res) + ' nm/voxel')
+print('\tMasks: ' + str(in_masks))
 if mk_rsc != 1:
-    print '\t\tRe-scaling factor: ' + str(mk_rsc)
-print '\t\tDistance to grow: ' + str(mk_dst) + ' nm'
-print '\tTemplate Pre-processing: '
-print '\t\t-Initial decimation factor: ' + str(tp_dec)
-print '\t\t-Re-scaling factor: ' + str(tp_rsc)
+    print('\t\tRe-scaling factor: ' + str(mk_rsc))
+print('\t\tDistance to grow: ' + str(mk_dst) + ' nm')
+print('\tTemplate Pre-processing: ')
+print('\t\t-Initial decimation factor: ' + str(tp_dec))
+print('\t\t-Re-scaling factor: ' + str(tp_rsc))
 if tp_cmass:
-    print '\t\t-Points in the center of mass.'
+    print('\t\t-Points in the center of mass.')
 else:
-    print '\t\t-Points in the picked postions.'
-print ''
+    print('\t\t-Points in the picked postions.')
+print('')
 
 ######### Process
 
-print 'Main procedure loop:'
+print('Main procedure loop:')
 
 for (in_star, in_temp, in_mask, in_tomo) in zip(in_stars, in_temps, in_masks, in_tomos):
 
-    print '\tLoading the input STAR file: ' + str(in_star)
+    print('\tLoading the input STAR file: ' + str(in_star))
     star = ps.sub.Star()
     star.load(in_star)
-    print '\t\t-Number of particles: ' + str(star.get_nrows())
+    print('\t\t-Number of particles: ' + str(star.get_nrows()))
 
-    print '\tGeneration tomogram peaks object...'
+    print('\tGeneration tomogram peaks object...')
     tpeaks = star.gen_tomo_peaks(in_tomo, klass=None, orig=rt_orig, full_path=False, micro=False)
 
-    print '\tGenerate an instance template poly data: ' + str(in_temp)
+    print('\tGenerate an instance template poly data: ' + str(in_temp))
     temp = ps.disperse_io.load_tomo(in_temp)
     temp_poly = tomo_poly_iso(temp, tp_th, rt_flip, tp_dec)
 
 
-    print '\tRender templates in the reference tomogram...'
+    print('\tRender templates in the reference tomogram...')
     temp_rss = np.asarray(temp.shape, dtype=np.float)
     ref_poly, cmass = tomo_poly_peaks(tpeaks, temp_poly, (ROT_COL, TILT_COL, PSI_COL), temp_rss, rt_orig,
                                       do_cmass=tp_cmass)
     gc.collect()
 
-    print '\tProcessing mask:' + str(in_mask)
+    print('\tProcessing mask:' + str(in_mask))
     mask = ps.disperse_io.load_tomo(in_mask)
     mask[mask>0] = 1
     density = scipy.ndimage.filters.gaussian_filter(mask, 1.)
@@ -465,18 +465,18 @@ for (in_star, in_temp, in_mask, in_tomo) in zip(in_stars, in_temps, in_masks, in
     if mk_rsc != 1:
         mask = sp.ndimage.interpolation.zoom(mask, mk_rsc)
 
-    print '\t\tMeasuring particle segmentation distance...'
+    print('\t\tMeasuring particle segmentation distance...')
     dst_poly = tomo_poly_iso(mask, 0.9, False, None)
     dst_poly = poly_scale(dst_poly, 1./tp_rsc, dec=True)
-    print '\t\t-Number of center of mass: ' + str(len(cmass))
+    print('\t\t-Number of center of mass: ' + str(len(cmass)))
     assert len(cmass) == star.get_nrows()
     cmass_poly, dsts = cmass_poly_dst(cmass, dst_poly)
     gc.collect()
 
-    print '\t\tGenrating the splited STAR files...'
+    print('\t\tGenrating the splited STAR files...')
     star.add_column('_DistanceToFib', val=dsts, no_parse=True)
 
-    print '\tStoring the results...'
+    print('\tStoring the results...')
     out_stem = os.path.splitext(os.path.split(in_star)[1])[0]
     star.store(out_dir + '/' + out_stem + '_dst.star')
     ps.disperse_io.save_vtp(temp_poly, out_dir+'/'+out_stem+'_temp.vtp')

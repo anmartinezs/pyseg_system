@@ -2,12 +2,14 @@
 Correlative approach
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 1319 2016-07-07 12:45:40Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1319 $"
+__version__ = "$Revision$"
 
-from basic import Basic
+from .basic import Basic
 #import test
 
 

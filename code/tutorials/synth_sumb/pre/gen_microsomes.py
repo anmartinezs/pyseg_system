@@ -414,12 +414,12 @@ def pr_routine(pr_id, tomo_ids, settings):
     for i in tomo_ids:
 
         snr = settings.snrs[i]
-        print '\t\t-M[' + str(pr_id) + '/' + str(i) + '] Generating microsome ' + str(i) + ' with SNR=' + str(snr) + ':'
+        print('\t\t-M[' + str(pr_id) + '/' + str(i) + '] Generating microsome ' + str(i) + ' with SNR=' + str(snr) + ':')
         tm_size_hz = np.asarray(settings.tm_size, dtype=np.int)
         tm_size_hz[2] -= (2 * settings.mc_halo_z)
         tomo = np.zeros(shape=settings.tm_size, dtype=np.float16)
 
-        print '\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the particles: '
+        print('\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the particles: ')
         hold_locs, tot_locs = None, list()
         for j, key in enumerate(settings.mc_in_models):
             svol_ref = settings.svol_refs[key]
@@ -448,23 +448,23 @@ def pr_routine(pr_id, tomo_ids, settings):
             insert_particles(tomo, svol_ref, settings.cent_p, settings.cent_v, locs, angs)
             tot_locs += locs
             try:
-                print '\t\t\t\t*M[' + str(pr_id) + '/' + str(i) + '] Particles inserted for ' + pat_str + ' pattern ' + str(j) + \
-                      ' (' + os.path.split(key)[1] + ') : ' + str(len(locs)) + ' of ' + str(npart)
+                print('\t\t\t\t*M[' + str(pr_id) + '/' + str(i) + '] Particles inserted for ' + pat_str + ' pattern ' + str(j) + \
+                      ' (' + os.path.split(key)[1] + ') : ' + str(len(locs)) + ' of ' + str(npart))
             except NameError:
                 pass
 
-        print '\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the membrane...'
+        print('\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the membrane...')
         tomo = add_dmb_msome(tomo, None, settings.mic_rad*settings.tm_res, settings.tm_res, settings.mc_mbt,
                              settings.mc_mbs)
         mc_halo_z_f = int(round(0.75 * settings.mc_halo_z))
         tomo[:, :, :mc_halo_z_f] = 0
         tomo[:, :, settings.tm_size[2]-mc_halo_z_f:] = 0
         out_tomo_bin_nodist = out_dir + '/' + out_stem + '_tomo_mic_' + str(i) + '_nodist_bin_' + str(tm_bin) + '.mrc'
-        print '\t\t\t-M[' + str(pr_id) + '/' + str(i) + '] Saving the ' + str(tm_bin) + ' binned microsome without distortions as: ' + out_tomo_bin_nodist
+        print('\t\t\t-M[' + str(pr_id) + '/' + str(i) + '] Saving the ' + str(tm_bin) + ' binned microsome without distortions as: ' + out_tomo_bin_nodist)
         tomo_bin_nodist = tomo_binning(tomo, settings.tm_bin)
         disperse_io.save_numpy(tomo_bin_nodist, out_tomo_bin_nodist)
 
-        print '\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the distortions...'
+        print('\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the distortions...')
         mask = tomo > 0
         mn = tomo[mask].mean()
         sg_bg = mn / snr
@@ -474,15 +474,15 @@ def pr_routine(pr_id, tomo_ids, settings):
         tomo = tomo.astype(np.float16)
 
         out_tomo = out_dir + '/' + out_stem + '_tomo_mic_' + str(i) + '.mrc'
-        print '\t\t\t-M[' + str(pr_id) + '/' + str(i) + '] Saving the microsome as: ' + out_tomo
+        print('\t\t\t-M[' + str(pr_id) + '/' + str(i) + '] Saving the microsome as: ' + out_tomo)
         disperse_io.save_numpy(tomo.astype(np.float16), out_tomo)
         out_tomo_bin = out_dir + '/' + out_stem + '_tomo_mic_' + str(i) + '_bin_' + str(tm_bin) + '.mrc'
-        print '\t\t\t-M[' + str(pr_id) + '/' + str(i) + '] Saving the ' + str(tm_bin) + ' binned microsome as: ' + out_tomo_bin
+        print('\t\t\t-M[' + str(pr_id) + '/' + str(i) + '] Saving the ' + str(tm_bin) + ' binned microsome as: ' + out_tomo_bin)
         tomo_bin = tomo_binning(tomo, tm_bin)
         disperse_io.save_numpy(tomo_bin, out_tomo_bin)
         cols.append((out_tomo, out_tomo_bin))
 
-    print '\tProcess ' + str(pr_id) + ' has finished.'
+    print('\tProcess ' + str(pr_id) + ' has finished.')
     sys.exit(pr_id)
 
 ########################################################################################
@@ -494,36 +494,36 @@ if mp_npr > tm_nt:
 
 ########## Printing the initial message
 
-print 'Generate synthetic microsomes.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tMultiprocessing settings:'
-print '\t\t-Number of parallel processes: ' + str(mp_npr)
-print '\tTomograms settings:'
-print '\t\t-Number of tomograms: ' + str(tm_nt)
-print '\t\t-Tomogram size: ' + str(tm_size) + ' px'
-print '\t\t-Resolution: ' + str(tm_res) + ' nm/px'
-print '\t\t-SNR range: ' + str(tm_snr_rg)
-print '\t\t-Missing wedge semi-angle: ' + str(tm_wedge) + ' deg'
-print '\t\t-Rotation for wedge axis: ' + str(tm_wedge_rot) + ' deg'
-print '\t\t-Binning factor: ' + str(tm_bin)
-print '\t\t-Sub-volume size: ' + str(tm_size)
-print '\tMicrosome settings:'
-print '\t\t-Membrane thickness: ' + str(mc_mbt) + ' nm'
-print '\t\t-Membrane layer sigma: ' + str(mc_mbs) + ' nm'
-print '\t\t-Minimum iter-particles distance: ' + str(mc_ip_min_dst) + ' nm'
-print '\t\t-Clusters radius for 1st pattern: ' + str(mc_1st_crad) + ' nm'
-print '\t\t-Clusters radius for 2nd pattern: ' + str(2*mc_1st_crad) + ' nm'
-print '\t\t-Averaged ditance to the 3rd pattern particles for the 4th pattern particles: ' + str(mc_4th_dst) + ' nm'
-print '\t\t-Input files with the density models: ' + str(mc_in_models)
-print '\t\t-Averaged (normal distribution) number of particles per model and microsome: ' + str(mc_avg_nparts)
-print '\t\t-Maximum deviation (3sg for Gaussian): ' + str(mc_3sg_nparts)
-print '\t\t-Subvolumes center height: ' + str(mc_zh) + ' px'
-print '\t\t-Slices to discard (to set zero) on top and bottom of the microsomes: ' + str(mc_halo_z) + ' px'
-print ''
+print('Generate synthetic microsomes.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tMultiprocessing settings:')
+print('\t\t-Number of parallel processes: ' + str(mp_npr))
+print('\tTomograms settings:')
+print('\t\t-Number of tomograms: ' + str(tm_nt))
+print('\t\t-Tomogram size: ' + str(tm_size) + ' px')
+print('\t\t-Resolution: ' + str(tm_res) + ' nm/px')
+print('\t\t-SNR range: ' + str(tm_snr_rg))
+print('\t\t-Missing wedge semi-angle: ' + str(tm_wedge) + ' deg')
+print('\t\t-Rotation for wedge axis: ' + str(tm_wedge_rot) + ' deg')
+print('\t\t-Binning factor: ' + str(tm_bin))
+print('\t\t-Sub-volume size: ' + str(tm_size))
+print('\tMicrosome settings:')
+print('\t\t-Membrane thickness: ' + str(mc_mbt) + ' nm')
+print('\t\t-Membrane layer sigma: ' + str(mc_mbs) + ' nm')
+print('\t\t-Minimum iter-particles distance: ' + str(mc_ip_min_dst) + ' nm')
+print('\t\t-Clusters radius for 1st pattern: ' + str(mc_1st_crad) + ' nm')
+print('\t\t-Clusters radius for 2nd pattern: ' + str(2*mc_1st_crad) + ' nm')
+print('\t\t-Averaged ditance to the 3rd pattern particles for the 4th pattern particles: ' + str(mc_4th_dst) + ' nm')
+print('\t\t-Input files with the density models: ' + str(mc_in_models))
+print('\t\t-Averaged (normal distribution) number of particles per model and microsome: ' + str(mc_avg_nparts))
+print('\t\t-Maximum deviation (3sg for Gaussian): ' + str(mc_3sg_nparts))
+print('\t\t-Subvolumes center height: ' + str(mc_zh) + ' px')
+print('\t\t-Slices to discard (to set zero) on top and bottom of the microsomes: ' + str(mc_halo_z) + ' px')
+print('')
 
 ########### Input parsing
 
@@ -544,8 +544,8 @@ hold_ref_0 = disperse_io.load_tomo(mc_in_models[0])
 for in_model in mc_in_models:
     hold_ref = disperse_io.load_tomo(in_model)
     if hold_ref_0.shape != hold_ref.shape:
-        print 'ERROR: All input density subvolume models must have the same size.'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: All input density subvolume models must have the same size.')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     hold_ref_sz = np.asarray(hold_ref.shape, dtype=np.int)
     temp = np.zeros(shape=tm_rsz, dtype=hold_ref.dtype)
@@ -564,9 +564,9 @@ cent_v = .5*np.asarray(hold_ref_0.shape, dtype=np.float) - cent_p
 mc_ip_min_dst_v, mc_1st_crad_v, mc_4th_dst_v = float(mc_ip_min_dst)/tm_res, float(mc_1st_crad)/tm_res, \
                                                float(mc_4th_dst)/tm_res
 
-print 'Main routine: '
+print('Main routine: ')
 
-print '\tParallel loop for microsomes: '
+print('\tParallel loop for microsomes: ')
 settings = Settings()
 settings.snrs = snrs
 settings.svol_refs = svol_refs
@@ -595,22 +595,22 @@ settings.mc_zh = mc_zh
 settings.mc_halo_z = mc_halo_z
 cols = list()
 if mp_npr <= 1:
-    pr_routine(0, range(tm_nt), settings)
+    pr_routine(0, list(range(tm_nt)), settings)
 else:
     processes, pr_results = dict(), dict()
-    mp_tomos = np.array_split(range(tm_nt), mp_npr)
+    mp_tomos = np.array_split(list(range(tm_nt)), mp_npr)
     for pr_id in range(mp_npr):
         pr = mp.Process(target=pr_routine, args=(pr_id, mp_tomos[pr_id], settings))
         pr.start()
         processes[pr_id] = pr
-    for pr_id, pr in zip(processes.iterkeys(), processes.itervalues()):
+    for pr_id, pr in zip(iter(processes.keys()), iter(processes.values())):
         pr.join()
         if pr_id != pr.exitcode:
-            print 'ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']'
-            print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+            print('ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']')
+            print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
 
 out_star = out_dir + '/' + out_stem + '.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star_tomos = sub.Star()
 star_tomos.add_column('_rlnMicrographName')
 star_tomos.add_column('_rlnImageName')
@@ -622,4 +622,4 @@ for i in range(tm_nt):
         star_tomos.add_row(**row)
 star_tomos.store(out_star)
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

@@ -2,10 +2,16 @@
 Generates some unusual structuring elements.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: struct_el.py 1289 2016-04-14 16:44:31Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 
-__version__ = "$Revision: 1289 $"
+__version__ = "$Revision$"
 
 import logging
 import numpy
@@ -118,12 +124,13 @@ class StructEl(object):
             return conn_label, nn
 
             # complain
-            raise NotImplementedError("Sorry, don't know how to label using " +
-                             "structuring element with " +
-                             "rank: " + str(structure.rank) +
-                             ", mode: " + str(structure.mode) +
-                             ", connectivity: " + str(structure.connectivity) +
-                             " and size: " + str(structure.size) + ".")
+            raise NotImplementedError(
+                "Sorry, don't know how to label using " +
+                "structuring element with " +
+                "rank: " + str(structure.rank) +
+                ", mode: " + str(structure.mode) +
+                ", connectivity: " + str(structure.connectivity) +
+                " and size: " + str(structure.size) + ".")
 
         else:
 
@@ -160,7 +167,7 @@ class StructEl(object):
             if (self.mode is None) or (self.mode == 'standard'):
 
                 # size > 3, standard
-                half_size = (self.size - 1) / 2
+                half_size = old_div((self.size - 1), 2)
                 if self.connectivity < half_size**2:
 
                     # size too large: trim the size and call decompose
@@ -196,12 +203,13 @@ class StructEl(object):
                     return label_se, conn_se
        
         # complain
-        raise NotImplementedError("Sorry, don't know how to decompose " +
-                             "structuring element with " +
-                             "rank: " + str(self.rank) +
-                             ", mode: " + str(self.mode) +
-                             ", connectivity: " + str(self.connectivity) +
-                             " and size: " + str(self.size) + ".")
+        raise NotImplementedError(
+            "Sorry, don't know how to decompose " +
+            "structuring element with " +
+            "rank: " + str(self.rank) +
+            ", mode: " + str(self.mode) +
+            ", connectivity: " + str(self.connectivity) +
+            " and size: " + str(self.size) + ".")
         
     def connect(self, input):
         """
@@ -241,12 +249,13 @@ class StructEl(object):
                 return new
 
         # complain
-        raise NotImplementedError("Sorry, don't know how to connect using " +
-                             "structuring element with " +
-                             "rank: " + str(self.rank) +
-                             ", mode: " + str(self.mode) +
-                             ", connectivity: " + str(self.connectivity) +
-                             " and size: " + str(self.size) + ".")
+        raise NotImplementedError(
+            "Sorry, don't know how to connect using " +
+            "structuring element with " +
+            "rank: " + str(self.rank) +
+            ", mode: " + str(self.mode) +
+            ", connectivity: " + str(self.connectivity) +
+            " and size: " + str(self.size) + ".")
 
     def generate(self):
         """
@@ -268,7 +277,7 @@ class StructEl(object):
                 # size >3, standard
                 shape = [self.size] * self.rank
                 distance_in = numpy.ones(shape, dtype='int')
-                origin = ((self.size-1)/2,) * self.rank
+                origin = (old_div((self.size-1),2),) * self.rank
                 distance_in[origin] = 0
                 if (distance_in > 0).all():  # workaround for scipy bug 1089
                     raise ValueError("Can't calculate distance_function ",
@@ -287,11 +296,11 @@ class StructEl(object):
             if self.axis is None:
                 for axis in range(self.rank):
                     true_indices = [slice(None)] * self.rank
-                    true_indices[axis] = (self.size-1) / 2
+                    true_indices[axis] = old_div((self.size-1), 2)
                     se[tuple(true_indices)] = True
             else:
                 true_indices = [slice(None)] * self.rank
-                true_indices[self.axis] = (self.size-1) / 2
+                true_indices[self.axis] = old_div((self.size-1), 2)
                 se[tuple(true_indices)] = True
             return se
                 
@@ -302,11 +311,12 @@ class StructEl(object):
 
 
         # complain
-        raise NotImplementedError("Sorry, don't know how to generate a " +
-                             "structuring element with " +
-                             "rank: " + str(self.rank) +
-                             ", mode: " + str(self.mode) +
-                             ", connectivity: " + str(self.connectivity) +
-                             " and size: " + str(self.size) + ".")
+        raise NotImplementedError(
+            "Sorry, don't know how to generate a " +
+            "structuring element with " +
+            "rank: " + str(self.rank) +
+            ", mode: " + str(self.mode) +
+            ", connectivity: " + str(self.connectivity) +
+            " and size: " + str(self.size) + ".")
 
         

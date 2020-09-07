@@ -7,6 +7,6 @@ Set of specific utilities for combining PySeg with Subtomogram Averaging tools (
 
 __author__ = 'Antonio Martinez-Sanchez'
 
-from plist import TomoPeaks, SetTomoPeaks, Score, SingleTiltWedge, Particle, ParticleList, PK_COORDS
-from star import Star, relion_norm
-from klass import ClassStar
+from .plist import TomoPeaks, SetTomoPeaks, Score, SingleTiltWedge, Particle, ParticleList, PK_COORDS
+from .star import Star, relion_norm
+from .klass import ClassStar

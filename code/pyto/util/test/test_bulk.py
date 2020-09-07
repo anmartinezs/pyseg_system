@@ -5,10 +5,11 @@ Tests module util.bulk .
 Currently tests only bulk module.. 
 
 # Author: Vladan Lucic
-# $Id: test_bulk.py 765 2010-10-05 17:15:02Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 765 $"
+__version__ = "$Revision$"
 
 import os
 import sys

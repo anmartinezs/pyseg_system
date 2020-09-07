@@ -269,13 +269,9 @@ class GeometryMCF:
 #   Abstract class for working as interface to geometries
 #
 #
-class Geometry:
+class Geometry(metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    # manifold: image with the manifold (Numpy ndarray)
-    # density: image with the density (Numpy ndarray)
     def __init__(self, manifold, density):
 
         if (not isinstance(manifold, np.ndarray)) and (not isinstance(density, np.ndarray)):

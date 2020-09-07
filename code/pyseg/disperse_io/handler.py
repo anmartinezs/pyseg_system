@@ -11,8 +11,8 @@ import time
 import warnings
 import subprocess
 import logging
-import pyfits
-import disperse_io
+from astropy.io import fits
+from . import disperse_io
 import shutil
 from pyto.io import ImageIO as ImageIO
 # import pexceptions
@@ -303,8 +303,9 @@ class DisPerSe(object):
             mask_opt = ('-mask', self.__mask)
         if (self.__dump_manifolds is not None) or no_cut:
             manifolds_opt = ('-dumpManifolds', self.__dump_manifolds)
-        if (self.__cut is not None) or no_cut or (self.__cut > 0):
-            cut_opt = ('-cut', str(self.__cut))
+        if (self.__cut is not None) or no_cut:
+            if self.__cut > 0:
+                cut_opt = ('-cut', str(self.__cut))
         elif (self.__nsig is not None) and (self.__nsig > 0):
             nsig_opt = ('-nsig', str(self.__nsig))
         if self.__robust:
@@ -390,8 +391,8 @@ class DisPerSe(object):
         self.__input_inv = stem + '_inv.fits'
         warnings.resetwarnings()
         warnings.filterwarnings('ignore', category=UserWarning, append=True)
-        pyfits.writeto(self.__input_inv, utils.lin_map(array=pyfits.getdata(self.__input), lb=1, ub=0),
-                       clobber=True, output_verify='silentfix')
+        fits.writeto(self.__input_inv, utils.lin_map(array=fits.getdata(self.__input), lb=1, ub=0),
+                       overwrite=True, output_verify='silentfix')
         warnings.resetwarnings()
         warnings.filterwarnings('always', category=UserWarning, append=True)
 
@@ -423,7 +424,7 @@ class DisPerSe(object):
             fits_image = self.__work_dir + '/' + stem + '.fits'
             warnings.resetwarnings()
             warnings.filterwarnings('ignore', category=UserWarning, append=True)
-            pyfits.writeto(fits_image, image.data.transpose(), clobber=True, output_verify='silentfix')
+            fits.writeto(fits_image, image.data.transpose(), overwrite=True, output_verify='silentfix')
             warnings.resetwarnings()
             warnings.filterwarnings('always', category=UserWarning, append=True)
             return fits_image

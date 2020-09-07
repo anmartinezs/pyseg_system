@@ -3,10 +3,18 @@ Class Ball provides methods for crating and manipulating n-dimensional balls
 (filled spheres), in addition to methods defined in its base class Segment.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: ball.py 1434 2017-03-27 12:36:23Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import next
+from builtins import zip
+from builtins import str
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1434 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -17,8 +25,8 @@ import numpy
 import scipy
 
 import pyto.util.numpy_plus as numpy_plus
-from segment import Segment
-from plane import Plane
+from .segment import Segment
+from .plane import Plane
 
 class Ball(Segment):
     """
@@ -145,7 +153,7 @@ class Ball(Segment):
         data, ids, update = self.parseInput(data=data, ids=ids)
         
         # find disc centers
-        from morphology import Morphology
+        from .morphology import Morphology
         mor = Morphology(segments=data, ids=ids)
         mor.getCenter(real=True)
         centers = mor.center[ids]
@@ -280,7 +288,7 @@ class Ball(Segment):
 
         # parse arguments
         if (ids is None) or (len(ids) == 0) or (max(ids) < 1):
-            ids = range(1, len(centers)+1)
+            ids = list(range(1, len(centers)+1))
 
         # round centers to nearest int and calculate rounding errors
         centers_round = numpy.rint(centers).astype(int)
@@ -314,7 +322,7 @@ class Ball(Segment):
         max_radius = numpy.rint(max(radii) + 0.999)
         mark_dist_gen = inst.markDistance(size=max_radius)
         for index in range(len(ids)):
-            distance, slice_, id_ = mark_dist_gen.next()
+            distance, slice_, id_ = next(mark_dist_gen)
 
             # ToDo (?) correct distnce for rounding error of centers
 
@@ -370,7 +378,7 @@ class Ball(Segment):
 
         # loop over all combinations
         for (id1, c1, r1), (id2, c2, r2) in itertools.combinations(
-                zip(ids, centers, radii), 2):
+                list(zip(ids, centers, radii)), 2):
             if numpy.sqrt(((c1 - c2)**2).sum()) < r1 + r2 + clearance:
                 over.append([id1, id2])
 

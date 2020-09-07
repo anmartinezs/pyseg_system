@@ -8,10 +8,12 @@ object.
 
 This script may be placed anywhere in the directory tree.
 
-$Id: extract_points.py 1485 2018-10-04 14:35:01Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1485 $"
+from __future__ import unicode_literals
+
+__version__ = "$Revision$"
 
 import sys
 import os

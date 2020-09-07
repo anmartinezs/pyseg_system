@@ -2,12 +2,14 @@
 tomo directory module
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 1461 2017-10-12 10:10:49Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1461 $"
+__version__ = "$Revision$"
 
-from series import Series
-from serial_em import SerialEM
-from frame_series import FrameSeries
-from ctf import Ctf
+from .series import Series
+from .serial_em import SerialEM
+from .frame_series import FrameSeries
+from .ctf import Ctf

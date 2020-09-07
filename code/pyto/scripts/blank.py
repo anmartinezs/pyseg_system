@@ -5,12 +5,19 @@ given segments.
 
 This script may be placed anywhere in the directory tree.
 
-$Id: blank.py 21 2007-12-23 11:38:03Z vladan $
+$Id$
+Author: Vladan Lucic (Max Planck Institute for Biochemistry) 
 """
+from __future__ import unicode_literals
+
+__version__ = "$Revision$"
 
 import os
+
 import numpy
+
 import pyto
+import pyto.scripts.common as common
 
 
 ##############################################################
@@ -27,7 +34,7 @@ import pyto
 #
 
 # name of the image file
-imageFileName = "and-1-6.mrc"
+image_file_name = "../3d/tomo.mrc"
 
 #####################################################
 #
@@ -37,23 +44,21 @@ imageFileName = "and-1-6.mrc"
 #
 
 # name of the labels file (file containing segmented volume) 
-labelsFileName = "../viz/and-1-6_labels_sv.raw"
+labels_file_name = "labels_1.raw"
 
 # labels file dimensions
-labelsShape = (260, 260, 100)
+labels_shape = None     # shape given in header of the disc file (if em
+                        # or mrc), or in the tomo (grayscale image) header   
+#shape = (100, 120, 90) # shape given here
 
 # labels file data type (e.g. 'int8', 'int16', 'int32', 'float16', 'float64') 
-labelsDataType = 'int8'
+labels_data_type = 'int8'
 
 # labels file byteOrder ('<' for little-endian, '>' for big-endian)
-labelsByteOrder = '<'
+labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labelsArrayOrder = 'FORTRAN'
-
-# offset of labels in respect to the image (None means 0-offset)
-labelsOffset = None
-
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 #########################################
 #
@@ -61,7 +66,6 @@ labelsOffset = None
 #
 
 # ids of all labels that need to be blanked (removed) 
-#vesicleIds = range(2,64)  # range of ids
 ids = [2,3,4]       # individual ids
 #ids = range(2,5)   # range of ids, same as above
 
@@ -75,8 +79,8 @@ value = -1.
 #   labels_directory + labels_base_name + <connSuffix> + labels_extension
 #
 
-# out file name suffix
-blankSuffix = '_blank-test'
+# blanked tomo file name suffix
+blank_suffix = '_1'
 
 
 ################################################################
@@ -87,38 +91,47 @@ blankSuffix = '_blank-test'
 
 ################################################
 #
-# Read files
+#  Main function
 #
 
-# read image file
-imageFile = pyto.io.ImageIO()
-imageFile.read(file=imageFileName)
+def main():
 
-# read labels file
-labels = pyto.io.ImageIO()
-labels.read(file=labelsFileName, byteOrder=labelsByteOrder, dataType=labelsDataType,
-            arrayOrder=labelsArrayOrder, shape=labelsShape)
+    # read image file
+    #imageFile = pyto.io.ImageIO()
+    #imageFile.read(file=image_file_name)
+    image = common.read_image(
+        file_name=image_file_name, header=True, memmap=True)
+    new_shape = common.find_shape(
+        file_name=image_file_name, shape=labels_shape,
+        suggest_shape=image.data.shape)
 
-#################################################
-#
-# Calculations
-#
+    # read labels file
+    #labels = pyto.io.ImageIO()
+    #labels.read(
+    labels = pyto.segmentation.Segment.read(
+        file=labels_file_name, byteOrder=labels_byte_order, 
+        dataType=labels_data_type, arrayOrder=labels_array_order, 
+        shape=new_shape)
 
-blankData = imageFile.data.copy()
-for id in ids:
-    blankData[labels.data==id] = value
+    # calculations
+    blank_data = image.data.copy()
+    for id in ids:
+        blank_data[labels.data==id] = value
 
-##################################################
-#
-# Write output file
-#
+    # extract parts from the image_file_name and make blank image name
+    (dir, base) = os.path.split(image_file_name)
+    (root, ext) = os.path.splitext(base)
+    blank_file_name = os.path.join(dir, root+blank_suffix+ext)
 
-# extract parts from the imageFileName and make blank image name
-(dir, base) = os.path.split(imageFileName)
-(root, ext) = os.path.splitext(base)
-blankFileName = os.path.join(dir, root+blankSuffix+ext)
+    # write the blank file with the same header as in imageFile
+    image_io = pyto.io.ImageIO()
+    image_io.readHeader(file=image_file_name)
+    image_io.setData(data=blank_data)
+    image_io.write(file=blank_file_name)
 
-# write the blank file with the same header as in imageFile
-imageFile.write(file=blankFileName, data=blankData)
+
+# run if standalone
+if __name__ == '__main__':
+    main()
 
 

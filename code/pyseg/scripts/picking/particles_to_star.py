@@ -24,7 +24,7 @@ do_rnd = True
 do_sg = False
 do_norm = True
 
-print 'Intilizing output STAR file...'
+print('Intilizing output STAR file...')
 star = ps.sub.Star()
 star.add_column('_rlnMicrographName')
 star.add_column('_rlnImageName')
@@ -43,18 +43,18 @@ mask = None
 if in_mask_norm is not None:
     mask = ps.disperse_io.load_tomo(in_mask_norm)
 
-print 'Processing file: ' + in_coords
+print('Processing file: ' + in_coords)
 with open(in_coords, 'r') as in_file:
     lines = in_file.readlines()
     nlines = len(lines)
     ndigits = len(str(nlines))
-    print 'Number of particles to process ' + str(nlines)
+    print('Number of particles to process ' + str(nlines))
     for i, line in enumerate(lines):
         part_id = str(i+1).zfill(ndigits)
         part_name = in_part_stem + part_id + '.mrc'
-        print '\t-Processing particle: ' + part_name
+        print('\t-Processing particle: ' + part_name)
         if not os.path.exists(part_name):
-            print 'WARNING: particle reconstruction file ' + part_name + ' was not found!'
+            print('WARNING: particle reconstruction file ' + part_name + ' was not found!')
             continue
             # raise IOError
         part = ps.disperse_io.load_tomo(part_name)
@@ -84,6 +84,6 @@ with open(in_coords, 'r') as in_file:
         row['_rlnImageName'] = out_part_name
         star.add_row(**row)
 
-print 'Storing file: ' + out_star
+print('Storing file: ' + out_star)
 star.store(out_star)
-print 'Succesfully terminated!'
+print('Succesfully terminated!')

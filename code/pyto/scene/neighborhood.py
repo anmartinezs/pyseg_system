@@ -6,10 +6,12 @@ elements lay not further than a given distance to the region. Technically a
 region is also a segment.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: neighborhood.py 1009 2014-01-21 15:19:48Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import object
 
-__version__ = "$Revision: 1009 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -17,7 +19,7 @@ from copy import copy, deepcopy
 
 import numpy
 
-import pyto.util.scipy_plus
+from ..util import scipy_plus
 
 class Neighborhood(object):
     """

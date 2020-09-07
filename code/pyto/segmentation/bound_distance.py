@@ -4,11 +4,13 @@ boundaries that contact the same segment.
 
 Applicable only to the segments that contact exactly two boundaries.
 
-# Author: Vladan Lucic
-# $Id: bound_distance.py 923 2013-01-18 17:22:23Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 923 $"
+__version__ = "$Revision$"
 
 
 from copy import copy, deepcopy
@@ -18,7 +20,7 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from features import Features
+from .features import Features
 
 class BoundDistance(Features):
     """

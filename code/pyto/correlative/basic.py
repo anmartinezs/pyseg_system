@@ -6,10 +6,13 @@ The two systems need to have the same dimensionality,
 Classes for specific approaches should inherit from this class.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: basic.py 1258 2015-11-30 09:20:16Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 
-__version__ = "$Revision: 1258 $"
+__version__ = "$Revision$"
 
 
 import warnings
@@ -583,8 +586,8 @@ class Basic(object):
     ##############################################################
 
     def readPositions(
-            self, points, format_='imagej', columns=None, comments=' ', 
-            skiprows=1, delimiter=' ', indexing=1):
+            self, points, format_='imagej', columns=None, comments=b' ', 
+            skiprows=1, delimiter=b' ', indexing=1):
         """
         Reads positions of points specified by arg points from multiple files.
 
@@ -644,12 +647,12 @@ class Basic(object):
         """
 
         # set file parsing parameters
-        if format_ is 'imagej':
+        if format_ == 'imagej':
 
             # ImageJ definitions, ignore args delimiter, comments and skiprows
-            comments = ' '
+            comments = b' '
             skiprows = 1    # probably redundant with comments
-            delimiter = '\t'
+            delimiter = b'\t'
 
         else:
 
@@ -661,7 +664,7 @@ class Basic(object):
             columns = np.array(columns) - 1
 
         # read positions and save as attributes
-        for name, val in points.items():
+        for name, val in list(points.items()):
 
             # read columns from file
             try:

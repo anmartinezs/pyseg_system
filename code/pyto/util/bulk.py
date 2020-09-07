@@ -2,10 +2,13 @@
 Useful functions that can modify or execute many files (scripts) together.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: bulk.py 1311 2016-06-13 12:41:50Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import str
+from past.builtins import basestring
 
-__version__ = "$Revision: 1311 $"
+__version__ = "$Revision$"
 
 import os
 import sys
@@ -58,12 +61,12 @@ def replace(old, rules, new=None, repeat=None):
         # check all line match patterns for replacement
         line_written = False
         modif_line = copy(line)
-        for pattern, value in rules.items():
+        for pattern, value in list(rules.items()):
             if re.search(pattern, modif_line) is not None:
 
                 # modify the current line using the current rule
                 if isinstance(value, dict):
-                    for pat, sub_ in value.items():
+                    for pat, sub_ in list(value.items()):
                         modif_line = re.sub(pat, sub_, modif_line)
                 else:
                     modif_line = value
@@ -140,7 +143,7 @@ def run_path(path, package=''):
     if package != '':
         package = package + '.'
 
-    if isinstance(path, str):
+    if isinstance(path, basestring):
         all_paths = [path]
     else:
         all_paths = path

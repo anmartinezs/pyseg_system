@@ -3,10 +3,14 @@
 Tests module em_lm_correlation 
 
 # Author: Vladan Lucic
-# $Id: test_em_lm_correlation.py 967 2013-05-10 16:42:37Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 967 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest

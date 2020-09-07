@@ -2,10 +2,15 @@
 """
 Contains functions often used in the scripts of this directory
 
-$Id: common.py 1538 2019-04-16 12:05:34Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1538 $"
+from __future__ import unicode_literals
+from builtins import zip
+#from builtins import str
+from past.builtins import basestring
+
+__version__ = "$Revision$"
 
 # ToDo: see if this should become a superclass for some of the scripts
 
@@ -143,16 +148,18 @@ def make_file_name(directory='', prefix='', insert_root=True,
 # Reading image files
 #
 
-def read_image(file_name, memmap=False):
+def read_image(file_name, header=False, memmap=False):
     """
     Reads image file and returns an segmentation.Grey object
 
     Argument:
       - file_name: image file name
+      - header: flag indicating if file header is read and saved
       - memmap: Flag indicating if the data is read to a memory map,
       instead of reading it into a ndarray
     """
-    image = pyto.segmentation.Grey.read(file=file_name, memmap=memmap)
+    image = pyto.segmentation.Grey.read(
+        file=file_name, header=header, memmap=memmap)
     return image
 
 def read_labels(
@@ -237,14 +244,14 @@ def is_multi_file(file_name):
     Argument:
       - file_name: one file name or a list (tuple) of file names
     """
-    if isinstance(file_name, (str, unicode)):
+    if isinstance(file_name, (str, basestring)):
         return False
     elif isinstance(file_name, (tuple, list)):
         return True
     else:
         raise ValueError(
-            "File name " + str(file_name) + " has to be either a string / "
-            + "unicode (one file) or a tuple (multiple files).")    
+            "File name " + str(file_name) + " has to be either a string "
+            + "(one file) or a tuple (multiple files).")    
 
 def read_single_labels(
         file_name, ids, shape=None, byte_order=None, data_type=None, 
@@ -348,8 +355,8 @@ def find_shape(file_name, shape=None, suggest_shape=None):
     """
     Determines image file shape using the first found of the following:
       - argument shape; returns shape
-      - shape given in the image file header (if in em or mrc format); returns
-      None (shape to be read from file header)
+      - shape read from the image file header (if in em or mrc format)
+      Note: previously (r<=1556 returned None)
       - argument suggest_shape; returns suggest_shape
 
     Arguments:
@@ -372,8 +379,12 @@ def find_shape(file_name, shape=None, suggest_shape=None):
         if (bound_io.fileFormat == 'em') or (bound_io.fileFormat == 'mrc'):
 
             # specified in header
-            result_shape = None
- 
+            #result_shape = None
+            bound_io.readHeader()
+            result_shape = bound_io.shape
+            logging.debug(
+                "scripts/common:find_shape() return changed from None to shape")
+            
         elif suggest_shape is not None:
 
             # specified by arg suggest_shape
@@ -524,7 +535,7 @@ def write_labels(labels, name, data_type, inset=False, ids=None,
 # Pickle files
 #
 
-def read_pickle(file_name, compact=[], inset=None, image=[]):
+def read_pickle(file_name, compact=[], inset=None, image=[], encoding='latin1'):
     """
     Reads pickles
 
@@ -537,12 +548,17 @@ def read_pickle(file_name, compact=[], inset=None, image=[]):
       ... of objects)
       - compact: list of names of attribute that should be expanded (can
       be attributes of ... of objects)
+      - encoding: encoding for pickle.load(), not used for python 2
 
     Returns: unpickled object
     """
 
     # unpickle
-    obj = pickle.load(open(file_name))
+    if sys.version_info[0] > 2:
+        file_ = open(file_name, 'rb')
+        obj = pickle.load(file_, encoding=encoding)
+    else:
+        obj = pickle.load(open(file_name))
 
     # expand
     for c_name in compact:

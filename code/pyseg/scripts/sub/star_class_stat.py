@@ -61,40 +61,40 @@ from matplotlib.pyplot import cm
 
 ########## Print initial message
 
-print 'Statistical analysis of class distribution by group from a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file: ' + in_star
+print('Statistical analysis of class distribution by group from a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file: ' + in_star)
 if meta_groups is None:
-    print '\tNo meta groups.'
+    print('\tNo meta groups.')
 else:
-    print '\tMeta groups: ' + str(meta_groups)
+    print('\tMeta groups: ' + str(meta_groups))
 if lgd:
-    print '\tPrint legends'
-print ''
+    print('\tPrint legends')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"'
+    print('ERROR: input STAR file could not be read because of "' + str(e.msg, e.expr) + '"')
     sys.exit(-1)
 
-print '\tFinding the set of groups...'
+print('\tFinding the set of groups...')
 groups = star.get_column_data_set(GROUP_COL)
 if groups is None:
-    print '\t-WARNING: No tomograms found!.'
-    print 'Terminated. (' + time.strftime("%c") + ')'
-print '\t-Number of tomograms found: ' + str(len(groups))
+    print('\t-WARNING: No tomograms found!.')
+    print('Terminated. (' + time.strftime("%c") + ')')
+print('\t-Number of tomograms found: ' + str(len(groups)))
 groups = list(np.sort(np.asarray(list(groups), dtype=np.int)))
 
-print '\tFinding micrographs name per group...'
+print('\tFinding micrographs name per group...')
 for group in groups:
     hold_star = copy.deepcopy(star)
     del_rows = list()
@@ -103,18 +103,18 @@ for group in groups:
             del_rows.append(i)
     hold_star.del_rows(del_rows)
     micros = hold_star.get_column_data_set(MICRO_COL)
-    print '\t- Group ' + str(group) + ': ' + str(micros)
+    print('\t- Group ' + str(group) + ': ' + str(micros))
 
-print '\tFinding the set of classes...'
+print('\tFinding the set of classes...')
 classes = star.get_column_data_set(CLASS_COL)
 if classes is None:
-    print '\t-WARNING: No class found!.'
-    print 'Terminated. (' + time.strftime("%c") + ')'
-print '\t-Number of classes found: ' + str(len(classes))
+    print('\t-WARNING: No class found!.')
+    print('Terminated. (' + time.strftime("%c") + ')')
+print('\t-Number of classes found: ' + str(len(classes)))
 classes = list(classes)
 
 if meta_groups is None:
-    print '\tComputing particles by group...'
+    print('\tComputing particles by group...')
     groups_str, vals_g = list(), list()
     for group in groups:
         val = star.count_elements(((GROUP_COL, group),))
@@ -124,7 +124,7 @@ if meta_groups is None:
             vals_g.append(0.)
         groups_str.append(str(group))
 else:
-    print '\tComputing particles by meta-group...'
+    print('\tComputing particles by meta-group...')
     groups_str, vals_g = list(), list()
     for i, meta_group in enumerate(meta_groups):
         hold_val = 0.
@@ -150,7 +150,7 @@ plt.xticks(index + BAR_WIDTH, groups_str)
 plt.tight_layout()
 plt.show(block=False)
 
-print '\tComputing particles by class...'
+print('\tComputing particles by class...')
 classes_str, vals = list(), list()
 for klass in classes:
     val = star.count_elements(((CLASS_COL, klass),))
@@ -171,7 +171,7 @@ plt.tight_layout()
 plt.show(block=False)
 
 if meta_groups is None:
-    print '\tComputing class proportions by group...'
+    print('\tComputing class proportions by group...')
     groups_p = np.zeros(shape=(len(groups), len(classes)), dtype=np.float)
     for i in range(len(groups)):
         if vals_g[i] > 0:
@@ -180,7 +180,7 @@ if meta_groups is None:
                 if val is not None:
                     groups_p[i][j] = float(val) / vals_g[i]
 else:
-    print '\tComputing class proportions by meta-group...'
+    print('\tComputing class proportions by meta-group...')
     groups_p = np.zeros(shape=(len(meta_groups), len(classes)), dtype=np.float)
     for i in range(len(meta_groups)):
         if vals_g[i] > 0:
@@ -211,4 +211,4 @@ if lgd:
 plt.tight_layout()
 plt.show(block=True)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

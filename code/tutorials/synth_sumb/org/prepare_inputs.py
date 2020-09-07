@@ -77,21 +77,21 @@ sg_suf = '_bin_2_mbu'
 
 ########## Printing the initial message
 
-print 'Prepare inputs for PyOrg.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput particles STAR files: ' + str(in_parts)
-print '\tInput models: ' + str(in_models)
-print '\tInput models for simulations: ' + str(in_models_sim)
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tSegmentation: '
-print '\t\t-Subvolume resolution: ' + str(sg_md_res) + ' nm/px'
-print '\t\t-Segmentation resolution: ' + str(sg_res) + ' nm/px'
-print '\t\t-Segmentations directory: ' + str(sg_dir)
-print '\t\t-Segmentation suffix: ' + str(sg_suf)
-print ''
+print('Prepare inputs for PyOrg.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput particles STAR files: ' + str(in_parts))
+print('\tInput models: ' + str(in_models))
+print('\tInput models for simulations: ' + str(in_models_sim))
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tSegmentation: ')
+print('\t\t-Subvolume resolution: ' + str(sg_md_res) + ' nm/px')
+print('\t\t-Segmentation resolution: ' + str(sg_res) + ' nm/px')
+print('\t\t-Segmentations directory: ' + str(sg_dir))
+print('\t\t-Segmentation suffix: ' + str(sg_suf))
+print('')
 
 ########### Input parsing
 
@@ -101,10 +101,10 @@ count = 0
 mics, segs, mods, mod_sims, out_parts = list(), list(), list(), list(), list()
 sg_bin = sg_res / sg_md_res
 
-print '\tMain loop:'
+print('\tMain loop:')
 for in_part, in_model, in_model_sim in zip(in_parts, in_models, in_models_sim):
 
-    print '\t\t-Processing the STAR file: ' + str(in_part)
+    print('\t\t-Processing the STAR file: ' + str(in_part))
     star = sub.Star()
     star.load(in_part)
 
@@ -125,13 +125,13 @@ for in_part, in_model, in_model_sim in zip(in_parts, in_models, in_models_sim):
 
     out_part = out_dir + '/' + str(count) + '_' + os.path.splitext(os.path.split(in_model)[1])[0].split('_')[0] + '_' \
                + os.path.splitext(os.path.split(in_part)[1])[0] + '_parts.star'
-    print '\t\t+Storing the processed STAR file in: ' + str(out_part)
+    print('\t\t+Storing the processed STAR file in: ' + str(out_part))
     star.store(out_part)
     out_parts.append(out_part)
     count += 1
 
 out_seg_star = out_dir + '/' + out_stem + '_seg.star'
-print '\tStoring STAR segmentation file in: ' + out_seg_star
+print('\tStoring STAR segmentation file in: ' + out_seg_star)
 star_seg_out = sub.Star()
 star_seg_out.add_column('_rlnMicrographName')
 star_seg_out.add_column('_psSegImage')
@@ -154,7 +154,7 @@ for mic, seg in zip(mics, segs):
 star_seg_out.store(out_seg_star)
 
 out_star = out_dir + '/' + out_stem + '_ltomos.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star_out = sub.Star()
 star_out.add_column('_psStarFile')
 star_out.add_column('_suSurfaceVtp')
@@ -170,4 +170,4 @@ for out_part, out_model, out_model_sim in zip(out_parts, in_models, in_models_si
     star_out.add_row(**part_row)
 star_out.store(out_star)
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

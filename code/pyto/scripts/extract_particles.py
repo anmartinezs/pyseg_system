@@ -4,9 +4,15 @@ Extracts sub-images containing individual particles based on the corresponding
 segment positions.
 
  # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: extract_particles.py 1311 2016-06-13 12:41:50Z vladan $
+# $Id$
 """
-__version__ = "$Revision: 1311 $"
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+#from builtins import str
+#from past.utils import old_div
+
+__version__ = "$Revision$"
 
 import sys
 import os

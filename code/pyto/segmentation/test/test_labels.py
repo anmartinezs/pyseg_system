@@ -5,10 +5,12 @@ Tests for remove(), reorder(), restrict() and inset related methods are
 implemented in the moment.
 
 # Author: Vladan Lucic
-# $Id: test_labels.py 1435 2017-03-27 14:26:36Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import range
 
-__version__ = "$Revision: 1435 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -94,6 +96,38 @@ class TestLabels(np_test.TestCase):
              [0, 6, 0, 0, 6]])
         np_test.assert_equal(removed, desired)
 
+        desired_2 = numpy.array(
+            [[0, 1, 1, 2, 5],
+             [0, 1, 0, 2, 5],
+             [0, 1, 0, 0, 8]])
+
+        desired_3 = numpy.array(
+            [[0, 1, 1, 3, 3],
+             [0, 1, 0, 3, 3],
+             [0, 1, 0, 0, 3]])
+
+        # use remove(), ids single int
+        self.small = Labels(data=self.small_array)
+        self.small.setData(data=self.small.data.copy())
+        self.small.remove(ids=7, value=8)
+        np_test.assert_equal(self.small.data, desired_2)
+
+        # _remove, mode 'remove'
+        removed = self.small._remove(
+            data=self.small_array.copy(), remove=7, value=8, mode='remove')
+        np_test.assert_equal(removed, desired_2)
+        removed = self.small._remove(
+            data=self.small_array.copy(), keep=1, value=3, mode='remove')
+        np_test.assert_equal(removed, desired_3)
+
+        # _remove, mode 'keep'
+        kept = self.small._remove(
+            data=self.small_array.copy(), keep=1, value=3, mode='keep')
+        np_test.assert_equal(kept, desired_3)
+        kept = self.small._remove(
+            data=self.small_array.copy(), remove=7, value=8, mode='keep')
+        np_test.assert_equal(kept, desired_2)
+        
     def testRestrict(self):
         """
         Tests restrict()
@@ -420,7 +454,7 @@ class TestLabels(np_test.TestCase):
         np_test.assert_equal(small.findInset(ids=ids), desired_inset)
         small.makeInset(ids=ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
         
         # some ids
         small = Labels(data=self.small_array)
@@ -429,7 +463,7 @@ class TestLabels(np_test.TestCase):
         np_test.assert_equal(small.findInset(ids=ids), desired_inset)
         small.makeInset(ids=ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
         
         # some ids with extend
         small = Labels(data=self.small_array)
@@ -451,7 +485,7 @@ class TestLabels(np_test.TestCase):
         np_test.assert_equal(small.findInset(ids=ids), None)
         small.makeInset(ids=ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
         
         # no ids
         small = Labels(data=self.small_array)
@@ -460,7 +494,7 @@ class TestLabels(np_test.TestCase):
         np_test.assert_equal(small.findInset(ids=ids), None)
         small.makeInset(ids=ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
         
         # no data 
         small = Labels(data=numpy.zeros((0,0), dtype=int))
@@ -469,7 +503,7 @@ class TestLabels(np_test.TestCase):
         np_test.assert_equal(small.findInset(ids=ids), None)
         small.makeInset(ids=ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
         
         # with additional
         small = Labels(data=self.small_array)
@@ -483,7 +517,7 @@ class TestLabels(np_test.TestCase):
         small.makeInset(ids=ids, additional=small_2, 
                         additionalIds=additional_ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
         
         # with additional, update=False
         small = Labels(data=self.small_array)
@@ -498,7 +532,7 @@ class TestLabels(np_test.TestCase):
         prev_data = small.data
         new_data = small.makeInset(ids=ids, additional=small_2, 
                                    additionalIds=additional_ids, update=False)
-        np_test.assert_equal(new_data, self.small_array[desired_inset])
+        np_test.assert_equal(new_data, self.small_array[tuple(desired_inset)])
         np_test.assert_equal(small.inset, prev_inset)
         np_test.assert_equal(small.data, prev_data)
         
@@ -514,7 +548,7 @@ class TestLabels(np_test.TestCase):
         small.makeInset(ids=ids, additional=small_2, 
                         additionalIds=additional_ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
 
         # ids with wrong additional
         small = Labels(data=self.small_array)
@@ -528,7 +562,7 @@ class TestLabels(np_test.TestCase):
         small.makeInset(ids=ids, additional=small_2, 
                         additionalIds=additional_ids)
         np_test.assert_equal(small.inset, desired_inset)
-        np_test.assert_equal(small.data, self.small_array[desired_inset])
+        np_test.assert_equal(small.data, self.small_array[tuple(desired_inset)])
                 
     def testGetPointsAll(self):
         """

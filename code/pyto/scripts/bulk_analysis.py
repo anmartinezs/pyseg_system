@@ -12,11 +12,14 @@ executed. Finally, the information about the files holding the script execution
 results are added to the catalog files (contain metadata about individual 
 tomograms and their segmentation and analysis).
 
-$Id: bulk_analysis.py 988 2013-09-27 07:50:48Z vladan $
+$Id$
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
 """
+from __future__ import unicode_literals
+#from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 988 $"
+__version__ = "$Revision$"
 
 
 import sys

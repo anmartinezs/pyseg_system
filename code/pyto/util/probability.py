@@ -1,7 +1,15 @@
 """
 Useful probability functions.
+ 
+# Author: Vladan Lucic
+# $Id$
 """
-# Author: Vladan Lucic, last modified 05.04.07
+from __future__ import unicode_literals
+from builtins import range
+
+__version__ = "$Revision$"
+
+
 
 import numpy
 
@@ -34,8 +42,8 @@ def combinations(elements, size, repeat=False, order=False):
             for comb in _combinationsRepeatOrder(elements, size): yield comb
         else:
             # could be generated as permutations on no repeat, no order comb's
-            raise NotImplementedError, "Sorry, combinations with ordered, " \
-                  + "nonrepeated elements are not implemented." 
+            raise NotImplementedError("Sorry, combinations with ordered, " \
+                  + "nonrepeated elements are not implemented.") 
 
     else:
         for comb in _combinationsNoOrder(elements, size, repeat): yield comb
@@ -46,7 +54,7 @@ def _combinationsNoOrder(elements, size, repeat=False):
     elements = numpy.array(elements)
 
     if repeat: eInd = [0] * size
-    else: eInd = range(size)
+    else: eInd = list(range(size))
     eInd[size-1] -= 1
     
     sInd = size - 1

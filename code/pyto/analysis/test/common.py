@@ -3,10 +3,11 @@
 Common stuff for tests
 
 # Author: Vladan Lucic
-# $Id: common.py 988 2013-09-27 07:50:48Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 988 $"
+__version__ = "$Revision$"
 
 import pickle
 import numpy

@@ -3,13 +3,17 @@
 Tests module cleft
 
 # Author: Vladan Lucic
-# $Id: test_cleft.py 1303 2016-06-01 17:35:50Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision: 1303 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
+#import sys
 
 import numpy
 import numpy.testing as np_test 
@@ -92,7 +96,8 @@ class TestCleft(np_test.TestCase):
         med_0, med_0_vec = cl_1.getWidth(mode='median', toBoundary=0)
         med_1, med_1_vec = cl_1.getWidth(mode='median', toBoundary=1)
         med_2, med_2_vec = cl_1.getWidth(mode='median', toBoundary=2)
-        desired = numpy.array([(numpy.sqrt(13) + 4) / 2, numpy.sqrt(13), 4]) - 1
+        desired = numpy.array(
+            [(numpy.sqrt(13) + 4) / 2, numpy.sqrt(13), 4]) - 1
         np_test.assert_almost_equal([med_0, med_1, med_2], desired) 
 
         # test max distance
@@ -561,7 +566,7 @@ class TestCleft(np_test.TestCase):
         desired = {2 : [2, 2], 3 : [3, 3], 4 : [4, 3], 5:[2,2]}
         np_test.assert_equal(centers, desired) 
        
-        # notFound == None 
+        # notFound is None 
         dist = hor_cl.elementDistanceToRim(
             ids=[2,3,4], metric='euclidean', rimId=0, 
             rimLocation='out', rimConnectivity=1)
@@ -737,14 +742,14 @@ class TestCleft(np_test.TestCase):
         np_test.assert_almost_equal(coord[0,2,1,1:4], [1,0,-1])
         np_test.assert_almost_equal(coord[0,2,3,1:4], [1,0,-1])
         for z_coord in [1,2,3]:
-            np_test.assert_almost_equal(coord[0,:,:,z_coord],
-                                        numpy.zeros(shape=(5,7)) + 2 - z_coord)
+            np_test.assert_almost_equal(
+                coord[0,:,:,z_coord], numpy.zeros(shape=(5,7)) + 2 - z_coord)
         for y_coord in [1,2,3,4,5]:
-            np_test.assert_almost_equal(coord[1,:,y_coord,:],
-                                        numpy.zeros(shape=(5,5)) - 3 + y_coord)
+            np_test.assert_almost_equal(
+                coord[1,:,y_coord,:], numpy.zeros(shape=(5,5)) - 3 + y_coord)
         for x_coord in [1,2,3]:
-            np_test.assert_almost_equal(coord[2,x_coord,:,:], 
-                                        numpy.zeros(shape=(7,5)))
+            np_test.assert_almost_equal(
+                coord[2,x_coord,:,:], numpy.zeros(shape=(7,5)))
 
         # 3D horizontal polar
         coord = hor_3d_cl.parametrizeLayers(
@@ -779,40 +784,115 @@ class TestCleft(np_test.TestCase):
             ids=[1,2,3], system='cartesian', normalize=False, startId=2, 
             metric='euclidean', connectivity=1, rimId=0, rimLocation='out')
         # id 1
-        np_test.assert_almost_equal(coord[:,2,2,2], [0,0,0])
-        np_test.assert_almost_equal(coord[:,1,2,2], [0,sq(2)/2,-sq(2)/2])
-        np_test.assert_almost_equal(coord[:,1,3,2], [0,sq(2),0])
-        np_test.assert_almost_equal(coord[:,3,2,2], [0,-sq(2)/2,sq(2)/2])
-        np_test.assert_almost_equal(coord[:,3,1,2], [0,-sq(2),0])
-        np_test.assert_almost_equal(coord[:,2,2,3], [-1,0,0])
-        np_test.assert_almost_equal(coord[:,1,2,3], [-1,sq(2)/2,-sq(2)/2])
-        np_test.assert_almost_equal(coord[:,1,3,3], [-1,sq(2),0])
-        np_test.assert_almost_equal(coord[:,2,2,1], [1,0,0])
+        try:
+            # python 2
+            np_test.assert_almost_equal(coord[:,2,2,2], [0,0,0])
+            np_test.assert_almost_equal(coord[:,1,2,2], [0,sq(2)/2, -sq(2)/2])
+            np_test.assert_almost_equal(coord[:,1,3,2], [0,sq(2),0])
+            np_test.assert_almost_equal(coord[:,3,2,2], [0,-sq(2)/2, sq(2)/2])
+            np_test.assert_almost_equal(coord[:,3,1,2], [0,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,2,2,3], [-1,0,0])
+            np_test.assert_almost_equal(coord[:,1,2,3], [-1,sq(2)/2, -sq(2)/2])
+            np_test.assert_almost_equal(coord[:,1,3,3], [-1,sq(2),0])
+            np_test.assert_almost_equal(coord[:,2,2,1], [1,0,0])
+        except AssertionError:
+            # global ambiguity in the direction of best fit line in
+            # scp.linalg.svd() (flipped between python 2 and 3)
+            np_test.assert_almost_equal(coord[:,2,2,2], [0,0,0])
+            np_test.assert_almost_equal(coord[:,1,2,2], [0,-sq(2)/2, sq(2)/2])
+            np_test.assert_almost_equal(coord[:,1,3,2], [0,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,3,2,2], [0,sq(2)/2, -sq(2)/2])
+            np_test.assert_almost_equal(coord[:,3,1,2], [0,sq(2),0])
+            np_test.assert_almost_equal(coord[:,2,2,3], [-1,0,0])
+            np_test.assert_almost_equal(coord[:,1,2,3], [-1,-sq(2)/2, sq(2)/2])
+            np_test.assert_almost_equal(coord[:,1,3,3], [-1,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,2,2,1], [1,0,0])            
         # id 2
-        np_test.assert_almost_equal(coord[:,3,3,2], [0,0,0])
-        np_test.assert_almost_equal(coord[:,2,3,2], [0,sq(2)/2,-sq(2)/2])
-        np_test.assert_almost_equal(coord[:,2,4,2], [0,sq(2),0])
-        np_test.assert_almost_equal(coord[:,4,3,2], [0,-sq(2)/2,sq(2)/2])
-        np_test.assert_almost_equal(coord[:,4,2,2], [0,-sq(2),0])
-        np_test.assert_almost_equal(coord[:,3,3,3], [-1,0,0])
-        np_test.assert_almost_equal(coord[:,2,3,3], [-1,sq(2)/2,-sq(2)/2])
-        np_test.assert_almost_equal(coord[:,2,4,3], [-1,sq(2),0])
-        np_test.assert_almost_equal(coord[:,3,3,1], [1,0,0])
+        try:
+            np_test.assert_almost_equal(coord[:,3,3,2], [0,0,0])
+            np_test.assert_almost_equal(coord[:,2,3,2], [0,sq(2)/2,-sq(2)/2])
+            np_test.assert_almost_equal(coord[:,2,4,2], [0,sq(2),0])
+            np_test.assert_almost_equal(coord[:,4,3,2], [0,-sq(2)/2,sq(2)/2])
+            np_test.assert_almost_equal(coord[:,4,2,2], [0,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,3,3,3], [-1,0,0])
+            np_test.assert_almost_equal(coord[:,2,3,3], [-1,sq(2)/2,-sq(2)/2])
+            np_test.assert_almost_equal(coord[:,2,4,3], [-1,sq(2),0])
+            np_test.assert_almost_equal(coord[:,3,3,1], [1,0,0])
+        except AssertionError:
+            np_test.assert_almost_equal(coord[:,3,3,2], [0,0,0])
+            np_test.assert_almost_equal(coord[:,2,3,2], [0,-sq(2)/2,sq(2)/2])
+            np_test.assert_almost_equal(coord[:,2,4,2], [0,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,4,3,2], [0,sq(2)/2,-sq(2)/2])
+            np_test.assert_almost_equal(coord[:,4,2,2], [0,sq(2),0])
+            np_test.assert_almost_equal(coord[:,3,3,3], [-1,0,0])
+            np_test.assert_almost_equal(coord[:,2,3,3], [-1,-sq(2)/2,sq(2)/2])
+            np_test.assert_almost_equal(coord[:,2,4,3], [-1,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,3,3,1], [1,0,0])            
         # id 3
-        np_test.assert_almost_equal(coord[:,4,4,2], [0,0,0])
-        np_test.assert_almost_equal(coord[:,3,4,2], [0,sq(2)/2,-sq(2)/2])
-        np_test.assert_almost_equal(coord[:,3,5,2], [0,sq(2),0])
-        np_test.assert_almost_equal(coord[:,5,4,2], [0,-sq(2)/2,sq(2)/2])
-        np_test.assert_almost_equal(coord[:,5,3,2], [0,-sq(2),0])
-        np_test.assert_almost_equal(coord[:,4,4,3], [-1,0,0])
-        np_test.assert_almost_equal(coord[:,3,4,3], [-1,sq(2)/2,-sq(2)/2])
-        np_test.assert_almost_equal(coord[:,3,5,3], [-1,sq(2),0])
-        np_test.assert_almost_equal(coord[:,4,4,1], [1,0,0])
-               
+        try:
+            np_test.assert_almost_equal(coord[:,4,4,2], [0,0,0])
+            np_test.assert_almost_equal(coord[:,3,4,2], [0,sq(2)/2,-sq(2)/2])
+            np_test.assert_almost_equal(coord[:,3,5,2], [0,sq(2),0])
+            np_test.assert_almost_equal(coord[:,5,4,2], [0,-sq(2)/2,sq(2)/2])
+            np_test.assert_almost_equal(coord[:,5,3,2], [0,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,4,4,3], [-1,0,0])
+            np_test.assert_almost_equal(coord[:,3,4,3], [-1,sq(2)/2,-sq(2)/2])
+            np_test.assert_almost_equal(coord[:,3,5,3], [-1,sq(2),0])
+            np_test.assert_almost_equal(coord[:,4,4,1], [1,0,0])
+        except AssertionError:
+            np_test.assert_almost_equal(coord[:,4,4,2], [0,0,0])
+            np_test.assert_almost_equal(coord[:,3,4,2], [0,-sq(2)/2,sq(2)/2])
+            np_test.assert_almost_equal(coord[:,3,5,2], [0,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,5,4,2], [0,sq(2)/2,-sq(2)/2])
+            np_test.assert_almost_equal(coord[:,5,3,2], [0,sq(2),0])
+            np_test.assert_almost_equal(coord[:,4,4,3], [-1,0,0])
+            np_test.assert_almost_equal(coord[:,3,4,3], [-1,-sq(2)/2,sq(2)/2])
+            np_test.assert_almost_equal(coord[:,3,5,3], [-1,-sq(2),0])
+            np_test.assert_almost_equal(coord[:,4,4,1], [1,0,0])
         # 3D slanted cartesian (phi=45, theta=90, origin=[3,3,2]), geodesic
         coord = sla_3d_cl.parametrizeLayers(
             ids=[1,2,3], system='cartesian', normalize=False, startId=2, 
             metric='geodesic', connectivity=1, rimId=0, rimLocation='out')
+        try:
+            self.block_3d_slanted_cartesian(coord)
+        except AssertionError:
+            # global ambiguity in the direction of best fit line in
+            # scp.linalg.svd() (flipped between python 2 and 3)
+            coord[1,:,:,:] = -coord[1,:,:,:]
+            self.block_3d_slanted_cartesian(coord)
+            
+        # 3D slanted polar
+        coord = sla_3d_cl.parametrizeLayers(
+            ids=[1,2,3], system='polar', normalize=False, startId=2, 
+            metric='geodesic', connectivity=1, rimId=0, rimLocation='out')
+        # r
+        desired_r = numpy.zeros(shape=(7,6,5)) - 1
+        desired_r1 = numpy.array([[-1, -1, -1, 3, -1, -1],
+                                  [-1, -1,  1, 2,  3, -1],
+                                  [-1, -1,  0, 1,  2, 3],
+                                  [-1,  2,  1, 0,  1, 2],
+                                  [-1,  3,  2, 1,  0, -1],
+                                  [-1, -1,  3, 2,  1, -1],
+                                  [-1, -1, -1, 3, -1, -1]])
+        desired_r[:,:,2] = desired_r1
+        desired_r[:,:,1] = numpy.where(desired_r1>=0, desired_r1+1, -1)
+        desired_r[:,:,3] = numpy.where(desired_r1>=0, desired_r1+1, -1)
+        np_test.assert_almost_equal(coord[0,:,:,:], desired_r) 
+
+        try:
+            self.block_3d_slanted_polar(coord)
+        except AssertionError:
+            # global ambiguity in the direction of best fit line in
+            # scp.linalg.svd() (flipped between python 2 and 3)
+            coord[1,:,:,:] = -coord[1,:,:,:]
+            self.block_3d_slanted_polar(coord)
+
+    def block_3d_slanted_cartesian(self, coord):
+        """
+        Block of tests
+        """
+        def sq(x): return numpy.sqrt(x)
+        
         # id 1
         np_test.assert_almost_equal(coord[:,2,2,2], [0,0])
         np_test.assert_almost_equal(coord[:,1,2,2], [0,1])
@@ -844,23 +924,12 @@ class TestCleft(np_test.TestCase):
         np_test.assert_almost_equal(coord[:,3,5,3], [-3/sq(3), 3*sq(2/3.)])
         np_test.assert_almost_equal(coord[:,4,4,1], [1,0])
 
-        # 3D slanted polar
-        coord = sla_3d_cl.parametrizeLayers(
-            ids=[1,2,3], system='polar', normalize=False, startId=2, 
-            metric='geodesic', connectivity=1, rimId=0, rimLocation='out')
-        # r
-        desired_r = numpy.zeros(shape=(7,6,5)) - 1
-        desired_r1 = numpy.array([[-1, -1, -1, 3, -1, -1],
-                                  [-1, -1,  1, 2,  3, -1],
-                                  [-1, -1,  0, 1,  2, 3],
-                                  [-1,  2,  1, 0,  1, 2],
-                                  [-1,  3,  2, 1,  0, -1],
-                                  [-1, -1,  3, 2,  1, -1],
-                                  [-1, -1, -1, 3, -1, -1]])
-        desired_r[:,:,2] = desired_r1
-        desired_r[:,:,1] = numpy.where(desired_r1>=0, desired_r1+1, -1)
-        desired_r[:,:,3] = numpy.where(desired_r1>=0, desired_r1+1, -1)
-        np_test.assert_almost_equal(coord[0,:,:,:], desired_r) 
+    def block_3d_slanted_polar(self, coord):
+        """
+        Block of tests
+        """
+        def sq(x): return numpy.sqrt(x)
+
         # phi id 1
         np_test.assert_almost_equal(coord[1,2,2,2], 0)
         np_test.assert_almost_equal(coord[1,1,2,2], numpy.pi / 2)
@@ -899,7 +968,7 @@ class TestCleft(np_test.TestCase):
         np_test.assert_almost_equal(coord[1,3,4,3], numpy.arctan2(sq(2)/2,-1))
         np_test.assert_almost_equal(coord[1,3,5,3], numpy.arctan2(sq(2),-1))
         np_test.assert_almost_equal(coord[1,4,4,1], 0)
-        
+
     def testMakeColumns(self):
         """
         Tests makeColumns()
@@ -1055,11 +1124,27 @@ class TestCleft(np_test.TestCase):
                                     [0, 4, 4, 5, 5, 0],
                                     [0, 0, 4, 4, 5, 0],
                                     [0, 0, 0, 4, 0, 0]])
-        np_test.assert_almost_equal(col.data[:,:,2], desired_xy_2) 
-        np_test.assert_almost_equal(
-            col.data[:,:,1], numpy.where(desired_xy_2>0, desired_xy_2+3, 0)) 
-        np_test.assert_almost_equal(
-            col.data[:,:,3], numpy.where(desired_xy_2>0, desired_xy_2-3, 0)) 
+        try:
+            np_test.assert_almost_equal(col.data[:,:,2], desired_xy_2) 
+            np_test.assert_almost_equal(
+                col.data[:,:,1],
+                numpy.where(desired_xy_2>0, desired_xy_2+3, 0)) 
+            np_test.assert_almost_equal(
+                col.data[:,:,3],
+                numpy.where(desired_xy_2>0, desired_xy_2-3, 0)) 
+        except AssertionError:
+            # global ambiguity in the direction scipy.linalg.svd()
+            # interchange 4 and 6
+            desired_xy_2[desired_xy_2==4] = 10
+            desired_xy_2[desired_xy_2==6] = 4
+            desired_xy_2[desired_xy_2==10] = 6
+            np_test.assert_almost_equal(col.data[:,:,2], desired_xy_2) 
+            np_test.assert_almost_equal(
+                col.data[:,:,1],
+                numpy.where(desired_xy_2>0, desired_xy_2+3, 0)) 
+            np_test.assert_almost_equal(
+                col.data[:,:,3],
+                numpy.where(desired_xy_2>0, desired_xy_2-3, 0)) 
 
         # phi binned
         col = sla_3d_cl.makeColumns(
@@ -1067,44 +1152,78 @@ class TestCleft(np_test.TestCase):
             metric='geodesic', connectivity=1, rimId=0, 
             bins=[[0,5], numpy.array([-3/4., -1/4., 1/4., 3/4.]) * numpy.pi])
         # phi id 1
-        np_test.assert_almost_equal(col.data[2,2,2], 2)
-        np_test.assert_almost_equal(col.data[1,2,2], 3)
-        np_test.assert_almost_equal(col.data[1,3,2], 3)
-        np_test.assert_almost_equal(col.data[3,2,2], 1)
-        np_test.assert_almost_equal(col.data[3,1,2], 1)
-        np_test.assert_almost_equal(col.data[2,2,3], 0)
-        np_test.assert_almost_equal(col.data[1,2,3], 0)
-        np_test.assert_almost_equal(col.data[1,3,3], 3)
-        np_test.assert_almost_equal(col.data[2,2,1], 2)
+        try:
+            np_test.assert_almost_equal(col.data[2,2,2], 2)
+            np_test.assert_almost_equal(col.data[1,2,2], 3)
+            np_test.assert_almost_equal(col.data[1,3,2], 3)
+            np_test.assert_almost_equal(col.data[3,2,2], 1)
+            np_test.assert_almost_equal(col.data[3,1,2], 1)
+            np_test.assert_almost_equal(col.data[2,2,3], 0)
+            np_test.assert_almost_equal(col.data[1,2,3], 0)
+            np_test.assert_almost_equal(col.data[1,3,3], 3)
+            np_test.assert_almost_equal(col.data[2,2,1], 2)
+        except AssertionError:
+            # best fit line direction ambiguity (scipy.linalg.svd())
+            np_test.assert_almost_equal(col.data[2,2,2], 2)
+            np_test.assert_almost_equal(col.data[1,2,2], 1)
+            np_test.assert_almost_equal(col.data[1,3,2], 1)
+            np_test.assert_almost_equal(col.data[3,2,2], 3)
+            np_test.assert_almost_equal(col.data[3,1,2], 3)
+            np_test.assert_almost_equal(col.data[2,2,3], 0)
+            np_test.assert_almost_equal(col.data[1,2,3], 0)
+            np_test.assert_almost_equal(col.data[1,3,3], 1)
+            np_test.assert_almost_equal(col.data[2,2,1], 2)
         # phi id 2
         try:
             np_test.assert_almost_equal(col.data[3,3,2], 2)
         except AssertionError:
             # can be anything
             pass
-        np_test.assert_almost_equal(col.data[2,3,2], 3)
-        np_test.assert_almost_equal(col.data[2,4,2], 3)
-        np_test.assert_almost_equal(col.data[4,3,2], 1)
-        np_test.assert_almost_equal(col.data[4,2,2], 1)
-        np_test.assert_almost_equal(col.data[3,3,3], 0)
-        np_test.assert_almost_equal(col.data[2,3,3], 0)
-        np_test.assert_almost_equal(col.data[2,4,3], 3)
-        np_test.assert_almost_equal(col.data[3,3,1], 2)
+        try:
+            np_test.assert_almost_equal(col.data[2,3,2], 3)
+            np_test.assert_almost_equal(col.data[2,4,2], 3)
+            np_test.assert_almost_equal(col.data[4,3,2], 1)
+            np_test.assert_almost_equal(col.data[4,2,2], 1)
+            np_test.assert_almost_equal(col.data[3,3,3], 0)
+            np_test.assert_almost_equal(col.data[2,3,3], 0)
+            np_test.assert_almost_equal(col.data[2,4,3], 3)
+            np_test.assert_almost_equal(col.data[3,3,1], 2)
+        except AssertionError:
+            # best fit line direction ambiguity (scipy.linalg.svd())
+            np_test.assert_almost_equal(col.data[2,3,2], 1)
+            np_test.assert_almost_equal(col.data[2,4,2], 1)
+            np_test.assert_almost_equal(col.data[4,3,2], 3)
+            np_test.assert_almost_equal(col.data[4,2,2], 3)
+            np_test.assert_almost_equal(col.data[3,3,3], 0)
+            np_test.assert_almost_equal(col.data[2,3,3], 0)
+            np_test.assert_almost_equal(col.data[2,4,3], 1)
+            np_test.assert_almost_equal(col.data[3,3,1], 2)
         # phi id 3
         try:
             np_test.assert_almost_equal(col.data[4,4,2], 2)
         except AssertionError:
             # can be anything
             pass
-        np_test.assert_almost_equal(col.data[3,4,2], 3)
-        np_test.assert_almost_equal(col.data[3,5,2], 3)
-        np_test.assert_almost_equal(col.data[5,4,2], 1)
-        np_test.assert_almost_equal(col.data[5,3,2], 1)
-        np_test.assert_almost_equal(col.data[4,4,3], 0)
-        np_test.assert_almost_equal(col.data[3,4,3], 0)
-        np_test.assert_almost_equal(col.data[3,5,3], 3)
-        np_test.assert_almost_equal(col.data[4,4,1], 2)
-
+        try:
+            np_test.assert_almost_equal(col.data[3,4,2], 3)
+            np_test.assert_almost_equal(col.data[3,5,2], 3)
+            np_test.assert_almost_equal(col.data[5,4,2], 1)
+            np_test.assert_almost_equal(col.data[5,3,2], 1)
+            np_test.assert_almost_equal(col.data[4,4,3], 0)
+            np_test.assert_almost_equal(col.data[3,4,3], 0)
+            np_test.assert_almost_equal(col.data[3,5,3], 3)
+            np_test.assert_almost_equal(col.data[4,4,1], 2)
+        except AssertionError:
+            # best fit line direction ambiguity (scipy.linalg.svd())
+            np_test.assert_almost_equal(col.data[3,4,2], 1)
+            np_test.assert_almost_equal(col.data[3,5,2], 1)
+            np_test.assert_almost_equal(col.data[5,4,2], 3)
+            np_test.assert_almost_equal(col.data[5,3,2], 3)
+            np_test.assert_almost_equal(col.data[4,4,3], 0)
+            np_test.assert_almost_equal(col.data[3,4,3], 0)
+            np_test.assert_almost_equal(col.data[3,5,3], 1)
+            np_test.assert_almost_equal(col.data[4,4,1], 2)
+        
         # normalize
         
 

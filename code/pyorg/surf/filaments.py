@@ -9,13 +9,13 @@ import copy
 import numpy as np
 import scipy as sp
 from shutil import rmtree
-from utils import *
+from .utils import *
 from pyorg import pexceptions, sub
 from pyorg.globals.utils import unpickle_obj, trilin3d
 from pyorg import globals as gl
 from pyorg.diff_geom import SpaceCurve
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -820,7 +820,7 @@ class ListTomoFilaments(object):
         :param res: input value
         :return:
         """
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             tomo.set_resolution(res)
         self.__res = res
 
@@ -830,7 +830,7 @@ class ListTomoFilaments(object):
         :param res: input value
         :return:
         """
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             tomo.set_fils_radius(rad)
         self.__rad = rad
 
@@ -839,27 +839,27 @@ class ListTomoFilaments(object):
 
     def get_num_filaments(self):
         total = 0
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             total += tomo.get_num_filaments()
         return total
 
     def get_num_filaments_dict(self):
         nfils = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             nfils[key] = tomo.get_num_filaments()
         return nfils
 
     def get_volumes_dict(self):
         vols = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             vols[key] = tomo.compute_voi_volume()
         return vols
 
     def get_tomo_fname_list(self):
-        return self.__tomos.keys()
+        return list(self.__tomos.keys())
 
     def get_tomo_list(self):
-        return self.__tomos.values()
+        return list(self.__tomos.values())
 
     def get_tomo_by_key(self, key):
         return self.__tomos[key]
@@ -872,7 +872,7 @@ class ListTomoFilaments(object):
         # Input parsing
         tomo_fname = tomo_fils.get_tomo_fname()
         if tomo_fname in self.get_tomo_fname_list():
-            print 'WARNING: tomo_surf (ListTomoFilaments): tomogram ' + tomo_fname + ' was already inserted.'
+            print('WARNING: tomo_surf (ListTomoFilaments): tomogram ' + tomo_fname + ' was already inserted.')
             return
         # Adding the tomogram to the list and dictionaries
         self.__tomos[tomo_fname] = tomo_fils
@@ -961,7 +961,7 @@ class ListTomoFilaments(object):
         # Dump pickable objects and store the file names of the unpickable objects
         count = 0
         self.__pkls = dict()
-        for key, tomo in self.__tomos.iteritems():
+        for key, tomo in self.__tomos.items():
             # key_stem = os.path.splitext(os.path.split(key)[1])[0]
             key_stem = key.replace('/', '_')
             hold_file = tomos_dir + '/' + key_stem + '.pkl'
@@ -988,7 +988,7 @@ class ListTomoFilaments(object):
         :return:
         """
         tomos = ListTomoFilaments()
-        for i, tomo in enumerate(self.__tomos.itervalues()):
+        for i, tomo in enumerate(self.__tomos.values()):
             model_in = model(tomo.get_voi(), rad=0)
             tomo_name = 'tomo_model_' + model_in.get_type_name() + '_' + str(i)
             tomos.add_tomo(model.gen_instance(model_in.get_num_filaments(), tomo_name))
@@ -1001,7 +1001,7 @@ class ListTomoFilaments(object):
         :return:
         """
         hold_dict = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             # print key + ': ' + str(tomo.get_num_filaments())
             if tomo.get_num_filaments() >= min_num_filaments:
                 hold_dict[key] = tomo
@@ -1013,14 +1013,14 @@ class ListTomoFilaments(object):
         :param n_keep: number of tomograms to, the one with the highest amount of particles
         :return:
         """
-        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(self.__tomos.keys())):
+        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(list(self.__tomos.keys()))):
             return
         # Sorting loop
         n_fils = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             n_fils[key] = tomo.get_num_filaments()
-        pargs_sort = np.argsort(np.asarray(n_fils.values()))[::-1]
-        keys = n_fils.keys()
+        pargs_sort = np.argsort(np.asarray(list(n_fils.values())))[::-1]
+        keys = list(n_fils.keys())
         # Cleaning loop
         hold_dict = dict()
         for parg in pargs_sort[:n_keep]:
@@ -1070,7 +1070,7 @@ class ListTomoFilaments(object):
         self.__dict__.update(state)
         # Restore unpickable objects
         self.__tomos = dict()
-        for key, pkl in self.__pkls.iteritems():
+        for key, pkl in self.__pkls.items():
             self.__tomos[key] = unpickle_obj(pkl)
 
     def __getstate__(self):
@@ -1100,7 +1100,7 @@ class SetListTomoFilaments(object):
         return self.__lists[key]
 
     def get_key_from_short_key(self, short_key):
-        for lkey in self.__lists.iterkeys():
+        for lkey in self.__lists.keys():
             fkey = os.path.split(lkey)[1]
             hold_key_idx = fkey.index('_')
             hold_key = fkey[:hold_key_idx]
@@ -1108,13 +1108,13 @@ class SetListTomoFilaments(object):
                 return lkey
 
     def get_lists_by_short_key(self, key):
-        for lkey, list in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for lkey, list in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             if self.get_key_from_short_key(lkey) == key:
                 return  list
 
     def get_tomos_fname(self):
         hold_list = list()
-        for ltomos in self.get_lists().values():
+        for ltomos in list(self.get_lists().values()):
             hold_list += ltomos.get_tomo_fname_list()
         return list(set(hold_list))
 
@@ -1137,7 +1137,7 @@ class SetListTomoFilaments(object):
         :return: return a set with all tomos in all list
         """
         tomos_l = list()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 tomos_l.append(tomo.get_tomo_fname())
         return set(tomos_l)
@@ -1151,7 +1151,7 @@ class SetListTomoFilaments(object):
 
         # Input parsing
         if list_names is None:
-            list_names = self.__lists.keys()
+            list_names = list(self.__lists.keys())
         out_list = ListTomoFilaments()
 
         # Getting the list of all tomograms
@@ -1160,7 +1160,7 @@ class SetListTomoFilaments(object):
             hold_list = self.__lists[list_name]
             for tomo_name in hold_list.get_tomo_fname_list():
                 tomo_names.append(tomo_name)
-                if not(tomo_name in vois.keys()):
+                if not(tomo_name in list(vois.keys())):
                     hold_tomo = hold_list.get_tomo_by_key(tomo_name)
                     vois[tomo_name] = hold_tomo.get_voi()
         tomo_names = list(set(tomo_names))
@@ -1183,7 +1183,7 @@ class SetListTomoFilaments(object):
         :return: Return a dictionary with the number of filaments by list
         """
         fils = dict()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             fils[key] = ltomos.get_num_filaments()
         return fils
 
@@ -1192,7 +1192,7 @@ class SetListTomoFilaments(object):
         :return: Return a dictionary with the number of filaments by tomogram
         """
         fils = dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 try:
                     fils[tomo.get_tomo_fname()] += tomo.get_num_filaments()
@@ -1205,7 +1205,7 @@ class SetListTomoFilaments(object):
         :return: Return a dictionary with the proportions for every tomogram
         """
         parts = dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 key_t = tomo.get_tomo_fname()
                 try:
@@ -1220,20 +1220,20 @@ class SetListTomoFilaments(object):
         :return: Return a dictionary with the proportions for every tomogram
         """
         # Initialization
-        fils_list, fils_tomo = dict.fromkeys(self.__lists.keys()), dict.fromkeys(self.get_set_tomos())
-        for key_t in fils_tomo.iterkeys():
+        fils_list, fils_tomo = dict.fromkeys(list(self.__lists.keys())), dict.fromkeys(self.get_set_tomos())
+        for key_t in fils_tomo.keys():
             fils_tomo[key_t] = 0
-        for key_l in fils_list.iterkeys():
-            fils_list[key_l] = np.zeros(shape=len(fils_tomo.keys()))
+        for key_l in fils_list.keys():
+            fils_list[key_l] = np.zeros(shape=len(list(fils_tomo.keys())))
         # Particles loop
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for i, key_t in enumerate(fils_tomo.keys()):
                 tomo = ltomos.get_tomo_by_key(key_t)
                 hold_fils = tomo.get_num_filaments()
                 fils_tomo[key_t] += hold_fils
                 fils_list[key_l][i] += hold_fils
         # Proportions loop
-        for key_l in fils_list.iterkeys():
+        for key_l in fils_list.keys():
             for i, tomo_nfils in enumerate(fils_tomo.values()):
                 if tomo_nfils > 0:
                     fils_list[key_l][i] /= tomo_nfils
@@ -1254,7 +1254,7 @@ class SetListTomoFilaments(object):
         star_list.add_column('_psPickleFile')
 
         # Tomograms loop
-        for lname, ltomo in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for lname, ltomo in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             lkey = os.path.splitext(os.path.split(lname)[1])[0]
             out_star, out_list_dir = out_dir_pkl + '/' + lkey + '_tf.star', out_dir_pkl + '/' + lkey + '_tf'
             clean_dir(out_list_dir)
@@ -1275,19 +1275,19 @@ class SetListTomoFilaments(object):
         # Computing total particles per tomogram loop
         if isinstance(min_num_filaments, dict):
             tomos_dict = dict().fromkeys(self.get_set_tomos(), 0)
-            for lkey, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for lkey, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
                 hold_min = min_num_filaments[lkey]
                 for tomo in ltomos.get_tomo_list():
                     if tomo.get_num_filaments() >= hold_min:
                         tomos_dict[tomo.get_tomo_fname()] += 1
             tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-            for key in tomos_dict.iterkeys():
-                if tomos_dict[key] < len(min_num_filaments.keys()):
+            for key in tomos_dict.keys():
+                if tomos_dict[key] < len(list(min_num_filaments.keys())):
                     tomos_del[key] = True
         else:
             tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-            for tkey in tomos_del.keys():
-                for ltomos in self.__lists.itervalues():
+            for tkey in list(tomos_del.keys()):
+                for ltomos in self.__lists.values():
                     try:
                         tomo = ltomos.get_tomo_by_key(tkey)
                     except KeyError:
@@ -1296,8 +1296,8 @@ class SetListTomoFilaments(object):
                         tomos_del[tkey] = True
 
         # Deleting loop
-        for ltomos in self.__lists.itervalues():
-            for tkey in tomos_del.keys():
+        for ltomos in self.__lists.values():
+            for tkey in list(tomos_del.keys()):
                 if tomos_del[tkey]:
                     try:
                         ltomos.del_tomo(tkey)
@@ -1313,7 +1313,7 @@ class SetListTomoFilaments(object):
 
         # Computing total particles per tomogram loop
         hold_dict = dict()
-        for ltomos in self.__lists.itervalues():
+        for ltomos in self.__lists.values():
             for tomo in ltomos.get_tomo_list():
                 tkey, n_parts = tomo.get_tomo_fname(), tomo.get_num_filaments()
                 try:
@@ -1322,7 +1322,7 @@ class SetListTomoFilaments(object):
                     hold_dict[tkey] = n_parts
 
         # Deleting loop
-        for tkey, n_parts in zip(hold_dict.iterkeys(), hold_dict.itervalues()):
+        for tkey, n_parts in zip(iter(hold_dict.keys()), iter(hold_dict.values())):
             if n_parts < min_num_filaments:
-                for ltomos in self.__lists.itervalues():
+                for ltomos in self.__lists.values():
                     ltomos.del_tomo(tkey)

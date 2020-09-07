@@ -20,7 +20,7 @@ class TestPsdSynap(TestCase):
     def test_Class(self):
 
         # Read the DisPerSe skeleton
-        print 'Loading skeleton...'
+        print('Loading skeleton...')
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName(DATA_DIR + '/skel.vtp')
         reader.Update()
@@ -34,11 +34,11 @@ class TestPsdSynap(TestCase):
         skel = red_filt.GetOutput()
 
         # Read the density
-        print 'Loading density...'
-        density = pyfits.getdata(DATA_DIR + '/density.fits')
+        print('Loading density...')
+        density = fits.getdata(DATA_DIR + '/density.fits')
 
         # Read the manifolds
-        print 'Loading manifolds...'
+        print('Loading manifolds...')
         reader = vtk.vtkXMLImageDataReader()
         # reader.SetFileName(DATA_DIR + '/manifolds.vti')
         reader.SetFileName(DATA_DIR + '/manifolds2.vti')
@@ -47,25 +47,25 @@ class TestPsdSynap(TestCase):
         del reader
 
         # Read the segmented membrane
-        print 'Loading membrane segmentation...'
-        seg = pyfits.getdata(DATA_DIR + '/mb_seg.fits')
+        print('Loading membrane segmentation...')
+        seg = fits.getdata(DATA_DIR + '/mb_seg.fits')
 
         # Factoring a MembSideSkelGraph object
-        print 'Creating the PsdSynap object...'
+        print('Creating the PsdSynap object...')
         psd = PsdSynap(skel, manifolds, density, seg)
         psd.set_resolution(TEST_RESOLUTION)
         psd.set_memb_thickness(TEST_MB_THICK)
         psd.set_max_dist_post(TEST_MAX_DIST_POST)
         psd.set_max_dist_pre(TEST_MAX_DIST_PRE)
 
-        print 'Building the SkelGraphs'
+        print('Building the SkelGraphs')
         psd.build_sgraphs()
 
-        print 'Building the ArcGraphs'
+        print('Building the ArcGraphs')
         psd.build_agraphs()
 
         # Write the output skel graph
-        print 'Storing the graphs as VTK poly data...'
+        print('Storing the graphs as VTK poly data...')
         poly = psd.get_vtp('skel')
         writer = vtk.vtkXMLPolyDataWriter()
         writer.SetFileName(DATA_DIR + '/psd_graph.vtp')
@@ -90,6 +90,6 @@ class TestPsdSynap(TestCase):
 
         # Check that the geometries have been built properly
         # Print the segmentation: densities and vertex labels
-        print 'Printing vertices in a image...'
+        print('Printing vertices in a image...')
         psd.print_vertices(DATA_DIR + '/seg_psd.vti', 'skel')
         psd.print_vertices(DATA_DIR + '/sega_psd.mrc', 'arc')

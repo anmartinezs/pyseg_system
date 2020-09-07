@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Prepares input files for ltomos_generator_translocon."""
-from __future__ import division
+
 
 import os
 import logging
@@ -31,7 +31,7 @@ def main():
 
     start_time = time.time()
 
-    print 'Loading star file: {}.'.format(in_star)
+    print('Loading star file: {}.'.format(in_star))
 
     # Read micrograph names
     star_ltomos = sub.Star()
@@ -59,7 +59,7 @@ def main():
             except KeyError:
                 segs[seg_file] = dict()
                 hold_dic = segs[seg_file]
-            print '\t-Adding entry for file: ' + in_star
+            print('\t-Adding entry for file: ' + in_star)
             hold_dic['_psSegImage'] = seg_file
             hold_dic['_rlnMicrographName'] = mic # seg_star.get_element(key='_rlnMicrographName', row=row)
             hold_dic['_psGhMCFPickle'] = seg_star.get_element(key='_psGhMCFPickle', row=row)
@@ -89,7 +89,7 @@ def main():
     seg_star.add_column('_psSegRot')
     seg_star.add_column('_psSegTilt')
     seg_star.add_column('_psSegPsi')
-    for key, hold_row in zip(segs.iterkeys(), segs.itervalues()):
+    for key, hold_row in zip(iter(segs.keys()), iter(segs.values())):
         if swap_seg_xy:
             hold = hold_row['_psSegOffX']
             hold_row['_psSegOffX'] = hold_row['_psSegOffY']
@@ -97,10 +97,10 @@ def main():
         seg_star.add_row(**hold_row)
 
     # Store the Star file
-    print 'Storing output Star file in: ' + out_star
+    print('Storing output Star file in: ' + out_star)
     seg_star.store(out_star)
 
-    print 'Finished. Runtime {}.'.format(str(timedelta(seconds=time.time()-start_time)))
+    print('Finished. Runtime {}.'.format(str(timedelta(seconds=time.time()-start_time))))
 
 if __name__ == "__main__":
     main()

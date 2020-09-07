@@ -2,10 +2,20 @@
 Contains class ImageIO for image file read/write.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: image_io.py 1504 2019-01-28 17:06:59Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1504 $"
+__version__ = "$Revision$"
 
 import sys
 import struct
@@ -14,13 +24,19 @@ import os.path
 import logging
 #import warnings
 from copy import copy, deepcopy
+import io
+from io import open
+try:
+    import tifffile as tf
+except ModuleNotFoundError:
+    pass
 
 import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from local_exceptions import FileTypeError
-import microscope_db
+from .local_exceptions import FileTypeError
+from . import microscope_db
 
 class ImageIO(object):
     """
@@ -81,6 +97,7 @@ class ImageIO(object):
         self.axisOrder = None
         self.length = None
         self.pixel = None
+        self.fileFormat = None
         
         self.mrcHeader = None
         self.emHeader = None
@@ -90,7 +107,7 @@ class ImageIO(object):
 
         # parse arguments
         if file is not None:
-            if isinstance(file, str):
+            if isinstance(file, basestring):
                 self.fileName = file
             elif isinstance(file, file):
                 self.file_ = file
@@ -143,10 +160,10 @@ class ImageIO(object):
           read(file='myfile.raw', dataType='float32', shape=(200,150,70))
 
         By default, arguments byteOrder='<' (little-endian) and
-        arrayOrder='FORTRAN'.
+        arrayOrder='F'.
 
         For mrc and em files, array order is determined from arg arrayOrder,
-        from self.arrayOrder, or it is set to the default ("FORTRAN") in 
+        from self.arrayOrder, or it is set to the default ("F") in 
         this order. Data is read according the determined array order.
         That is, array order is not read from the file header.
 
@@ -185,7 +202,7 @@ class ImageIO(object):
           - byteOrder: '<' (little-endian), '>' (big-endian)
           - dataType: any of the numpy types, e.g.: 'int8', 'int16', 'int32',
             'float32', 'float64'
-          - arrayOrder: 'C' (z-axis fastest), or 'FORTRAN' (x-axis fastest)
+          - arrayOrder: 'C' (z-axis fastest), or 'F' (x-axis fastest)
           - shape: (x_dim, y_dim, z_dim), needs to be compatible with the
           data read
           - memmap: Flag indicating if the data is read to a memory map,
@@ -282,8 +299,8 @@ class ImageIO(object):
         exception is raised. 
 
         Values for byteOrder and arrayOrder are set to the first value found 
-        from the arguments, properties with same names, or from emHeader / 
-        mrcHeader default values. 
+        from the following: the arguments, properties with same names, or 
+        emHeader / mrcHeader default values. 
 
         The data is converted to the (prevously determined) shape and array
         order and then written. That means that the shape and the array order 
@@ -306,7 +323,7 @@ class ImageIO(object):
           - dataType: any of the numpy types specified as strings, e.g.: 
             'int8', 'int16', 'int32', 'float32', 'float64', or as
             numpy.dtype
-          - arrayOrder: 'C' (z-axis fastest), or 'FORTRAN' (x-axis fastest)
+          - arrayOrder: 'C' (z-axis fastest), or 'F' (x-axis fastest)
           - shape: (x_dim, y_dim, z_dim)
           - length: (list aor ndarray) length in each dimension in nm (used 
           only for mrc format)
@@ -361,7 +378,8 @@ class ImageIO(object):
     em = { 'headerSize': 512,
            'headerFormat': '4b 3i 80s 40i 20s 8s 228s',
            'defaultByteOrder': machineByteOrder,
-           'arrayOrder': 'FORTRAN'
+           #'arrayOrder': 'FORTRAN'
+           'arrayOrder': 'F'
                  }
     emHeaderFields = (
         'machine', 'newOS9', 'noHeader', 'dataTypeCode', 'lengthX', 'lengthY',
@@ -378,16 +396,16 @@ class ImageIO(object):
         'widthDreistrahlbereich',
         'widthAchromRing', 'lambda', 'deltaTheta', 'field_39', 'field_40',
         'username', 'date', 'userdata')
-    emDefaultHeader = [6, 0, 0, 0, 1, 1, 1, 80*' '] \
+    emDefaultHeader = [6, 0, 0, 0, 1, 1, 1, 80*b' '] \
                       + numpy.zeros(40, 'int8').tolist() \
-                      + [20*' ', 8*' ', 228*' ']
+                      + [20*b' ', 8*b' ', 228*b' ']
     emDefaultShape = [0, 0, 0]
     #emDefaultDataType = 0
     emByteOrderTab = { 5: '>',  # Mac
                        6: '<'   # PC (Intel)
                        }
-    emByteOrderTabInv = dict( zip(emByteOrderTab.values(),
-                                  emByteOrderTab.keys()) )
+    emByteOrderTabInv = dict( list(zip(list(emByteOrderTab.values()),
+                                  list(emByteOrderTab.keys()))) )
     emDataTypeTab = {1: 'uint8',
                      2: 'uint16',
                      4: 'int32',
@@ -395,8 +413,8 @@ class ImageIO(object):
                      8: 'complex64',
                      9: 'float64'
                      }
-    emDataTypeTabInv = dict( zip(emDataTypeTab.values(),
-                                  emDataTypeTab.keys()) )
+    emDataTypeTabInv = dict( list(zip(list(emDataTypeTab.values()),
+                                  list(emDataTypeTab.keys()))) )
     
         
     def readEM(self, file=None, byteOrder=None, dataType=None,
@@ -406,7 +424,7 @@ class ImageIO(object):
         """
         
         # open the file if needed
-        self.checkFile(file_=file, mode='r')
+        self.checkFile(file_=file, mode='rb')
 
         # set defaults
         self.arrayOrder = ImageIO.em['arrayOrder']
@@ -435,7 +453,7 @@ class ImageIO(object):
         'Reads a header of an EM file'
 
         # open the file if needed
-        self.checkFile(file_=file, mode='r')
+        self.checkFile(file_=file, mode='rb')
 
         # read the header
         self.headerString = self.file_.read(ImageIO.em['headerSize'])
@@ -497,7 +515,7 @@ class ImageIO(object):
         """
 
         # open the file if needed
-        self.checkFile(file_=file, mode='w')
+        self.checkFile(file_=file, mode='wb')
 
         # set emHeader
         if header is not None: 
@@ -568,7 +586,7 @@ class ImageIO(object):
             raise TypeError(
                 "Data type " + self.dataType + " is not valid for EM"
                 " format. Allowed types are: " 
-                + str(ImageIO.emDataTypeTab.values()))
+                + str(list(ImageIO.emDataTypeTab.values())))
 
 
         # shape: use the argument, self.shape, or use default
@@ -594,13 +612,13 @@ class ImageIO(object):
                 print("Data type " + self.dataType 
                       + " is not valid for EM format."
                       + "Allowed types are: " 
-                      + str(ImageIO.emDataTypeTab.values()))
+                      + str(list(ImageIO.emDataTypeTab.values())))
                 raise
             for k in range( len(self.shape) ): 
                 self.emHeader[4+k] = self.shape[k]
         except (AttributeError, LookupError):
-            print "Need to specify byte order, data type \
-            and shape of the data."
+            print(
+                "Need to specify byte order, data type and shape of the data.")
             raise
 
         # convert emHeader to a string and write it
@@ -625,7 +643,8 @@ class ImageIO(object):
     mrc = { 'headerSize': 1024,
            'headerFormat': '10i 6f 3i 3f 2i h 30s 4h 6f 6h 12f i 800s',
             'defaultByteOrder': machineByteOrder,
-            'defaultArrayOrder': 'FORTRAN',
+            #'defaultArrayOrder': 'FORTRAN',
+            'defaultArrayOrder': 'F',
             'defaultAxisOrder': (1,2,3)
             }
     mrcDefaultShape = [1,1,1]
@@ -638,13 +657,13 @@ class ImageIO(object):
         + numpy.zeros(3, 'float32').tolist() 
         + numpy.zeros(2, 'int32').tolist() 
         + numpy.zeros(1, 'int16').tolist() 
-        + [30*' '] 
+        + [30*b' '] 
         + numpy.zeros(4, 'int16').tolist() 
         + numpy.zeros(6, 'float32').tolist() 
         + numpy.zeros(6, 'int16').tolist() 
         + numpy.zeros(12, 'float32').tolist() 
         + numpy.zeros(1, 'int32').tolist() 
-        + [800*' '])   
+        + [800*b' '])   
     
     # type 3 not implemented, added imod type 6
     mrcDataTypeTab = {0: 'ubyte',  
@@ -653,8 +672,8 @@ class ImageIO(object):
                       4: 'complex64',
                       6: 'uint16'
                      }
-    mrcDataTypeTabInv = dict( zip(mrcDataTypeTab.values(),
-                                  mrcDataTypeTab.keys()) )
+    mrcDataTypeTabInv = dict( list(zip(list(mrcDataTypeTab.values()),
+                                  list(mrcDataTypeTab.keys()))) )
     
     def readMRC(self, file=None, byteOrder=None, dataType=None,
                 arrayOrder=None, shape=None, memmap=False):
@@ -663,7 +682,7 @@ class ImageIO(object):
         """
         
         # open the file if needed
-        self.checkFile(file_=file, mode='r')
+        self.checkFile(file_=file, mode='rb')
 
         # parse arguments
         if byteOrder is not None: self.byteOrder = byteOrder
@@ -706,9 +725,9 @@ class ImageIO(object):
         """
 
         # open the file if needed
-        self.checkFile(file_=file, mode='r')
+        self.checkFile(file_=file, mode='rb')
 
-        # parse arguments and set variables
+        # set byte order
         if byteOrder is not None: self.byteOrder = byteOrder
         if self.byteOrder is None:
             self.byteOrder = ImageIO.mrc['defaultByteOrder']
@@ -745,6 +764,18 @@ class ImageIO(object):
     def parseMRCHeader(self, header=None):
         """
         Parse mrc header. If arg header is None, self.mrcHeader is used.
+
+        Needs self.headerString to be set. It also has to be consistent 
+        with header (arg or attribute).
+
+        Sets attributes:
+          - mrcHeader (if given as arg)
+          - byteOrder
+          - shape
+          - dataType
+          - axisOrder
+          - pixel: pixel size in nm
+          - length: lenght in all dimensions in nm
         """
 
         if header is not None:
@@ -759,8 +790,8 @@ class ImageIO(object):
         self.pixel = copy(self.mrcDefaultPixel)
         for ind in [0,1,2]:
             try:
-                self.pixel[ind] = (float(self.mrcHeader[ind+10]) 
-                                   / (10. * self.mrcHeader[ind]))
+                self.pixel[ind] = (
+                    float(self.mrcHeader[ind+10]) / (10. * self.mrcHeader[ind]))
             except ZeroDivisionError:
                 self.pixel[ind] = 1
         #self.pixel = [
@@ -813,8 +844,8 @@ class ImageIO(object):
         exception is raised. 
 
         Values for byteOrder and arrayOrder are set to the first value found 
-        from the arguments, properties with same names, from mrcHeader of 
-        default values. 
+        from the following: arguments, properties with same names, or 
+        mrcHeader of default values. 
  
         The data is converted to the (prevously determined) shape and array
         order and then written. That means that the shape and the array order 
@@ -837,7 +868,7 @@ class ImageIO(object):
         """
 
         # open the file if needed
-        self.checkFile(file_=file, mode='w')
+        self.checkFile(file_=file, mode='wb')
 
         # set attributes from header
         if header is not None:
@@ -853,11 +884,22 @@ class ImageIO(object):
         if self.arrayOrder is None:
             self.arrayOrder = ImageIO.mrc['defaultArrayOrder']
 
+        # pixel size: use the argument, self.pixel, or the default value
+        if pixel is not None:
+            self.pixel = pixel
+        if self.pixel is None:
+            self.pixel = copy(ImageIO.mrcDefaultPixel)
+
         # data: use the argument or the self.data
         # sets self.data, self.shape and self.dataType
         if data is not None:
-            self.setData(data, shape=shape)  
-        
+            self.setData(data, shape=shape, pixel=self.pixel)
+        #else:
+            # adjust length for mrc header in case self.data was set before
+            # self.fileFormat was set            
+        #    if (self.fileFormat is not None) and (self.fileFormat == 'mrc'):
+        #        self.adjustLength(shape=None, pixel=self.pixel)
+            
         # dataType: use the argument, self.dataType, or the mrcHeader value
         if dataType is not None: 
             self.dataType = dataType
@@ -898,7 +940,7 @@ class ImageIO(object):
             raise TypeError(
                 "Data type " + str(self.dataType) + " is not valid for MRC"
                 " format. Allowed types are: " 
-                + str(ImageIO.mrcDataTypeTab.values()))
+                + str(list(ImageIO.mrcDataTypeTab.values())))
 
         # axisOrder: self.axisOrder or default
         if self.axisOrder is None:
@@ -916,27 +958,23 @@ class ImageIO(object):
             elif isinstance(self.shape, tuple):
                 self.shape = self.shape + (1,) * (3 - len(self.shape)) 
 
-        # pixel size: use the argument, self.pixel, or the default value
-        if pixel is not None:
-            self.pixel = pixel
-        if self.pixel is None:
-            self.pixel = copy(ImageIO.mrcDefaultPixel)
-            #self.pixel = [ImageIO.mrcDefaultPixel[0]] * len(self.shape)
+        # make self.pixel a list
         try:
             if not isinstance(self.pixel, (list, tuple)):
                 self.pixel = [pixel] * len(self.shape)
         except (AttributeError, LookupError):
-            print "Need to specify shape of the data."
+            print("Need to specify shape of the data.")
             raise
 
         # length: use the argument, self.length, or shape * pixel_in_A
         if length is not None: self.length = length
         if self.length is None:
             try:
-                self.length = 10 * numpy.asarray(self.shape) \
-                    * numpy.asarray(self.pixel)
+                self.adjustLength()
+                #self.length = 10 * numpy.asarray(self.shape) \
+                #    * numpy.asarray(self.pixel)
             except (AttributeError, LookupError):
-                print "Need to specify shape of the data."
+                print("Need to specify shape of the data.")
                 raise
 
         # use header, self.mrcHeader or the default mrc header 
@@ -958,11 +996,11 @@ class ImageIO(object):
             except KeyError:
                 print("Data type " + str(self.dataType) + " is not valid for "
                       + "MRC format. Allowed types are: " 
-                      + str(ImageIO.mrcDataTypeTab.values()))
+                      + str(list(ImageIO.mrcDataTypeTab.values())))
                 raise
             self.mrcHeader[16:19] = self.axisOrder
         except (AttributeError, LookupError):
-            print "Need to specify data type and shape of the data."
+            print("Need to specify data type and shape of the data.")
             raise
  
         # add min max and mean values
@@ -984,6 +1022,38 @@ class ImageIO(object):
         
         return
 
+    def adjustLength(self, shape=None, pixel=None):
+        """
+        Calculate length based on shape and pixel. If args shape and
+        pixel are None, self.shape and self.pixel are used.
+
+        The length is calculated in A, as this is what is used in mrc
+        header. To be used for mrc files only.
+
+        Sets attribute length.
+
+        Arguments:
+          - shape: data shape
+          - pixel: pixel size in nm
+        """
+
+        # set variables
+        if shape is None: shape = self.shape
+        if pixel is None: pixel = self.pixel
+
+        # calculate length in all 3 dimensions
+        shape = numpy.asarray(shape)
+        if len(shape) < 3:
+            shape = numpy.concatenate((shape, (3 - len(shape)) * [1])) 
+        self.length = 10 * shape * numpy.asarray(pixel)
+
+    #####################################################
+    #
+    # Tiff file format
+    #
+    ######################################################
+
+    #def readTiff()
 
     #####################################################
     #
@@ -994,7 +1064,8 @@ class ImageIO(object):
     # raw file format properties
     raw = { 'defaultHeaderSize': 0,
             'defaultByteOrder': machineByteOrder,
-            'defaultArrayOrder': 'FORTRAN'
+            #'defaultArrayOrder': 'FORTRAN'
+            'defaultArrayOrder': 'F'
             }
 
     def readRaw(
@@ -1006,7 +1077,7 @@ class ImageIO(object):
         """
         
         # open the file if needed
-        self.checkFile(file_=file, mode='r')
+        self.checkFile(file_=file, mode='rb')
 
         # set defaults
         self.byteOrder = ImageIO.raw['defaultByteOrder']
@@ -1041,7 +1112,7 @@ class ImageIO(object):
         """
 
         # open the file if needed
-        self.checkFile(file_=file, mode='r')
+        self.checkFile(file_=file, mode='rb')
 
         # determine header size
         if size is not None:
@@ -1050,7 +1121,7 @@ class ImageIO(object):
             self.rawHeaderSize = self.raw['defaultHeaderSize']
 
         # read the header
-        if size > 0:
+        if (size is not None) and (size > 0):
             self.headerString = self.file_.read(self.rawHeaderSize)
         else:
             self.headerString = ''
@@ -1080,7 +1151,7 @@ class ImageIO(object):
         """
 
         # open the file if needed
-        self.checkFile(file_=file, mode='w')
+        self.checkFile(file_=file, mode='wb')
 
         # set defaults
         self.arrayOrder = ImageIO.raw['defaultArrayOrder']
@@ -1097,8 +1168,8 @@ class ImageIO(object):
         if dataType is not None: 
             self.dataType = dataType
         else:
-            self.dataType = data.dtype.name
-        if self.dataType != data.dtype.name:
+            self.dataType = self.data.dtype.name
+        if self.dataType != self.data.dtype.name:
             try:
                  self.data = self.data.astype(dtype=self.dataType, 
                                              casting=casting)
@@ -1125,11 +1196,26 @@ class ImageIO(object):
     #
     ########################################################
 
-    def setData(self, data, shape=None):
+    def setData(self, data, shape=None, pixel=None):
         """
         Reshapes data according to the arg shape (if specified) and saves it
         as attribute self.data. Also sets attributes self.shape and 
         self.dataType accordingly.
+
+        For mrc files, length is also set (see self.adjustLength()). In
+        this case, arg pixel has to be specified, or self.pixel has
+        to be defined previously.
+
+        Sets attributes:
+          - data
+          - shape
+          - dataType
+          - length
+
+        Arguments:
+          - data: image data
+          - shape: image shape
+          - pixel: pixel size in nm
         """
 
         # make shape of length 3
@@ -1139,13 +1225,18 @@ class ImageIO(object):
             elif len(shape) == 1:
                 shape = (shape[0], 1, 1)
 
+        # set data and shape
         self.data = data
         if self.data is not None:
             if shape is not None:
                 self.data = self.data.reshape(shape)
             self.shape = self.data.shape
             self.dataType = self.data.dtype.name
-        
+
+        # adjust length for mrc files
+        if (self.fileFormat is not None) and (self.fileFormat == 'mrc'):
+            self.adjustLength(shape=None, pixel=pixel)
+            
     def readData(self, shape=None, memmap=False):
         """
         Reads data from an image file. The data are read to numpy.ndarray 
@@ -1217,7 +1308,7 @@ class ImageIO(object):
             self.data = self.data.reshape(self.data.size, 
                                           order=self.arrayOrder )
         except (AttributeError, LookupError):
-            print "Need to specify data."
+            print("Need to specify data.")
             raise
 
         # write
@@ -1251,7 +1342,7 @@ class ImageIO(object):
                 file_ = self.fileName
 
             # find the extension of file_ to determine the format
-            if isinstance(file_, str):   # file argument is a file name 
+            if isinstance(file_, basestring):   # file argument is a file name 
                 splitFileName = os.path.splitext(file_)
                 extension = splitFileName[-1].lstrip('.')
                 self.fileFormat = ImageIO.fileFormats.get(extension)
@@ -1264,7 +1355,7 @@ class ImageIO(object):
     def checkFile(self, file_, mode):
         """
         If file_ is a string open the file with that name. If file_ is None,
-        use self.fileName.
+        use self.fileName and open the file.
 
         If file_ is a file instance don't do anything.
 
@@ -1279,14 +1370,21 @@ class ImageIO(object):
 
         # use self.fileName if file_ is None
         if file_ is None:
+            #print("file is None")
             file_ = self.fileName
 
+        # needed because file type not defined in Python3
+        try:
+            filetypes = (io.IOBase, file)
+        except NameError:
+            filetypes = io.IOBase
+            
         # open the file if not opened already
-        if isinstance(file_, str):  # file_ is a string
+        if isinstance(file_, basestring):  # file_ is a string
             self.fileName = file_
             self.file_ = open(file_, mode)  
 
-        elif isinstance(file_, file):  # file already open
+        elif isinstance(file_, filetypes):  # file already open
             self.file_ = file_  
 
         else:

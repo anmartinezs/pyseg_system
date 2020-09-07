@@ -4,10 +4,16 @@
 Gray value (density) analysis of parts of segments (typically layers) that are
 in the vicinity of some specified regions.
 
-$Id: neighborhood_grey.py 1009 2014-01-21 15:19:48Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1009 $"
+from __future__ import unicode_literals
+from builtins import zip
+#from builtins import str
+from builtins import range
+from past.builtins import basestring
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -85,9 +91,9 @@ segments_data_type = 'uint8'
 # segments file byteOrder ('<' for little-endian, '>' for big-endian)
 segments_byte_order = '<'
 
-# segments file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis 
+# segments file array order ('F' for x-axis fastest, 'C' for z-axis 
 # fastest)
-segments_array_order = 'FORTRAN'
+segments_array_order = 'F'
 
 # offset of segments in respect to the data 
 segments_offset = None             # no offset
@@ -95,7 +101,7 @@ segments_offset = None             # no offset
 
 # ids of all segments in the segments file that need to be kept 
 #segment_ids = 1           # usual from for ma
-segment_ids = range(1,24)
+segment_ids = list(range(1,24))
 
 # id shift in each subsequent segments file (in case of multiple segment files) 
 segments_shift = None    # shift is determined automatically
@@ -172,16 +178,16 @@ regions_data_type = 'uint8'
 # regions file byteOrder ('<' for little-endian, '>' for big-endian)
 regions_byte_order = '<'
 
-# regions file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis 
+# regions file array order ('F' for x-axis fastest, 'C' for z-axis 
 # fastest)
-regions_array_order = 'FORTRAN'
+regions_array_order = 'F'
 
 # offset of regions in respect to the data 
 regions_offset = None             # no offset
 #regions_offset = [10, 20, 30]    # offset specified
 
 # ids of segments in the regions file
-region_ids = range(1,22)
+region_ids = list(range(1,22))
 
 # id shift in each subsequent regions file (in case of multiple region files) 
 regions_shift = None    # shift is determined automatically
@@ -362,13 +368,14 @@ def is_multi_file(file_name):
     """
     Returns True if maultiple files are given.
     """
-    if isinstance(file_name, str):
+    if isinstance(file_name, basestring):
         return False
     elif isinstance(file_name, tuple) or isinstance(file_name, list):
         return True
     else:
-        raise ValueError, str(file_name) + " has to be aither a string (one " \
-              + "file) or a tuple (multiple files)."    
+        raise ValueError(
+            str(file_name) + " has to be aither a string (one " 
+            + "file) or a tuple (multiple files).")    
 
 ###########################################
 #
@@ -582,10 +589,10 @@ def format_data(data, name, format, segment_ids=None, region_ids=None):
 
     # ids
     if segment_ids is None:
-        segment_ids = range(1, data.shape[0]+1)
+        segment_ids = list(range(1, data.shape[0]+1))
     n_segments = len(segment_ids)
     if region_ids is None:
-        region_ids = range(1, data.shape[1]+1)
+        region_ids = list(range(1, data.shape[1]+1))
 
     # table head
     segment_ids_str = ''.join([('%5i' % id_) + '   ' for id_ in segment_ids])

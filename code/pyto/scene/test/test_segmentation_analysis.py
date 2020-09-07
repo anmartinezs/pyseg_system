@@ -3,10 +3,16 @@
 Tests module segmentation_analysis
 
 # Author: Vladan Lucic
-# $Id: test_segmentation_analysis.py 1311 2016-06-13 12:41:50Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from builtins import next
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1311 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -79,7 +85,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
         for count in range(len(seg_cmn.threshold_1)):
 
             # make level
-            new_se, level, curr_thresh = tc_iter.next()
+            new_se, level, curr_thresh = next(tc_iter)
             seg = new_se.segments
 
             # test parameters
@@ -246,7 +252,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
         for count in range(len(seg_cmn.threshold_1)):
 
             # make level
-            new_se, level, curr_thresh = tc_iter.next()
+            new_se, level, curr_thresh = next(tc_iter)
             seg = new_se.segments
 
             id_dict = seg_cmn.id_correspondence(actual=seg.data[2:6, 1:9], 
@@ -293,7 +299,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
 
             # make level
             #print 'Count: ', count
-            new_se, level, curr_thresh = tc_iter.next()
+            new_se, level, curr_thresh = next(tc_iter)
             seg = new_se.segments
 
             # test levels and threshold
@@ -303,7 +309,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
             # test ids
             id_dict = seg_cmn.id_correspondence(actual=seg.data[2:6, 1:9], 
                             desired=seg_cmn.data_1[-count-1], current=id_dict)
-            inv_id_dict = dict([(val, key) for key, val in id_dict.items()])
+            inv_id_dict = dict([(val, key) for key, val in list(id_dict.items())])
             converted_ids = [inv_id_dict[id_] for id_ 
                              in seg.ids]
 
@@ -383,7 +389,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
         # make hierarchy
         id_dict = {}
         for count in range(len(seg_cmn.threshold_1)):
-            seg, level, curr_thresh = tc_iter.next()
+            seg, level, curr_thresh = next(tc_iter)
         tc = tc_iter.send(True) 
 
         #######################################################
@@ -419,7 +425,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
             doMorphology=True, doLength=True, doTopology=True, 
             doDistanceTo=True, doBoundDistance=True)
         for count in range(len(seg_cmn.threshold_1)):
-            seg, level, curr_thresh = tc_iter.next()
+            seg, level, curr_thresh = next(tc_iter)
         tc = tc_iter.send(True) 
 
         # set classification parameters and desired results
@@ -453,7 +459,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
             doMorphology=True, doLength=True, doTopology=True, 
             doDistanceTo=True, doBoundDistance=True)
         for count in range(len(seg_cmn.threshold_1)):
-            seg, level, curr_thresh = tc_iter.next()
+            seg, level, curr_thresh = next(tc_iter)
         tc = tc_iter.send(True) 
 
         # set classification parameters and desired results
@@ -527,7 +533,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
         # make hierarchy
         id_dict = {}
         for count in range(len(seg_cmn.threshold_1)):
-            seg, level, curr_thresh = tc_iter.next()
+            seg, level, curr_thresh = next(tc_iter)
         tc = tc_iter.send(True) 
  
         # set classification parameters and desired results
@@ -606,7 +612,7 @@ class TestSegmentationAnalysis(np_test.TestCase):
 
         # make hierarchy
         for count in range(len(seg_cmn.threshold_1)):
-            seg, level, curr_thresh = tc_iter.next()
+            seg, level, curr_thresh = next(tc_iter)
         tc = tc_iter.send(True) 
  
         # set classification parameters and desired results

@@ -46,33 +46,33 @@ out_suffix = 'ref_syn_seg'
 
 ########## Print initial message
 
-print 'Express segmentations in their reference context.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput'
-print '\t\t-Input STAR file: ' + str(in_star)
-print '\tOuput:'
-print '\tOutput STAR file: ' + str(out_star)
-print '\tOutput suffix: ' + str(out_suffix)
-print ''
+print('Express segmentations in their reference context.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput')
+print('\t\t-Input STAR file: ' + str(in_star))
+print('\tOuput:')
+print('\tOutput STAR file: ' + str(out_star))
+print('\tOutput suffix: ' + str(out_suffix))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading STAR file...'
+print('\tLoading STAR file...')
 star, star_out = ps.sub.Star(), ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star_out.add_column('_psSegImage')
 star_out.add_column('_rlnMicrographName')
 
-print '\tLoop for transforming the segmentations...'
+print('\tLoop for transforming the segmentations...')
 for row in range(star.get_nrows()):
 
     ## Read segmentation mask
@@ -105,16 +105,16 @@ for row in range(star.get_nrows()):
             star_out.set_element('_psSegImage', row, out_seg)
             star_out.set_element('_rlnMicrographName', row, ref_fname)
         except ValueError:
-            print 'WARNING : segmentation file ' + str(seg_fname) + ' did not fit the reference tomogram ' + str(ref_fname)
+            print('WARNING : segmentation file ' + str(seg_fname) + ' did not fit the reference tomogram ' + str(ref_fname))
         except IOError:
-            print 'WARNING : segmentation file ' + str(seg_fname) + ' or reference tomogram ' + str(ref_fname) + ' could not be opened'
+            print('WARNING : segmentation file ' + str(seg_fname) + ' or reference tomogram ' + str(ref_fname) + ' could not be opened')
 
-print '\tStoring the output STAR file...'
+print('\tStoring the output STAR file...')
 try:
     star_out.store(out_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Result could not be stored because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Result could not be stored because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

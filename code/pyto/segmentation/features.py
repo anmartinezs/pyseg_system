@@ -2,11 +2,15 @@
 Contains class Features that provides basic functionality for the analysis of 
 segmented images. 
 
-# Author: Vladan Lucic
-# $Id: features.py 1216 2015-08-12 16:40:17Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import object
+from past.builtins import basestring
 
-__version__ = "$Revision: 1216 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -18,9 +22,9 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from labels import Labels
-from segment import Segment
-from hierarchy import Hierarchy
+from .labels import Labels
+from .segment import Segment
+from .hierarchy import Hierarchy
 
 class Features(object):
     """
@@ -120,9 +124,9 @@ class Features(object):
             self.ndim = segments.ndim
 
         else:
-            raise TypeError, "Argument segments is neither an ndarray nor " + \
+            raise TypeError("Argument segments is neither an ndarray nor " + \
               "an instance of a Labels subclass (but a " \
-              + segments.__class__.__name__ + " )."
+              + segments.__class__.__name__ + " ).")
 
     def getIds(self):
         """
@@ -166,7 +170,7 @@ class Features(object):
         # should be ok now (scipy 0.11)
         if len(self._ids) > 0:
             #self._ids = numpy.asarray(self._ids, dtype='int32')
-	    self._ids = numpy.asarray(self._ids, dtype='int64')
+            self._ids = numpy.asarray(self._ids, dtype='int64')
 	    
     ids = property(fget=getIds, fset=setIds, doc="Ids")
 
@@ -300,7 +304,7 @@ class Features(object):
 
             # reorderes a given data array according to the first index
             reordered = data.copy()
-            reordered[order.values()] = data[order.keys()]
+            reordered[list(order.values())] = data[list(order.keys())]
             return reordered
 
     def merge(self, new, names=None, mode='replace', mode0='replace'):
@@ -337,7 +341,7 @@ class Features(object):
 
         # set data attribute names
         if names is not None:
-            if isinstance(names, str):
+            if isinstance(names, basestring):
                 names = [names]
         else:
             names = new.dataNames
@@ -398,7 +402,7 @@ class Features(object):
                               "Currently 'add' and 'replace' are implemented.")
 
                 # merge 0 element
-                if isinstance(mode0, str):
+                if isinstance(mode0, basestring):
                     if mode0 == 'add':
                         modified[0] = modified[0] + new_var[0]
                     elif mode0=='replace':
@@ -516,7 +520,7 @@ class Features(object):
         Note: not sure if better to reverse ide and values of names 
         """
 
-        for id_, group_name in names.items():
+        for id_, group_name in list(names.items()):
             value = self.extractOne(id_=id_, array_=array_)
             setattr(self, group_name, value) 
 

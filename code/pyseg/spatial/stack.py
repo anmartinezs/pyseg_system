@@ -15,10 +15,10 @@ import pyseg as ps
 from pyseg.spatial.sparse import PlotUni, UniStat
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
-from variables import *
+from .variables import *
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -232,7 +232,7 @@ class TomoUni(object):
         tomo = np.zeros(shape=(self.__m, self.__n, len(self.__stack)), dtype=self.__stack[0].dtype)
 
         # Main loop
-        for (i, img, mask, coords) in zip(range(len(self.__stack)), self.__stack, self.__stack_m, self.__stack_c):
+        for (i, img, mask, coords) in zip(list(range(len(self.__stack))), self.__stack, self.__stack_m, self.__stack_c):
             hold_img = np.zeros(shape=(self.__m, self.__n), dtype=tomo.dtype)
             img_ids = (img * mask) > 0
             hold_img[img_ids] = 1
@@ -368,8 +368,8 @@ class StackPlotUni(PlotUni):
         cmap = cm.jet
 
         if self.not_eq_intensities():
-            print 'WARNING: Function G is not a proper metric for comparing patterns with different ' \
-                  'intensities'
+            print('WARNING: Function G is not a proper metric for comparing patterns with different ' \
+                  'intensities')
 
         # Preparing data
         X, Y, Z = self.__gen_surface(self._PlotUni__Gs, self._PlotUni__zs, off=0)

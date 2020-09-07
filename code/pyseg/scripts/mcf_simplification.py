@@ -51,19 +51,19 @@ def do_simplification(input_file, output_dir, prop_v, prop_e, v_num, e_num, v_de
                       mask, lbl_s, verbose):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     w_mask = None
     if mask is not None:
         if verbose:
-            print '\tMasking the graph...'
+            print('\tMasking the graph...')
         w_mask = disperse_io.load_tomo(mask)
         w_mask = w_mask == lbl_s
         for v in graph_mcf.get_vertices_list():
@@ -82,40 +82,40 @@ def do_simplification(input_file, output_dir, prop_v, prop_e, v_num, e_num, v_de
                 graph_mcf.remove_edge(e)
 
     if verbose:
-        print '\tComputing graph global statistics (before simplification)...'
+        print('\tComputing graph global statistics (before simplification)...')
         nvv, nev, nepv = graph_mcf.compute_global_stat(mask=w_mask)
-        print '\t\t-Number of vertices: ' + str(len(graph_mcf.get_vertices_list()))
-        print '\t\t-Number of edges: ' + str(len(graph_mcf.get_edges_list()))
-        print '\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3'
-        print '\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3'
-        print '\t\t-Edge/Vertex ratio: ' + str(round(nepv,5))
+        print('\t\t-Number of vertices: ' + str(len(graph_mcf.get_vertices_list())))
+        print('\t\t-Number of edges: ' + str(len(graph_mcf.get_edges_list())))
+        print('\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3')
+        print('\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3')
+        print('\t\t-Edge/Vertex ratio: ' + str(round(nepv,5)))
 
-    print '\tGraph simplification...'
+    print('\tGraph simplification...')
     try:
         graph_mcf.graph_density_simp(v_num=v_num, e_num=e_num, v_den=v_den, e_den=e_den, v_prop=prop_v,
                                      e_prop=prop_e, v_mode=v_mode, e_mode=e_mode, mask=w_mask)
     except pexceptions.PySegInputWarning as e:
-        print 'WARNING: graph density simplification failed:'
-        print '\t-' + e.get_message()
+        print('WARNING: graph density simplification failed:')
+        print('\t-' + e.get_message())
         # sys.exit(-2)
 
     if verbose:
-        print '\tComputing graph global statistics (after simplification)...'
+        print('\tComputing graph global statistics (after simplification)...')
         nvv, nev, nepv = graph_mcf.compute_global_stat(mask=w_mask)
-        print '\t\t-Number of vertices: ' + str(len(graph_mcf.get_vertices_list()))
-        print '\t\t-Number of edges: ' + str(len(graph_mcf.get_edges_list()))
-        print '\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3'
-        print '\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3'
-        print '\t\t-Edge/Vertex ratio: ' + str(round(nepv,5))
+        print('\t\t-Number of vertices: ' + str(len(graph_mcf.get_vertices_list())))
+        print('\t\t-Number of edges: ' + str(len(graph_mcf.get_edges_list())))
+        print('\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3')
+        print('\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3')
+        print('\t\t-Edge/Vertex ratio: ' + str(round(nepv,5)))
 
     if verbose:
-        print '\tUpdate properties...'
+        print('\tUpdate properties...')
     graph_mcf.compute_sgraph_relevance()
     if prop_v is None:
         graph_mcf.compute_edge_curvatures()
 
     if verbose:
-        print '\tStoring the result.'
+        print('\tStoring the result.')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(output_dir + '/' + stem + '_simp.pkl')
@@ -134,7 +134,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvi:o:V:E:n:a:d:e:m:s:p:q:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -152,8 +152,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -184,48 +184,48 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (output_dir is None) or ((v_num is None) and (v_den is None)):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'GraphMCF simplification.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput dir: ' + output_dir
+            print('GraphMCF simplification.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput dir: ' + output_dir)
             if mask is not None:
-                print '\tMask file (label=' + str(lbl_s) + '): ' + mask
+                print('\tMask file (label=' + str(lbl_s) + '): ' + mask)
             if prop_v is None:
-                print '\tTopological simplification for vertices.'
+                print('\tTopological simplification for vertices.')
             else:
-                print '\tProperty with key ' + prop_v + ' with mode ' + v_mode + ' for vertex simplification.'
+                print('\tProperty with key ' + prop_v + ' with mode ' + v_mode + ' for vertex simplification.')
             if v_num is not None:
-                print '\tTarget number of vertices: ' + str(v_num)
+                print('\tTarget number of vertices: ' + str(v_num))
             else:
-                print '\tTarget vertex density: ' + str(v_den) + ' vertex/nm'
+                print('\tTarget vertex density: ' + str(v_den) + ' vertex/nm')
             if e_num is not None:
-                print '\tProperty with key ' + prop_e + ' with mode ' + e_mode + ' for edge simplification.'
-                print '\tTarget number of edges: ' + str(e_num)
+                print('\tProperty with key ' + prop_e + ' with mode ' + e_mode + ' for edge simplification.')
+                print('\tTarget number of edges: ' + str(e_num))
             elif e_den is not None:
-                print '\tProperty with key ' + prop_e + ' with mode ' + e_mode + ' for edge simplification.'
-                print '\tTarget edge density: ' + str(e_den) + ' edge/nm'
-            print ''
+                print('\tProperty with key ' + prop_e + ' with mode ' + e_mode + ' for edge simplification.')
+                print('\tTarget edge density: ' + str(e_den) + ' edge/nm')
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_simplification(input_file, output_dir, prop_v, prop_e, v_num, e_num, v_den, e_den, v_mode, e_mode,
                           mask, lbl_s, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

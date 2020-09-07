@@ -3,10 +3,17 @@ Contains class CleftRegions for the analysis of a cleft-like region (a region
 between two roughly parallel boundaries) of an image segmented in regions.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: cleft_regions.py 1070 2014-11-06 14:07:41Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+#from builtins import str
+from builtins import range
+from builtins import object
+#from past.utils import old_div
 
-__version__ = "$Revision: 1070 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -14,9 +21,9 @@ from copy import copy, deepcopy
 import numpy
 import scipy
 
-from pyto.core.image import Image
-from pyto.segmentation.density import Density
-from pyto.segmentation.cleft import Cleft
+from ..core.image import Image
+from ..segmentation.density import Density
+from ..segmentation.cleft import Cleft
 
 
 class CleftRegions(object):
@@ -98,7 +105,7 @@ class CleftRegions(object):
         """
         """
 
-        ids = self.regions.binIds.keys()
+        ids = list(self.regions.binIds.keys())
         ids = numpy.asarray(ids)
         strings = ['%d : ' % id_ + str(self.regions.binIds[id_]) 
                    for id_ in ids]
@@ -131,8 +138,8 @@ class CleftRegions(object):
         if not isinstance(exclude, (list, numpy.ndarray, tuple)):
             exclude = [exclude, exclude]
 
-        ids = range(self.nBoundLayers + 1 + exclude[0], 
-                    self.nBoundLayers + 1 + self.nLayers - exclude[1])
+        ids = list(range(self.nBoundLayers + 1 + exclude[0], 
+                    self.nBoundLayers + 1 + self.nLayers - exclude[1]))
         return numpy.array(ids)
 
     cleftLayerIds = property(fget=getCleftLayerIds, doc='Cleft layer ids')
@@ -646,13 +653,13 @@ class CleftRegions(object):
                 'bound_1' : self.getBound1LayerIds(thick=boundThick[0]),
                 'bound_2' : self.getBound2LayerIds(thick=boundThick[1]),
                 'all' : self.getLayerIds()}
-        group_ids = groups.values()
+        group_ids = list(groups.values())
 
         # group density
         group_dens = regionDensity.aggregate(ids=group_ids)
         group_density = [(key, group_dens.extractOne(id_=id_, array_=False)) 
                          for key, id_ 
-                         in zip(groups.keys(), range(1, len(groups)+1))] 
+                         in zip(list(groups.keys()), list(range(1, len(groups)+1)))] 
         group_density = dict(group_density)
 
         return group_density, groups
@@ -692,8 +699,9 @@ class CleftRegions(object):
         min_layer_id = reduced_cleft_ids[min_layer_reduced]
 
         # find fractional position(s) of min density
-        min_layer_frac = (min_layer_id - cleft_ids[0] + 0.5) \
-            / (cleft_ids[-1] + 1 - cleft_ids[0])
+        min_layer_frac = (
+            (min_layer_id - cleft_ids[0] + 0.5)
+            / (cleft_ids[-1] + 1 - cleft_ids[0]))
 
         # get density
         if reference is None:
@@ -702,8 +710,9 @@ class CleftRegions(object):
                                                       reference])
 
         # get relative density of the min
-        rel_min_dens = (min_dens - agreg_dens.mean[2]) \
-            / (agreg_dens.mean[1] - agreg_dens.mean[2])
+        rel_min_dens = (
+            (min_dens - agreg_dens.mean[2])
+            / (agreg_dens.mean[1] - agreg_dens.mean[2]))
 
         return (min_dens, rel_min_dens, min_layer_id, min_layer_frac)
         

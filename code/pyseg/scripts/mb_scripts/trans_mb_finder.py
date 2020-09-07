@@ -24,7 +24,7 @@ import csv
 import sys
 import numpy as np
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -109,7 +109,7 @@ def store_list_feat_csv(graph, prop_l, crop_off, fname, mode):
         prop_id = graph.get_prop_id(prop)
         n_comp = graph.get_prop_ncomp(key_id=prop_id)
         if n_comp != 1:
-            print 'ERROR: only properties with 1 component are valid, ' + prop + ' has ' + str(n_comp)
+            print('ERROR: only properties with 1 component are valid, ' + prop + ' has ' + str(n_comp))
             sys.exit(-1)
         prop_ids.append(prop_id)
         d_types.append(ps.disperse_io.TypesConverter().gt_to_numpy(graph.get_prop_type(key_id=prop_id)))
@@ -120,7 +120,7 @@ def store_list_feat_csv(graph, prop_l, crop_off, fname, mode):
         data_l += list(np.asarray(graph.get_vertex_coords(v), dtype=np.float) + np.asarray(crop_off, dtype=np.float))
         for (prop_id, d_type)  in zip(prop_ids, d_types):
             data_l.append(graph.get_prop_entry_fast(prop_id, v.get_id(), 1, d_type)[0])
-        list_rows.append(dict(zip(list_cols, data_l)))
+        list_rows.append(dict(list(zip(list_cols, data_l))))
 
     # Writing the .csv file
     if mode == 1:
@@ -140,51 +140,51 @@ def store_list_feat_csv(graph, prop_l, crop_off, fname, mode):
 ########################################################################################
 
 if out_log is not None:
-    print 'Redirecting output text to: ' + out_log
+    print('Redirecting output text to: ' + out_log)
     sys.stdout = open(out_log, 'w')
 
 # Print initial message
-print 'Extracting transmembrane features.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
+print('Extracting transmembrane features.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
 # print '\tDisPerSe persistence threshold (nsig): ' + str(nsig)
-print '\tDisPerSe persistence threshold (csig): ' + str(csig)
-print '\tSigma for gaussian pre-processing: ' + str(s_sig)
-print '\tSigma for contrast enhancement: ' + str(nstd)
-print '\tSkeleton smoothing factor: ' + str(smooth)
-print '\tData resolution: ' + str(res) + ' nm/pixel'
-print '\tOutput directory: ' + output_dir
-print 'Graph density thresholds:'
+print('\tDisPerSe persistence threshold (csig): ' + str(csig))
+print('\tSigma for gaussian pre-processing: ' + str(s_sig))
+print('\tSigma for contrast enhancement: ' + str(nstd))
+print('\tSkeleton smoothing factor: ' + str(smooth))
+print('\tData resolution: ' + str(res) + ' nm/pixel')
+print('\tOutput directory: ' + output_dir)
+print('Graph density thresholds:')
 if v_prop is None:
     if v_num is None:
-        print '\tTarget vertex density (features) ' + str(v_den) + \
-              ' vertex/nm^3 for topological simplification'
+        print('\tTarget vertex density (features) ' + str(v_den) + \
+              ' vertex/nm^3 for topological simplification')
     else:
-        print '\tTarget number of vertices (features) ' + str(v_num) + \
-              ' vertices for topological simplification'
+        print('\tTarget number of vertices (features) ' + str(v_num) + \
+              ' vertices for topological simplification')
 else:
     if v_num is None:
-        print '\tTarget vertex density ' + str(v_den) + ' vertex/nm^3 for property ' + v_prop + \
-              ' with mode ' + v_mode
+        print('\tTarget vertex density ' + str(v_den) + ' vertex/nm^3 for property ' + v_prop + \
+              ' with mode ' + v_mode)
     else:
-        print '\tTarget vertex density ' + str(v_num) + ' vertices for property ' + v_prop + \
-              ' with mode ' + v_mode
+        print('\tTarget vertex density ' + str(v_num) + ' vertices for property ' + v_prop + \
+              ' with mode ' + v_mode)
 if e_num is None:
-    print '\tTarget edge density ' + str(e_den) + ' edge/nm^3 for property ' + e_prop + \
-          ' with mode ' + e_mode
+    print('\tTarget edge density ' + str(e_den) + ' edge/nm^3 for property ' + e_prop + \
+          ' with mode ' + e_mode)
 else:
-    print '\tTarget edge density ' + str(e_num) + ' edges for property ' + e_prop + \
-          ' with mode ' + e_mode
+    print('\tTarget edge density ' + str(e_num) + ' edges for property ' + e_prop + \
+          ' with mode ' + e_mode)
 if sup_scale is not None:
-    print 'Scale suppression:'
-    print '\t-Scale ' + str(sup_scale) + ' nm'
-    print '\t-Vertex sorting property ' + sup_prop_v
+    print('Scale suppression:')
+    print('\t-Scale ' + str(sup_scale) + ' nm')
+    print('\t-Vertex sorting property ' + sup_prop_v)
     if not sup_conn:
-        print 'IMPORTANT: scale suppression without edge connectivity, this may spoil edge information!'
-print ''
+        print('IMPORTANT: scale suppression without edge connectivity, this may spoil edge information!')
+print('')
 
-print '\tComputing paths for ' + input_tomo + ' ...'
+print('\tComputing paths for ' + input_tomo + ' ...')
 path, stem_tomo = os.path.split(input_tomo)
 stem_pkl, _ = os.path.splitext(stem_tomo)
 input_file = output_dir + '/' + stem_pkl + '_g' + str(s_sig) + '.fits'
@@ -192,7 +192,7 @@ _, stem = os.path.split(input_file)
 stem, _ = os.path.splitext(stem)
 output_csv = output_dir + '/' + stem_pkl + '_feat.csv'
 
-print '\tLoading input data: ' + stem_tomo
+print('\tLoading input data: ' + stem_tomo)
 tomo = ps.disperse_io.load_tomo(input_tomo).astype(np.float32)
 seg = ps.disperse_io.load_tomo(input_seg).astype(np.int16)
 seg_fg = seg > 0
@@ -200,12 +200,12 @@ lbls = list(set(seg[seg_fg]))
 tot_vol = float(seg_fg.sum())
 del seg_fg
 if len(lbls) == 0:
-    print 'ERROR: no segmented membrane to process found.'
-    print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: no segmented membrane to process found.')
+    print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-print '\t\t-Labels found ' + str(lbls)
+print('\t\t-Labels found ' + str(lbls))
 
-print '\tLoop for processing labelled membranes...'
+print('\tLoop for processing labelled membranes...')
 cont = 0
 unproc_l = list()
 for lbl in lbls:
@@ -214,32 +214,32 @@ for lbl in lbls:
 
     try:
 
-        print '\tProcessing membranes with label ' + str(lbl)
+        print('\tProcessing membranes with label ' + str(lbl))
         p_vol = float((seg == lbl).sum()) / tot_vol
         if v_num is not None:
             sv_num = int(np.ceil(v_num * p_vol))
-            print '\t\tSubvolume number of target vertices: ' + str(sv_num)
+            print('\t\tSubvolume number of target vertices: ' + str(sv_num))
         else:
             sv_num = None
         if e_num is not None:
             se_num = int(np.ceil(e_num * p_vol))
-            print '\t\tSubvolume number of target edges: ' + str(se_num)
+            print('\t\tSubvolume number of target edges: ' + str(se_num))
         else:
             se_num = None
-        print '\t\tCropping subvolume for membrane with label ' + str(lbl) + \
-              ' (Volume=' + str(round(p_vol*100, 2)) + '%)'
+        print('\t\tCropping subvolume for membrane with label ' + str(lbl) + \
+              ' (Volume=' + str(round(p_vol*100, 2)) + '%)')
         stomo, sseg, scrop_off = ps.disperse_io.crop_lbl_tomo(tomo, seg, lbl, SVOL_OFF)
-        print '\t\t\t-Local offset: ' + str(scrop_off)
+        print('\t\t\t-Local offset: ' + str(scrop_off))
         gcrop_off = tuple(np.asarray(crop_off) + np.asarray(scrop_off))
-        print '\t\t\t-Global offset: ' + str(gcrop_off)
+        print('\t\t\t-Global offset: ' + str(gcrop_off))
 
-        print '\t\tComputing mask...'
+        print('\t\tComputing mask...')
         tomod = ps.disperse_io.seg_dist_trans(sseg == lbl) * res
         mask = np.asarray(tomod <= (mb_dst_off/res), dtype=np.bool)
         input_msk = output_dir + '/' + stem + '_lbl_' + str(lbl) + '_mask.fits'
         ps.disperse_io.save_numpy(np.asarray(~mask, dtype=np.float).transpose(), input_msk)
 
-        print '\t\tSmoothing input tomogram (s=' + str(s_sig) + ')...'
+        print('\t\tSmoothing input tomogram (s=' + str(s_sig) + ')...')
         if s_sig > 0:
             density = sp.ndimage.filters.gaussian_filter(stomo, s_sig)
         else:
@@ -248,7 +248,7 @@ for lbl in lbls:
         ps.disperse_io.save_numpy(density, output_dir + '/' + stem_pkl + '_lbl_' + str(lbl) + '.vti')
         ps.disperse_io.save_numpy(density.transpose(), input_file)
 
-        print '\t\tInitializing DisPerSeg...'
+        print('\t\tInitializing DisPerSeg...')
         work_dir = output_dir + '/disperse'
         disperse = ps.disperse_io.DisPerSe(input_file, work_dir)
         disperse.clean_work_dir()
@@ -256,83 +256,83 @@ for lbl in lbls:
         disperse.set_dump_arcs(-1)
         rcut = round(density[mask].std()*csig, 4)
 
-        print '\t\tPersistence cut threshold set to: ' + str(rcut) + ' grey level'
+        print('\t\tPersistence cut threshold set to: ' + str(rcut) + ' grey level')
         disperse.set_cut(rcut)
         disperse.set_mask(input_msk)
         disperse.set_smooth(smooth)
 
-        print '\t\tRunning DisPerSe...'
+        print('\t\tRunning DisPerSe...')
         disperse.mse(no_cut=False, inv=False)
         skel = disperse.get_skel()
         manifolds = disperse.get_manifolds(no_cut=False, inv=False)
 
         # Build the GraphMCF for the membrane
-        print '\t\tBuilding MCF graph...'
+        print('\t\tBuilding MCF graph...')
         graph = ps.graph.GraphMCF(skel, manifolds, density)
         graph.set_resolution(res)
         graph.build_from_skel(basic_props=False)
         graph.filter_self_edges()
         graph.filter_repeated_edges()
 
-        print '\t\tBuilding geometry...'
+        print('\t\tBuilding geometry...')
         graph.build_vertex_geometry()
 
-        print '\t\tComputing vertices and edges properties...'
+        print('\t\tComputing vertices and edges properties...')
         graph.compute_edges_length(ps.globals.SGT_EDGE_LENGTH, 1, 1, 1, False)
         graph.compute_vertices_dst()
         graph.compute_edge_filamentness()
         graph.add_prop_inv(ps.globals.STR_FIELD_VALUE)
         if ps.globals.STR_GGF == v_prop:
-            print '\t\tTopological simplification based on GGF, pre-computing GGF...'
+            print('\t\tTopological simplification based on GGF, pre-computing GGF...')
             graph_gt = ps.graph.GraphGT(graph)
             graph_gt.ggf(ggf_sig, ggf_prop_v, ggf_prop_e, ggf_vinv, ggf_einv, ggf_vnorm, ggf_enorm, ggf_energy)
             graph_gt.add_prop_to_GraphMCF(graph, ps.globals.STR_GGF, up_index=True)
 
-        print '\t\tComputing graph global statistics (before simplification)...'
+        print('\t\tComputing graph global statistics (before simplification)...')
         nvv, nev, nepv = graph.compute_global_stat(mask=mask)
-        print '\t\t\t-Number of vertices: ' + str(len(graph.get_vertices_list()))
-        print '\t\t\t-Number of edges: ' + str(len(graph.get_edges_list()))
-        print '\t\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3'
-        print '\t\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3'
-        print '\t\t\t-Edge/Vertex ratio: ' + str(round(nepv,5))
+        print('\t\t\t-Number of vertices: ' + str(len(graph.get_vertices_list())))
+        print('\t\t\t-Number of edges: ' + str(len(graph.get_edges_list())))
+        print('\t\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3')
+        print('\t\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3')
+        print('\t\t\t-Edge/Vertex ratio: ' + str(round(nepv,5)))
 
-        print '\t\tGraph density simplification...'
+        print('\t\tGraph density simplification...')
         try:
             hold_e_prop = e_prop
             graph.graph_density_simp(v_num=sv_num, e_num=se_num, v_den=v_den, e_den=e_den, v_prop=v_prop, e_prop=hold_e_prop,
                                      v_mode=v_mode, e_mode=e_mode, mask=mask)
         except ps.pexceptions.PySegInputWarning as e:
-            print 'WARNING: graph density simplification failed:'
-            print '\t-' + e.get_message()
+            print('WARNING: graph density simplification failed:')
+            print('\t-' + e.get_message())
 
-        print '\t\tComputing graph global statistics (after simplification)...'
+        print('\t\tComputing graph global statistics (after simplification)...')
         nvv, nev, nepv = graph.compute_global_stat(mask=mask)
-        print '\t\t\t-Number of vertices: ' + str(len(graph.get_vertices_list()))
-        print '\t\t\t-Number of edges: ' + str(len(graph.get_edges_list()))
-        print '\t\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3'
-        print '\t\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3'
-        print '\t\t\t-Edge/Vertex ratio: ' + str(round(nepv,5))
+        print('\t\t\t-Number of vertices: ' + str(len(graph.get_vertices_list())))
+        print('\t\t\t-Number of edges: ' + str(len(graph.get_edges_list())))
+        print('\t\t\t-Vertex density: ' + str(round(nvv,5)) + ' nm^3')
+        print('\t\t\t-Edge density: ' + str(round(nev,5)) + ' nm^3')
+        print('\t\t\t-Edge/Vertex ratio: ' + str(round(nepv,5)))
 
         graph_gt = None
         if ps.globals.STR_GGF in prop_l:
-            print '\t\tComputing final GGF...'
+            print('\t\tComputing final GGF...')
             graph_gt = ps.graph.GraphGT(graph)
             graph_gt.ggf(ggf_sig, ggf_prop_v, ggf_prop_e, ggf_vinv, ggf_einv, ggf_vnorm, ggf_enorm, ggf_energy)
             graph_gt.add_prop_to_GraphMCF(graph, ps.globals.STR_GGF, up_index=True)
 
         if sup_scale is not None:
-            print '\t\tVertices scale suppression...'
+            print('\t\tVertices scale suppression...')
             if graph_gt is None:
                 graph_gt = ps.graph.GraphGT(graph)
             vids = graph_gt.vertex_scale_supression(sup_scale, sup_prop_v, sup_conn)
             graph.remove_vertices_list(vids)
 
     except Exception as e:
-        print 'WARNING: membranes with label ' + str(lbl) + ' could not be processed because of ' + str(e)
+        print('WARNING: membranes with label ' + str(lbl) + ' could not be processed because of ' + str(e))
         unproc_l.append(lbl)
         continue
 
-    print '\t\tSaving intermediate graphs...'
+    print('\t\tSaving intermediate graphs...')
     ps.disperse_io.save_vtp(graph.get_vtp(av_mode=True, edges=True),
                             output_dir + '/' + stem + '_lbl_' + str(lbl) + '_edges.vtp')
     ps.disperse_io.save_vtp(graph.get_vtp(av_mode=False, edges=True),
@@ -340,11 +340,11 @@ for lbl in lbls:
     ps.disperse_io.save_vtp(graph.get_scheme_vtp(nodes=True, edges=True),
                             output_dir + '/' + stem + '_lbl_' + str(lbl) + '_sch.vtp')
 
-    print '\t\tPickling the graph as: ' + stem_pkl + '.pkl'
+    print('\t\tPickling the graph as: ' + stem_pkl + '.pkl')
     ps.disperse_io.save_numpy(density, output_dir + '/' + stem + '_lbl_' + str(lbl) + '.vti')
     graph.pickle(output_dir + '/' + stem_pkl + '_lbl_' + str(lbl) + '.pkl')
 
-    print '\t\tStoring the list of features in file ' + output_csv
+    print('\t\tStoring the list of features in file ' + output_csv)
     if cont == 0:
         store_list_feat_csv(graph, prop_l, gcrop_off, output_csv, mode=1)
     else:
@@ -352,11 +352,11 @@ for lbl in lbls:
     cont += 1
 
 if len(unproc_l) == 0:
-    print 'All membranes were processed.'
-    print 'Successfully terminated. (' + time.strftime("%c") + ')'
+    print('All membranes were processed.')
+    print('Successfully terminated. (' + time.strftime("%c") + ')')
 elif len(unproc_l) == len(lbls):
-    print 'No membrane could be processed'
-    print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+    print('No membrane could be processed')
+    print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
 else:
-    print 'WARNING: Membranes labled as ' + str(unproc_l) + ' could no be processed.'
-    print 'Successfully terminated. (' + time.strftime("%c") + ')'
+    print('WARNING: Membranes labled as ' + str(unproc_l) + ' could no be processed.')
+    print('Successfully terminated. (' + time.strftime("%c") + ')')

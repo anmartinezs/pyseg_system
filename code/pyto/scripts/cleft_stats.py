@@ -41,10 +41,17 @@ segmentation & analysis pickles:
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: cleft_stats.py 1187 2015-06-11 16:15:30Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from builtins import zip
+#from builtins import str
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1187 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -66,6 +73,7 @@ import pyto
 from pyto.analysis.groups import Groups
 from pyto.analysis.observations import Observations
 
+# to debug replace INFO by DEBUG
 logging.basicConfig(
     level=logging.INFO,
     format='%(levelname)s %(module)s.%(funcName)s():%(lineno)d %(message)s',
@@ -407,7 +415,7 @@ def stats(data, name, bins=None, bin_names=None, fraction=None, join=None,
                 plot_name='histogram'
 
     # figure out if indexed
-    indexed = name in data.values()[0].indexed
+    indexed = name in list(data.values())[0].indexed
 
     if isinstance(data, Groups):
         if not indexed:
@@ -448,7 +456,7 @@ def stats(data, name, bins=None, bin_names=None, fraction=None, join=None,
 
                 # stats between groups and  between observations
                 if groups is None:
-                    groups = data.keys()
+                    groups = list(data.keys())
 
                 # between experiments
                 exp_ref = {}
@@ -504,8 +512,8 @@ def stats(data, name, bins=None, bin_names=None, fraction=None, join=None,
                     identifiers=identifiers,
                     ddof=ddof, out=out, format_=print_format, title=title)
 
-                if ((plot_name is not 'histogram') 
-                    and (plot_name is not 'probability')):
+                if ((plot_name != 'histogram') 
+                    and (plot_name != 'probability')):
 
                     # just plot
                     if plot_:
@@ -612,9 +620,9 @@ def correlation(
             reference=reference, mode=join, groups=groups,
             identifiers=identifiers, out=out, format_=format_, 
             title=title)
-        print "corr.properties: ", corr.properties
-        print "corr.xData: ", corr.xData
-        print "corr.yData: ", corr.yData
+        print("corr.properties: ", corr.properties)
+        print("corr.xData: ", corr.xData)
+        print("corr.yData: ", corr.yData)
         # plot
         if plot_:
             plot_2d(x_data=corr, x_name='xData', y_name='yData', groups=groups,
@@ -687,7 +695,7 @@ def plot_cleft_layers(
     # if data is Groups, print a separate figure for each group
     if isinstance(data, Groups):
         if groups is None:
-            groups = data.keys()
+            groups = list(data.keys())
 
         if (mode == 'all') or (mode == 'all&mean'): 
 
@@ -844,7 +852,7 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
 
     # find rough range of y-axis values (to plot cinfidence)
     y_values = [group.getValue(identifier=ident, property=name)
-                for group in stats.values()
+                for group in list(stats.values())
                 for ident in group.identifiers]
     if (y_values is not None) and (len(y_values) > 0):
         rough_y_min = min(y_values)
@@ -859,14 +867,15 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
         bar_width = 0.2
         left = -2 * bar_width
     elif bar_arrange == 'grouped':
-        max_identifs = max(len(group.identifiers) for group in stats.values())
+        max_identifs = max(
+            len(group.identifiers) for group in list(stats.values()))
         bar_width = numpy.floor(80 / max_identifs) / 100
     else:
         raise ValueError("bar_arrange has to be 'uniform' or 'grouped'.")
 
     # set group order
     if groups is None:
-        group_names = stats.keys() 
+        group_names = list(stats.keys()) 
     else:
         group_names = groups
 
@@ -875,7 +884,7 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
     y_max = 0
     group_left = []
     label_done = False
-    for group_nam, group_ind in zip(group_names, range(len(group_names))):
+    for group_nam, group_ind in zip(group_names, list(range(len(group_names)))):
         group = stats[group_nam]
 
         # set experiment order
@@ -893,7 +902,7 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
             group_left.append(left + bar_width)
 
         # loop over experiments
-        for ident, exp_ind in zip(loc_identifs, range(len(loc_identifs))):
+        for ident, exp_ind in zip(loc_identifs, list(range(len(loc_identifs)))):
 
             # label
             if label is None:
@@ -1050,7 +1059,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
     if (isinstance(x_data, Groups) and isinstance(y_data, Groups)):
         data_type = 'groups'
         if groups is None:
-            group_names = x_data.keys() 
+            group_names = list(x_data.keys()) 
         else:
             group_names = groups
     elif (isinstance(x_data, Observations) 
@@ -1082,7 +1091,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
     # loop over groups
     figure = None
     markers_default_copy = copy(markers_default)
-    for group_nam, group_ind in zip(group_names, range(len(group_names))):
+    for group_nam, group_ind in zip(group_names, list(range(len(group_names)))):
 
         # get data
         if data_type == 'groups':
@@ -1107,7 +1116,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
             loc_identifs = identifiers[group_nam]
 
         # loop over experiments
-        for ident, exp_ind in zip(loc_identifs, range(len(loc_identifs))):
+        for ident, exp_ind in zip(loc_identifs, list(range(len(loc_identifs)))):
 
             # values
             if (data_type == 'groups') or (data_type == 'observations'):
@@ -1249,7 +1258,7 @@ def save_data(object, base, name=['mean', 'sem'], categories=categories):
         result[:, 0] = ids
 
         # make array that contains all values for current property
-        for group, group_ind in zip(categories, range(len(categories))):
+        for group, group_ind in zip(categories, list(range(len(categories)))):
             values =  object.getValue(identifier=group, name=one_name)
             result[:, group_ind+1] = values
 
@@ -1301,7 +1310,7 @@ def findSpecialThreshold(layers, segments, fraction, new, thresh_str='_thr-',
 
     # get groups
     if groups is None:
-        groups = cleft.keys()
+        groups = list(cleft.keys())
 
     # loop over groups
     special_files = {}
@@ -1389,7 +1398,7 @@ def getSpecialThreshold(cleft, segments, fraction,
 
     # get groups
     if groups is None:
-        groups = cleft.keys()
+        groups = list(cleft.keys())
 
     # loop over groups
     fract_thresholds = {}
@@ -1416,21 +1425,21 @@ def getSpecialThreshold(cleft, segments, fraction,
                 identifier=identif, property='mean', ids=bound_ids)
             bound_volume = cleft[categ].getValue(
                 identifier=identif, property='volume', ids=bound_ids)
-            bound_density = numpy.dot(bound_densities, 
-                                      bound_volume) / bound_volume.sum() 
+            bound_density = numpy.dot(
+                bound_densities, bound_volume) / bound_volume.sum() 
             cleft_densities = cleft[categ].getValue(
                 identifier=identif, property='mean', ids=cleft_ids)
             cleft_volume = cleft[categ].getValue(
                 identifier=identif, property='volume', ids=cleft_ids)
-            cleft_density = numpy.dot(cleft_densities, 
-                                      cleft_volume) / cleft_volume.sum() 
-            fract_density = bound_density + (cleft_density 
-                                             - bound_density) * fraction
+            cleft_density = numpy.dot(
+                cleft_densities, cleft_volume) / cleft_volume.sum() 
+            fract_density = (
+                bound_density + (cleft_density - bound_density) * fraction
             
             # get closest threshold
             # ERROR thresholds badly formated in segments
-            all_thresh = segments[categ].getValue(identifier=identif, 
-                                                  property='thresh')
+            all_thresh = segments[categ].getValue(
+                identifier=identif, property='thresh')
             index = numpy.abs(all_thresh - fract_density).argmin()
             thresh = all_thresh[index]
             thresh_str = "%6.3f" % thresh

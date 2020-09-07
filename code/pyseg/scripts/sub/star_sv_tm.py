@@ -44,7 +44,7 @@ tm_mshift = 3 # nm
 tm_npr = None
 tm_mode = '3d' # 'za' #
 # 3D mode
-tm_rots = range(0, 360, 15)
+tm_rots = list(range(0, 360, 15))
 tm_tilts = np.asarray((0,)) # range(-15, 15, 5)
 tm_psis = np.asarray((0,)) # range(-15, 15, 5)
 # ZA mode settings
@@ -59,44 +59,44 @@ md_cutoff = 6 # 2.5 # 6 # nm
 
 ########## Print initial message
 
-print 'Template matching on a particles STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
-print '\tOutput STAR file: ' + out_star
-print '\tTemplate matching settings:'
-print '\t\t-Input model: ' + tm_model
-print '\t\t-Input mask: ' + tm_mask
-print '\t\t-Resolution: ' + str(tm_res) + ' nm/vx'
-print '\t\t-Maximum shift: ' + str(tm_mshift) + ' nm'
-print '\t\t-Number of processes: ' + str(tm_npr)
+print('Template matching on a particles STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + in_star)
+print('\tOutput STAR file: ' + out_star)
+print('\tTemplate matching settings:')
+print('\t\t-Input model: ' + tm_model)
+print('\t\t-Input mask: ' + tm_mask)
+print('\t\t-Resolution: ' + str(tm_res) + ' nm/vx')
+print('\t\t-Maximum shift: ' + str(tm_mshift) + ' nm')
+print('\t\t-Number of processes: ' + str(tm_npr))
 if tm_mode == 'za':
-    print '\t\t-Z-axis averaged mode selected.'
+    print('\t\t-Z-axis averaged mode selected.')
 elif tm_mode == '3d':
-    print '\t\t-3D mode selected: '
-    print '\t\t\t+Rotation angles to search: ' + str(tm_rots)
-    print '\t\t\t+Tilt angles to search: ' + str(tm_tilts)
-    print '\t\t\t+Psi angles to search: ' + str(tm_psis)
+    print('\t\t-3D mode selected: ')
+    print('\t\t\t+Rotation angles to search: ' + str(tm_rots))
+    print('\t\t\t+Tilt angles to search: ' + str(tm_tilts))
+    print('\t\t\t+Psi angles to search: ' + str(tm_psis))
 else:
-    print 'ERROR: invalid input mode: ' + str(tm_mode)
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: invalid input mode: ' + str(tm_mode))
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-print '\tModel preprocessing settings:'
-print '\t\t-Low pass filtering cutoff: ' + str(md_cutoff) + ' nm'
-print ''
+print('\tModel preprocessing settings:')
+print('\t\t-Low pass filtering cutoff: ' + str(md_cutoff) + ' nm')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input list of STAR files could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input list of STAR files could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 model = ps.disperse_io.load_tomo(tm_model, mmap=False)
 if tm_mask is None:
@@ -105,25 +105,25 @@ else:
     mask = ps.disperse_io.load_tomo(tm_mask, mmap=False)
 
 if md_cutoff is not None:
-    print '\tLow pass filtering input model...'
+    print('\tLow pass filtering input model...')
     nyquist = 2. * tm_res
     rad = (nyquist/8) * np.min(np.asarray(model.shape, dtype=np.float32)) * .5
     lpf = ps.globals.low_pass_fourier_3d(model.shape, tm_res, cutoff=md_cutoff)
     model = np.real(sp.fftpack.ifftn(sp.fftpack.fftn(model) * sp.fftpack.fftshift(lpf)))
 
-print '\tTemplate matching by particles...'
+print('\tTemplate matching by particles...')
 try:
-    if tm_mode is 'za':
+    if tm_mode ==za':
         star.particles_template_matching_za(model, tm_res, max_shift=tm_mshift, mask=mask, npr=tm_npr)
     else:
         star.particles_template_matching(model, tm_res, max_shift=tm_mshift, mask=mask,
                                          rots=tm_rots, tilts=tm_tilts, psis=tm_psis, npr=tm_npr)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: binning procedure failed because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: binning procedure failed because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\t\tStoring output STAR file in: ' + out_star
+print('\t\tStoring output STAR file in: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

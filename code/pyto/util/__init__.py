@@ -2,17 +2,19 @@
 Util directory module
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 765 2010-10-05 17:15:02Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 765 $"
+__version__ = "$Revision$"
 
-import nested
-import attributes
-import numpy_plus
-import scipy_plus
-import probability
-import bulk
+from . import nested
+from . import attributes
+from . import numpy_plus
+from . import scipy_plus
+from . import probability
+from . import bulk
 
-import test
+from . import test
 

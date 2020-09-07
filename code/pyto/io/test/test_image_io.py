@@ -3,10 +3,12 @@
 Tests module image_io
  
 # Author: Vladan Lucic
-# $Id: test_pickled.py 983 2013-09-13 16:44:04Z vladan $
+# $Id:$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
 
-__version__ = "$Revision: 983 $"
+__version__ = "$Revision:$"
 
 from copy import copy, deepcopy
 import pickle
@@ -63,7 +65,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_almost_equal(em.data[150:153, 20:23, 10], expected,
                                     decimal=4)
         np_test.assert_equal(em.byteOrder, '<')
-        np_test.assert_equal(em.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(em.arrayOrder, 'F')
         np_test.assert_equal(em.dataType, 'float32')
         np_test.assert_equal(em.data.dtype, numpy.dtype('float32'))
         np_test.assert_equal(em.memmap, False)
@@ -81,7 +83,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_almost_equal(em.data[150:153, 20:23, 10], expected,
                                     decimal=4)
         np_test.assert_equal(em.byteOrder, '<')
-        np_test.assert_equal(em.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(em.arrayOrder, 'F')
         np_test.assert_equal(em.dataType, 'float32')
         np_test.assert_equal(em.data.dtype, numpy.dtype('float32'))
         np_test.assert_equal(em.memmap, True)
@@ -112,7 +114,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_almost_equal(mrc.data[150:153, 20:23, 10], expected,
                                     decimal=4)
         np_test.assert_equal(mrc.byteOrder, '<')
-        np_test.assert_equal(mrc.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(mrc.arrayOrder, 'F')
         np_test.assert_equal(mrc.dataType, 'float32')
         np_test.assert_equal(mrc.data.dtype, numpy.dtype('float32'))
         np_test.assert_equal(mrc.memmap, False)
@@ -131,7 +133,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_almost_equal(mrc.data[150:153, 20:23, 10], expected,
                                     decimal=4)
         np_test.assert_equal(mrc.byteOrder, '<')
-        np_test.assert_equal(mrc.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(mrc.arrayOrder, 'F')
         np_test.assert_equal(mrc.dataType, 'float32')
         np_test.assert_equal(mrc.data.dtype, numpy.dtype('float32'))
         np_test.assert_equal(mrc.memmap, True)
@@ -150,7 +152,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_almost_equal(mrc.data[150:153, 20:23, 10], expected,
                                     decimal=4)
         np_test.assert_equal(mrc.byteOrder, '<')
-        np_test.assert_equal(mrc.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(mrc.arrayOrder, 'F')
         np_test.assert_equal(mrc.dataType, 'float32')
         np_test.assert_equal(mrc.data.dtype, numpy.dtype('float32'))
         np_test.assert_equal(mrc.memmap, False)
@@ -170,7 +172,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_almost_equal(mrc.data[150:153, 20:23, 10], expected,
                                     decimal=4)
         np_test.assert_equal(mrc.byteOrder, '<')
-        np_test.assert_equal(mrc.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(mrc.arrayOrder, 'F')
         np_test.assert_equal(mrc.dataType, 'float32')
         np_test.assert_equal(mrc.data.dtype, numpy.dtype('float32'))
         np_test.assert_equal(mrc.memmap, True)
@@ -242,7 +244,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_equal(mrc_new.dataType, 'int16')
         np_test.assert_equal(mrc_new.data.dtype, numpy.dtype('int16'))
         np_test.assert_equal(mrc_new.byteOrder, '<')
-        np_test.assert_equal(mrc_new.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(mrc_new.arrayOrder, 'F')
         np_test.assert_equal(mrc_new.shape, (40,30,20))
         np_test.assert_equal(mrc_new.pixel, [0.4, 0.4, 0.4])
         np_test.assert_equal(mrc_new.pixelsize, 0.4)
@@ -258,7 +260,7 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_equal(mrc_new.dataType, 'int16')
         np_test.assert_equal(mrc_new.data.dtype, numpy.dtype('int16'))
         np_test.assert_equal(mrc_new.byteOrder, '<')
-        np_test.assert_equal(mrc_new.arrayOrder, 'FORTRAN')
+        np_test.assert_equal(mrc_new.arrayOrder, 'F')
         np_test.assert_equal(mrc_new.shape, (40,30,20))
         np_test.assert_equal(mrc_new.pixel, [0.4, 0.4, 0.4])
         np_test.assert_equal(mrc_new.pixelsize, 0.4)
@@ -269,12 +271,12 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_equal(mrc_new.n_labels, 9)
         np_test.assert_equal(len(mrc_new.labels), 9)
         desired = (
-            "COMBINEFFT: Combined FFT from two tomograms             " 
-            + "07-Oct-13  17:15:24" )
+            b"COMBINEFFT: Combined FFT from two tomograms             " 
+            + b"07-Oct-13  17:15:24" )
         np_test.assert_equal(len(mrc_new.labels[3]), 80)
         np_test.assert_equal(mrc_new.labels[3][:len(desired)], desired)
         desired = (
-            "NEWSTACK: Images copied                                 10-Oct-13  18:00:03")
+            b"NEWSTACK: Images copied                                 10-Oct-13  18:00:03")
         np_test.assert_equal(len(mrc_new.labels[6]), 80)
         np_test.assert_equal(mrc_new.labels[6][:len(desired)], desired)
 
@@ -328,26 +330,27 @@ class TestImageIO(np_test.TestCase):
   
         # em uint8
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_uint8)
+        file_out.write(file=os.path.join(self.dir, '_test.em'), data=ar_uint8)
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'uint8')
         np_test.assert_equal(file_in.data, ar_uint8)
 
         # em uint16
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_uint16)
+        file_out.write(file=os.path.join(self.dir, '_test.em'), data=ar_uint16)
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'uint16')
         np_test.assert_equal(file_in.data, ar_uint16)
 
         # em int16 converted to int32, safe casting
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_int16, dataType='int32', 
-                       casting='safe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.em'),
+            data=ar_int16, dataType='int32', casting='safe')
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'int32')
         np_test.assert_equal(file_in.data, ar_int16)
 
@@ -356,17 +359,19 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.em', 'data':ar_int16, 'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.em'),
+               'data':ar_int16, 'casting':'safe'})
 
         # em int16 converted to uint16, unsafe casting
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_int16, dataType='uint16', 
-                       casting='unsafe')
+        print("int16 to uint16")
+        file_out.write(file=os.path.join(self.dir, '_test.em'),
+                       data=ar_int16, dataType='uint16', casting='unsafe')
+        print("int16 to uint16 end")
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'uint16')
         np_test.assert_equal(file_in.data.dtype, numpy.dtype('uint16'))
-        #np_test.assert_equal(file_in.data, ar_int16) should fail
         np_test.assert_equal(file_in.data[0,1,0] == ar_int16[0,1,0], False)
 
         # em int16 to uint16, safe casting 
@@ -374,31 +379,34 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.em', 'data':ar_int16, 'dataType':'uint16', 
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.em'),
+               'data':ar_int16, 'dataType':'uint16', 'casting':'safe'})
 
         # em uint16 to int16, unsafe casting 
         file_out = ImageIO()
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.em', 'data':ar_uint16, 'dataType':'int16', 
-               'casting':'unsafe'})
+            **{'file':os.path.join(self.dir, '_test.em'),
+               'data':ar_uint16, 'dataType':'int16', 'casting':'unsafe'})
 
         # em uint32 to int32, safe casting 
+        print("uint32 to int32 safe")
         file_out = ImageIO()
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.em', 'data':ar_uint32, 'dataType':'int32', 
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.em'),
+               'data':ar_uint32, 'dataType':'int32', 'casting':'safe'})
 
         # em uint32 converted to int32, unsafe casting
+        print("uint32 to int32")
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_uint32, dataType='int32', 
-                       casting='unsafe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.em'),
+            data=ar_uint32, dataType='int32', casting='unsafe')
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'int32')
         #np_test.assert_equal(file_in.data, ar_uint32) should fail
         np_test.assert_equal(file_in.data[0,0,0] == ar_uint32[0,0,0], True)
@@ -409,59 +417,63 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.em', 'data':ar_uint32, 'dataType':'float32', 
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.em'),
+               'data':ar_uint32, 'dataType':'float32', 'casting':'safe'})
 
         # em uint32 to float32, unsafe casting
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_uint32, dataType='float32', 
-                       casting='unsafe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.em'),
+            data=ar_uint32, dataType='float32', casting='unsafe')
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'float32')
         #np_test.assert_almost_equal(file_in.data, ar_uint32)  should fail
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             file_in.data[0,0,0] == ar_uint32[0,0,0], True)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             file_in.data[1,1,1] == ar_uint32[1,1,1], False)
 
         # em int32 to float32, unsafe casting
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_int32, dataType='float32', 
-                       casting='unsafe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.em'),
+            data=ar_int32, dataType='float32', casting='unsafe')
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'float32')
         #np_test.assert_almost_equal(file_in.data, ar_int32)  should fail
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             file_in.data[0,0,0] == ar_int32[0,0,0], True)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             file_in.data[1,0,1] == ar_int32[1,0,1], False)
 
         # em int32 to float64, safe casting
         file_out = ImageIO()
-        file_out.write(file='_test.em', data=ar_int32, dataType='float64', 
-                       casting='safe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.em'),
+            data=ar_int32, dataType='float64', casting='safe')
         file_in = ImageIO()
-        file_in.read(file='_test.em')
+        file_in.read(file=os.path.join(self.dir, '_test.em'))
         np_test.assert_equal(file_in.dataType, 'float64')
         np_test.assert_almost_equal(file_in.data, ar_int32)
 
         # mrc data type and shape from args
         file_out = ImageIO()
         file_out.write(
-            file='_test.mrc', data=ar_int8_2, shape=(2,3,4), dataType='int16')
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int8_2, shape=(2,3,4), dataType='int16')
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.shape, (2,3,4))
 
         # mrc data type and shape from previously given data
         file_out = ImageIO()
         file_out.setData(ar_int16_2)
-        file_out.write(file='_test.mrc')
+        file_out.write(file=os.path.join(self.dir, '_test.mrc'))
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.shape, (4,3,2))
 
@@ -470,25 +482,26 @@ class TestImageIO(np_test.TestCase):
         file_out.data = ar_int8_2
         file_out.shape = (2,3,4)
         file_out.dataType = 'int16'
-        file_out.write(file='_test.mrc')
+        file_out.write(file=os.path.join(self.dir, '_test.mrc'))
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.shape, (2,3,4))
 
         # mrc data type and shape from data
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16_2)
+        file_out.write(file=os.path.join(self.dir, '_test.mrc'),
+                       data=ar_int16_2)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.shape, (4,3,2))
 
         # mrc uint8, same as ubyte
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_uint8)
+        file_out.write(file=os.path.join(self.dir, '_test.mrc'), data=ar_uint8)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'ubyte')
         np_test.assert_almost_equal(file_in.data, ar_uint8)
 
@@ -497,22 +510,23 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_raises(
             (KeyError, TypeError),
             file_out.write,
-            **{'file':'_test.mrc', 'data':ar_uint16})
+            **{'file':os.path.join(self.dir, '_test.mrc'), 'data':ar_uint16})
 
         # mrc uint16 to int16, safe casting
         file_out = ImageIO()
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.mrc', 'data':ar_uint16, 'dataType':'ubyte', 
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.mrc'),
+               'data':ar_uint16, 'dataType':'ubyte', 'casting':'safe'})
 
         # mrc uint16 to int16, unsafe casting
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_uint16, dataType='int16', 
-                       casting='unsafe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_uint16, dataType='int16', casting='unsafe')
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         #np_test.assert_almost_equal(file_in.data, ar_uint16)  should fail
         np_test.assert_equal(file_in.data[0,0,0] == ar_uint16[0,0,0], True)
@@ -520,9 +534,10 @@ class TestImageIO(np_test.TestCase):
 
         # mrc int16
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16, pixel=2.3)
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'), data=ar_int16, pixel=2.3)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.data, ar_int16)
         np_test.assert_equal(file_in.pixel, [2.3, 2.3, 2.3])
@@ -530,19 +545,21 @@ class TestImageIO(np_test.TestCase):
 
         # mrc int16 2D
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar2_int16, pixel=3.4)
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'), data=ar2_int16, pixel=3.4)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.data[:,:,0], ar2_int16)        
         np_test.assert_equal(file_in.pixelsize, 3.4)
 
         # mrc int8 to int16
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int8, dataType='int16', 
-                       casting='safe')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'), data=ar_int8,
+            dataType='int16', casting='safe')
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.data, ar_int8)
 
@@ -551,45 +568,51 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_raises(
             (KeyError, TypeError),
             file_out.write,
-            **{'file':'_test.mrc', 'data':ar_int32})
+            **{'file':os.path.join(self.dir, '_test.mrc'), 'data':ar_int32})
 
         # mrc int32 to int16
         file_out = ImageIO()
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.mrc', 'data':ar_int32, 'dataType':'int16',
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.mrc'),
+               'data':ar_int32, 'dataType':'int16', 'casting':'safe'})
 
         # mrc int32 to float32
         file_out = ImageIO()
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.mrc', 'data':ar_int32, 'dataType':'float32',
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.mrc'),
+               'data':ar_int32, 'dataType':'float32', 'casting':'safe'})
 
         # mrc int32 to complex64
         file_out = ImageIO()
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.mrc', 'data':ar_int32, 'dataType':'complex64',
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.mrc'),
+               'data':ar_int32, 'dataType':'complex64', 'casting':'safe'})
 
         # raw int16
         file_out = ImageIO()
-        file_out.write(file='_test.raw', data=ar_int16)
+        file_out.write(file=os.path.join(self.dir, '_test.raw'), data=ar_int16)
         file_in = ImageIO()
-        file_in.read(file='_test.raw', dataType='int16', shape=(2,2,2))
+        file_in.read(
+            file=os.path.join(self.dir, '_test.raw'),
+            dataType='int16', shape=(2,2,2))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.data, ar_int16)
 
         # raw int8 to int16
         file_out = ImageIO()
-        file_out.write(file='_test.raw', data=ar_int8, dataType='int16')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.raw'),
+            data=ar_int8, dataType='int16')
         file_in = ImageIO()
-        file_in.read(file='_test.raw', dataType='int16', shape=(3,1,2))
+        file_in.read(
+            file=os.path.join(self.dir, '_test.raw'),
+            dataType='int16', shape=(3,1,2))
         np_test.assert_equal(file_in.dataType, 'int16')
         np_test.assert_equal(file_in.data, ar_int8)
 
@@ -598,8 +621,8 @@ class TestImageIO(np_test.TestCase):
         np_test.assert_raises(
             TypeError,
             file_out.write,
-            **{'file':'_test.raw', 'data':ar_int16, 'dataType':'int8',
-               'casting':'safe'})
+            **{'file':os.path.join(self.dir, '_test.raw'),
+               'data':ar_int16, 'dataType':'int8', 'casting':'safe'})
 
         # explain error messages printed before 
         print("It's fine if few error messages were printed just before " +
@@ -607,50 +630,62 @@ class TestImageIO(np_test.TestCase):
 
         # shape param
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16, dataType='int16')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int16, dataType='int16')
         file_in = ImageIO()
-        file_in.read(file='_test.mrc', dataType='int16')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'), dataType='int16')
         np_test.assert_equal(file_in.data.shape, (2,2,2))
         file_out = ImageIO()
         file_out.write(
-            file='_test.mrc', data=ar_int16, dataType='int16', shape=(1,4,2))
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int16, dataType='int16', shape=(1,4,2))
         file_in = ImageIO()
-        file_in.read(file='_test.mrc', dataType='int16')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'), dataType='int16')
         np_test.assert_equal(file_in.data.shape, (1,4,2))
         file_out.write(
-            file='_test.mrc', data=ar_int16, dataType='int16', shape=(4,2))
-        file_in.readHeader(file='_test.mrc')
-        file_in.read(file='_test.mrc', dataType='int16')
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int16, dataType='int16', shape=(4,2))
+        file_in.readHeader(file=os.path.join(self.dir, '_test.mrc'))
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'), dataType='int16')
         np_test.assert_equal(file_in.data.shape, (4,2,1))
-        file_in.read(file='_test.mrc', dataType='int16', shape=(2,2,2))
+        file_in.read(
+            file=os.path.join(self.dir, '_test.mrc'),
+            dataType='int16', shape=(2,2,2))
         np_test.assert_equal(file_in.data.shape, (2,2,2))
 
         # array order C, read write default (F)
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16_c)
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'), data=ar_int16_c)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.data, ar_int16_c)
 
         # array order C, read write C
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16_c, arrayOrder='C')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int16_c, arrayOrder='C')
         file_in = ImageIO()
-        file_in.read(file='_test.mrc', arrayOrder='C')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'), arrayOrder='C')
         np_test.assert_equal(file_in.data, ar_int16_c)
 
         # array order F, read write default (F)
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16_f)
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'), data=ar_int16_f)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_equal(file_in.data, ar_int16_f)
 
         # array order F, read write F
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16_f, arrayOrder='F')
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int16_f, arrayOrder='F')
         file_in = ImageIO()
-        file_in.read(file='_test.mrc', arrayOrder='F')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'), arrayOrder='F')
         np_test.assert_equal(file_in.data, ar_int16_f)
 
     def testPixelSize(self):
@@ -664,9 +699,11 @@ class TestImageIO(np_test.TestCase):
 
         #
         file_out = ImageIO()
-        file_out.write(file='_test.mrc', data=ar_int16_2, pixel=2.1)
+        file_out.write(
+            file=os.path.join(self.dir, '_test.mrc'),
+            data=ar_int16_2, pixel=2.1)
         file_in = ImageIO()
-        file_in.read(file='_test.mrc')
+        file_in.read(file=os.path.join(self.dir, '_test.mrc'))
         np_test.assert_almost_equal(file_in.pixel, 2.1)
 
     def tearDown(self):

@@ -53,58 +53,58 @@ p_cp_ptomo = True # Copy column '_mtParticlesTomo' values to '_rlnMicrographName
 
 ########## Print initial message
 
-print 'Curating particle STAR files for Microtubules.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file of particles: ' + str(in_star)
-print '\tInput STAR file for segmentations: ' + str(in_seg)
-print '\tOutput STAR file: ' + str(out_star)
-print '\tPre-processing settings: '
-print '\t\t-Coordinates binning factor: ' + str(p_bin)
-print '\t\t-Maximun distance to a centerline: ' + str(p_max_dst) + ' nm'
-print '\t\t-Picking data resolution: ' + str(p_res) + ' nm/vx'
-print '\t\t-Swap X and Y.'
+print('Curating particle STAR files for Microtubules.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file of particles: ' + str(in_star))
+print('\tInput STAR file for segmentations: ' + str(in_seg))
+print('\tOutput STAR file: ' + str(out_star))
+print('\tPre-processing settings: ')
+print('\t\t-Coordinates binning factor: ' + str(p_bin))
+print('\t\t-Maximun distance to a centerline: ' + str(p_max_dst) + ' nm')
+print('\t\t-Picking data resolution: ' + str(p_res) + ' nm/vx')
+print('\t\t-Swap X and Y.')
 if p_cp_ptomo:
-    print '\t\t-Copying _mtParticlesTomo -> _rlnMicrographName.'
-print ''
+    print('\t\t-Copying _mtParticlesTomo -> _rlnMicrographName.')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tGenerating Micrograph-segmentations dictionary...'
+print('\tGenerating Micrograph-segmentations dictionary...')
 star_seg = sub.Star()
 try:
     star_seg.load(in_seg)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 ct_dic = dict()
 for seg_row in range(star_seg.get_nrows()):
     ct_str = star_seg.get_element('_mtCenterLine', seg_row)
     ct_dic[ct_str] = seg_row
 
-print '\tPre-processing the input particles STAR file: '
+print('\tPre-processing the input particles STAR file: ')
 
 surfs = list()
-print '\tLoading input STAR file(s)...'
+print('\tLoading input STAR file(s)...')
 star, star_out = sub.Star(), sub.Star()
 p_max_dst_v = float(p_max_dst) / float(p_res)
 try:
     star.load(in_star)
     star.add_column('_psSegImage')
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-part_dsts= dict().fromkeys(range(star.get_nrows()))
-for key in part_dsts.iterkeys():
+part_dsts= dict().fromkeys(list(range(star.get_nrows())))
+for key in part_dsts.keys():
     part_dsts[key] = np.finfo(np.float).max
 
 if p_bin > 0:
-    print '\t\t-Binning the input coordinates: '
+    print('\t\t-Binning the input coordinates: ')
     p_bin_f = float(p_bin)
     for row in range(star.get_nrows()):
         hold_x = star.get_element('_rlnCoordinateX', row)
@@ -118,23 +118,23 @@ if p_bin > 0:
         star.set_element(key='_rlnCoordinateZ', val=hold_z, row=row)
 
 if p_cp_ptomo:
-    print '\t\t-Copying column values mtParticlesTomo to rlnMicrographName...'
+    print('\t\t-Copying column values mtParticlesTomo to rlnMicrographName...')
     for row in range(star_seg.get_nrows()):
         star_seg.set_element(key='_rlnMicrographName', val=star_seg.get_element('_mtParticlesTomo', row), row=row)
 
-print '\tLoop for MT: '
+print('\tLoop for MT: ')
 seg_dic = dict()
 for row_ct in range(star_seg.get_nrows()):
 
     ct_str = star_seg.get_element('_mtCenterLine', row_ct)
-    print '\t\t-MT to process: ' + ct_str
+    print('\t\t-MT to process: ' + ct_str)
     ct_vtp = disperse_io.load_poly(ct_str)
     ct_points = np.zeros(shape=(ct_vtp.GetNumberOfPoints(), 3), dtype=np.float32)
     for i in range(ct_points.shape[0]):
         ct_points[i, :] = ct_vtp.GetPoint(i)
     seg_dic[star_seg.get_element('_psSegImage', row_ct)] = star_seg.get_element('_rlnMicrographName', row_ct)
 
-    print '\tLoop for particles: '
+    print('\tLoop for particles: ')
     for row in range(star.get_nrows()):
 
         # Loading the input coordiante
@@ -161,7 +161,7 @@ for row_ct in range(star_seg.get_nrows()):
             star.set_element(key='_psSegImage', val=hold_seg, row=row)
             part_dsts[row] = hold_min
 
-print '\tDeleting unidentified particles...'
+print('\tDeleting unidentified particles...')
 del_ids = list()
 for row in range(star.get_nrows()):
     if part_dsts[row] > p_max_dst_v:
@@ -170,12 +170,12 @@ for row in range(star.get_nrows()):
         hold_mic = star.get_element('_rlnMicrographName', row)
         hold_seg = star.get_element('_psSegImage', row)
         if seg_dic[hold_seg] != hold_mic:
-            print 'Row [' + str(row) + ']: ' + hold_seg + ', ' + hold_mic
+            print('Row [' + str(row) + ']: ' + hold_seg + ', ' + hold_mic)
             del_ids.append(row)
 star.del_rows(del_ids)
-print '\t\t-Final number of particles: ' + str(star.get_nrows())
+print('\t\t-Final number of particles: ' + str(star.get_nrows()))
 
-print '\tWriting output STAR file: ' + out_star
+print('\tWriting output STAR file: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

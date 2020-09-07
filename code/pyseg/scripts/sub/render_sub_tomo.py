@@ -349,65 +349,65 @@ import time
 
 ########## Print initial message
 
-print 'Rendering a template in a tomogram.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
-print '\tInput reference tomogram file: ' + in_tomo
-print '\tInput template tomogram: ' + in_temp
+print('Rendering a template in a tomogram.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + in_star)
+print('\tInput reference tomogram file: ' + in_tomo)
+print('\tInput template tomogram: ' + in_temp)
 if out_stem is None:
     _, temp_fname = os.path.split(in_temp)
     out_stem, _ = os.path.splitext(temp_fname)
-print '\tOutput directory: ' + out_dir
-print '\tOutput suffix: ' + out_stem
-print '\tTemplate Pre-processing: '
-print '\t\t-Template threshold: ' + str(tp_th)
-print '\t\t-Re-scaling factor: ' + str(tp_rsc)
-print '\tRigid transformations: '
+print('\tOutput directory: ' + out_dir)
+print('\tOutput suffix: ' + out_stem)
+print('\tTemplate Pre-processing: ')
+print('\t\t-Template threshold: ' + str(tp_th))
+print('\t\t-Re-scaling factor: ' + str(tp_rsc))
+print('\tRigid transformations: ')
 if rt_flip:
-    print '\t\t-Template flipping active.'
+    print('\t\t-Template flipping active.')
 if rt_orig:
-    print '\t\t-Origin compensation.'
+    print('\t\t-Origin compensation.')
 if rt_swapxy:
-    print '\t\t-Swapping XY coordinates.'
-print '\t\t-Rotation extrinsic XYZ: ' + str(rt_rot)
-print '\t\t-Un-cropping with: ' + str(rt_tr)
-print ''
+    print('\t\t-Swapping XY coordinates.')
+print('\t\t-Rotation extrinsic XYZ: ' + str(rt_rot))
+print('\t\t-Un-cropping with: ' + str(rt_tr))
+print('')
 
 ######### Process
 
-print 'Main procedure:'
+print('Main procedure:')
 
-print '\tLoading the input STAR file...'
+print('\tLoading the input STAR file...')
 star = ps.sub.Star()
 star.load(in_star)
 
 if classes is not None:
-    print '\tFiltering to keep classes ' + str(classes) + '...'
+    print('\tFiltering to keep classes ' + str(classes) + '...')
     del_rows = list()
     for i in range(star.get_nrows()):
         if not(star.get_element(key_col, i) in classes):
             del_rows.append(i)
     star.del_rows(del_rows)
 
-print '\tScaling particle coordinates...'
+print('\tScaling particle coordinates...')
 star.scale_coords(tp_rsc)
 
-print '\tGeneration tomogram peaks object...'
+print('\tGeneration tomogram peaks object...')
 tpeaks = star.gen_tomo_peaks(in_tomo, klass=None, orig=rt_orig, full_path=False)
 
-print '\tGenerate template poly data...'
+print('\tGenerate template poly data...')
 temp = ps.disperse_io.load_tomo(in_temp)
 temp_poly = tomo_poly_iso(temp, tp_th, rt_flip)
 ps.disperse_io.save_vtp(temp_poly, out_dir+'/'+out_stem+'_temp.vtp')
 
-print '\tRender templates in the reference tomogram...'
+print('\tRender templates in the reference tomogram...')
 temp_rss = np.asarray(temp.shape, dtype=np.float) * tp_rsc
 ref_poly, cmass = tomo_poly_peaks(tpeaks, temp_poly, (ROT_COL, TILT_COL, PSI_COL), temp_rss, rt_orig)
 cmass_poly = cloud_point_to_poly(cmass)
 
-print '\tRigid body translations...'
+print('\tRigid body translations...')
 if rt_swapxy:
     ref_poly = tomo_poly_swapxy(ref_poly)
     cmass_poly = tomo_poly_swapxy(cmass_poly)
@@ -416,7 +416,7 @@ ref_poly = tomo_ref_poly_trans(ref_poly, -1.*np.asarray(rt_tr, dtype=np.float32)
 cmass_poly = tomo_ref_poly_rotation(cmass_poly, in_tomo, rt_rot)
 cmass_poly = tomo_ref_poly_trans(cmass_poly, -1.*np.asarray(rt_tr, dtype=np.float32))
 
-print '\tStoring the results...'
+print('\tStoring the results...')
 ps.disperse_io.save_vtp(ref_poly, out_dir+'/'+out_stem+'.vtp')
 ps.disperse_io.save_vtp(cmass_poly, out_dir+'/'+out_stem+'_cmass.vtp')
 # ps.disperse_io.save_numpy(tpeaks.to_tomo_cloud(), out_dir+'/'+out_stem+'.mrc')

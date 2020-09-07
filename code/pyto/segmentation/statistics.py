@@ -1,11 +1,17 @@
 """
 Class Statistics for basic statistical analysis of labeled (segmented) data.
 
-# Author: Vladan Lucic
-# $Id: statistics.py 885 2012-09-26 13:33:26Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import object
+#from past.utils import old_div
 
-__version__ = "$Revision: 885 $"
+__version__ = "$Revision$"
 
 
 import scipy
@@ -232,7 +238,7 @@ class Statistics(object):
 
             # reorderes data array
             reordered = data.copy()
-            reordered[order.values()] = data[order.keys()]
+            reordered[list(order.values())] = data[list(order.keys())]
             return reordered
 
     def _prepareArrays(self, arrays, dtypes, widths=0):
@@ -313,7 +319,7 @@ class Statistics(object):
             # make a mask defining the slice
             sliceObj[axis] = slice(sliceCoord[id,axis], sliceCoord[id,axis]+1) 
             mask = numpy.zeros(self.labels.shape, dtype=bool)
-            mask[sliceObj] = True
+            mask[tuple(sliceObj)] = True
 
             # intersect the mask with (this id) labels and add to sliceLabels
             slicedLabels += (mask & (self.labels == id)) * id
@@ -420,7 +426,7 @@ class Statistics(object):
 
         # do calculations for all segments together
         if not zero_id:
-            from segment import Segment
+            from .segment import Segment
             seg = Segment()
             locLabels = seg.keep(ids=self._ids, data=self.labels.copy())
             self.mean[0] = ndimage.mean(input=self.data, labels=locLabels,
@@ -515,26 +521,27 @@ class Statistics(object):
         # calculate directions (spherical coordinates) for 2D and 3D
         if self.data.ndim == 2:
 
-            self._prepareArrays(arrays=('minPhi', 'maxPhi'),
-                                dtypes=(float, float), widths=1)
-            self.minPhi[ids] = \
-                numpy.arctan2(self.minVec[ids,1], self.minVec[ids,0]) * 180 / pi
-            self.maxPhi[ids] = \
-                numpy.arctan2(self.maxVec[ids,1], self.maxVec[ids,0]) * 180 / pi
+            self._prepareArrays(
+                arrays=('minPhi', 'maxPhi'), dtypes=(float, float), widths=1)
+            self.minPhi[ids] = numpy.arctan2(
+                self.minVec[ids,1], self.minVec[ids,0]) * 180 / pi
+            self.maxPhi[ids] = numpy.arctan2(
+                self.maxVec[ids,1], self.maxVec[ids,0]) * 180 / pi
 
         elif self.data.ndim == 3:
 
-            self._prepareArrays(arrays=('minPhi', 'maxPhi', 
-                                        'minTheta', 'maxTheta'),
-                                dtypes=(float, float, float, float), widths=1)
-            self.minPhi[ids] = \
-                numpy.arctan2(self.minVec[ids,1], self.minVec[ids,0]) * 180 / pi
-            self.maxPhi[ids] = \
-                numpy.arctan2(self.maxVec[ids,1], self.maxVec[ids,0]) * 180 / pi
-            self.minTheta[ids] = \
-                numpy.arccos(self.minVec[ids,2] / self.min[ids]) * 180 / pi
-            self.maxTheta[ids] = \
-                numpy.arccos(self.maxVec[ids,2] / self.max[ids]) * 180 / pi
+            self._prepareArrays(
+                arrays=('minPhi', 'maxPhi', 'minTheta', 'maxTheta'),
+                dtypes=(float, float, float, float), widths=1)
+            self.minPhi[ids] = numpy.arctan2(
+                self.minVec[ids,1], self.minVec[ids,0]) * 180 / pi
+            self.maxPhi[ids] = numpy.arctan2(
+                self.maxVec[ids,1], self.maxVec[ids,0]) * 180 / pi
+            # element 0 not important, may cause RuntimeWarning
+            self.minTheta[ids] = numpy.arccos(
+                self.minVec[ids,2] / self.min[ids]) * 180 / pi
+            self.maxTheta[ids] = numpy.arccos(
+                self.maxVec[ids,2] / self.max[ids]) * 180 / pi
 
     def getValues(self, id):
         """

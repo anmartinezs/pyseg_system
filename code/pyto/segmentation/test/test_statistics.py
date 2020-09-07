@@ -3,10 +3,14 @@
 Tests module statistics
 
 # Author: Vladan Lucic
-# $Id: test_statistics.py 775 2010-10-25 16:04:41Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision: 775 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -16,7 +20,7 @@ import numpy.testing as np_test
 import scipy
 
 from pyto.segmentation.statistics import Statistics
-import common as common
+#from pyto.segmentation.test import common
 
 
 class TestStatistics(np_test.TestCase):

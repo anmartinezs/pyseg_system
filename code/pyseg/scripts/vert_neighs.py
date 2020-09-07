@@ -221,25 +221,25 @@ def gen_arcs_graph(graph, vertices, prop_key=None, prop_val=None, prop_field=Non
 def do_vert_neighs(input_file, surf_file, prop_key, prop_val, deg_n, verbose):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if verbose:
-        print '\tLoading the surface...'
+        print('\tLoading the surface...')
     try:
         surf = disperse_io.load_poly(surf_file)
     except:
-        print '\tERROR: surface ' + surf_file + ' could not be loaded.'
+        print('\tERROR: surface ' + surf_file + ' could not be loaded.')
         sys.exit(4)
 
     if verbose:
-        print '\tPicking up input vertices...'
+        print('\tPicking up input vertices...')
     if prop_key is not None:
         hold_vertices = graph_mcf.get_vertices_list()
         vertices = list()
@@ -254,13 +254,13 @@ def do_vert_neighs(input_file, surf_file, prop_key, prop_val, deg_n, verbose):
         vertices = graph_mcf.get_vertices_list()
 
     if verbose:
-        print '\tComputing vertices normal...'
+        print('\tComputing vertices normal...')
     array_norm = None
     for i in range(surf.GetPointData().GetNumberOfArrays()):
         if surf.GetPointData().GetArrayName(i) == STR_CLOUD_NORMALS:
             array_norm = surf.GetPointData().GetArray(i)
     if array_norm is None:
-        print '\tERROR: surface ' + surf_file + ' does not contain normals.'
+        print('\tERROR: surface ' + surf_file + ' does not contain normals.')
         sys.exit(4)
     graph_mcf.add_prop(STR_CLOUD_NORMALS, 'float', 3, def_val=-1)
     key_n_id = graph_mcf.get_prop_id(STR_CLOUD_NORMALS)
@@ -282,19 +282,19 @@ def do_vert_neighs(input_file, surf_file, prop_key, prop_val, deg_n, verbose):
         graph_mcf.set_prop_entry_fast(key_n_id, tuple(n_coords), v_id, 3)
 
     if verbose:
-        print '\tGenerating vertices graph...'
+        print('\tGenerating vertices graph...')
     v_graph = gen_vertices_graph(graph_mcf, vertices, prop_key=prop_key, prop_val=prop_val,
                                  prop_field=STR_FIELD_VALUE_INV)
     v_tomo = gauss_FE(v_graph, STR_FIELD_VALUE_INV, sigma=3, size=None)
 
     if verbose:
-        print '\tGenerating arcs graph...'
+        print('\tGenerating arcs graph...')
     a_graph = gen_arcs_graph(graph_mcf, vertices, prop_key=prop_key, prop_val=prop_val,
                              prop_field=STR_FIELD_VALUE_INV)
     a_tomo = gauss_FE(a_graph, STR_FIELD_VALUE_INV, sigma=3, size=None)
 
     if verbose:
-        print '\tStoring the result in ' + input_file
+        print('\tStoring the result in ' + input_file)
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(input_file)
@@ -311,7 +311,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvi:s:p:w:d:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -322,8 +322,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -338,33 +338,33 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (surf_file is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool averaging set of vertices neighbourhood.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput graph file: ' + input_file
-            print '\tInput reference surface file: ' + surf_file
-            print '\tMaximum Neighbourhood degree: ' + str(deg_n)
-            print '\tProperty for selection ' + str(prop_key) + ' with value ' + str(prop_val)
-            print ''
+            print('Running tool averaging set of vertices neighbourhood.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput graph file: ' + input_file)
+            print('\tInput reference surface file: ' + surf_file)
+            print('\tMaximum Neighbourhood degree: ' + str(deg_n))
+            print('\tProperty for selection ' + str(prop_key) + ' with value ' + str(prop_val))
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_vert_neighs(input_file, surf_file, prop_key, prop_val, deg_n, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

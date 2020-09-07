@@ -8,10 +8,13 @@ This script may be placed anywhere in the directory tree.
 ToDo:
   - see about excentricity
 
-$Id: discs_to_balls.py 1461 2017-10-12 10:10:49Z vladan $
+$Id$
 Author: Vladan Lucic (Max Planck Institute for Biochemistry) 
 """
-__version__ = "$Revision: 1461 $"
+from __future__ import unicode_literals
+#from builtins import str
+
+__version__ = "$Revision$"
 
 import os
 import os.path
@@ -58,24 +61,29 @@ if tomo_info is not None: image_file_name = tomo_info.image_file_name
 # mrc headers.
 
 # name of the input (discs) file 
-discs_file_name = "discs.dat"    
+discs_file_name = "discs.raw"    
 
 # name of the output (balls) file 
-balls_file_name = "balls.dat"    
+if tomo_info is not None: balls_file_name = tomo_info.labels_file_name
+#balls_file_name = "balls.mrc"    
 
 # file dimensions
 shape = None   # shape given in header of the disc file (if em
                # or mrc), or in the tomo (grayscale image) header   
 #shape = (100, 120, 90) # shape given here
 
-# file data type (e.g. 'int8', 'int16', 'int32', 'float16', 'float64') 
-data_type = 'int8'
-
+# discs file data type (e.g. 'int8', 'int16', 'int32', 'float16', 'float64') 
+discs_data_type = 'uint8'
+ 
+# balls file data type (e.g. 'int8', 'int16', 'int32', 'float16', 'float64')
+# For mrc files use 'uint8' if less than 256 lables, or 'int16' for more labels
+balls_data_type = 'uint8'
+ 
 # file byte order ('<' for little-endian, '>' for big-endian)
 byte_order = '<'
 
-# file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-array_order = 'FORTRAN'
+# file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+array_order = 'F'
 
 #########################################
 #
@@ -144,7 +152,7 @@ def main():
     # read input file
     discs = pyto.segmentation.Ball.read(
         file=discs_file_name, ids=all_ids, byteOrder=byte_order, 
-        dataType=data_type, arrayOrder=array_order, shape=new_shape)
+        dataType=discs_data_type, arrayOrder=array_order, shape=new_shape)
 
     # make discs if needed
     if balls_to_discs:
@@ -153,7 +161,7 @@ def main():
     # check
     if check_discs:
         topo = pyto.segmentation.Topology(segments=discs, ids=vesicle_ids)
-        n_connected = topo.getHomologyRank(dim=0)[vesicle_ids]
+        n_connected = topo.calculateHomologyRank(dim=0)[vesicle_ids]
         if not (n_connected == 1).all():
             many = topo.ids[numpy.nonzero(n_connected[topo.ids]>1)[0]]
             if len(many) > 0:
@@ -173,8 +181,15 @@ def main():
         ids=vesicle_ids, axis=disc_axis, cut=normal_vector, theta=theta, 
         enlarge=enlarge_radii, external=surround_id, check=check_discs)
 
+    # try to find pixelsize
+    pixel = 1
+    if discs.pixelsize != 1:
+        pixel = discs.pixelsize
+    elif image.pixelsize != 1:
+        pixel = image.pixelsize
+
     # write balls file
-    balls.write(file=balls_file_name)
+    balls.write(file=balls_file_name, dataType=balls_data_type, pixel=pixel)
 
 
 # run if standalone

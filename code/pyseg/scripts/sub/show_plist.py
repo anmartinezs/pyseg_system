@@ -87,48 +87,48 @@ from pyseg.sub import ParticleList
 
 ########## Print initial message
 
-print 'Showing particles in a tomogram.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput particles list: ' + in_plist_xml
-print '\tReference tomogram name: ' + str(in_ref)
-print '\tOutput directory: ' + output_dir
-print '\tTransformation properties (from reference to holding tomogram):'
-print '\t\t-Offset: ' + str(in_off) + ' voxels'
-print '\t\t-Rotation angles (phi, psi, the): ' + str(in_rot_angs) + ' degs'
-print '\t\t-Binning: ' + str(in_bin)
-print '\tSub-volumes properties: '
-print '\t\t-Shape: ' + str(sv_shape)
+print('Showing particles in a tomogram.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput particles list: ' + in_plist_xml)
+print('\tReference tomogram name: ' + str(in_ref))
+print('\tOutput directory: ' + output_dir)
+print('\tTransformation properties (from reference to holding tomogram):')
+print('\t\t-Offset: ' + str(in_off) + ' voxels')
+print('\t\t-Rotation angles (phi, psi, the): ' + str(in_rot_angs) + ' degs')
+print('\t\t-Binning: ' + str(in_bin))
+print('\tSub-volumes properties: ')
+print('\t\t-Shape: ' + str(sv_shape))
 if in_mb_seg is not None:
-    print '\tMembrane Miss-alignment deletion:'
-    print '\t\t-Angle threshold: ' + str(an_th) + ' deg'
-    print '\t\t-Membrane Segmentation tomogram: ' + in_mb_seg
-    print '\t\t-Memebrane label: ' + str(in_mb_lbl)
-    print '\t\t-Mask file: ' + in_mask
-print ''
+    print('\tMembrane Miss-alignment deletion:')
+    print('\t\t-Angle threshold: ' + str(an_th) + ' deg')
+    print('\t\t-Membrane Segmentation tomogram: ' + in_mb_seg)
+    print('\t\t-Memebrane label: ' + str(in_mb_lbl))
+    print('\t\t-Mask file: ' + in_mask)
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tParsing particle list...'
+print('\tParsing particle list...')
 pl_path, pl_fname = os.path.split(in_plist_xml)
 plist = ParticleList(pl_path + '/sub')
 plist.load(in_plist_xml)
-print '\t\t-Number of particles found: ' + str(plist.get_num_particles())
+print('\t\t-Number of particles found: ' + str(plist.get_num_particles()))
 
 _, in_ref_name = os.path.split(in_ref)
 ref_stem, ref_ext = os.path.splitext(in_ref_name)
-print '\tDeleting particles which does not belong to a reference tomogram (' + str(ref_stem) + ')...'
+print('\tDeleting particles which does not belong to a reference tomogram (' + str(ref_stem) + ')...')
 plist.filter_particle_fname(ref_stem, keep=True, cmp='stem')
 flt_plist = copy.deepcopy(plist)
-print '\t\t-Number of particles found: ' + str(plist.get_num_particles())
+print('\t\t-Number of particles found: ' + str(plist.get_num_particles()))
 if plist.get_num_particles() <= 0:
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit()
 
-print '\tGenerates peaks container for reference tomogram...'
+print('\tGenerates peaks container for reference tomogram...')
 in_ref_map = ps.disperse_io.load_tomo(in_ref, mmap=True)
 in_ref_shape = in_ref_map.shape
 swap_xy = False
@@ -137,39 +137,39 @@ if (ref_ext == '.mrc') or (ref_ext == '.em'):
 tpeaks = plist.gen_TomoPeaks(in_ref_shape, ref_stem, swap_xy=swap_xy)
 
 out_sv = output_dir + '/sub_alg'
-print '\tExtracting aligned subvolumes in directory: ' + out_sv
+print('\tExtracting aligned subvolumes in directory: ' + out_sv)
 mask = None
 if in_mask is not None:
     mask = ps.disperse_io.load_tomo(in_mask)
 nsvs, sv_avg = tpeaks.save_subvolumes(in_ref_map, sv_shape, out_sv, stem=stem, mask=mask,
                                       key_eu='Rotation', key_sf='Shift', swap_xy=swap_xy, av_ref=True)
 ps.disperse_io.save_numpy(sv_avg, output_dir + '/' + stem + '_alg_avg.mrc')
-print '\t\t-Number of subvolumes stored: ' + str(nsvs)
+print('\t\t-Number of subvolumes stored: ' + str(nsvs))
 
-print '\tRotate reference coordinates...'
+print('\tRotate reference coordinates...')
 center = (in_ref_shape[0]*.5, in_ref_shape[1]*.5, in_ref_shape[2]*.5)
 tpeaks.rotate_coords(in_rot_angs[0], in_rot_angs[1], in_rot_angs[2], center=center)
 
-print '\tCrop reference coordinates...'
+print('\tCrop reference coordinates...')
 hold_off = (in_off[1], in_off[0], in_off[2])
 tpeaks.peaks_prop_op(ps.sub.PK_COORDS, hold_off, operator.sub)
 
-print '\tInverse rotation of normal...'
+print('\tInverse rotation of normal...')
 tpeaks.add_prop('Normal', 3, vals=in_norm, dtype=np.float32)
 tpeaks.rotate_vect(key_vect='Normal', key_eu='Rotation', inv=True)
 
-print '\tUn rotate normals...'
+print('\tUn rotate normals...')
 tpeaks.add_prop('Unrotation', 3, vals=in_rot_angs, dtype=np.float32)
 tpeaks.rotate_vect(key_vect='Normal', key_eu='Unrotation')
 
 if in_mb_lbl:
-    print '\tComputing angle to membranes...'
+    print('\tComputing angle to membranes...')
     tomo_seg = ps.disperse_io.load_tomo(in_mb_seg) == in_mb_lbl
     tpeaks.seg_shortest_normal(tomo_seg, 'Mb_normal')
     tpeaks.vects_angle(key_v1='Normal', key_v2='Mb_normal', key_a='Angle')
     tpeaks.filter_prop_scalar(key_s='Angle', cte=an_th, op=operator.gt)
-    print '\tDeleting miss-aligned peaks...'
-    print '\t\tNumber of peaks: ' + str(tpeaks.get_num_peaks())
+    print('\tDeleting miss-aligned peaks...')
+    print('\t\tNumber of peaks: ' + str(tpeaks.get_num_peaks()))
     if plist.get_num_particles() > 0:
         tp_fnames = tpeaks.get_prop_vals('Filename', dtype=str)
         flt_plist.filter_particle_nolist(tp_fnames)
@@ -179,20 +179,20 @@ if in_mb_lbl:
             os.makedirs(out_dir_msa)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
-                print 'ERROR: directory ' + out_dir_msa + ' could not be created'
-                print 'Wrong terminated. (' + time.strftime("%c") + ')'
+                print('ERROR: directory ' + out_dir_msa + ' could not be created')
+                print('Wrong terminated. (' + time.strftime("%c") + ')')
                 sys.exit()
-        print '\t\tStoring corrected subvolumes in : ' + out_dir_msa
+        print('\t\tStoring corrected subvolumes in : ' + out_dir_msa)
         nsvs, sv_avg = tpeaks_msa.save_particles(in_ref_map, sv_shape, out_dir_msa, stem=stem, mask=mask,
                                                  swap_xy=swap_xy, av_ref=True)
         ps.disperse_io.save_numpy(sv_avg, out_dir_msa + '/' + stem + '_alg_avg.mrc')
         pl_stem, _ = os.path.splitext(pl_fname)
         ps.disperse_io.save_vtp(tpeaks_msa.to_vtp(), out_dir_msa + '/' + ref_stem + '_plist.vtp')
 
-print '\tGenerating VTP file...'
+print('\tGenerating VTP file...')
 poly = tpeaks.to_vtp()
 
-print '\tStoring the results in: ' + output_dir
+print('\tStoring the results in: ' + output_dir)
 ps.disperse_io.save_vtp(poly, output_dir + '/' + ref_stem + '_plist.vtp')
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

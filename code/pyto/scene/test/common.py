@@ -3,10 +3,12 @@
 Common stuff for tests
 
 # Author: Vladan Lucic
-# $Id: common.py 695 2010-04-11 21:01:57Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import range
 
-__version__ = "$Revision: 695 $"
+__version__ = "$Revision$"
 
 import numpy
 import scipy

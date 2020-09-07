@@ -3,10 +3,14 @@
 Tests module cleft_regions
 
 # Author: Vladan Lucic
-# $Id: test_cleft_regions.py 1001 2013-12-09 09:41:11Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1001 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -128,16 +132,16 @@ class TestCleftRegions(np_test.TestCase):
         np_test.assert_almost_equal(cl_2.widthVector.data, [6, 0])
 
         # ids
-        np_test.assert_equal(cl_2.getLayerIds(), range(1, 10))
-        np_test.assert_equal(cl_2.getCleftLayerIds(), range(3, 8))
-        np_test.assert_equal(cl_2.getBound1LayerIds(), range(1, 3))
-        np_test.assert_equal(cl_2.getBound2LayerIds(), range(8, 10))
-        np_test.assert_equal(cl_2.getBound1LayerIds(thick=1), range(2, 3))
-        np_test.assert_equal(cl_2.getBound2LayerIds(thick=2), range(8, 10))
+        np_test.assert_equal(cl_2.getLayerIds(), list(range(1, 10)))
+        np_test.assert_equal(cl_2.getCleftLayerIds(), list(range(3, 8)))
+        np_test.assert_equal(cl_2.getBound1LayerIds(), list(range(1, 3)))
+        np_test.assert_equal(cl_2.getBound2LayerIds(), list(range(8, 10)))
+        np_test.assert_equal(cl_2.getBound1LayerIds(thick=1), list(range(2, 3)))
+        np_test.assert_equal(cl_2.getBound2LayerIds(thick=2), list(range(8, 10)))
         np_test.assert_equal(cl_2.getBoundLayerIds(thick=[1,2]), [2, 8, 9])
         cl_2.boundThick = 1
-        np_test.assert_equal(cl_2.getBound1LayerIds(), range(2, 3))
-        np_test.assert_equal(cl_2.getBound2LayerIds(), range(8, 9))
+        np_test.assert_equal(cl_2.getBound1LayerIds(), list(range(2, 3)))
+        np_test.assert_equal(cl_2.getBound2LayerIds(), list(range(8, 9)))
 
         # layers
         desired = numpy.zeros((10, 10), dtype=int)
@@ -163,7 +167,7 @@ class TestCleftRegions(np_test.TestCase):
         cl_3.makeLayers(nLayers=None, widthMode='mean', maxDistance=2.,
                         nBoundLayers=1, adjust=False, refine=False)
         np_test.assert_equal(cl_3.nLayers, 2)
-        np_test.assert_almost_equal(cl_3.width, (numpy.sqrt(10) + 2) /2. - 1)
+        np_test.assert_almost_equal(cl_3.width, (numpy.sqrt(10) + 2) / 2. - 1)
 
         # cleft 3 adjust and refine
         cl_3 = CleftRegions(image=None, cleft=self.makeCleft3())
@@ -254,10 +258,10 @@ class TestCleftRegions(np_test.TestCase):
         np_test.assert_equal(cl_2.boundThick, [None, None])
 
         # minimum density layer
-        np_test.assert_almost_equal(cl_2.minCleftDensity, 
-                                    cl_2.regionDensity.mean[3])
-        np_test.assert_almost_equal(cl_2.relativeMinCleftDensity, 
-                                    (3 - 33/4.) / (5 - 33/4.))
+        np_test.assert_almost_equal(
+            cl_2.minCleftDensity, cl_2.regionDensity.mean[3])
+        np_test.assert_almost_equal(
+            cl_2.relativeMinCleftDensity, (3 - 33/4.) / (5 - 33/4.))
         np_test.assert_equal(cl_2.minCleftDensityId, 3)
         np_test.assert_almost_equal(cl_2.minCleftDensityPosition, 0.1)
 
@@ -277,7 +281,7 @@ class TestCleftRegions(np_test.TestCase):
         np_test.assert_almost_equal(cl_2.groupDensity['cleft'].mean, 5)
         np_test.assert_almost_equal(cl_2.groupDensity['bound_1'].mean, 10)
         np_test.assert_almost_equal(cl_2.groupDensity['bound_2'].mean, 12)
-        np_test.assert_almost_equal(cl_2.groupDensity['all'].mean, 47 / 7.)
+        np_test.assert_almost_equal(cl_2.groupDensity['all'].mean, 47/7.)
         
         # group ids
         np_test.assert_equal(cl_2.groupIds['cleft'], 

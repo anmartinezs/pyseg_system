@@ -3,12 +3,14 @@
 Tests module denisty
 
 # Author: Vladan Lucic
-# $Id: test_density.py 1216 2015-08-12 16:40:17Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 1216 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 #from numpy.testing import *
 
@@ -25,6 +27,7 @@ class TestDensity(np_test.TestCase):
     """
 
     def setUp(self):
+        importlib.reload(common) # to avoid problems when running multiple tests
         self.grey = common.make_grey()
         self.segments = common.make_shapes()
         self.density = Density()

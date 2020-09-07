@@ -3,10 +3,17 @@ Contains class Rigid3D for preforming rigid body transformation and scalar
 scaling followed by translation on points (vectors).
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: rigid_3d.py 1461 2017-10-12 10:10:49Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.builtins import basestring
+#from past.utils import old_div
 
-__version__ = "$Revision: 1461 $"
+__version__ = "$Revision$"
 
 
 from functools import partial
@@ -14,7 +21,7 @@ from functools import partial
 import numpy as np
 import scipy as sp
 
-from affine import Affine
+from .affine import Affine
 
 class Rigid3D(Affine):
     """
@@ -39,15 +46,27 @@ class Rigid3D(Affine):
 
     Note that in this class xy_axes is always 'dim_point' except in 
     methods that take xy_axes as an argument. This is  opposite from 
-    Affine where 'pint_dim' is the default, but both values can be used.
+    Affine where 'point_dim' is the default, but both values can be used.
 
     """
 
     def __init__(self, q=None, scale=1., gl=None, d=None, order='qpsm'):
         """
+        Sets transformation parameters from arguments.
+
         Sets self.order from arguments and self.xy_axes to 'dim_point' .
 
-        """
+        Arguments:
+          - q: rotation matrix
+          - scale: (single number) scale 
+          - gl: (numpy.ndarray of shape (ndim, ndim)) general linear 
+          transormation matrix, it has to be of the form appropriate for
+          the rigin 3D transformation
+          - d: (numpy.ndarray of shape ndim) translation
+          - order: decomposition order
+          - xy_axes: order of axes in matrices representing points, can be
+          'point_dim' (default) or 'dim_point'
+         """
 
         # initialize transformation parameters
         self.param_names = ['q', 'p', 's_scale', 'm', 'u', 'v']
@@ -123,7 +142,7 @@ class Rigid3D(Affine):
                 raise ValueError(
                     "Martix s is not valid for a rigid transformation.") 
         else:
-            s_scalar = (s[0,0] * s[1,1] * s[2,2]) ** (1/3.)
+            s_scalar = (s[0,0] * s[1,1] * s[2,2]) ** (1 / 3.)
 
         return s_scalar
 
@@ -419,7 +438,7 @@ class Rigid3D(Affine):
             einit_loc = einit
         elif isinstance(einit, (np.ndarray, list)):
             einit_loc = einit
-        elif isinstance(einit, str) and (einit == 'gl2'):
+        elif isinstance(einit, basestring) and (einit == 'gl2'):
             gl2 = True
             einit_loc, s_gl22 = cls.approx_gl2_to_ck3(
                 x=x_prime, y=y_prime, xy_axes='dim_point', ret='both')
@@ -435,7 +454,7 @@ class Rigid3D(Affine):
                 sinit_loc = sinit
             elif isinstance(sinit, (float, int)):
                 sinit_loc = sinit
-            elif isinstance(sinit, str) and (sinit == 'gl2'):
+            elif isinstance(sinit, basestring) and (sinit == 'gl2'):
                 if gl2:
                     sinit_loc = s_gl22
                 else:
@@ -978,7 +997,7 @@ class Rigid3D(Affine):
             x2 = x[:,:2]
 
         # find 2d affine
-        from affine_2d import Affine2D
+        from .affine_2d import Affine2D
         affine22 = Affine2D.find(x2, y, xy_axes=xy_axes)
 
         # find corresponding ck params
@@ -1010,8 +1029,8 @@ class Rigid3D(Affine):
         """
 
         # SV decompose gl 
-        from affine import Affine
-        from affine_2d import Affine2D
+        from .affine import Affine
+        from .affine_2d import Affine2D
         aff = Affine()
         u, p, s, v = aff.decomposeSV(gl=gl)
 
@@ -1275,9 +1294,9 @@ class Rigid3D(Affine):
             elif (final == 'zxz_in_active'):
                 result = (psi, theta, phi)
             elif final == 'zyz_ex_active':
-                result = (phi + np.pi/2, theta, psi - np.pi/2)
+                result = (phi + np.pi / 2, theta, psi - np.pi / 2)
             elif final == 'zyz_in_active':
-                result = (psi + np.pi/2, theta, phi - np.pi/2)
+                result = (psi + np.pi / 2, theta, phi - np.pi / 2)
 
             elif final.endswith('_passive'):
 
@@ -1296,9 +1315,9 @@ class Rigid3D(Affine):
             elif (init == 'zxz_in_active'):
                 result = (psi, theta, phi)
             elif init == 'zyz_ex_active':
-                result = (phi - np.pi/2, theta, psi + np.pi/2)
+                result = (phi - np.pi / 2, theta, psi + np.pi / 2)
             elif init == 'zyz_in_active':
-                result = (psi - np.pi/2, theta, phi + np.pi/2)
+                result = (psi - np.pi / 2, theta, phi + np.pi / 2)
 
             elif init.endswith('_passive'):
 
@@ -1417,15 +1436,15 @@ class Rigid3D(Affine):
                 return np.array([psi_1, theta_1, phi_1])
             elif (mode == 'zyz_ex_active'):
                 phi_1_ret = cls.shift_angle_range(
-                    angle=phi_1 + np.pi/2, low=-np.pi)
+                    angle=phi_1 + np.pi / 2, low=-np.pi)
                 psi_1_ret = cls.shift_angle_range(
-                    angle=psi_1 - np.pi/2, low=-np.pi)
+                    angle=psi_1 - np.pi / 2, low=-np.pi)
                 return np.array([phi_1_ret, theta_1, psi_1_ret])
             elif (mode == 'zyz_in_active'):
                 psi_1_ret = cls.shift_angle_range(
-                    angle=phi_1 + np.pi/2, low=-np.pi)
+                    angle=phi_1 + np.pi / 2, low=-np.pi)
                 phi_1_ret = cls.shift_angle_range(
-                    angle=psi_1 - np.pi/2, low=-np.pi)
+                    angle=psi_1 - np.pi / 2, low=-np.pi)
                 return np.array([phi_1_ret, theta_1, psi_1_ret])
 
             else:
@@ -1443,24 +1462,24 @@ class Rigid3D(Affine):
                                  [psi_2, theta_2, phi_2]])
             elif (mode == 'zyz_ex_active'):
                 phi_1_ret = cls.shift_angle_range(
-                    angle=phi_1 + np.pi/2, low=-np.pi)
+                    angle=phi_1 + np.pi / 2, low=-np.pi)
                 psi_1_ret = cls.shift_angle_range(
-                    angle=psi_1 - np.pi/2, low=-np.pi)
+                    angle=psi_1 - np.pi / 2, low=-np.pi)
                 phi_2_ret = cls.shift_angle_range(
-                    angle=phi_2 + np.pi/2, low=-np.pi)
+                    angle=phi_2 + np.pi / 2, low=-np.pi)
                 psi_2_ret = cls.shift_angle_range(
-                    angle=psi_2 - np.pi/2, low=-np.pi)
+                    angle=psi_2 - np.pi / 2, low=-np.pi)
                 return np.array([[phi_1_ret, theta_1, psi_1_ret],
                                  [phi_2_ret, theta_2, psi_2_ret]])
             elif (mode == 'zyz_in_active'):
                 psi_1_ret = cls.shift_angle_range(
-                    angle=phi_1 + np.pi/2, low=-np.pi)
+                    angle=phi_1 + np.pi / 2, low=-np.pi)
                 phi_1_ret = cls.shift_angle_range(
-                    angle=psi_1 - np.pi/2, low=-np.pi)
+                    angle=psi_1 - np.pi / 2, low=-np.pi)
                 psi_2_ret = cls.shift_angle_range(
-                    angle=phi_2 + np.pi/2, low=-np.pi)
+                    angle=phi_2 + np.pi / 2, low=-np.pi)
                 phi_2_ret = cls.shift_angle_range(
-                    angle=psi_2 - np.pi/2, low=-np.pi)
+                    angle=psi_2 - np.pi / 2, low=-np.pi)
                 return np.array([[phi_1_ret, theta_1, psi_1_ret],
                                  [phi_2_ret, theta_2, psi_2_ret]])
 
@@ -1507,19 +1526,19 @@ class Rigid3D(Affine):
             # It is also different from  
 
             res = np.array(
-                [np.cos((fi + psi)/2.) * np.cos(theta/2.),
-                 np.cos((-fi + psi)/2.) * np.sin(theta/2.),
-                 np.sin((-fi + psi)/2.) * np.sin(theta/2.),
-                 np.sin((fi + psi)/2.) * np.cos(theta/2.)]
+                [np.cos((fi + psi) / 2.) * np.cos(theta / 2.),
+                 np.cos((-fi + psi) / 2.) * np.sin(theta / 2.),
+                 np.sin((-fi + psi) / 2.) * np.sin(theta / 2.),
+                 np.sin((fi + psi) / 2.) * np.cos(theta / 2.)]
                 )
 
         elif mode == 'test':
 
             res = np.array(
-                [np.cos((fi + psi)/2.) * np.cos(theta/2.),
-                 np.cos((fi - psi)/2.) * np.sin(theta/2.),
-                 np.sin((fi - psi)/2.) * np.sin(theta/2.),
-                 np.sin((fi + psi)/2.) * np.cos(theta/2.)]
+                [np.cos((fi + psi) / 2.) * np.cos(theta / 2.),
+                 np.cos((fi - psi) / 2.) * np.sin(theta / 2.),
+                 np.sin((fi - psi) / 2.) * np.sin(theta / 2.),
+                 np.sin((fi + psi) / 2.) * np.cos(theta / 2.)]
                 )
 
         else:
@@ -1634,7 +1653,7 @@ class Rigid3D(Affine):
     # Other methods
     #
  
-    def transform(self, x, q=None, s=None, d=None, origin=None, xy_axes=None):
+    def transform(self, x, q=None, s=None, d=None, center=None, xy_axes=None):
         """
         Applies transformation defined by q, s and d to points x. 
 
@@ -1644,13 +1663,22 @@ class Rigid3D(Affine):
         instance should be specified as n_point x 3 / 3 x n_point 
         matrices.
         
+        If the arg center is specified, the transformation is applied
+        in respect to the arg center, and not in respect to 0 (coordinate
+        system origin). In other words, the gl (includes rotation and
+        scaling) part transforms the point at the arg center to the
+        same point. Therefore, this method is consistent with 
+        shiftCenter() and resetCenter() methods, but not with 
+        Rigid3D.recalculate_translation() where the rotation center is
+        shifted, but the scaling center remains at 0.
+
         Arguments:
           - x: coordinates of one or more points
           - q: matrix representation of rotation
           - s: (single float or int) scale
           - d: translation vector (both 0 and None mean 0 in each coordinate)
-          - origin: coordinates of the rotation and scale origin, 
-          None or 0 for origin at the coordinate system origin
+          - center: coordinates of the rotation and scale center, 
+          None or 0 for center at the coordinate system origin
           - xy_axes: order of axes in matrices representing points, can be
           'point_dim' or 'dim_point' (default)
 
@@ -1678,7 +1706,7 @@ class Rigid3D(Affine):
         # use Affine.transform()
         aff = Affine()
         aff.ndim = 3
-        y = aff.transform(x=x, gl=s*q, d=d, origin=origin, xy_axes=xy_axes)
+        y = aff.transform(x=x, gl=s*q, d=d, center=center, xy_axes=xy_axes)
 
         # transformation
         #if xy_axes == 'point_dim':
@@ -1697,6 +1725,11 @@ class Rigid3D(Affine):
         """
         Recalculates translation when the current transformation is
         modified so that the rotation center is changed (not at the origin).
+
+        Note that here the scaling center remains at 0 (coordinate
+        system origin). This is different from shift_center() method,
+        where both rotation center and scaling center are changed
+        (shifted).
 
         The rotation center can be specified as 1d, 1x3 or 3x1 array. The 
         returned translation will have the same form as the center.
@@ -1736,6 +1769,17 @@ class Rigid3D(Affine):
 
         return trans        
 
+    def shift_center(self, *args, **kwargs):
+        """
+        Same as shiftCenter()
+        """
+        return self.shiftCenter(*args, **kwargs)
+
+    def reset_center(self, *args, **kwargs):
+        """
+        Same as resetCenter()
+        """
+        return self.resetCenter(*args, **kwargs)
 
     #########################################################
     #

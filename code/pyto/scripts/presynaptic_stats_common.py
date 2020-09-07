@@ -7,10 +7,17 @@ This was previously part of presynaptic_stats.py.
 Work in progress (03.2018)
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: presynaptic_stats_common.py 1485 2018-10-04 14:35:01Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1485 $"
+__version__ = "$Revision$"
 
 import sys
 import logging
@@ -323,7 +330,7 @@ def stats(data, name, bins=None, bin_names=None, fraction=None, join=None,
                 plot_name='histogram'
 
     # figure out if indexed
-    indexed = name in data.values()[0].indexed
+    indexed = name in list(data.values())[0].indexed
 
     if isinstance(data, Groups):
         if not indexed:
@@ -364,7 +371,7 @@ def stats(data, name, bins=None, bin_names=None, fraction=None, join=None,
 
                 # stats between groups and  between observations
                 if groups is None:
-                    groups = data.keys()
+                    groups = list(data.keys())
 
                 # between experiments
                 exp_ref = {}
@@ -420,8 +427,8 @@ def stats(data, name, bins=None, bin_names=None, fraction=None, join=None,
                     identifiers=identifiers,
                     ddof=ddof, out=out, format_=print_format, title=title)
 
-                if ((plot_name is not 'histogram') 
-                    and (plot_name is not 'probability')):
+                if ((plot_name != 'histogram') 
+                    and (plot_name != 'probability')):
 
                     # just plot
                     if plot_:
@@ -715,7 +722,7 @@ def plot_layers(
     # if data is Groups, print a separate figure for each group
     if isinstance(data, Groups):
         if groups is None:
-            groups = data.keys()
+            groups = list(data.keys())
 
         if (mode == 'all') or (mode == 'all&mean'): 
 
@@ -860,7 +867,7 @@ def plot_histogram(data, name, bins, groups=None, identifiers=None,
             if len(groups)==1:
                 facecolor = color.get(groups[0], None)
         else:
-            if isinstance(groups, str):
+            if isinstance(groups, basestring):
                 facecolor = color.get(groups, None)
 
     # plot
@@ -911,7 +918,7 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
 
     # set group order
     if groups is None:
-        group_names = stats.keys() 
+        group_names = list(stats.keys()) 
     else:
         group_names = groups
 
@@ -945,7 +952,7 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
     y_max = 0
     group_left = []
     label_done = False
-    for group_nam, group_ind in zip(group_names, range(len(group_names))):
+    for group_nam, group_ind in zip(group_names, list(range(len(group_names)))):
         group = stats[group_nam]
 
         # set experiment order
@@ -963,7 +970,7 @@ def plot_stats(stats, name, groups=None, identifiers=None, yerr='sem',
             group_left.append(left + bar_width)
 
         # loop over experiments
-        for ident, exp_ind in zip(loc_identifs, range(len(loc_identifs))):
+        for ident, exp_ind in zip(loc_identifs, list(range(len(loc_identifs)))):
 
             # label
             if label is None:
@@ -1123,7 +1130,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
     if (isinstance(x_data, Groups) and isinstance(y_data, Groups)):
         data_type = 'groups'
         if groups is None:
-            group_names = x_data.keys() 
+            group_names = list(x_data.keys()) 
         else:
             group_names = groups
     elif (isinstance(x_data, Observations) 
@@ -1155,7 +1162,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
     # loop over groups
     figure = None
     markers_default_copy = copy(markers_default)
-    for group_nam, group_ind in zip(group_names, range(len(group_names))):
+    for group_nam, group_ind in zip(group_names, list(range(len(group_names)))):
 
         # get data
         if data_type == 'groups':
@@ -1180,7 +1187,7 @@ def plot_2d(x_data, x_name='x_data', y_data=None, y_name='y_data', yerr=None,
             loc_identifs = identifiers[group_nam]
 
         # loop over experiments
-        for ident, exp_ind in zip(loc_identifs, range(len(loc_identifs))):
+        for ident, exp_ind in zip(loc_identifs, list(range(len(loc_identifs)))):
 
             # values
             if (data_type == 'groups') or (data_type == 'observations'):
@@ -1307,7 +1314,7 @@ def save_data(object, base, name=['mean', 'sem'], categories=categories):
     # find shortest ids
     if 'ids' in object.indexed:
         ids = object.ids[0]
-        for group, group_ind in zip(categories, range(len(categories))):
+        for group, group_ind in zip(categories, list(range(len(categories)))):
             current_ids = object.getValue(identifier=group, name='ids')
             if len(current_ids) < len(ids):
                 ids = current_ids
@@ -1327,7 +1334,7 @@ def save_data(object, base, name=['mean', 'sem'], categories=categories):
             result[0,0] = 1
 
         # make array that contains all values for current property
-        for group, group_ind in zip(categories, range(len(categories))):
+        for group, group_ind in zip(categories, list(range(len(categories)))):
             values =  object.getValue(identifier=group, name=one_name)
 
             if one_name in object.indexed:
@@ -1365,7 +1372,7 @@ def getSpecialThreshold(cleft, segments, fraction,
 
     # get groups
     if groups is None:
-        groups = cleft.keys()
+        groups = list(cleft.keys())
 
     # loop over groups
     fract_thresholds = {}
@@ -1392,16 +1399,16 @@ def getSpecialThreshold(cleft, segments, fraction,
                 identifier=identif, property='mean', ids=bound_ids)
             bound_volume = cleft[categ].getValue(
                 identifier=identif, property='volume', ids=bound_ids)
-            bound_density = numpy.dot(bound_densities, 
-                                      bound_volume) / bound_volume.sum() 
+            bound_density = (
+                numpy.dot(bound_densities, bound_volume) / bound_volume.sum())
             cleft_densities = cleft[categ].getValue(
                 identifier=identif, property='mean', ids=cleft_ids)
             cleft_volume = cleft[categ].getValue(
                 identifier=identif, property='volume', ids=cleft_ids)
-            cleft_density = numpy.dot(cleft_densities, 
-                                      cleft_volume) / cleft_volume.sum() 
-            fract_density = bound_density + (cleft_density 
-                                             - bound_density) * fraction
+            cleft_density = (
+                numpy.dot(cleft_densities, cleft_volume) / cleft_volume.sum()) 
+            fract_density = (
+                bound_density + (cleft_density - bound_density) * fraction)
             
             # get closest threshold
             # ERROR thresholds badly formated in segments
@@ -1631,17 +1638,17 @@ def anova_factorial(data_11, data_12, data_21, data_22):
     # ss between columns
     ss_col = (
         numpy.hstack((data_11, data_21)).sum()**2 /
-            (float(len(data_11) + len(data_21))) 
-        + numpy.hstack((data_12, data_22)).sum()**2 / 
-            (float(len(data_12) + len(data_22))) 
+            (float(len(data_11) + len(data_21)))
+        + numpy.hstack((data_12, data_22)).sum()**2 /
+            (float(len(data_12) + len(data_22)))
         - tot.sum()**2 / float(len(tot)) )
 
     # ss between rows
     ss_row = (
-        numpy.hstack((data_11, data_12)).sum()**2 / 
-            (float(len(data_11) + len(data_12)))  
-        + numpy.hstack((data_21, data_22)).sum()**2 / 
-            (float(len(data_21) + len(data_22)))  
+        numpy.hstack((data_11, data_12)).sum()**2 /
+            (float(len(data_11) + len(data_12)))
+        + numpy.hstack((data_21, data_22)).sum()**2 /
+            (float(len(data_21) + len(data_22)))
         - tot.sum()**2 / float(len(tot)) )
         
     # ss interaction
@@ -1655,8 +1662,8 @@ def anova_factorial(data_11, data_12, data_21, data_22):
 
     # ss error
     ss_err = ss_tot - (ss_col + ss_row + ss_int)
-    ms_err = ss_err / float(len(data_11) + len(data_12) + len(data_21) 
-                            + len(data_22) - 4)
+    ms_err = ss_err / float(
+        len(data_11) + len(data_12) + len(data_21) + len(data_22) - 4)
 
     # f values and significances
     f_col = ss_col / ms_err

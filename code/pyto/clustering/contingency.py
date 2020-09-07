@@ -1,6 +1,6 @@
 """
-Contains class Contingency for compaing a clustering (classification with a
-reference clustering.
+Contains class Contingency for compaing a clustering (classification) with a
+reference classification.
 
 
 # Author: Vladan Lucic
@@ -14,12 +14,19 @@ import collections
 
 import numpy as np
 import scipy as sp
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    pass # Python 2
 
 
 class Contingency(object):
     """
-    Holds and manipulates a contingency (confusion) matrix
+    Holds and manipulates a contingency (confusion) matrix.
+
+    Important attributes:
+      - self.data: Contingency table (pandas.DataFrame) where rows are 
+        clusters and columns are reference classes
     """
 
     def __init__(self, data=None):
@@ -77,12 +84,39 @@ class Contingency(object):
 
     def match(self):
         """
-        Associates each cluster with the reference that most of its 
-        elements belongs to.
+        Matches clusters with reference classes.
+        
+        First, associates each cluster with the reference class that most 
+        of the cluster elements belongs to (saved as attribute class_ref).
+        Then, joins the clusters associated with the same reference classes
+        to form matched clusters. In this way, 1 to 1 corespondence 
+        between the matched clusters and reference classes. Note that not 
+        all clusters need to have an associated reference class.
 
-        Sets attribute:
-          - self.matched
-          - self.class_ref
+        The matched contingency matrix (self.matched) is created from the 
+        existing contingency matrix (self.data) by modifying the latter
+        to reflect the above associations. The columns are ordered so that 
+        the matched contingency matrix is diagonalized. The rows of the 
+        resulting matrix correspond to the matched clusters and columns to 
+        reference classes (attribute match). In case a cluster is not 
+        associated with any reference class, the corresponding rows are 
+        filled with 0's. 
+
+        All together, the matched contingency matrix has a square shape
+        (the size equals the number of reference classes), the 
+        columns denote reference classes and the rows the matched clusters, 
+        and the matched clusters are associated with the reference classes
+        of the same index.
+
+        Note: Useful when reference classes have the same number of elements.
+        Otherwise, not clear how to use it.
+
+        Sets attributes:
+          - self.matched: (DataFrame) contingency table where rows (clusters)
+          and columns (reference classes) are reordered so that they match 
+          the clusters
+          - self.class_ref: dictionary where keys are cluster indices and
+          values the indices of the corresponding reference clusters
         """
 
         # initialize
@@ -98,6 +132,55 @@ class Contingency(object):
 
     def evaluate(self, match=True):
         """
+        Calculates several properties used to evaluate the clustering.
+
+        First checks wheteher the clusters and reference classes were matched
+        (that is whether self.matched exists, (see self.match()), or 
+        executes self.match() if atg match is True. If not, self data is 
+        taken to be the matched contingency matrix.
+
+        Marginal values of both contingency and the matched contingency 
+        matrices are calculated.
+
+        The number of true positives is calculated for the original 
+        (from contingency matrix) and matched clusters (from the 
+        matched contingency matrix). False positives and false
+        negatives are calculated for the matched clusters.
+
+        Precision and recall are defined in the following way:
+
+          precision = (1 / N_ref_classes) * TP / (TP + FP) 
+          recall = (1 / N_ref_classes) * TP / (TP + FN)
+          recall_adj = (1 / N_clusters) * TP / (TP + FN)
+
+        The adjusted recall (recall_adj) shows improved behavior because 
+        it decreases with the increasing number of clusters.
+
+        F1 measure is calculated using both recalls (see 
+        bioRxiv doi:10.1101/413484 ):
+
+        F1 = (2 * precision * recall) / (precision + recall)
+        F1_adj = (2 * precision * recall_adj) / (precision + recall_adj)
+
+        Sets attributes:
+          - class_margin: number of elements in each cluster (marginalizes
+          self.data)
+          - class_margin_matched: number of elements in each matched cluster
+          (matginalizes self.matched)
+          - ref_margin: number of elements in reference classes
+          - tp: true positives for  
+          - tp_matched: true positives for matched clusters
+          - fp_matched: false positives for matched clusters
+          - fn_matched: false negatives for matched clusters
+          - precision_matched: precision for matched clusters
+          - recall_matched: recall for matched clusters
+          - recall_matched_adj: adjusted recall for matched clusters
+          - f1_matched: F1 for matched clusters
+          - f1_matched_adj: adjusted F1 for matched clusters
+
+        Arguments:
+          - match: flag indicating whether mathch() method is executed
+          first
         """
 
         # match clusters to references if needed

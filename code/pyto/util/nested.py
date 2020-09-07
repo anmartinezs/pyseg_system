@@ -2,10 +2,13 @@
 Functions dealing with nested lists and related.
 
 # Author: Vladan Lucic
-# $Id: nested.py 514 2009-06-30 13:54:21Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import map
+from past.builtins import basestring
 
-__version__ = "$Revision: 514 $"
+__version__ = "$Revision$"
 
 
 from copy import copy, deepcopy
@@ -56,7 +59,7 @@ def map(fun, lis):
     result = []
     for el in lis:
         if hasattr(el, "__iter__") and not isinstance(el, basestring):
-            result.append(map(fun, el))
+            result.append(list(map(fun, el)))
         else:
             result.append(fun(el))
     return result
@@ -116,7 +119,7 @@ def resolve_dict(dict):
 
     result = deepcopy(dict)
 
-    for key in dict.iterkeys():
+    for key in dict.keys():
         val = key
         try:
             while(True):

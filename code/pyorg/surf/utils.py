@@ -184,7 +184,7 @@ def points_to_poly(points, normals=None, n_name='n_normal'):
         p_norm = vtk.vtkFloatArray()
         p_norm.SetName(n_name)
         p_norm.SetNumberOfComponents(3)
-        for i, point, normal in zip(range(len(points)), points, normals):
+        for i, point, normal in zip(list(range(len(points))), points, normals):
             p_points.InsertNextPoint(point)
             p_cells.InsertNextCell(1)
             p_cells.InsertCellPoint(i)
@@ -242,7 +242,7 @@ def vtp_to_vtp_closest_point(vtp_1, vtp_2):
     point_tree.SetDataSet(vtp_2)
     point_tree.BuildLocator()
     point_id, point_dst = -1, np.finfo(np.float).max
-    for i in xrange(vtp_1.GetNumberOfPoints()):
+    for i in range(vtp_1.GetNumberOfPoints()):
         point_1 = vtp_1.GetPoint(i)
         point_2_id = point_tree.FindClosestPoint(point_1)
         point_2 = vtp_2.GetPoint(point_2_id)
@@ -262,7 +262,7 @@ def stat_dict_to_mat(dict_in, list_in):
     # Initialization
     hold_mat = list()
 
-    for key, arr in zip(dict_in.iterkeys(), dict_in.itervalues()):
+    for key, arr in zip(iter(dict_in.keys()), iter(dict_in.values())):
         tomo = list_in.get_tomo_by_key(key)
         # Parse simulation keys
         for i in range(tomo.get_num_particles()):
@@ -281,16 +281,16 @@ def list_tomoparticles_pvalues(rads, dic_exp, dic_sim):
     p_values = dict()
 
     # Loop dictrionary entries
-    for key, exp_arr in zip(dic_exp.iterkeys(), dic_exp.itervalues()):
+    for key, exp_arr in zip(iter(dic_exp.keys()), iter(dic_exp.values())):
         try:
             sim_mat = dic_sim[key]
         except KeyError:
-            print 'WARNING (list_tomoparticles_pvalues): key ' + key + ' not in simulation dictionary!'
+            print('WARNING (list_tomoparticles_pvalues): key ' + key + ' not in simulation dictionary!')
             continue
         # Get the percentile maximum loop
         p_values[key] = [0., 0., 0., 0.]
         pers = np.zeros(shape=exp_arr.shape, dtype=np.float32)
-        for i in xrange(len(exp_arr)):
+        for i in range(len(exp_arr)):
             rad, exp_value, sim_arr = rads[i], exp_arr[i], sim_mat[:, i]
             sim_len = float(len(sim_arr))
             if sim_len > 0:

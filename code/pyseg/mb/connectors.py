@@ -192,7 +192,7 @@ class CloudMbConn(object):
                                 break
                     if not found:
                         error_msg = 'Unexpected event.'
-                        print 'WARNING: ' + error_msg
+                        print('WARNING: ' + error_msg)
                         # raise pexceptions.PySegTransitionError(expr='__build (CloudMbConn)',
                         #                                        msg=error_msg)
 
@@ -422,7 +422,7 @@ class ConnSubGraph(object):
                     pass
                 elif not found:
                     error_msg = 'Unexpected event.'
-                    print 'WARNING: ' + error_msg
+                    print('WARNING: ' + error_msg)
                     # raise pexceptions.PySegTransitionError(expr='__build (CloudMbConn)',
                     #                                        msg=error_msg)
                 else:

@@ -3,11 +3,14 @@ Tests class Balls.
 
 
 
-# Author: Vladan Lucic
-# $Id: test_ball.py 1434 2017-03-27 12:36:23Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest

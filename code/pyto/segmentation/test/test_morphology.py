@@ -5,10 +5,17 @@ Tests module morphology
 More tests needed
 
 # Author: Vladan Lucic
-# $Id: test_morphology.py 1338 2016-09-28 13:38:40Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+#from past.utils import old_div
 
-__version__ = "$Revision: 1338 $"
+__version__ = "$Revision$"
+
+import importlib
 
 import numpy
 import scipy
@@ -19,13 +26,14 @@ from numpy.testing import *
 from pyto.segmentation.segment import Segment
 from pyto.segmentation.morphology import Morphology
 from pyto.segmentation.contact import Contact
-import common
+from pyto.segmentation.test import common
 
 class TestMorphology(TestCase):
     """
     """
 
     def setUp(self):
+        importlib.reload(common) # to avoid problems when running multiple tests
         self.shapes = common.make_shapes()
 
     def testVS(self):
@@ -75,7 +83,7 @@ class TestMorphology(TestCase):
             [desired_mean_1, 2.18885441, 1.77213119, 1.32865187])
         desired_std_1 = numpy.sqrt(
             ((numpy.sqrt(2.) - desired_mean_1)**2 + 
-             (1. - desired_mean_1)**2) /2)
+             (1. - desired_mean_1)**2) / 2)
         assert_almost_equal(
             mor.radius.std[self.shapes.ids], 
             [desired_std_1, 0.09442658,  0.65649035,  0.72138648  ],

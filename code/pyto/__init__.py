@@ -2,22 +2,29 @@
 Set of utilities for segmentation and analysis of n-dimensional images.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 1461 2017-10-12 10:10:49Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1461 $"
+__version__ = "$Revision$"
 
-import util
-import core
-import grey
-import io
-import segmentation
-import scene
-import analysis
-import geometry
-import tomo
-import correlative
-import particles
+from . import util
+from . import core
+from . import grey
+from . import io
+from . import segmentation
+from . import clustering
+from . import scene
+from . import analysis
+from . import geometry
+from . import tomo
+from . import correlative
+try:
+    from . import particles
+except (ModuleNotFoundError, ImportError):
+    pass
+
 #import scripts
 
 from numpy.testing import Tester

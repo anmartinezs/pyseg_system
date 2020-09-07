@@ -6,10 +6,13 @@ files.
 For series saved as a stack, electron dose can be calculated
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: sort_series.py 1367 2016-12-14 15:51:56Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from builtins import input
 
-__version__ = "$Revision: 1367 $"
+__version__ = "$Revision$"
 
 import logging
 import numpy
@@ -152,7 +155,7 @@ def main():
         # remove (manually) bad projections
         # ToDo: check the angles and complain if needed
         print('\nIf a tilt angle is repeated interrupt the procedure (Ctrl-C)')
-        raw_input('and remove bad projection(s), otherwise press Return:')
+        input('and remove bad projection(s), otherwise press Return:')
 
         # sort and correct the series 
         logging.info("Sorting the series:")

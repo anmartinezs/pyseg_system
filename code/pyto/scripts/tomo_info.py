@@ -14,10 +14,13 @@ Each parameter should be read using a statement like:
 
 Parameters can have their values redefined in the individual scripts, if needed.
 
-$Id: tomo_info.py 1493 2018-11-08 16:23:38Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1493 $"
+from __future__ import unicode_literals
+from builtins import range
+
+__version__ = "$Revision$"
 
 
 ############################################################
@@ -53,17 +56,21 @@ labels_data_type = 'uint16'
 # Segments that are not listed here are removed, that is set to 0. In order to
 # avoid possible problems, all boundary file segments should be specified here, 
 # or no other segment (boundary or segmentation region) should have id 0.
-all_ids = [2,3] + range(9,165)  
+all_ids = [2,3] + list(range(9,165))  
 
 # Ids of all boundaries defined in the labels file. Nested list can be used 
 # where ids in a sublist are uderstood in the "or" sense, that is all boundaries 
 # listed in a sublist form effectivly a single boundary
-boundary_ids = [2] + range(9,165)  
+boundary_ids = [2] + list(range(9,165))  
 
 # Ids of vesicles in the labels file
-vesicle_ids = range(9,165)      
+vesicle_ids = list(range(9,165))      
 
 # Id of the segmentation region (where connectors can be formed). Using 0 in
 # case the segmentation region is not specified in the boundary file is
 # discouraged. 
 segmentation_region = 3
+
+# Id of a segment to which distance is calculated 
+# For presynaptic_stats this should be the AZ membrane
+distance_id = 2

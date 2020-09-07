@@ -2,10 +2,14 @@
 Scipy related utility functions.
 
 # Author: Vladan Lucic, Max Planck Institute for Biochemistry
-# $Id: scipy_plus.py 1564 2019-06-04 09:37:47Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+#from past.utils import old_div
 
-__version__ = "$Revision: 1564 $"
+__version__ = "$Revision$"
 
 
 import numpy
@@ -40,7 +44,7 @@ def chisquare_2(f_obs_1, f_obs_2, yates=False):
         sum_2 = float(f_obs_2.sum())
 
         # calculate chi-square value
-        chisq = [(el_1 * sum_2 - el_2 * sum_1) ** 2 / (el_1 + el_2) 
+        chisq = [(el_1 * sum_2 - el_2 * sum_1) ** 2 / float(el_1 + el_2) 
                  for el_1, el_2 in zip(f_obs_1, f_obs_2)]
         chisq = numpy.array(chisq, dtype='float').sum() / (sum_1 * sum_2)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Creates a segmentaion file for statistical analysis containg the global offsets."""
-from __future__ import division
+
 
 import os
 import logging
@@ -145,7 +145,7 @@ def main():
         z -= (.25 * zoffset)
         coords[name].append((x, y, z, rot, tilt, psi, image_base.rsplit('_', 1)[-1]))
 
-    for name, particles in coords.iteritems():
+    for name, particles in coords.items():
         write_coords(particles, export_csv_path + '/' + str(name) + '_peaks_imod.csv')
 
     logger.info('Finished. Runtime {}.'.format(str(timedelta(seconds=time.time()-start_time))))

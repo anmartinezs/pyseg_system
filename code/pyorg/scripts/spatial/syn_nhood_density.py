@@ -26,7 +26,7 @@ from pyorg.surf.model import ModelCSRV
 from pyorg.surf.utils import list_tomoparticles_pvalues
 import matplotlib.pyplot as plt
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -81,61 +81,61 @@ if nb_thick is not None:
 
 ########## Print initial message
 
-print 'Computed averaged density in a neighbourhood.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput reference STAR file: ' + str(in_star_ref)
-print '\tInput reference short key: ' + str(in_ref_short_key)
+print('Computed averaged density in a neighbourhood.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput reference STAR file: ' + str(in_star_ref))
+print('\tInput reference short key: ' + str(in_ref_short_key))
 if in_star:
-    print '\tBi-variate mode activated: '
-    print '\t\t-Input analysis STAR file: ' + str(in_star)
+    print('\tBi-variate mode activated: ')
+    print('\t\t-Input analysis STAR file: ' + str(in_star))
 else:
-    print '\tUnivariate mode activated!'
+    print('\tUnivariate mode activated!')
 if in_wspace is not None:
-    print '\tLoad workspace from: ' + in_wspace
-print '\tNeighbourhood settings: '
-print '\t\t-Range of radius: ' + str(nb_rad) + ' nm'
-print '\t\t-Range of radius: ' + str(nb_rad_v) + ' voxels'
+    print('\tLoad workspace from: ' + in_wspace)
+print('\tNeighbourhood settings: ')
+print('\t\t-Range of radius: ' + str(nb_rad) + ' nm')
+print('\t\t-Range of radius: ' + str(nb_rad_v) + ' voxels')
 if nb_rad is None:
-    print '\t\t-Spherical neighborhood'
+    print('\t\t-Spherical neighborhood')
 else:
-    print '\t\t-Shell neighborhood with thickness: ' + str(nb_rad) + ' nm'
-    print '\t\t-Shell neighborhood with thickness: ' + str(nb_rad_v) + ' voxels'
-print '\t\t-Convergence iterations: ' + str(nb_conv_iter)
-print '\t\t-Maximum iterations: ' + str(nb_max_iter)
+    print('\t\t-Shell neighborhood with thickness: ' + str(nb_rad) + ' nm')
+    print('\t\t-Shell neighborhood with thickness: ' + str(nb_rad_v) + ' voxels')
+print('\t\t-Convergence iterations: ' + str(nb_conv_iter))
+print('\t\t-Maximum iterations: ' + str(nb_max_iter))
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print '\t\t-Colormap: ' + str(pt_cmap)
-print '\t\t-Nuber of bins in histograms: ' + str(pt_nbins)
+    print('\tPlotting settings: ')
+print('\t\t-Colormap: ' + str(pt_cmap))
+print('\t\t-Nuber of bins in histograms: ' + str(pt_nbins))
 if pt_sim_v:
-    print '\t\t-Verbose simulation activated!'
-print ''
+    print('\t\t-Verbose simulation activated!')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
 out_stem_dir = out_dir + '/' + out_stem
-print '\tCleaning the output dir: ' + out_stem
+print('\tCleaning the output dir: ' + out_stem)
 if os.path.exists(out_stem_dir):
     clean_dir(out_stem_dir)
 else:
     os.makedirs(out_stem_dir)
 
-print '\tLoading input data...'
+print('\tLoading input data...')
 star_ref = sub.Star()
 try:
     star_ref.load(in_star_ref)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input reference STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input reference STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 if in_star is None:
     star = star_ref
@@ -144,8 +144,8 @@ else:
     try:
         star.load(in_star)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 ref_list = None
 for row in range(star_ref.get_nrows()):
@@ -158,8 +158,8 @@ for row in range(star_ref.get_nrows()):
     if fname_pkl[:idx] == in_ref_short_key:
         ref_list = unpickle_obj(ltomos_pkl)
 if ref_list is None:
-    print 'ERROR: reference ListTomoParticles with short key ' + in_ref_short_key + ' was not found!'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: reference ListTomoParticles with short key ' + in_ref_short_key + ' was not found!')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if in_wspace is None:
@@ -170,7 +170,7 @@ if in_wspace is None:
         ltomos = unpickle_obj(ltomos_pkl)
         set_lists.add_list_tomos(ltomos, ltomos_pkl)
 
-    print '\tBuilding the dictionaries...'
+    print('\tBuilding the dictionaries...')
     lists_count, tomos_count = 0, 0
     lists_dic = dict()
     lists_hash, tomos_hash = dict(), dict()
@@ -178,12 +178,12 @@ if in_wspace is None:
     lists_den, lists_color = dict(), dict()
     tmp_sim_folder = out_dir + '/tmp_gen_list_' + out_stem
     set_lists_dic = set_lists.get_lists()
-    for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+    for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
         fkey = os.path.split(lkey)[1]
-        print '\t\t-Processing list: ' + fkey
+        print('\t\t-Processing list: ' + fkey)
         short_key_idx = fkey.index('_')
         short_key = fkey[:short_key_idx]
-        print '\t\t\t+Short key found: ' + short_key
+        print('\t\t\t+Short key found: ' + short_key)
         try:
             lists_dic[short_key]
         except KeyError:
@@ -191,13 +191,13 @@ if in_wspace is None:
             lists_hash[lists_count] = short_key
             lists_den[short_key] = None
             lists_count += 1
-    for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+    for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
         llist_tomos_dic = llist.get_tomos()
-        for tkey, ltomo in zip(llist_tomos_dic.iterkeys(), llist_tomos_dic.itervalues()):
+        for tkey, ltomo in zip(iter(llist_tomos_dic.keys()), iter(llist_tomos_dic.values())):
             try:
                 ref_tomo = ref_list.get_tomo_by_key(tkey)
             except KeyError:
-                print '\t\t\t\t\t-WARNING: tomogram ' + tkey + ' discarded because it is not in reference list!'
+                print('\t\t\t\t\t-WARNING: tomogram ' + tkey + ' discarded because it is not in reference list!')
                 continue
             try:
                 tomos_den[tkey]
@@ -206,18 +206,18 @@ if in_wspace is None:
                 tomos_den[tkey] = list()
                 tomos_count += 1
 
-    print '\tLIST COMPUTING LOOP:'
-    for lkey in lists_hash.values():
+    print('\tLIST COMPUTING LOOP:')
+    for lkey in list(lists_hash.values()):
 
         llist = lists_dic[lkey]
-        print '\t\t-Processing list: ' + lkey
-        print '\t\t\t+Tomograms computing loop:'
-        for tkey in tomos_hash.keys():
+        print('\t\t-Processing list: ' + lkey)
+        print('\t\t\t+Tomograms computing loop:')
+        for tkey in list(tomos_hash.keys()):
 
-            print '\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1]
+            print('\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1])
             ltomo, ref_tomo = llist.get_tomo_by_key(tkey), ref_list.get_tomo_by_key(tkey)
 
-            print '\t\t\t\t\t-Computing neighbourhood densities...'
+            print('\t\t\t\t\t-Computing neighbourhood densities...')
             hold_dens = ref_tomo.compute_densities_nhood(nb_rad, nb_thick, border=True,
                                                          conv_iter=nb_conv_iter, max_iter=nb_max_iter,
                                                          bi_coords=ref_tomo.get_particle_coords())
@@ -229,7 +229,7 @@ if in_wspace is None:
                     lists_den[lkey] = np.concatenate([lists_den[lkey], hold_dens])
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
-    print '\tPickling computation workspace in: ' + out_wspace
+    print('\tPickling computation workspace in: ' + out_wspace)
     wspace = (lists_count, tomos_count,
               lists_hash, tomos_hash,
               tomos_den,
@@ -240,7 +240,7 @@ if in_wspace is None:
 
 else:
 
-    print '\tLoading the workspace: ' + in_wspace
+    print('\tLoading the workspace: ' + in_wspace)
     with open(in_wspace, 'r') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
@@ -248,30 +248,30 @@ else:
     tomos_den = wspace[4]
     lists_den, lists_color = wspace[5], wspace[6]
 
-print '\tPrinting lists hash: '
-for id, lkey in zip(lists_hash.iterkeys(), lists_hash.itervalues()):
-    print '\t\t-[' + str(id) + '] -> [' + lkey + ']'
-print '\tPrinting tomograms hash: '
-for tkey, val in zip(tomos_hash.iterkeys(), tomos_hash.itervalues()):
-    print '\t\t-[' + tkey + '] -> [' + str(val) + ']'
+print('\tPrinting lists hash: ')
+for id, lkey in zip(iter(lists_hash.keys()), iter(lists_hash.values())):
+    print('\t\t-[' + str(id) + '] -> [' + lkey + ']')
+print('\tPrinting tomograms hash: ')
+for tkey, val in zip(iter(tomos_hash.keys()), iter(tomos_hash.values())):
+    print('\t\t-[' + tkey + '] -> [' + str(val) + ']')
 
-print '\tPrinting number of samples and volume for the reference by tomogram: '
+print('\tPrinting number of samples and volume for the reference by tomogram: ')
 for tomo in ref_list.get_tomo_list():
     tkey = tomo.get_tomo_fname()
-    print '\t\t-' + tkey + ': ' + str(tomo.get_num_particles()) + ' np, ' + str(tomo.compute_voi_volume()) + ' nm**3'
+    print('\t\t-' + tkey + ': ' + str(tomo.get_num_particles()) + ' np, ' + str(tomo.compute_voi_volume()) + ' nm**3')
 
 # Getting the lists colormap
-n_lists = len(lists_hash.keys())
-for i, lkey in zip(lists_hash.iterkeys(), lists_hash.itervalues()):
+n_lists = len(list(lists_hash.keys()))
+for i, lkey in zip(iter(lists_hash.keys()), iter(lists_hash.values())):
     lists_color[lkey] = pt_cmap(1.*i/n_lists)
 
-print '\tTOMOGRAMS PLOTTING LOOP: '
+print('\tTOMOGRAMS PLOTTING LOOP: ')
 
 out_tomos_dir = out_stem_dir + '/tomos'
 os.makedirs(out_tomos_dir)
 
-print '\t\t-Plotting densities by tomos...'
-for tkey, ltomo in zip(tomos_den.iterkeys(), tomos_den.itervalues()):
+print('\t\t-Plotting densities by tomos...')
+for tkey, ltomo in zip(iter(tomos_den.keys()), iter(tomos_den.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.title('Density for ' + tkey_short)
@@ -292,8 +292,8 @@ for tkey, ltomo in zip(tomos_den.iterkeys(), tomos_den.itervalues()):
         plt.savefig(hold_dir + '/averaged.png')
     plt.close()
 
-print '\t\t-Plotting density histograms by tomos...'
-for tkey, ltomo in zip(tomos_den.iterkeys(), tomos_den.itervalues()):
+print('\t\t-Plotting density histograms by tomos...')
+for tkey, ltomo in zip(iter(tomos_den.keys()), iter(tomos_den.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.title('Density histogram for ' + tkey_short)
@@ -313,13 +313,13 @@ for tkey, ltomo in zip(tomos_den.iterkeys(), tomos_den.itervalues()):
         plt.savefig(hold_dir + '/histogram.png')
     plt.close()
 
-print '\tLISTS PLOTTING LOOP: '
+print('\tLISTS PLOTTING LOOP: ')
 
 out_lists_dir = out_stem_dir + '/lists'
 os.makedirs(out_lists_dir)
 
-print '\t\t-Plotting averganed densities by lists...'
-n_tomos = len(tomos_hash.keys())
+print('\t\t-Plotting averganed densities by lists...')
+n_tomos = len(list(tomos_hash.keys()))
 plt.figure()
 plt.title('Density lists')
 plt.ylabel('Averaged density (np/vol)')
@@ -335,12 +335,12 @@ else:
     plt.savefig(out_lists_dir + '/lists_averaged.png')
 plt.close()
 
-print '\t\t-Plotting density histograms by lists...'
+print('\t\t-Plotting density histograms by lists...')
 plt.figure()
 plt.title('Density histogram for lists')
 plt.ylabel('Frequency')
 plt.xlabel('Density (np/vol)')
-for lkey, dens in zip(lists_den.iterkeys(), lists_den.itervalues()):
+for lkey, dens in zip(iter(lists_den.keys()), iter(lists_den.values())):
     plt.hist(dens, pt_nbins, color=lists_color[lkey], label=lkey, histtype='step')
 plt.legend(loc=1)
 plt.tight_layout()
@@ -350,5 +350,5 @@ else:
     plt.savefig(out_lists_dir + '/lists_histogram.png')
 plt.close()
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')
 

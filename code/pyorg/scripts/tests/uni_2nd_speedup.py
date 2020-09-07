@@ -81,36 +81,36 @@ def amdahls(x, p):
 
 ########## Print initial message
 
-print 'Test for measuring univariate 2nd order and simulations computation speed-up.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print '\tSynthetic data generations settings: '
-print '\t\t-Particle surface path: ' + str(sdat_surf)
-print '\t\t-Tomogram shape: ' + str(sdat_tomo_shape)
-print '\t\t-Number of tomograms: ' + str(sdat_n_tomos)
+print('Test for measuring univariate 2nd order and simulations computation speed-up.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('\tSynthetic data generations settings: ')
+print('\t\t-Particle surface path: ' + str(sdat_surf))
+print('\t\t-Tomogram shape: ' + str(sdat_tomo_shape))
+print('\t\t-Number of tomograms: ' + str(sdat_n_tomos))
 if sdat_n_sims is None:
-    print '\t\t-Number of simulations per tomogram are set to the number of processess.'
+    print('\t\t-Number of simulations per tomogram are set to the number of processess.')
 else:
-    print '\t\t-Number of simulations per tomogram: ' + str(sdat_n_sims)
-print '\t\t-Number of particles per tomogram: ' + str(sdat_n_part_tomo)
-print '\tAnalysis settings: '
-print '\t\t-Number of parallel processes to check: ' + str(ana_npr_rg)
-print '\t\t-Scale samplings array: ' + str(ana_rad_rg)
+    print('\t\t-Number of simulations per tomogram: ' + str(sdat_n_sims))
+print('\t\t-Number of particles per tomogram: ' + str(sdat_n_part_tomo))
+print('\tAnalysis settings: ')
+print('\t\t-Number of parallel processes to check: ' + str(ana_npr_rg))
+print('\t\t-Scale samplings array: ' + str(ana_rad_rg))
 if ana_shell_thick is None:
-    print '\t\t-Functions L is computed.'
+    print('\t\t-Functions L is computed.')
 else:
-    print '\t\t-Function O is computed with shell thickness: ' + str(ana_shell_thick)
+    print('\t\t-Function O is computed with shell thickness: ' + str(ana_shell_thick))
 if ana_fmm:
-    print '\t\t-Geodesic metric.'
+    print('\t\t-Geodesic metric.')
 else:
-    print '\t\t-Euclidean metric.'
-print ''
+    print('\t\t-Euclidean metric.')
+print('')
 
 ######### Main process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\t-Initialization...'
+print('\t-Initialization...')
 voi = gen_rect_voi_array(sdat_tomo_shape)
 part = disperse_io.load_poly(sdat_surf)
 model_csrv = ModelCSRV()
@@ -118,15 +118,15 @@ ltomos_csrv = gen_tlist(sdat_n_tomos, sdat_n_part_tomo, model_csrv, voi, sdat_su
                         npr=max(ana_rad_rg))
 cu_i = 1. / float(sdat_n_tomos * sdat_n_part_tomo)
 cpus = mp.cpu_count()
-print '\t\t+CPUs found: ' + str(cpus)
+print('\t\t+CPUs found: ' + str(cpus))
 
 # Loop for the of processors
-print '\t-Measurements loops: '
+print('\t-Measurements loops: ')
 comp_times = np.zeros(shape=len(ana_npr_rg), dtype=np.float32)
 sim_times = np.zeros(shape=len(ana_npr_rg), dtype=np.float32)
 for i, npr in enumerate(ana_npr_rg):
 
-    print '\t\t+Number of processes: ' + str(npr)
+    print('\t\t+Number of processes: ' + str(npr))
 
     # Computations loop
     comp_time, sim_time = 0, 0
@@ -147,10 +147,10 @@ for i, npr in enumerate(ana_npr_rg):
                                                     npr=npr)
         sim_time += (time.time() - hold_time)
     comp_times[i], sim_times[i] = comp_time * cu_i, sim_time * cu_sim_i
-    print '\t\t\t*Computation time per c.u.: ' + str(comp_times[i]) + ' [secs]'
-    print '\t\t\t*Computation time per c.u. and null-model simulations time: ' + str(sim_times[i]) + ' [secs]'
+    print('\t\t\t*Computation time per c.u.: ' + str(comp_times[i]) + ' [secs]')
+    print('\t\t\t*Computation time per c.u. and null-model simulations time: ' + str(sim_times[i]) + ' [secs]')
 
-print '\tPlotting: '
+print('\tPlotting: ')
 
 # plt.figure()
 # plt.xlabel('# processes')
@@ -197,10 +197,10 @@ fig.tight_layout()
 # fig.legend(loc=9)
 if out_dir is not None:
     out_fig_speed = out_dir + '/speed_up_time.png'
-    print '\t\t-Storing the time figure in: ' + out_fig_speed
+    print('\t\t-Storing the time figure in: ' + out_fig_speed)
     plt.savefig(out_fig_speed)
 else:
     plt.show(block=True)
 plt.close()
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

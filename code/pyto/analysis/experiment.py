@@ -5,10 +5,14 @@ This class is not meant to really hold data (Observations is the main
 data-holding class). It is only used for some special purposes.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: experiment.py 1275 2015-12-23 14:31:51Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import object
 
-__version__ = "$Revision: 1275 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -165,7 +169,7 @@ class Experiment(object):
         """
 
         # wrap in Observations
-        from observations import Observations
+        from .observations import Observations
         obs = Observations()
         obs.addExperiment(experiment=self)
 
@@ -205,7 +209,7 @@ class Experiment(object):
         """
 
         # wrap in Observations
-        from observations import Observations
+        from .observations import Observations
         obs = Observations()
         obs.addExperiment(experiment=self, identifier='')
 

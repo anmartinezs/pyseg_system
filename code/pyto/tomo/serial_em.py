@@ -3,10 +3,13 @@ Class SerialEM contains methods for manipulations of meta-data (parameters) of
 a tomographic series acquired by SerialEM.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: serial_em.py 1531 2019-04-10 14:00:24Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 
-__version__ = "$Revision: 1531 $" 
+__version__ = "$Revision$" 
 
 import re
 import os
@@ -31,11 +34,17 @@ class SerialEM(object):
 
         Either dir_ or mdoc should be specified.
 
+        Normally, pixel values in SerialEM series show the "real" counts
+        multiplied by a factor (19.2 on MPI Titan2-K2). This factor
+        should be given as arg counte. Attribute self.counte is set 
+        directly from arg counte, but it can be also set externaly from
+        FrameSeries.
+
         Arguments:
           - dir_: directory where mdoc and stacks corresponding to one tilt 
           series are located
           - mdoc: mdoc file path
-          - counte:
+          - counte: counts per electron for SerialEM projection stack
           - projection suffix: format of the suffix containing tilt
           angle that is added to the stack name to form file names for
           individual projections 

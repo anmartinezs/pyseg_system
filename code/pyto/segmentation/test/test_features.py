@@ -3,10 +3,11 @@ Tests class Features.
 
 
 # Author: Vladan Lucic
-# $Id: test_features.py 1216 2015-08-12 16:40:17Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 1216 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest

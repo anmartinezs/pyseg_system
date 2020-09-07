@@ -2,9 +2,10 @@
 Set of utilities for analysis of greyscale n-dimensional images.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 447 2009-03-10 17:21:22Z vladan $
+# $Id$
 """
+from __future__ import absolute_import
 
-__version__ = "$Revision: 447 $"
+__version__ = "$Revision$"
 
-from image import Image
+from .image import Image

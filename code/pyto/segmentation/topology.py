@@ -1,8 +1,6 @@
 """
-
 Contains class Topology for the calculation of topological properties of 
 segmented images.
-
 
 Basic usage:
 
@@ -16,11 +14,14 @@ topo.nLoops
 topo.nHoles
 
 # Author: Vladan Lucic (MPI for Biochemistry)
-# $Id: topology.py 1216 2015-08-12 16:40:17Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 1216 $"
-#__version__ = "$Revision: 1216 $"[1:-1].replace('Revision:', '').strip()
+__version__ = "$Revision$"
 
 
 import sys
@@ -30,10 +31,10 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from features import Features
-from labels import Labels
-from segment import Segment
-from hierarchy import Hierarchy
+from .features import Features
+from .labels import Labels
+from .segment import Segment
+from .hierarchy import Hierarchy
 
 class Topology(Features):
     """
@@ -98,11 +99,10 @@ class Topology(Features):
 
         # set structuring elements
         if self.segments is not None:
-            self.structEl = ndimage.generate_binary_structure(rank=self.ndim, 
-                                                              connectivity=1)
-            self.invStructEl = \
-                ndimage.generate_binary_structure(rank=self.ndim, 
-                                                  connectivity=self.ndim)
+            self.structEl = ndimage.generate_binary_structure(
+                rank=self.ndim, connectivity=1)
+            self.invStructEl = ndimage.generate_binary_structure(
+                rank=self.ndim, connectivity=self.ndim)
             # warn if segment.structEl is different?
 
     def initializeData(self):
@@ -194,9 +194,10 @@ class Topology(Features):
         if (self.ndim > 0) and (self.ndim <=3):
             return self._homologyRank[:,1]
         else:
-            raise NotImplementedError, "Sorry, don't know how to caclulate the"\
-                  + " number of independent loops for a " + str(self.ndim) \
-                  + "-dimensional obect."
+            raise NotImplementedError(
+                "Sorry, don't know how to caclulate the"
+                + " number of independent loops for a " + str(self.ndim) 
+                + "-dimensional obect.")
 
     def setNLoops(self, nLoops):
         """
@@ -207,9 +208,10 @@ class Topology(Features):
         """
         self._homologyRank[:,1] = numpy.asarray(nLoops)
 
-    nLoops = property(fget=getNLoops, fset=setNLoops, \
-                 doc="Number of closed independent loops, or the rank of the "\
-                 + "fundamental group.")
+    nLoops = property(
+        fget=getNLoops, fset=setNLoops, 
+        doc="Number of closed independent loops, or the rank of the "
+        + "fundamental group.")
 
     def getNHoles(self):
         """
@@ -220,9 +222,10 @@ class Topology(Features):
         if (self.ndim > 0) and (self.ndim <=3):
             return self._homologyRank[:,self.ndim-1]
         else:
-            raise NotImplementedError, "Sorry, don't know how to caclulate the"\
-                  + " number of holes for a " + str(self.ndim) \
-                  + "-dimensional obect."
+            raise NotImplementedError(
+                "Sorry, don't know how to caclulate the"
+                + " number of holes for a " + str(self.ndim) 
+                + "-dimensional obect.")
 
     def setNHoles(self, nHoles):
         """
@@ -233,8 +236,9 @@ class Topology(Features):
         """
         self._homologyRank[:,self.ndim-1] = numpy.asarray(nHoles)
 
-    nHoles = property(fget=getNHoles, fset=setNHoles, \
-                 doc="Number of holes, or the rank of ndim-1 Homology group.")
+    nHoles = property(
+        fget=getNHoles, fset=setNHoles, 
+        doc="Number of holes, or the rank of ndim-1 Homology group.")
 
 
     #############################################################
@@ -264,7 +268,7 @@ class Topology(Features):
 
         # calculate everything that can be done directly
         self.getEuler(ids=ids)
-        self.homologyRank = self.getHomologyRank(ids=ids)
+        self.homologyRank = self.calculateHomologyRank(ids=ids)
 
         # calculate n loops for 3d
         if self.ndim == 3:
@@ -413,7 +417,7 @@ class Topology(Features):
             simplex = numpy.ones(shape=shape, dtype='int64')
             yield simplex
 
-    def getHomologyRank(self, ids=None, dim=None):
+    def calculateHomologyRank(self, ids=None, dim=None):
         """
         Calculates the rank of the homology group for dimensionality dim.
 
@@ -431,9 +435,10 @@ class Topology(Features):
         # check ndim
         if dim is not None:
             if (dim > 0) and (dim < self.ndim-1):
-                raise NotImplementedError("Sorry, don't know how to caclulate"\
-                      + " rank of the " + str(dim) + "-Homology group for an "\
-                      + str(self.ndim) + "-dimensional obect.")
+                raise NotImplementedError(
+                    "Sorry, don't know how to caclulate"
+                    + " rank of the " + str(dim) + "-Homology group for an "
+                    + str(self.ndim) + "-dimensional obect.")
                 
         # ids
         ids, max_id = self.findIds(ids=ids)
@@ -450,7 +455,7 @@ class Topology(Features):
                 # recursively calculate all faces
                 h_rank = numpy.zeros(shape=(max_id+1, self.ndim+1), dtype='int')
                 for i_dim in [0, self.ndim-1, self.ndim]:
-                    h_rank_i = self.getHomologyRank(ids=ids, dim=i_dim)
+                    h_rank_i = self.calculateHomologyRank(ids=ids, dim=i_dim)
                     h_rank[:,i_dim] = h_rank_i
                 return h_rank
 
@@ -466,10 +471,11 @@ class Topology(Features):
 
                 # find separate segments
                 h_rank = numpy.zeros(shape=(max_id+1), dtype='int')
-                h_rank[ids] = \
-                    [(ndimage.label(self.segments[objects[id_-1]]==id_, 
-                                    structure=self.structEl))[1] \
-                         for id_ in ids]
+                h_rank[ids] = [
+                    (ndimage.label(
+                        self.segments[objects[id_-1]]==id_,
+                        structure=self.structEl))[1] 
+                    for id_ in ids]
                 h_rank[0] = sum(h_rank[id_] for id_ in ids) 
 
             elif dim == self.ndim-1:
@@ -478,11 +484,11 @@ class Topology(Features):
                 h_rank = numpy.zeros(shape=(max_id+1), dtype='int')
                 for id_ in ids:
                     data_inset = self.segments[objects[id_-1]]
-                    filled = ndimage.binary_fill_holes(data_inset==id_, 
-                                                 structure=self.invStructEl)
+                    filled = ndimage.binary_fill_holes(
+                        data_inset==id_, structure=self.invStructEl)
                     inter = (filled==True) & (data_inset==0) 
-                    h_rank[id_] = (ndimage.label(input=inter, 
-                                                 structure=self.structEl))[1]
+                    h_rank[id_] = (
+                        ndimage.label(input=inter, structure=self.structEl))[1]
                 h_rank[0] = sum(h_rank[id_] for id_ in ids)
             
             elif dim == self.ndim:

@@ -2,10 +2,10 @@
 Contains electron microscope constants.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: microscope_db.py 1367 2016-12-14 15:51:56Z vladan $
+# $Id$
 """
 
-__version__ = "$Revision: 1367 $"
+__version__ = "$Revision$"
 
 
 #####################################################

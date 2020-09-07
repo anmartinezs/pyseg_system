@@ -42,10 +42,19 @@ and are also a consequence of the changed behavior of scipy.
 
 This script may be placed anywhere in the directory tree.
 
-$Id: cleft.py 1493 2018-11-08 16:23:38Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1493 $"
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from builtins import next
+from builtins import zip
+#from builtins import str
+from builtins import range
+#from past.utils import old_div
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -120,8 +129,8 @@ labels_data_type = 'uint8'
 # labels file byteOrder ('<' for little-endian, '>' for big-endian)
 labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labels_array_order = 'FORTRAN'
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 # offset of labels in respect to the data 
 labels_offset = None             # no offset
@@ -990,7 +999,7 @@ def do_segmentation(image, bound, cleft_lay, sa_file_name, inset):
                      + tr_str)
 
         # segment at this threshold
-        sa_level, level, curr_thresh = tc_iter.next()
+        sa_level, level, curr_thresh = next(tc_iter)
     
         # write connections
         if write_connections_flag and (len(sa_level.segments.ids) > 0):
@@ -1114,7 +1123,7 @@ def setClassifications(analysis):
         # parse classification parameters
         prefix = 'class_' + str(ind) + '_'
         args = {}
-        for name, value in globals().items():
+        for name, value in list(globals().items()):
             if name.startswith(prefix):
                 class_arg_name = name.lstrip(prefix)
                 if class_arg_name != 'type':
@@ -1461,7 +1470,7 @@ def write_results(analysis, cleft_layers=None, thresh=None, name=''):
     out_format = ' %3u'
 
     # threshold
-    if mode is 'hierarchy':
+    if mode == 'hierarchy':
         tab_head[0] += " Thresh"
         tab_head[1] += "       "
         out_vars += [labels.thresh]
@@ -1519,8 +1528,8 @@ def write_results(analysis, cleft_layers=None, thresh=None, name=''):
                                                 indices=[0], prependIndex=True)
                 fd.write('#' + tot_line[0] + os.linesep)
             except TypeError:
-                print("Could not write all segments results for threshold ", 
-                      tr_str, ", continuing to the next threshold.") 
+                print(("Could not write all segments results for threshold ", 
+                      tr_str, ", continuing to the next threshold.")) 
 
         # write background results
         if 'backgroundDensity' in analysis.resultNames:
@@ -1539,7 +1548,7 @@ def write_results(analysis, cleft_layers=None, thresh=None, name=''):
             out_vars = (reg_dens.mean, reg_dens.std, reg_dens.min, 
                         reg_dens.max, reg_dens.volume)
             out_format = '    %7.3f %6.3f %7.3f %7.3f %6u'
-            if mode is 'hierarchy':
+            if mode == 'hierarchy':
                 out_format = '       ' + out_format
             cleft_line = out_format % out_vars
             fd.write('#' + cleft_line + os.linesep)
@@ -1880,7 +1889,7 @@ def main():
             directory=lay_pkl_directory, prefix=lay_pkl_prefix, 
             suffix=lay_pkl_suffix, insert_root=lay_pkl_insert_root, 
             reference=image_file_name)
-        cleft_lay = pickle.load(open(cl_file_name))
+        cleft_lay = pickle.load(open(cl_file_name, 'rb'), encoding='latin1')
         
     # adjust cleft region and boundaries according to the layers
     #adjust_boundaries(bound=bound, regions=cleft_lay.regions)
@@ -1911,7 +1920,8 @@ def main():
             directory=col_directory, prefix=col_prefix, suffix=col_suffix,
             insert_root=col_insert_root, reference=image_file_name)
         try:
-            cleft_col = pickle.load(open(col_file_name))
+            cleft_col = pickle.load(
+                open(col_file_name, 'rb'), encoding='latin1')
             logging.info('Reading columns')
         except IOError:
             do_layers_on_columns_flag = False        

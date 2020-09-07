@@ -5,10 +5,12 @@ of their connectivity. Each of these segments is defined as a (single)
 connected cluster of array elements. The segments do not touch each other.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: connected.py 1333 2016-09-27 08:01:37Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1333 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -18,12 +20,12 @@ import scipy.ndimage as ndimage
 
 import pyto.util.numpy_plus as numpy_plus
 import pyto.util.nested as nested
-from struct_el import StructEl
-from contact import Contact
+from .struct_el import StructEl
+from .contact import Contact
 from pyto.core.image import Image
-from grey import Grey
-from labels import Labels
-from segment import Segment
+from .grey import Grey
+from .labels import Labels
+from .segment import Segment
 
 class Connected(Segment):
     """

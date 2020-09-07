@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Script for removig double picked partiles in STAR file."""
-from __future__ import division
+
 
 import os
 import math
@@ -47,29 +47,29 @@ def main():
 
     start_time = time.time()
 
-    print 'Loading star file: {}.'.format(in_star)
+    print('Loading star file: {}.'.format(in_star))
     star, star_ves = sub.Star(), sub.Star()
     star.load(in_star)
     star_ves = cp.deepcopy(star)
 
-    print 'Pre-processing input star file...'
+    print('Pre-processing input star file...')
 
-    print '\tRemoving rlnRandomSubset column...'
+    print('\tRemoving rlnRandomSubset column...')
     if star.has_column('_rlnRandomSubset'):
         star.del_column('_rlnRandomSubset')
         star_ves.del_column('_rlnRandomSubset')
 
     if in_mic is not None:
-        print '\tChoosing micrograph: ' + in_mic
+        print('\tChoosing micrograph: ' + in_mic)
         del_l = list()
         for row in range(star.get_nrows()):
             if star.get_element('_rlnMicrographName', row) != in_mic:
                 del_l.append(row)
-        print '\t\t-Deleting ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.'
+        print('\t\t-Deleting ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.')
         star.del_rows(del_l)
         star_ves.del_rows(del_l)
 
-    print '\tParticles pre-processing...'
+    print('\tParticles pre-processing...')
     for row in range(star.get_nrows()):
         x = star.get_element('_rlnCoordinateX', row) * s_pbin
         y = star.get_element('_rlnCoordinateY', row) * s_pbin
@@ -81,7 +81,7 @@ def main():
         star_ves.set_element('_rlnCoordinateY', row, y * 2.)
         star_ves.set_element('_rlnCoordinateZ', row, z * 2.)
 
-    print '\tRemoving highly shifted particles (' + str(max_shift) + ' nm)'
+    print('\tRemoving highly shifted particles (' + str(max_shift) + ' nm)')
     del_l = list()
     max_shift_v = max_shift / (res / float(s_ubin))
     for row in range(star.get_nrows()):
@@ -93,11 +93,11 @@ def main():
         dst = math.sqrt((shifts * shifts).sum())
         if dst > max_shift_v:
             del_l.append(row)
-    print '\t\t-Deleting ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.'
+    print('\t\t-Deleting ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.')
     star.del_rows(del_l)
     star_ves.del_rows(del_l)
 
-    print '\tRemoving badly segmented microsomes...'
+    print('\tRemoving badly segmented microsomes...')
     err_dst_v = err_dst / res
     pt_ssup_v = ssup / res
     s_bin = 1. / s_ubin
@@ -137,7 +137,7 @@ def main():
             parts_mic[mic_seg] = list()
             parts_mic[mic_seg].append(row)
     mics_del, tot_dst = 0, 0
-    for mic_seg, rows in zip(parts_mic.iterkeys(), parts_mic.itervalues()):
+    for mic_seg, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
         try:
             mic = disperse_io.load_tomo(mic_seg)
         except IOError:
@@ -154,24 +154,24 @@ def main():
                 del_l.append(row)
                 num_err += 1
         ptg = 100. * (num_err / float(len(rows)))
-        print '\t\tProcessing microsome: ' + mic_seg
-        print '\t\t\t-Number of particles: ' + str(len(rows))
-        print '\t\t\t-Number of bad particles: ' + str(num_err) + ' (' + str(ptg) + '%)'
+        print('\t\tProcessing microsome: ' + mic_seg)
+        print('\t\t\t-Number of particles: ' + str(len(rows)))
+        print('\t\t\t-Number of bad particles: ' + str(num_err) + ' (' + str(ptg) + '%)')
         if ptg > err_ptg:
-            print '\t\t\t-BAD MICROSOME DELETING ALL PARTICLES!'
+            print('\t\t\t-BAD MICROSOME DELETING ALL PARTICLES!')
             for row in rows:
                 try:
                     del_l.index(row)
                 except ValueError:
                     del_l.append(row)
             mics_del += 1
-    print '\tTotal distance measured + ' + str(tot_dst) + ' vx'
-    print '\tDeleted microsomes + ' + str(mics_del) + ' of ' + str(len(parts_mic.keys()))
-    print '\t\t-Deleted ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.'
+    print('\tTotal distance measured + ' + str(tot_dst) + ' vx')
+    print('\tDeleted microsomes + ' + str(mics_del) + ' of ' + str(len(list(parts_mic.keys()))))
+    print('\t\t-Deleted ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.')
     star.del_rows(del_l)
     star_ves.del_rows(del_l)
 
-    print '\tFrom microsomes path indexing to tomograms path indexing...'
+    print('\tFrom microsomes path indexing to tomograms path indexing...')
     for row in range(star.get_nrows()):
         hold_mic = star.get_element('_rlnMicrographName', row)
         new_mic = hold_mic.replace('/oriented_ribo_bin2', '')
@@ -179,7 +179,7 @@ def main():
         hold_stem = fname.split('_ves_')[0]
         star.set_element(key='_rlnMicrographName', val=tomo_path + '/' + hold_stem + '_bin_4.em', row=row)
 
-    print '\t\tApplying scale suppression (' + str(pt_ssup_v) + ' vx)...'
+    print('\t\tApplying scale suppression (' + str(pt_ssup_v) + ' vx)...')
     # 'Computing tomograms dictionary
     parts_mic, del_l = dict(), list()
     part_coords = np.zeros(shape=(star.get_nrows(), 3), dtype=np.float32)
@@ -202,7 +202,7 @@ def main():
             parts_mic[mic].append(row)
     # Particle suppression on output STAR file (maximum likelihood criterium)
     if log_crit:
-        for mic, rows in zip(parts_mic.iterkeys(), parts_mic.itervalues()):
+        for mic, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
             mic_coords = np.zeros(shape=(len(rows), 3), dtype=np.float32)
             mic_lut = np.ones(shape=len(rows), dtype=np.bool)
             mic_logs = np.zeros(shape=len(rows), dtype=np.bool)
@@ -222,7 +222,7 @@ def main():
                             del_l.append(rows[idx])
     else:
         # Particle suppression on output STAR file (first found criterium)
-        for mic, rows in zip(parts_mic.iterkeys(), parts_mic.itervalues()):
+        for mic, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
             mic_coords = np.zeros(shape=(len(rows), 3), dtype=np.float32)
             mic_lut = np.ones(shape=len(rows), dtype=np.bool)
             for i, row in enumerate(rows):
@@ -236,11 +236,11 @@ def main():
                         if mic_lut[idx] and (idx != i):
                             mic_lut[idx] = False
                             del_l.append(rows[idx])
-    print '\t\t-Deleted ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.'
+    print('\t\t-Deleted ' + str(len(del_l)) + ' of ' + str(star.get_nrows()) + ' particles.')
     star.del_rows(del_l)
     star_ves.del_rows(del_l)
 
-    print '\tChecking removing procedure...'
+    print('\tChecking removing procedure...')
     parts_mic = dict()
     part_coords = np.zeros(shape=(star.get_nrows(), 3), dtype=np.float32)
     for row in range(star.get_nrows()):
@@ -260,7 +260,7 @@ def main():
         except KeyError:
             parts_mic[mic] = list()
             parts_mic[mic].append(row)
-    for mic, rows in zip(parts_mic.iterkeys(), parts_mic.itervalues()):
+    for mic, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
         if len(rows) <= 1:
             continue
         mic_coords = np.zeros(shape=(len(rows), 3), dtype=np.float32)
@@ -271,24 +271,24 @@ def main():
             dsts = np.sqrt((hold * hold).sum(axis=1))
             dsts_min = np.sort(dsts)[1]
             if dsts_min <= pt_ssup_v:
-                print '\t-WARNING: particle in row ' + str(rows[i]) + ' with minimum distance ' + str(dsts_min*res) + 'nm not suppressed!'
+                print('\t-WARNING: particle in row ' + str(rows[i]) + ' with minimum distance ' + str(dsts_min*res) + 'nm not suppressed!')
     imgs = star.get_column_data('_rlnImageName')
     for row, img in enumerate(imgs):
         if imgs.count(img) != 1:
-            print '\t-WARNING: not a single entry for particle in row ' + str(row) + ' with image name ' + imgs
+            print('\t-WARNING: not a single entry for particle in row ' + str(row) + ' with image name ' + imgs)
 
     # Store the Star file
-    print 'Storing output Star file in: ' + out_star
+    print('Storing output Star file in: ' + out_star)
     star.store(out_star)
 
     out_star_stem = os.path.splitext(out_star)[0]
     out_star_ves = out_star_stem + '_ves.star'
-    print 'Storing output Star with vesicles file in: ' + out_star_ves
+    print('Storing output Star with vesicles file in: ' + out_star_ves)
     star_ves.store(out_star_ves)
 
     out_path, out_stem = os.path.split(out_star)
     out_star_shift = out_path + '/' + os.path.splitext(out_stem)[0] + '_shift.star'
-    print '\tGenerating the shifted version: ' + out_star_shift
+    print('\tGenerating the shifted version: ' + out_star_shift)
     for row in range(star.get_nrows()):
         # Getting particle coordinates
         x = star.get_element('_rlnCoordinateX', row)
@@ -305,7 +305,7 @@ def main():
         star.set_element('_rlnOriginZ', row, 0)
     star.store(out_star_shift)
 
-    print 'Finished. Runtime {}.'.format(str(timedelta(seconds=time.time()-start_time)))
+    print('Finished. Runtime {}.'.format(str(timedelta(seconds=time.time()-start_time))))
 
 if __name__ == "__main__":
     main()

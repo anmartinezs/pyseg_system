@@ -27,7 +27,7 @@ from factory import GraphsSurfMask
 from factory import short_path_accum
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -72,7 +72,7 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
               rob_t=None, max_dist=0, f_update=False, sig=None, verbose=False):
     # Initialization
     if verbose:
-        print '\tInitializing...'
+        print('\tInitializing...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     work_dir = output_dir + '/disperse'
@@ -122,7 +122,7 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
 
     # Disperse
     if verbose:
-        print '\tRunning DisPerSe...'
+        print('\tRunning DisPerSe...')
     if f_update:
         disperse.mse(no_cut=False, inv=False)
     skel = disperse.get_skel()
@@ -132,12 +132,12 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
     pkl_sgraph = work_dir + '/skel_graph.pkl'
     if f_update or (not os.path.exists(pkl_sgraph)):
         if verbose:
-            print '\tBuilding graph...'
+            print('\tBuilding graph...')
         graph = GraphMCF(skel, manifolds, density)
         graph.set_resolution(res)
         graph.build_from_skel(basic_props=False)
         if verbose:
-            print '\tPickling...'
+            print('\tPickling...')
         graph.pickle(pkl_sgraph)
         _, stem = os.path.split(input_file)
         stem, _ = os.path.splitext(stem)
@@ -145,22 +145,22 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
                              output_dir + '/' + stem + '_graph.vtp')
     else:
         if verbose:
-            print '\tUnpickling graph...'
+            print('\tUnpickling graph...')
         graph = unpickle_obj(pkl_sgraph)
 
     if verbose:
-        print '\tPostprocessing the graph...'
+        print('\tPostprocessing the graph...')
     if low_t is not None:
         if verbose:
-            print '\t\tLow vertex...'
+            print('\t\tLow vertex...')
         graph.threshold_vertices(STR_FIELD_VALUE, low_t, operator.gt)
     if high_t is not None:
         if verbose:
-            print '\t\tHigh edge...'
+            print('\t\tHigh edge...')
         graph.threshold_edges(STR_FIELD_VALUE, high_t, operator.gt)
     if rob_t is not None:
         if verbose:
-            print '\t\tRobustness...'
+            print('\t\tRobustness...')
         graph.threshold_vertices(DPSTR_ROBUSTNESS, rob_t, operator.lt)
     # TODO: Add graph relevance filter
     # Post processing
@@ -170,7 +170,7 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
         # graph.filter_mw_edges(tilt_rot, tilt_ang)
 
     if verbose:
-        print '\tGetting membrane and attached structures graphs...'
+        print('\tGetting membrane and attached structures graphs...')
     factor = GraphsSurfMask(graph, surf, sign_field, dist_field, pol, mb_thick)
     disperse_io.save_numpy(sign_field, output_dir + '/hold.vti')
     disperse_io.save_numpy(dist_field, output_dir + '/hold2.vti')
@@ -187,13 +187,13 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
         att_g.filter_mw_edges(tilt_rot, tilt_ang)
 
     if verbose:
-        print '\tComputing graph properties'
+        print('\tComputing graph properties')
     memb_g.compute_diameters()
     att_g.compute_diameters()
     att_g.build_vertex_geometry()
     att_g.compute_sgraph_relevance()
 
-    print 'Test accumulation'
+    print('Test accumulation')
     anchors = factor.get_anchor_vertices()
     end_nodes = factor.get_end_vertices()
     key_id = att_g.add_prop('mb_type', 'int', 1, 0)
@@ -215,7 +215,7 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
     disperse_io.save_numpy(g_filter, output_dir + '/hold.vti')
 
     if verbose:
-        print '\tSegmentation...'
+        print('\tSegmentation...')
     memb_g.build_vertex_geometry()
     seg_core = memb_g.print_vertices(property=STR_GRAPH_ID, th_den=sig)
     mb_thick_vx = mb_thick / res
@@ -231,14 +231,14 @@ def do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file=None, res=1, mb_t
         seg_ext *= dist_field.astype(seg_ext.dtype)
 
     if verbose:
-        print '\tGenerating GT graphs'
+        print('\tGenerating GT graphs')
     memb_gt = GraphGT(memb_g)
     memb_gt.betweenness(mode='both')
     att_gt = GraphGT(att_g)
     att_gt.betweenness(mode='both')
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
     disperse_io.save_vtp(surf, output_dir + '/' + stem + '_surf.vtp')
     memb_g.pickle(output_dir + '/' + stem + '_mb.pkl')
@@ -273,7 +273,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvdi:o:m:n:r:t:p:a:b:C:L:H:R:s:g:f:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -296,8 +296,8 @@ def main(argv):
     thick = 0
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -336,54 +336,54 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file == '') or (output_dir == '') or (seg_file == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for getting graphs from membrane segmentation.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
+            print('Running tool for getting graphs from membrane segmentation.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
             if f_update:
-                print '\tUpdate disperse: yes'
+                print('\tUpdate disperse: yes')
                 if cut_t is not None:
-                    print '\tPersistence threshold: ' + str(cut_t)
+                    print('\tPersistence threshold: ' + str(cut_t))
                 if rob_t is not None:
-                    print '\tRobustness threshold: ' + str(rob_t)
+                    print('\tRobustness threshold: ' + str(rob_t))
             else:
-                print '\tUpdate disperse: no'
-            print '\tResolution: ' + str(res) + ' nm/vox'
-            print '\tMembrane thickness ' + str(thick) + ' nm'
-            print '\tMaximum distance ' + str(max_dist)
-            print '\tMembrane polarity ' + pol
+                print('\tUpdate disperse: no')
+            print('\tResolution: ' + str(res) + ' nm/vox')
+            print('\tMembrane thickness ' + str(thick) + ' nm')
+            print('\tMaximum distance ' + str(max_dist))
+            print('\tMembrane polarity ' + pol)
             if tilt_rot is not None:
-                print '\tMissing wedge rotation angle ' + str(tilt_rot) + ' deg'
-                print '\tMaximum tilt angle ' + str(tilt_ang) + ' deg'
+                print('\tMissing wedge rotation angle ' + str(tilt_rot) + ' deg')
+                print('\tMaximum tilt angle ' + str(tilt_ang) + ' deg')
             if low_t is not None:
-                print '\tLow density maxima threshold: ' + str(low_t)
+                print('\tLow density maxima threshold: ' + str(low_t))
             if high_t is not None:
-                print '\tHigh density minima threshold: ' + str(high_t)
+                print('\tHigh density minima threshold: ' + str(high_t))
             if sig is not None:
-                print '\tNo sigmas for segmentation: ' + str(sig)
-            print '\tOutput segmentation format ' + fmt
-            print ''
+                print('\tNo sigmas for segmentation: ' + str(sig))
+            print('\tOutput segmentation format ' + fmt)
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_mb_seg(input_file, seg_file, output_dir, fmt, mask_file, res, thick, pol, tilt_rot,
                   tilt_ang, cut_t, low_t, high_t, rob_t, max_dist, f_update, sig, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

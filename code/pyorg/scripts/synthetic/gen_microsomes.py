@@ -331,31 +331,31 @@ def gen_csrv_msome(shape, n_parts, mic_rad, min_ip_dst):
 
 ########## Printing the initial message
 
-print 'Generate synthetic microsomes.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tTomograms settings:'
-print '\t\t-Number of tomograms: ' + str(tm_nt)
-print '\t\t-Tomogram size: ' + str(tm_size) + ' px'
-print '\t\t-Resolution: ' + str(tm_res) + ' nm/px'
-print '\t\t-SNR range: ' + str(tm_snr_rg)
-print '\t\t-Missing wedge semi-angle: ' + str(tm_wedge) + ' deg'
-print '\t\t-Binning factor: ' + str(tm_bin)
-print '\tMicrosome settings:'
-print '\t\t-Membrane thickness: ' + str(mc_mbt) + ' nm'
-print '\t\t-Membrane layer sigma: ' + str(mc_mbs) + ' nm'
-print '\t\t-Minimum iter-particles distance: ' + str(mc_ip_min_dst) + ' nm'
-print '\t\t-Clusters radius for 1st pattern: ' + str(mc_1st_crad) + ' nm'
-print '\t\t-Clusters radius for 2nd pattern: ' + str(2*mc_1st_crad) + ' nm'
-print '\t\t-Averaged ditance to the 3rd pattern particles for the 4th pattern particles: ' + str(mc_4th_dst) + ' nm'
-print '\t\t-Input files with the density models: ' + str(mc_in_models)
-print '\t\t-Averaged (normal distribution) number of particles per model and microsome: ' + str(mc_avg_nparts)
-print '\t\t-Maximum deviation (3sg for Gaussian): ' + str(mc_3sg_nparts)
-print '\t\t-Subvolumes center height: ' + str(mc_zh)
-print ''
+print('Generate synthetic microsomes.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tTomograms settings:')
+print('\t\t-Number of tomograms: ' + str(tm_nt))
+print('\t\t-Tomogram size: ' + str(tm_size) + ' px')
+print('\t\t-Resolution: ' + str(tm_res) + ' nm/px')
+print('\t\t-SNR range: ' + str(tm_snr_rg))
+print('\t\t-Missing wedge semi-angle: ' + str(tm_wedge) + ' deg')
+print('\t\t-Binning factor: ' + str(tm_bin))
+print('\tMicrosome settings:')
+print('\t\t-Membrane thickness: ' + str(mc_mbt) + ' nm')
+print('\t\t-Membrane layer sigma: ' + str(mc_mbs) + ' nm')
+print('\t\t-Minimum iter-particles distance: ' + str(mc_ip_min_dst) + ' nm')
+print('\t\t-Clusters radius for 1st pattern: ' + str(mc_1st_crad) + ' nm')
+print('\t\t-Clusters radius for 2nd pattern: ' + str(2*mc_1st_crad) + ' nm')
+print('\t\t-Averaged ditance to the 3rd pattern particles for the 4th pattern particles: ' + str(mc_4th_dst) + ' nm')
+print('\t\t-Input files with the density models: ' + str(mc_in_models))
+print('\t\t-Averaged (normal distribution) number of particles per model and microsome: ' + str(mc_avg_nparts))
+print('\t\t-Maximum deviation (3sg for Gaussian): ' + str(mc_3sg_nparts))
+print('\t\t-Subvolumes center height: ' + str(mc_zh))
+print('')
 
 ########### Input parsing
 
@@ -376,8 +376,8 @@ hold_ref_0 = disperse_io.load_tomo(mc_in_models[0])
 for in_model in mc_in_models:
     hold_ref = disperse_io.load_tomo(in_model)
     if hold_ref_0.shape != hold_ref.shape:
-        print 'ERROR: All input density subvolume models must have the same size.'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: All input density subvolume models must have the same size.')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     svol_refs[mc_in_models] = hold_ref
 max_tm_size, max_svol_dim = max(tm_size[0:1]), max(hold_ref_0.shape[0:1])
@@ -388,17 +388,17 @@ cent_v = .5*np.asarray(hold_ref_0.shape, dtype=np.float) - np.asarray((0, 0, mc_
 mc_ip_min_dst_v, mc_1st_crad_v, mc_4th_dst_v = float(mc_ip_min_dst)/tm_res, float(mc_1st_crad)/tm_res, \
                                                float(mc_4th_dst)/tm_res
 
-print 'Main routine: '
+print('Main routine: ')
 
-print '\tLoop for microsomes: '
+print('\tLoop for microsomes: ')
 cols = list()
 for i in range(tm_nt):
 
     snr = snrs[i]
-    print '\t\t-Generating microsome ' + str(i) + ' with SNR=' + snr + ':'
+    print('\t\t-Generating microsome ' + str(i) + ' with SNR=' + snr + ':')
     tomo = np.zeros(shape=tm_size, dtype=np.float16)
 
-    print '\t\t\t+Adding the particles: '
+    print('\t\t\t+Adding the particles: ')
     hold_locs, hold_angs = None, None
     for j, key in enumerate(svol_refs.keys()):
         svol_ref = svol_refs[key]
@@ -417,12 +417,12 @@ for i in range(tm_nt):
             tomo = spatial.over_sub_tomo(tomo, point, svol, np.max)
         if j == 2:
             hold_locs, hold_angs = locs, angs
-        print '\t\t\t\t* Particles inserted: ' + str(len(locs)) + ' of ' + str(npart)
+        print('\t\t\t\t* Particles inserted: ' + str(len(locs)) + ' of ' + str(npart))
 
-    print '\t\t\t+Adding the membrane...'
+    print('\t\t\t+Adding the membrane...')
     add_dmb_msome(tomo, mic_rad, tm_res, mc_mbt, mc_mbs)
 
-    print '\t\t\t+Adding the distortions...'
+    print('\t\t\t+Adding the distortions...')
     mc_rad1, mc_rad2 = mic_rad - mc_zh, mic_rad + max_svol_dim - mc_zh
     mask = gen_mask_msome(tm_size, mc_rad1, mc_rad2)
     mn = tomo[mask].mean()
@@ -432,10 +432,10 @@ for i in range(tm_nt):
     tomo = add_mw(tomo, 0, tm_wedge)
 
     out_tomo = out_dir + '/' + out_stem + '_ + tomo_mic_' + str(i) + '.mrc'
-    print '\t\t\t+Saving the microsome as: ' + out_tomo
+    print('\t\t\t+Saving the microsome as: ' + out_tomo)
     disperse_io.save_numpy(tomo, out_tomo)
     out_tomo_bin = out_dir + '/' + out_stem + '_ + tomo_mic_bin_' + str(i) + '.mrc'
-    print '\t\t\t+Saving the ' + str(tm_bin) + ' binned microsome as: ' + out_tomo_bin
+    print('\t\t\t+Saving the ' + str(tm_bin) + ' binned microsome as: ' + out_tomo_bin)
     tomo_bin = tomo
     for i in range(bin):
         tomo_bin = tomo_binning(tomo_bin)
@@ -443,7 +443,7 @@ for i in range(tm_nt):
     cols.append((out_tomo, out_tomo_bin))
 
 out_star = out_dir + '/' + out_stem + '.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star_tomos = sub.Star()
 star_tomos.add_column('_rlnMicrographName')
 star_tomos.add_column('_rlnImageName')
@@ -452,4 +452,4 @@ for col in cols:
     star_tomos.add_row(**row)
 star_tomos.store(out_star)
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')
