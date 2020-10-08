@@ -550,19 +550,19 @@ class ListTomoOMSegmentations(object):
         self.__tomos = dict()
         # For pickling
         self.__pkls = None
-        self.__res = 1
 
     # EXTERNAL FUNCTIONALITY
 
-    def set_resolution(self, res):
+    def set_resolution(self, res, key):
         """
         Set resolution in nm/pixel
         :param res: input value
+        :param key: tomogram index key
         :return:
         """
-        for tomo in self.__tomos.itervalues():
-            tomo.set_resolution(res)
-        self.__res = res
+        # for tomo in self.__tomos.itervalues():
+        tomo = self.get_tomo_by_key(key)
+        tomo.set_resolution(res)
 
     def get_tomos(self):
         return self.__tomos
@@ -615,7 +615,7 @@ class ListTomoOMSegmentations(object):
         """
         del self.__tomos[tomo_key]
 
-    def insert_tomo(self, name, voi_mb=None, voi_lm=None, max_dst=0):
+    def insert_tomo(self, name, voi_mb=None, voi_lm=None, max_dst=0, res=1):
         """
         :param name: name to identify the tomogram
         :param voi_mb: if None (default) the membrane tomogram is loaded from tomo_fname, otherwise this is actually
@@ -623,9 +623,10 @@ class ListTomoOMSegmentations(object):
         :param voi_lm: if None (default) the lumen tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
         :param max_dst: maximum distance for membrane pixles to border inside the lumen (in segmentation pixels)
+        :param res: resolution or pixel size
         :param lbls_lm: lists of labels with the lumen segmentations
         """
-        self.__tomos[name] = TomoOMSegmentations(name, voi_mb=voi_mb, voi_lm=voi_lm, max_dst=max_dst)
+        self.__tomos[name] = TomoOMSegmentations(name, voi_mb=voi_mb, voi_lm=voi_lm, max_dst=max_dst, res=res)
 
     def store_stars(self, out_stem, out_dir):
         """

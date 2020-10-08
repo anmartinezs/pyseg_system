@@ -29,14 +29,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_fil_den_ps1.408.star' # '/in/in_ltomos_fils_all.star' # '/in/in_ltomos_fils_new.star' # '/in/in_ltomos_fil_den.star' # '/in/in_ltomos_fils_sep.star'
+in_star = ROOT_PATH + '/in/in_ltomos_fils_all_corr0910.star' # '/in/in_ltomos_fils_all.star' # '/in/in_ltomos_fil_den_ps1.408.star' # '/in/in_ltomos_fils_new.star' # '/in/in_ltomos_fil_den.star' # '/in/in_ltomos_fils_sep.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_den_ps1.408.star' # '/in/in_seg_all.star' # '/in/in_seg_den.star' # '/in/in_seg_2.star'
+in_seg = ROOT_PATH + '/in/in_seg_all_corr0910.star' # '/in/in_seg_all.star' # '/in/in_seg_den_ps1.408.star' # '/in/in_seg_den.star' # '/in/in_seg_2.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/fil_den_ps1.408' # '/ltomos/fils_all' # '/ltomos/fil_den' # '/ltomos/fils_sep' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'fil_den_ps1.408' # 'fils_all' # 'fil_den' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/fils_all_corr0910_pyorg' # '/ltomos/fils_all_pyorg' # '/ltomos/fil_den_ps1.408' # '/ltomos/fils_all' # '/ltomos/fil_den' # '/ltomos/fils_sep' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'all_corr0910_pyorg' # 'all_pyorg' # 'fil_den_ps1.408' # 'fils_all' # 'fil_den' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 0 # 1 # segmented label
@@ -167,20 +167,7 @@ for star_row in range(star.get_nrows()):
 
         fils_xml_str = star_fil.get_element('_fbXMLFile', fil_row)
         mic_str = star_fil.get_element('_rlnMicrographName', fil_row)
-        mic = disperse_io.load_tomo(mic_str, mmap=True)
-        fils_res, fils_rad = star_fil.get_element('_psPixelSize', fil_row), star_fil.get_element('_fbRadius', fil_row)
-        if fils_res <= 0:
-            print 'WARNING: Pixel size for a tomogram must be greater than zero:' + mic_str
-            continue
-        if fils_rad >= 0:
-            fils_rad_v = fils_rad / fils_res
-        else:
-            fils_rad_v = None
-        fl_dst_v = None
-        if fl_dst is not None:
-            fl_dst_v = fl_dst / fils_res
-        list_tomos.set_resolution(fils_res)
-        list_tomos.set_fils_radius(fils_rad)
+
         print '\t\t\tLoading filaments XML file(s): ' + fils_xml_str
         xml_fils = sub.XMLFilaments()
         try:
@@ -195,6 +182,21 @@ for star_row in range(star.get_nrows()):
             print 'WARNING: Micrograph not found: ' + mic_str
             continue
         seg_str = star_seg.get_element('_psSegImage', seg_row)
+
+        mic = disperse_io.load_tomo(mic_str, mmap=True)
+        fils_res, fils_rad = star_fil.get_element('_psPixelSize', fil_row), star_fil.get_element('_fbRadius', fil_row)
+        if fils_res <= 0:
+            print 'WARNING: Pixel size for a tomogram must be greater than zero:' + mic_str
+            continue
+        if fils_rad >= 0:
+            fils_rad_v = fils_rad / fils_res
+        else:
+            fils_rad_v = None
+        fl_dst_v = None
+        if fl_dst is not None:
+            fl_dst_v = fl_dst / fils_res
+        list_tomos.set_resolution(fils_res, seg_str)
+        list_tomos.set_fils_radius(fils_rad, seg_str)
 
         for fils_row in range(xml_fils.get_nfils()):
 

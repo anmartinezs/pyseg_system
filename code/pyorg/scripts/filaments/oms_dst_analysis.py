@@ -47,20 +47,20 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_all/all_ltomos.star' # '/ltomos_omsegs/omsegs_fil_new/fil_new_ltomos.star' # '/ltomos_omsegs/omsegs_fil_ctrl/fil_ctrl_ltomos.star' # '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
-in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_all/oms_fil_ctrl_25_250_3_svg_v3_wspace.pkl' # None
+in_star = ROOT_PATH + '/ltomos_omsegs/omsegs_corr0915_all_rcorr/corr0915_all_rcorr_ltomos.star' # '/ltomos_omsegs/omsegs_corr0910/corr0910_ltomos.star' # '/ltomos_omsegs/omsegs_all/all_ltomos.star' # '/ltomos_omsegs/omsegs_fil_new/fil_new_ltomos.star' # '/ltomos_omsegs/omsegs_fil_ctrl/fil_ctrl_ltomos.star' # '/ltomos_omsegs/omsegs_1/omsegs_ltomos.star'
+in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_corr0915_all_rcorr/oms_corr0915_all_rcorr_50_250_3_png_wspace.pkl' # ROOT_PATH + '/ana/oms_dsts/oms_all/oms_fil_ctrl_25_250_3_svg_v3_wspace.pkl' # None
 
 # Output directory
-out_dir = ROOT_PATH + '/ana/oms_dsts/oms_all' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
-out_stem = 'oms_fil_ctrl_25_250_3_svg_v4' # 'oms_fil_ctrl_25_250_3_png_2'
+out_dir = ROOT_PATH + '/ana/oms_dsts/oms_corr0915_all_rcorr' # '/ana/oms_dsts/oms_all' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
+out_stem = 'oms_corr0915_all_rcorr_50_250_3_svg' # 'oms_fil_ctrl_25_250_3_svg_v4' # 'oms_fil_ctrl_25_250_3_png_2'
 
 # Analysis variables
 pt_per = 95 # %
-ana_nbins = 25
+ana_nbins = 50 # 25 # 250
 ana_rmax = 250 # nm
 
 # Figure saving options
-fig_fmt = '.svg' # '.png' # if None they showed instead
+fig_fmt = '.svg' # '.svg' # if None they showed instead
 
 # Plotting options
 pt_sim_v = True
@@ -649,7 +649,7 @@ if len(lists_exp_occ.values()) >= 2:
     print '\t\t-Statistical test for organelle occupancy for the first two list: '
     print '\t\t\t\t-K-S 2 samples [100*(1-p)]: ' + str(100. * (1 - sp.stats.ks_2samp(lists_exp_occ.values()[0],
                                                                                  lists_exp_occ.values()[1])[1])) + '%'
-    print '\t\t\t\t-K-S 2 samples p: ' + str(sp.stats.ks_2samp(lists_exp_occ.values()[0], lists_exp_occ.values()[1])[1])
+    print '\t\t\t\t-K-S 2 samples p: ' + str(sp.stats.ks_2samp(lists_exp_occ.values()[0], lists_exp_occ.values()[1]))
 
 print 'Plotting the number of membrane voxels analyzed per condition: '
 for lkey, vals in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
@@ -671,4 +671,3 @@ for lkey, vals in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
     print '- ' + str(hkey) + ': ' + str(count) + ' vx'
 
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
-

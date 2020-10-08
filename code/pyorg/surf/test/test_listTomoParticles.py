@@ -213,8 +213,8 @@ class TestListTomoParticles(TestCase):
         # Storing tomograms list
         ltomos_csrv.pickle(OUT_DIR + '/tomos_csrv_mcs_tpl.pkl')
         ltomos_sprv.pickle(OUT_DIR + '/tomos_srpv_mcs_tpl.pkl')
-        ltomos_csrv.store_appended_tomos(OUT_DIR, out_stem='csrv_mcs_', mode='center')
-        ltomos_sprv.store_appended_tomos(OUT_DIR, out_stem='srpv_mcs_', mode='center')
+        ltomos_csrv.store_appended_tomos(OUT_DIR, out_stem='csrv_mcs_', mode='point')
+        ltomos_sprv.store_appended_tomos(OUT_DIR, out_stem='srpv_mcs_', mode='point')
 
         # Compute the matrices
         hold_time = time.time()

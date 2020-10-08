@@ -28,11 +28,11 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_omsegs.star' # '/in/in_ltomos_fils_new_omsegs.star' # '/in/in_ltomos_fil_ctrl_omsegs.star'
+in_star = ROOT_PATH + '/in/in_ltomos_omsegs_corr0915_all.star' # '/in/in_ltomos_omsegs.star' # '/in/in_ltomos_fils_new_omsegs.star' # '/in/in_ltomos_fil_ctrl_omsegs.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos_omsegs/omsegs_all' # '/ltomos_omsegs/omsegs_fil_new' # '/ltomos_omsegs/omsegs_fil_ctrl' # '/ltomos_omsegs/omsegs_1' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'all' # 'fil_ctrl' # 'omsegs' # 'pre'
+out_dir = ROOT_PATH + '/ltomos_omsegs/omsegs_corr0915_all_rcorr' # '/ltomos_omsegs/omsegs_all' # '/ltomos_omsegs/omsegs_fil_new' # '/ltomos_omsegs/omsegs_fil_ctrl' # '/ltomos_omsegs/omsegs_1' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'corr0915_all_rcorr' # 'corr0910' # 'fil_ctrl' # 'omsegs' # 'pre'
 
 # Segmentation pre-processing
 sg_lbl = 1 # segmented label
@@ -127,12 +127,12 @@ for star_row in range(star.get_nrows()):
             print 'WARNING: Pixel size for a tomogram must be greater than zero:' + mic_str
             continue
         sg_max_rad_v = sg_max_rad / sg_res
-        list_tomos.set_resolution(sg_res)
+        # list_tomos.set_resolution(sg_res)
 
         # Insert the new particle in the proper tomogram
         tomo_fname = os.path.splitext(os.path.split(mic_str)[1])[0]
         try:
-            list_tomos.insert_tomo(tomo_fname, voi_mb=seg_mb, voi_lm=seg_lm, max_dst=sg_max_rad_v)
+            list_tomos.insert_tomo(tomo_fname, voi_mb=seg_mb, voi_lm=seg_lm, max_dst=sg_max_rad_v, res=sg_res)
             segs_inserted += 1
         except pexceptions.PySegInputError as e:
             print 'WARNING: segmentations in row ' + str(seg_row) + ' could not be inserted in tomogram ' + \

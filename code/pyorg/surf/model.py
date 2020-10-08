@@ -185,13 +185,15 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
             else:
                 angs = hold_angs[i]
                 norm_v = None
-            if ref_surf_fname is None:
-                hold_part = Particle(part_vtp, center=(0, 0, 0))
-                hold_part.rotation(float(angs[0]), float(angs[1]), float(angs[2]))
-                hold_part.translation(float(coord[0]), float(coord[1]), float(coord[2]))
-            else:
-                hold_part = ParticleL(ref_surf_fname, center=(float(coord[0]), float(coord[1]), float(coord[2])),
-                                      eu_angs=(float(angs[0]), float(angs[1]), float(angs[2])))
+            # if ref_surf_fname is None:
+            #     hold_part = Particle(part_vtp, center=(0, 0, 0))
+            #     hold_part.rotation(float(angs[0]), float(angs[1]), float(angs[2]))
+            #     hold_part.translation(float(coord[0]), float(coord[1]), float(coord[2]))
+            # else:
+            #     hold_part = ParticleL(ref_surf_fname, center=(float(coord[0]), float(coord[1]), float(coord[2])),
+            #                           eu_angs=(float(angs[0]), float(angs[1]), float(angs[2])))
+            hold_part = ParticleL(part_fname, center=(float(coord[0]), float(coord[1]), float(coord[2])),
+                                  eu_angs=(float(angs[0]), float(angs[1]), float(angs[2])))
             if norm_v is not None:
                 hold_part.add_prop('normal_v', vtk.vtkFloatArray, norm_v)
             hold_tomo.insert_particle(hold_part, check_bounds=False, check_inter=False)
@@ -1291,8 +1293,8 @@ class ModelFilsRSR(ModelFils):
         np.random.seed(seed=int(str(math.fabs(int(timestamp)-timestamp))[2:9])) # getting second decimals
 
         # Initialization
-        TomoFilaments(tomo_fname, -1, voi=self._ModelFils__voi, res=self._ModelFils__res, rad=self._ModelFils__rad)
-        tomo = TomoFilaments(tomo_fname, -1, self._ModelFils__voi)
+        tomo = TomoFilaments(tomo_fname, -1, voi=self._ModelFils__voi, res=self._ModelFils__res, rad=self._ModelFils__rad)
+        # tomo = TomoFilaments(tomo_fname, -1, self._ModelFils__voi)
         if mode == 'full':
             check_bounds, check_inter = True, self._ModelFils__rad / self._ModelFils__res
         elif mode == 'none':

@@ -13,7 +13,6 @@
 ################# Package import
 
 import os
-import csv
 import numpy as np
 import scipy as sp
 import sys
@@ -46,27 +45,27 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos/fils_all/fils_all_ltomos.star'
-in_wspace = ROOT_PATH + '/ana/fil_dsts/fils_all_v2/fils_max_fils_sims_50_250_25_50_png_wspace.pkl' # '/ana/fil_dsts/fils_max_fils/fils_max_fils_45_sims_50_250_50_wspace.pkl'
+in_star = ROOT_PATH + '/ltomos/fils_all_corr0910_pyorg/all_corr0910_pyorg_ltomos.star' # '/ltomos/fils_all_pyorg/all_pyorg_ltomos.star' # '/ltomos/fils_all/fils_all_ltomos.star' # '/ltomos/fils_all_corr0910/all_corr0910_ltomos.star' # '/ltomos/fils_sep/fils_sep_ltomos.star'
+in_wspace = ROOT_PATH + '/ana/fil_dsts/fils_all_corr0910_sims200_pyorg/fils_max_fils_sims_200_50_250_50_svg_test_15_wspace.pkl' # '/ana/fil_dsts/fils_max_fils/fils_max_fils_45_sims_25_250_200_wspace.pkl' # '/ana/fil_dsts/fils_sep/fils_sep_sims_25_250_25_50_wspace.pkl'
 
 # Output directory
-out_dir = ROOT_PATH + '/ana/fil_dsts/fils_all_v2'
-out_stem = 'fils_max_fils_sims_50_250_25_50_png_v2'
+out_dir = ROOT_PATH + '/ana/fil_dsts/fils_all_corr0910_sims200_pyorg' # '/ana/fil_dsts/fils_all_sims3_pyorg' # '/ana/fil_dsts/fils_all_v2' #  # '/ana/fil_dsts/fils_all_corr0910_sims25' # '/ana/fil_dsts/fils_all_v2' # '/ana/fil_dsts/fils_sep'
+out_stem = 'fils_max_fils_sims_200_50_250_50_svg_test_20' # 'fils_sep_sims_25_250_25_50_2'
 
 # Analysis variables
-ana_nbins = 25
+ana_nbins = 50
 ana_rmax = 250 # nm
-ana_max_test = 20 # nm
+ana_max_test = 20 # 5 # nm
 
 # Simulation settings
-sm_ns = 25 # 200
+sm_ns = 200 # 25
 sm_rg_shifts = [10, 20] # nm
 sm_rg_rots = [0, 10] # degs
 sm_mx_tries = 100
 sm_mx_fils = 50
 
 # Figure saving options
-fig_fmt = '.svg' # if None they showed instead
+fig_fmt = '.svg' # '.svg' # if None they showed instead
 
 # Plotting options
 pt_per = 95 # %
@@ -87,6 +86,16 @@ def compute_ic(per, sims):
     ic_med = np.percentile(sims, 50, axis=0, interpolation='linear')
     ic_high = np.percentile(sims, 100 - per, axis=0, interpolation='linear')
     return ic_low, ic_med, ic_high
+
+# Custom function to draw the diff bars
+def label_diff(ax, i,j,text,X,Y):
+    x = (i+j)/2
+    y = 1.1*max(X, Y)
+    print x, y
+    props = {'connectionstyle':'bar','arrowstyle':'-',\
+                 'shrinkA':20,'shrinkB':20,'linewidth':2}
+    ax.annotate(text, xy=(x,y+7), ha='center', zorder=10)
+    ax.annotate('', xy=(X,y), xytext=(X,y), arrowprops=props)
 
 ########## Print initial message
 
@@ -198,7 +207,6 @@ if in_wspace is None:
             if ltomo.get_num_filaments() <= 0:
                 print '\t\t\t\t\t-WARNING: no filaments to process, continuing...'
                 continue
-            print('\t\t\t\t\t-Number of filaments found: ' + str(ltomo.get_num_filaments()))
 
             print '\t\t\t\t\t-Computing filament to membrane nearest distances...'
             hold_arr_dsts = ltomo.compute_fils_seg_dsts()
@@ -218,18 +226,17 @@ if in_wspace is None:
                 if hold_arr_dsts is not None:
                     lists_sim_dsts[lkey].append(hold_arr_dsts)
                     tomos_sim_dsts[tkey][lkey].append(hold_arr_dsts)
-                # if i == 0:
-                #     out_fils = out_dir + '/' + tkey.replace('/', '_') + '_sim_fils.vtp'
-                #     disperse_io.save_vtp(ltomo_sim.gen_filaments_vtp(), out_fils)
-                out_fils = out_dir + '/' + tkey.replace('/', '_') + '_sim_' + str(i) + '_fils.vtp'
-                disperse_io.save_vtp(ltomo_sim.gen_filaments_vtp(), out_fils)
+                if i == 0:
+                    out_fils = out_dir + '/' + tkey.replace('/', '_') + '_sim_fils.vtp'
+                    disperse_io.save_vtp(ltomo_sim.gen_filaments_vtp(), out_fils)
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
     print '\tPickling computation workspace in: ' + out_wspace
     wspace = (lists_count, tomos_count,
               lists_hash, tomos_hash,
               tomos_exp_dsts, lists_exp_dsts, tomos_sim_dsts, lists_sim_dsts)
-    with open(out_wspace, "wb") as fl:
+    # with open(out_wspace, "wb") as fl:
+    with open(out_wspace, "w") as fl:
         pickle.dump(wspace, fl)
         fl.close()
 
@@ -275,11 +282,15 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
                 raise ValueError
         except ValueError or IndexError:
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
-            # continue
-            pass
-        lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
+            continue
+            # pass
+	lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
         if lkey_short == '0':
             lkey_short = 'EXP'
+        elif lkey_short == '1':
+            lkey_short = 'MSA'
+        elif lkey_short == '2':
+            lkey_short = 'PFF'
         plt.figure()
         # plt.title('Histogram Nearest distances for ' + tkey_short + ' and ' + lkey)
         plt.ylabel('Probability Density')
@@ -320,9 +331,13 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
             continue
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
-        lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
+	lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
         if lkey_short == '0':
             lkey_short = 'EXP'
+        elif lkey_short == '1':
+            lkey_short = 'MSA'
+        elif lkey_short == '2':
+            lkey_short = 'PFF'
         plt.figure()
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
         plt.ylabel('Cumulative Density')
@@ -370,6 +385,10 @@ for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
         continue
     if lkey_short == '0':
         lkey_short = 'EXP'
+    elif lkey_short == '1':
+        lkey_short = 'MSA'
+    elif lkey_short == '2':
+        lkey_short = 'PFF'
     plt.figure()
     # plt.title('Nearest distance histogram for ' + lkey_short)
     plt.ylabel('Probability Density')
@@ -405,6 +424,10 @@ for lkey, ltomo in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
         continue
     if lkey_short == '0':
         lkey_short = 'EXP'
+    elif lkey_short == '1':
+        lkey_short = 'MSA'
+    elif lkey_short == '2':
+        lkey_short = 'PFF'
     plt.figure()
     # plt.title('Univariate 1st order for ' + lkey_short)
     plt.ylabel('Cumulative Density')
@@ -434,6 +457,7 @@ exp_cdf_dic, sim_cdf_dic = dict().fromkeys(lists_exp_dsts.keys()), dict().fromke
 exp_acc_dic, sim_acc_dic = dict().fromkeys(lists_exp_dsts.keys()), dict().fromkeys(lists_exp_dsts.keys())
 for lkey in exp_cdf_dic.iterkeys():
     exp_cdf_dic[lkey], sim_cdf_dic[lkey], exp_acc_dic[lkey], sim_acc_dic[lkey] = list(), list(), list(), list()
+#     exp_acc_dic2[lkey], sim_acc_dic2[lkey] = list(), list()
 for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     exps_hist_vals = list()
@@ -441,7 +465,8 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
         if len(arr) <= 0:
             continue
         try:
-            hist_bins, hist_vals = compute_hist(arr[0], ana_nbins, ana_rmax)
+            arr = arr[0]
+            hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
             exp_hist_dic[lkey].append(hist_vals)
             exp_acc_dic[lkey].append(hist_vals[hist_bins <= ana_max_test].sum())
             for hold_sim in tomos_sim_dsts[tkey][lkey]:
@@ -452,39 +477,27 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
             # continue
             pass
-fieldnames, rows = list(), dict()
-for i, lkey in enumerate(exp_hist_dic.iterkeys()):
+for lkey in exp_hist_dic.iterkeys():
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     if lkey_short == '0':
         lkey_short = 'EXP'
-    # elif lkey_short == '1':
-    #     lkey_short = 'MSA'
-    # elif lkey_short == '2':
-    #     lkey_short = 'PFF'
+    elif lkey_short == '1':
+        lkey_short = 'MSA'
+    elif lkey_short == '2':
+        lkey_short = 'PFF'
     ic_low, ic_med, ic_high = compute_ic(pt_per, np.asarray(exp_hist_dic[lkey]))
     plt.plot(hist_bins, ic_med, color=lists_color[lkey], linewidth=2.0, label=lkey_short)
-    if i == 0:
-        fieldnames.append('distance')
-        rows['distance'] = hist_bins
-    fieldnames.append(lkey_short + '_low')
-    fieldnames.append(lkey_short + '_med')
-    fieldnames.append(lkey_short + '_high')
-    rows[lkey_short + '_low'] = ic_low
-    rows[lkey_short + '_med'] = ic_med
-    rows[lkey_short + '_high'] = ic_high
     # plt.plot(hist_bins, ic_low, 'k--')
     # plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(hist_bins, ic_high, 'k--')
     plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color=lists_color[lkey], edgecolor='w')
-    ic_low_sim, ic_med_sim, ic_high_sim = compute_ic(pt_per, np.asarray(sim_hist_dic[lkey]))
-    plt.plot(hist_bins, ic_med_sim, color='black', linewidth=2.0, label='SIM')
-    plt.fill_between(hist_bins, ic_low_sim, ic_high_sim, alpha=0.5, color='gray', edgecolor='w')
-    fieldnames.append('SIM' + '_low')
-    fieldnames.append('SIM' + '_med')
-    fieldnames.append('SIM' + '_high')
-    rows['SIM' + '_low'] = ic_low_sim
-    rows['SIM' + '_med'] = ic_med_sim
-    rows['SIM' + '_high'] = ic_high_sim
+sim_hist_list = list()
+for sim_hists in sim_hist_dic.itervalues():
+    for hists_vals in sim_hists:
+        sim_hist_list.append(hists_vals)
+ic_low_sim, ic_med_sim, ic_high_sim = compute_ic(pt_per, np.asarray(sim_hist_dic[lkey]))
+plt.plot(hist_bins, ic_med_sim, color='black', linewidth=2.0, label='SIM')
+plt.fill_between(hist_bins, ic_low_sim, ic_high_sim, alpha=0.5, color='gray', edgecolor='w')
 plt.legend(loc=1)
 plt.tight_layout()
 if fig_fmt is None:
@@ -492,16 +505,6 @@ if fig_fmt is None:
 else:
     plt.savefig(out_lists_dir + '/H_lists' + fig_fmt, dpi=600)
 plt.close()
-
-out_csv_file = out_lists_dir + '/H_lists.csv'
-with open(out_csv_file, 'w') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
-    writer.writeheader()
-    for i in range(len(rows['distance'])):
-        row = dict()
-        for key in rows.iterkeys():
-            row[key] = rows[key][i]
-        writer.writerow(row)
 
 print '\t\t-Plotting the CDF with tomos IC...'
 plt.figure()
@@ -528,19 +531,20 @@ for lkey in exp_hist_dic.iterkeys():
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     if lkey_short == '0':
         lkey_short = 'EXP'
-    # elif lkey_short == '1':
-    #    lkey_short = 'MSA'
-    # elif lkey_short == '2':
-    #    lkey_short = 'PFF'
+    elif lkey_short == '1':
+       lkey_short = 'MSA'
+    elif lkey_short == '2':
+       lkey_short = 'PFF'
     ic_low, ic_med, ic_high = compute_ic(pt_per, np.asarray(exp_cdf_dic[lkey]))
     plt.plot(hist_bins, ic_med, color=lists_color[lkey], linewidth=2.0, label=lkey_short)
-    # plt.plot(hist_bins, ic_low, 'k--')
-    # plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
-    # plt.plot(hist_bins, ic_high, 'k--')
     plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color=lists_color[lkey], edgecolor='w')
-    ic_low_sim, ic_med_sim, ic_high_sim = compute_ic(pt_per, np.asarray(sim_cdf_dic[lkey]))
-    plt.plot(hist_bins, ic_med_sim, color='black', linewidth=2.0, label='SIM')
-    plt.fill_between(hist_bins, ic_low_sim, ic_high_sim, alpha=0.5, color='gray', edgecolor='w')
+sim_cdf_list = list()
+for sim_cdfs in sim_cdf_dic.itervalues():
+    for cdf_vals in sim_cdfs:
+        sim_cdf_list.append(cdf_vals)
+ic_low_sim, ic_med_sim, ic_high_sim = compute_ic(pt_per, np.asarray(sim_cdf_list))
+plt.plot(hist_bins, ic_med_sim, color='black', linewidth=2.0, label='SIM')
+plt.fill_between(hist_bins, ic_low_sim, ic_high_sim, alpha=0.5, color='gray', edgecolor='w')
 plt.legend(loc=4)
 plt.tight_layout()
 if fig_fmt is None:
@@ -553,26 +557,51 @@ print '\t\t-Box-plotting of cumulative density up to ' + str(ana_max_test) + ' n
 plt.figure()
 plt.ylabel('Cumulative density at ' + str(ana_max_test) + ' nm')
 x_ticks, x_lbls = list(), list()
-for idx, lkey in zip(np.arange(1, 3*len(exp_acc_dic.keys())), exp_acc_dic.iterkeys()):
+h_max = 0
+for idx, lkey in zip(np.arange(1, 3*len(exp_acc_dic.keys()), step=2), exp_acc_dic.iterkeys()):
     ic_low = np.percentile(exp_acc_dic[lkey], pt_per)
     ic_med = np.percentile(exp_acc_dic[lkey], 50)
     ic_high = np.percentile(exp_acc_dic[lkey], 100-pt_per)
-    plt.bar(idx, ic_med, BAR_WIDTH, color=lists_color[lkey], linewidth=4)
+    plt.bar(idx, ic_med, BAR_WIDTH, color=lists_color[lkey], linewidth=2, edgecolor='k')
     plt.errorbar(idx, ic_med, yerr=np.asarray([[ic_med - ic_low, ic_high - ic_med], ]).reshape(2, 1),
-                 ecolor='k', elinewidth=4, capthick=4, capsize=8)
+                 ecolor='k', elinewidth=2, capthick=2, capsize=6)
+    h_exp = ic_low
     ic_low = np.percentile(sim_acc_dic[lkey], pt_per)
     ic_med = np.percentile(sim_acc_dic[lkey], 50)
     ic_high = np.percentile(sim_acc_dic[lkey], 100 - pt_per)
-    plt.bar(idx+1, ic_med, BAR_WIDTH, color='gray', linewidth=4)
+    plt.bar(idx+1, ic_med, BAR_WIDTH, color='gray', linewidth=2, edgecolor='k')
     plt.errorbar(idx+1, ic_med, yerr=np.asarray([[ic_med - ic_low, ic_high - ic_med], ]).reshape(2, 1),
-                 ecolor='k', elinewidth=4, capthick=4, capsize=8)
+                 ecolor='k', elinewidth=2, capthick=2, capsize=6)
+    h_sim = ic_low
     x_ticks += (idx, idx+1)
-    if idx == 1:
+    if lkey == '0':
         x_lbls += ('EXP', 'SIM')
+    elif lkey == '1':
+        x_lbls += ('MSA', 'SIM-MSA')
+    elif lkey == '2':
+        x_lbls += ('PFF', 'SIM-PFF')
     else:
         x_lbls += (lkey, 'SIM')
+    p_ks = sp.stats.ks_2samp(exp_acc_dic[lkey], sim_acc_dic[lkey])[1]
+    test_lbl = None
+    if (p_ks <= 0.05) and (p_ks > 0.01):
+        test_lbl = '*'
+    elif (p_ks <= 0.01) and (p_ks > 0.001):
+        test_lbl = '**'
+    elif (p_ks <= 0.001) and (p_ks > 0.0001):
+        test_lbl = '***'
+    elif p_ks <= 0.0001:
+        test_lbl = '****'
+    if test_lbl is not None:
+        hold_h_max = max(h_exp, h_sim)
+        plt.annotate(test_lbl, (idx+0.45, 0.004+hold_h_max))
+        plt.annotate('', (idx, 0.0005+hold_h_max), (idx+1, 0.0005+hold_h_max), arrowprops={'arrowstyle':'-','linewidth':2,
+                                                                                           'connectionstyle':'bar'})
+        if hold_h_max > h_max:
+            h_max = hold_h_max
 plt.xticks(x_ticks, x_lbls)
-plt.xlim(0.5, max(x_ticks) + .5)
+# plt.xlim(0.5, max(x_ticks) + .5)
+# plt.ylim(0, 0.006+h_max)
 plt.tight_layout()
 if fig_fmt is None:
     plt.show(block=True)
@@ -584,7 +613,13 @@ print '\t\t-Statistical test up to ' + str(ana_max_test) + ' nm: '
 for lkey, exp_acc in zip(exp_acc_dic.iterkeys(), exp_acc_dic.itervalues()):
     print '\t\t\t+List ' + str(lkey) + ': '
     print '\t\t\t\t-K-S 2 samples [100*(1-p)]: ' + str(100. * (1 - sp.stats.ks_2samp(exp_acc, sim_acc_dic[lkey])[1])) + '%'
-    print '\t\t\t\t-K-S 2 samples p: ' + str(sp.stats.ks_2samp(exp_acc, sim_acc_dic[lkey])[1])
+    print '\t\t\t\t-K-S 2 samples D, p: ' + str(sp.stats.ks_2samp(exp_acc, sim_acc_dic[lkey]))
+
+# print '\t\t-Statistical 2nd test up to ' + str(ana_max_test) + ' nm: '
+# for lkey, exp_acc2 in zip(exp_acc_dic2.iterkeys(), exp_acc_dic2.itervalues()):
+#     print '\t\t\t+List ' + str(lkey) + ': '
+#     print '\t\t\t\t-K-S 2 samples [100*(1-p)]: ' + str(100. * (1 - sp.stats.ks_2samp(exp_acc2, sim_acc_dic2[lkey])[1])) + '%'
+#     print '\t\t\t\t-K-S 2 samples p: ' + str(sp.stats.ks_2samp(exp_acc2, sim_acc_dic2[lkey])[1])
 
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
 

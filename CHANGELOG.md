@@ -39,3 +39,8 @@
     + Adding filament analysis scrits in code/pyorg/scripts/filaments
 * **03/09/2020**
     + Correction bug in script /code/tutorials/exp_somb/pre_tomos_seg.py
+* **11/09/2020**
+    + Corrections for test in module /code/pyorg/surf
+* **08/10/2020**
+    + Corrections for the statistical analysis of filaments organization
+    
