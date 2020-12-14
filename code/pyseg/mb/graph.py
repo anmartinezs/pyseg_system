@@ -1435,8 +1435,8 @@ class SynGraphMCF(GraphMCF):
             gl = self.get_prop_entry_fast(gl_id, v_id, 1, gl_dt)[0]
             sin = self.get_prop_entry_fast(sin_id, v_id, 1, sin_dt)[0]
             gol = self.get_prop_entry_fast(gol_id, v_id, 1, gol_dt)[0]
-            if (gol > 0) and (gl > 0) and (gol < gl):
-                continue
+            # if (gol > 0) and (gl > 0) and (gol < gl):
+            #     continue
             if slice.test(seg=seg, eu_dst=eu, geo_dst=geo, geo_len=gl, sin=sin):
                     h_v_ids.append(v_id)
 

@@ -52,12 +52,13 @@ in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_corr0915_all_rcorr/oms_corr0915_all_r
 
 # Output directory
 out_dir = ROOT_PATH + '/ana/oms_dsts/oms_corr0915_all_rcorr' # '/ana/oms_dsts/oms_all' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
-out_stem = 'oms_corr0915_all_rcorr_50_250_3_svg' # 'oms_fil_ctrl_25_250_3_svg_v4' # 'oms_fil_ctrl_25_250_3_png_2'
+out_stem = 'oms_corr0915_all_rcorr_50_250_5_svg' # 'oms_fil_ctrl_25_250_3_svg_v4' # 'oms_fil_ctrl_25_250_3_png_2'
 
 # Analysis variables
 pt_per = 95 # %
 ana_nbins = 50 # 25 # 250
 ana_rmax = 250 # nm
+ana_max_test = 20 # 5 # nm
 
 # Figure saving options
 fig_fmt = '.svg' # '.svg' # if None they showed instead
@@ -95,6 +96,7 @@ if in_wspace is not None:
 print '\tOrganization analysis settings: '
 print '\t\t-Number of bins: ' + str(ana_nbins)
 print '\t\t-Maximum radius: ' + str(ana_rmax) + ' nm'
+print '\t\t-Maximum distance for the test: ' + str(ana_max_test) + ' nm'
 if fig_fmt is not None:
     print '\tStoring figures:'
     print '\t\t-Format: ' + str(fig_fmt)
@@ -437,6 +439,8 @@ plt.figure()
 # plt.title('Histogram Nearest distances for ' + tkey_short + ' and ' + lkey)
 plt.ylabel('Probability Density')
 plt.xlabel('Inter-Membrane Nearest Distance [nm]')
+exp_acc_dic1, exp_acc_dic2 = list(), list()
+#     exp_acc_dic2[lkey], sim_acc_dic2[lkey] = list(), list()
 exp_hist_dic = dict().fromkeys(lists_exp_dsts.keys())
 for lkey in exp_hist_dic.iterkeys():
     exp_hist_dic[lkey] = list()
@@ -444,11 +448,16 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     exps_hist_vals = list()
     for lkey, arr in zip(tomos_exp_dsts[tkey].iterkeys(), tomos_exp_dsts[tkey].itervalues()):
+        lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
         if len(arr) <= 0:
             continue
         try:
             hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
             exp_hist_dic[lkey].append(hist_vals)
+            if lkey_short == '3':
+                exp_acc_dic1.append(hist_vals[hist_bins <= ana_max_test].sum())
+            else:
+                exp_acc_dic2.append(hist_vals[hist_bins <= ana_max_test].sum())
         except ValueError or IndexError:
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
             # continue
@@ -488,6 +497,11 @@ if fig_fmt is None:
 else:
     plt.savefig(out_lists_dir + '/H_lists' + fig_fmt, dpi=600)
 plt.close()
+
+print '\t\t-Statistical test for distances up to ' + str(ana_max_test) + ' nm: '
+print '\t\t\t+List ' + str(lkey) + ': '
+print '\t\t\t\t-K-S 2 samples [100*(1-p)]: ' + str(100. * (1 - sp.stats.ks_2samp(exp_acc_dic1, exp_acc_dic2)[1])) + '%'
+print '\t\t\t\t-K-S 2 samples D, p: ' + str(sp.stats.ks_2samp(exp_acc_dic1, exp_acc_dic2))
 
 out_csv_file = out_lists_dir + '/H_lists.csv'
 with open(out_csv_file, 'w') as csvfile:
@@ -546,7 +560,7 @@ else:
     plt.savefig(out_lists_dir + '/CDF_lists' + fig_fmt, dpi=600)
 plt.close()
 
-print '\t\t-Boxplot for oganelle volumes...'
+print '\t\t-Boxplot for organelle volumes...'
 plt.figure()
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 exp_vols_dic = dict().fromkeys(lists_exp_dsts.keys())
@@ -669,5 +683,24 @@ for lkey, vals in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
     for arr in lists_exp_dsts[lkey]:
         count += len(arr)
     print '- ' + str(hkey) + ': ' + str(count) + ' vx'
+
+print 'Plotting the membrane volumes (um**3) analyzed per condition: '
+for lkey, vals in zip(lists_exp_dsts.iterkeys(), lists_exp_dsts.itervalues()):
+    if lkey == '0':
+        hkey = 'WT'
+    elif lkey == '1':
+        hkey = 'MSA'
+    elif lkey == '2':
+        hkey = 'PFF'
+    elif lkey == '3':
+        hkey = 'CTRL'
+    elif lkey == '4':
+        hkey = 'FIL'
+    else:
+        hkey = lkey
+    vols = 0
+    for arr in lists_exp_vols[lkey]:
+        vols += arr.sum()
+    print '- ' + str(hkey) + ': ' + str(vols) + ' um**3'
 
 print 'Successfully terminated. (' + time.strftime("%c") + ')'

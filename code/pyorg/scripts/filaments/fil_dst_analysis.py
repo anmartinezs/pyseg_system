@@ -50,7 +50,7 @@ in_wspace = ROOT_PATH + '/ana/fil_dsts/fils_all_corr0910_sims200_pyorg/fils_max_
 
 # Output directory
 out_dir = ROOT_PATH + '/ana/fil_dsts/fils_all_corr0910_sims200_pyorg' # '/ana/fil_dsts/fils_all_sims3_pyorg' # '/ana/fil_dsts/fils_all_v2' #  # '/ana/fil_dsts/fils_all_corr0910_sims25' # '/ana/fil_dsts/fils_all_v2' # '/ana/fil_dsts/fils_sep'
-out_stem = 'fils_max_fils_sims_200_50_250_50_svg_test_20' # 'fils_sep_sims_25_250_25_50_2'
+out_stem = 'fils_max_fils_sims_200_50_250_50_svg_test_20_csv' # 'fils_sep_sims_25_250_25_50_2'
 
 # Analysis variables
 ana_nbins = 50
@@ -477,6 +477,7 @@ for tkey, ltomo in zip(tomos_exp_dsts.iterkeys(), tomos_exp_dsts.itervalues()):
             print '\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey
             # continue
             pass
+fieldnames, rows = list(), dict()
 for lkey in exp_hist_dic.iterkeys():
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     if lkey_short == '0':
@@ -491,6 +492,15 @@ for lkey in exp_hist_dic.iterkeys():
     # plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(hist_bins, ic_high, 'k--')
     plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color=lists_color[lkey], edgecolor='w')
+    if not('distances' in fieldnames):
+        fieldnames.append('distance')
+        rows['distance'] = hist_bins
+    fieldnames.append(lkey_short + '_low')
+    fieldnames.append(lkey_short + '_med')
+    fieldnames.append(lkey_short + '_high')
+    rows[lkey_short + '_low'] = ic_low
+    rows[lkey_short + '_med'] = ic_med
+    rows[lkey_short + '_high'] = ic_high
 sim_hist_list = list()
 for sim_hists in sim_hist_dic.itervalues():
     for hists_vals in sim_hists:
@@ -498,6 +508,12 @@ for sim_hists in sim_hist_dic.itervalues():
 ic_low_sim, ic_med_sim, ic_high_sim = compute_ic(pt_per, np.asarray(sim_hist_dic[lkey]))
 plt.plot(hist_bins, ic_med_sim, color='black', linewidth=2.0, label='SIM')
 plt.fill_between(hist_bins, ic_low_sim, ic_high_sim, alpha=0.5, color='gray', edgecolor='w')
+fieldnames.append('SIM_low')
+fieldnames.append('SIM_med')
+fieldnames.append('SIM_high')
+rows['SIM_low'] = ic_low_sim
+rows['SIM_med'] = ic_med_sim
+rows['SIM_high'] = ic_high_sim
 plt.legend(loc=1)
 plt.tight_layout()
 if fig_fmt is None:
@@ -505,6 +521,18 @@ if fig_fmt is None:
 else:
     plt.savefig(out_lists_dir + '/H_lists' + fig_fmt, dpi=600)
 plt.close()
+
+# Save H_list graph in a CSV file
+import csv
+out_csv_file = out_lists_dir + '/H_lists.csv'
+with open(out_csv_file, 'w') as csvfile:
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
+    writer.writeheader()
+    for i in range(len(rows['distance'])):
+        row = dict()
+        for key in rows.iterkeys():
+            row[key] = rows[key][i]
+        writer.writerow(row)
 
 print '\t\t-Plotting the CDF with tomos IC...'
 plt.figure()
