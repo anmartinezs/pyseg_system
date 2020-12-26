@@ -43,4 +43,6 @@
     + Corrections for test in module /code/pyorg/surf
 * **08/10/2020**
     + Corrections for the statistical analysis of filaments organization
+* **26/12/2020**
+    + Adding comments to explain XML files
     

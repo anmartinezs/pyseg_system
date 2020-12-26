@@ -1,23 +1,26 @@
 <file>
 
-<!-- MEMBRANE -->
+<!-- MEMBRANE, source vertices to find paths (filaments) of densities attached to membranes within a graph (network) -->
   
-  <mb_slice>
-    <name>mb</name>
-    <side>1</side>
-    <cont>-</cont>
-    <eu_dst id="low">-inf</eu_dst>
-    <eu_dst id="high">inf</eu_dst>
-    <eu_dst id="sign">+</eu_dst>
-    <geo_dst id="low">-inf</geo_dst>
-    <geo_dst id="high">inf</geo_dst>
-    <geo_dst id="sign">+</geo_dst>
-    <geo_len id="low">-inf</geo_len>
-    <geo_len id="high">inf</geo_len>
-    <geo_len id="sign">+</geo_len>
-    <sin id="low">-inf</sin>
-    <sin id="high">inf</sin>
-    <sin id="sign">+</sin>
+  <mb_slice> <!-- A graph subset defined by its relationship with a membrane segmentation -->
+    <!-- Segmentation definition -->
+    <name>mb</name> <!-- name -->
+    <side>1</side> <!-- segmentation label, value of vertex property mb_seg -->
+    <cont>-</cont> <!-- not used for filament tracing, just for picking -->
+    <!-- Geometrical restictions -->
+    <eu_dst id="low">-inf</eu_dst> <!-- Minimum Euclidean distance to membrane -->
+    <eu_dst id="high">inf</eu_dst> <!-- Maximum Euclidean distance to membrane -->
+    <eu_dst id="sign">+</eu_dst> <!-- if + then [min, max], otherwise [-inf,min]U[max,+inf] -->
+    <geo_dst id="low">-inf</geo_dst> <!-- Minimum Geodesic distance to membrane -->
+    <geo_dst id="high">inf</geo_dst> <!-- Maximum Geodesic distance to membrane -->
+    <geo_dst id="sign">+</geo_dst> <!-- if + then [min, max], otherwise [-inf,min]U[max,+inf] -->
+    <geo_len id="low">-inf</geo_len> <!-- Minimum Geodesic length to membrane -->
+    <geo_len id="high">inf</geo_len> <!-- Maximum Geodesic length to membrane -->
+    <geo_len id="sign">+</geo_len> <!-- if + then [min, max], otherwise [-inf,min]U[max,+inf] -->
+    <sin id="low">-inf</sin> <!-- Minimum filament sinuosity -->
+    <sin id="high">inf</sin> <!-- Maximum filament sinuosity -->
+    <sin id="sign">+</sin> <!-- if + then [min, max], otherwise [-inf,min]U[max,+inf] -->
+      <!-- Not used -->
     <clst_nv id="low">-inf</clst_nv>
     <clst_nv id="high">inf</clst_nv>
     <clst_nv id="sign">+</clst_nv>
