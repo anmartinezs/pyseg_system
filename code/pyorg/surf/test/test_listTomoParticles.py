@@ -323,7 +323,7 @@ class TestListTomoParticles(TestCase):
         plt.close()
         plt.close()
         # plt.figure()
-        fig, (ax, ax2) = plt.subplots(2, 1, sharex=True)
+        fig, (ax, ax2) = plt.subplots(2, 1) # plt.subplots(2, 1, sharex=True)
         # plt.title('Model SRPV')
         # plt.ylabel('Ripley\'s O')
         # plt.xlabel('Scale')
@@ -340,7 +340,8 @@ class TestListTomoParticles(TestCase):
         ax.spines['bottom'].set_visible(False)
         ax2.spines['top'].set_visible(False)
         ax.xaxis.tick_top()
-        ax.tick_params(labeltop='off')  # don't put tick labels at the top
+        ax.set_xticklabels([])
+        # ax.tick_params(labeltop='off')  # don't put tick labels at the top
         ax2.xaxis.tick_bottom()
         d = .015  # how big to make the diagonal lines in axes coordinates
         # arguments to pass to plot, just so we don't keep repeating them
@@ -555,8 +556,6 @@ class TestListTomoParticles(TestCase):
 
     def test_compute_uni_2nd_dsa(self):
 
-        return
-
         # Initialization
         voi = self.gen_rect_voi_array(TOMO_SHAPE)
         part = disperse_io.load_poly(PARTICLE_SURF)
@@ -683,7 +682,7 @@ class TestListTomoParticles(TestCase):
                     str(N_PROCESSORS) + '.png')
         plt.close()
         # plt.figure()
-        fig, (ax, ax2) = plt.subplots(2, 1, sharex=True)
+        fig, (ax, ax2) = plt.subplots(2, 1) # plt.subplots(2, 1, sharex=True)
         # plt.title('Model SRPV')
         # plt.ylabel('Ripley\'s O')
         # plt.xlabel('Scale')
@@ -700,7 +699,8 @@ class TestListTomoParticles(TestCase):
         ax.spines['bottom'].set_visible(False)
         ax2.spines['top'].set_visible(False)
         ax.xaxis.tick_top()
-        ax.tick_params(labeltop='off')  # don't put tick labels at the top
+        ax.set_xticklabels([])
+        # ax.tick_params(labeltop='off')  # don't put tick labels at the top
         ax2.xaxis.tick_bottom()
         d = .015  # how big to make the diagonal lines in axes coordinates
         # arguments to pass to plot, just so we don't keep repeating them
@@ -758,7 +758,7 @@ class TestListTomoParticles(TestCase):
 
     def test_compute_bi_2nd_dsa(self):
 
-        return
+        # return
 
         # Initialization
         voi = self.gen_rect_voi_array(TOMO_SHAPE)
@@ -894,7 +894,7 @@ class TestListTomoParticles(TestCase):
 
     def test_compute_uni_2nd_fmm(self):
 
-        return
+        # return
 
         # Initialization
         hold_shape = (TOMO_SHAPE[0], TOMO_SHAPE[1], .33 * TOMO_SHAPE[2])

@@ -20,7 +20,6 @@ import numpy as np
 import scipy as sp
 import sys
 import time
-import math
 import multiprocessing as mp
 from pyorg import pexceptions, sub, disperse_io, surf
 from pyorg.globals import unpickle_obj, clean_dir
@@ -38,33 +37,33 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 BAR_WIDTH = .35
 
-rcParams['axes.labelsize'] = 22 # 14
-rcParams['xtick.labelsize'] = 22 # 14
-rcParams['ytick.labelsize'] = 22 # 14
+rcParams['axes.labelsize'] = 14
+rcParams['xtick.labelsize'] = 14
+rcParams['ytick.labelsize'] = 14
 
 ########################################################################################
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos_v2/all_no_pid_p3/all_L_ltomos.star'
-in_wspace = ROOT_PATH + '/tests/uni_1st_nopid_p3//test_all_100_60_sim_20_2_wspace.pkl' # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star'
+in_wspace = None # ROOT_PATH + '/uni_1nd/v2/v2_100_60_sim_20_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/tests/uni_1st_nopid_p3/'
-out_stem = 'test_all_100_60_sim_20_2_plot'
+out_dir = ROOT_PATH + '/uni_1nd/v2'
+out_stem = 'v2_25_25_sim_50'
 
 # List pre-processing options
-pr_ss = 0 # 10 # nm
+pr_ss = None # 10 # nm
 
 # Analysis variables
-ana_res = 2.096 # 0.684 # nm/voxel
-ana_nbins = 100
-ana_rmax = 60 # nm
+ana_res = 1.368 # 0.684 # nm/voxel
+ana_nbins = 25 # 100
+ana_rmax = 25 # nm   #60 #controls the length-scale over which the plot is made.
 ana_f_npoints = 1000
-ana_npr_model = 1 # 10
+ana_npr_model = 10
 # Required for function-NNS computation, only if columns '_psStartSurfIds' and '_psEndSurfIds' are present
 # in the input STAR file
 ana_ndst_rg = [0, 40] # nm
@@ -73,7 +72,7 @@ ana_mx_conn = 3 # None
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 20
+p_nsims = 50 # 20
 p_per = 5 # %
 p_jhigh = 0.98
 # Particle surface
@@ -419,9 +418,6 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     for lkey, arr in zip(iter(tomos_exp_dsts[tkey].keys()), iter(tomos_exp_dsts[tkey].values())):
         try:
-            if len(arr[0]) == 0:
-                # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
-                continue
             hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
             sims_hist_vals = list()
@@ -431,24 +427,21 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_hist_vals))
             else:
                 raise ValueError
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         # plt.title('Histogram Nearest distances for ' + tkey_short + ' and ' + lkey)
-        plt.ylabel('Probability density')
-        plt.xlabel('Scale [nm]')
+        plt.ylabel('Frequency')
+        plt.xlabel('Distance [nm]')
         plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
         # plt.legend(loc=4)
         # plt.plot(hist_bins, ic_low, 'k--')
         plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(hist_bins, ic_high, 'k--')
         plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
-        arg_max = np.argmax(hist_vals)
-        plt.plot((hist_bins[arg_max], hist_bins[arg_max]), (0, hist_vals[arg_max]), 'k--', linewidth=2.0)
-        plt.xlim(8, 30)
         plt.tight_layout()
-        # plt.grid(True)
+        plt.grid(True)
         if fig_fmt is None:
             plt.show(block=True)
         else:
@@ -463,42 +456,32 @@ pvals_glow, pvals_ghigh = dict(), dict()
 for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values())):
     for lkey, arr in zip(iter(tomos_exp_dsts[tkey].keys()), iter(tomos_exp_dsts[tkey].values())):
         try:
-            if len(arr[0]) == 0:
-                # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
-                continue
             cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
             sims_cdf_vals = list()
             for sim_dsts in tomo_sim_dsts:
                 sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
-            n_exp, n_sim = len(arr[0]), len(sims_cdf_vals)
-            if n_sim > 0:
+            if len(sims_cdf_vals) > 0:
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
                 pvals_glow[tkey], pvals_ghigh[tkey] = compute_pvals(cdf_vals, np.asarray(sims_cdf_vals))
             else:
                 raise ValueError
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
-        plt.ylabel('Function-G')
-        plt.xlabel('Scale [nm]')
+        plt.ylabel('Nearest neighbor distribution')
+        plt.xlabel('Distance [nm]')
         plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], label=lkey, linewidth=2.0)
-        # plt.legend(loc=4)
+        plt.legend(loc=4)
         # plt.plot(cdf_bins, ic_low, 'k--')
         plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(cdf_bins, ic_high, 'k--')
         plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
-        diff = cdf_vals - ic_med
-        i_dm = np.argmax(np.abs(diff))
-        dm, r_dm = diff[i_dm], cdf_bins[i_dm]
-        alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-        plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
-        plt.xlim(8, 30)
         plt.tight_layout()
-        # plt.grid(True)
+        plt.grid(True)
         if fig_fmt is None:
             plt.show(block=True)
         else:
@@ -508,27 +491,23 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
             plt.savefig(out_fig_dir + '/G_' + lkey + '.png')
         plt.close()
 
-        print('\t\t-Plotting KS-test results for tomogram ' + str(tkey) + ' and list ' + str(lkey) + ':')
-        print('\t\t\t+Dm: ' + str(dm))
-        print('\t\t\t+rD: ' + str(r_dm))
-        print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
-        print('\t\t\t+alpha: ' + str(alpha))
-        print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100. * (1. - alpha)) + '  %')
-
 print('\t\t-Plotting Function-G p-values (tomo[s_low, s_high]= (min_pval, max_pval)):')
 min_pvals, max_pvals = list(), list()
 for tkey, pvals_low, pvals_high in zip(iter(pvals_glow.keys()), iter(pvals_glow.values()), iter(pvals_ghigh.values())):
-    pvals_hmin, pvals_hmax = np.copy(pvals_low), np.copy(pvals_high)
-    pvals_hmin[cdf_bins <= pr_ss] = -1
-    pvals_hmax[cdf_bins <= pr_ss] = -1
-    idx_min, idx_max = np.argmax(pvals_hmin), np.argmax(pvals_hmax)
-    min_pval, max_pval = pvals_hmin[idx_min], pvals_hmax[idx_max]
-    print('\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' \
-          + str(min_pval) + ', ' + str(max_pval) + ')')
-    min_pvals.append(pvals_hmin[idx_min])
-    max_pvals.append(pvals_hmax[idx_max])
+    try:
+        pvals_hmin, pvals_hmax = np.copy(pvals_low), np.copy(pvals_high)
+        pvals_hmin[cdf_bins <= pr_ss] = -1
+        pvals_hmax[cdf_bins <= pr_ss] = -1
+        idx_min, idx_max = np.argmax(pvals_hmin), np.argmax(pvals_hmax)
+        min_pval, max_pval = pvals_hmin[idx_min], pvals_hmax[idx_max]
+        print('\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' \
+              + str(min_pval) + ', ' + str(max_pval) + ')')
+        min_pvals.append(pvals_hmin[idx_min])
+        max_pvals.append(pvals_hmax[idx_max])
+    except TypeError:
+        continue
 plt.figure()
-# plt.title('Function-G p-values box-plot')
+plt.title('Function-G p-values box-plot')
 plt.ylabel('Function-G (p-values)')
 plt.boxplot([min_pvals, max_pvals], labels=['Low', 'High'])
 plt.tight_layout()
@@ -540,29 +519,26 @@ plt.close()
 
 print('\t\t-Plotting Funtion-G for all simulations:')
 plt.figure()
-# plt.title('Null-model')
+plt.title('Function-G (1st order) for all simulations')
 plt.ylabel('Function-G')
-plt.xlabel('Scale [nm]')
+plt.xlabel('Distance [nm]')
 pvals_glow, pvals_ghigh = dict(), dict()
 hold_cdf_vals = dict()
-max_nsims = p_nsims
-if max_nsims > 5:
-    max_nsims = 5
 for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values())):
     for lkey, arr in zip(iter(tomos_exp_dsts[tkey].keys()), iter(tomos_exp_dsts[tkey].values())):
         try:
 
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
-            for sim_dsts in tomo_sim_dsts[:max_nsims]:
+            for sim_dsts in tomo_sim_dsts:
                 cdf_bins, cdf_vals = compute_cdf(sim_dsts, ana_nbins, ana_rmax)
-                plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
+                plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.5)
                 try:
                     hold_cdf_vals[lkey].append(cdf_vals)
                 except KeyError:
                     hold_cdf_vals[lkey] = list()
                     hold_cdf_vals[lkey].append(cdf_vals)
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
 for lkey, cdf_vals in zip(iter(hold_cdf_vals.keys()), iter(hold_cdf_vals.values())):
     cdf_mat = np.asarray(cdf_vals, dtype=np.float32)
@@ -571,73 +547,28 @@ for lkey, cdf_vals in zip(iter(hold_cdf_vals.keys()), iter(hold_cdf_vals.values(
         lbl = 'CONTROL'
     elif lkey == '1':
         lbl = 'RAPA'
-    plt.plot(cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
-plt.xlim(8, 35)
+    plt.plot(cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='--')
 plt.legend(loc=4)
 plt.tight_layout()
-# plt.grid(True)
+plt.grid(True)
 if fig_fmt is None:
     plt.show(block=True)
 else:
     plt.savefig(out_tomos_dir + '/sims_G.png')
 plt.close()
 
-print('\t\t-Plotting Function-F for all simulations:')
-plt.figure()
-# plt.title('Null-model')
-plt.ylabel('Function-F')
-plt.xlabel('Scale [nm]')
-pvals_glow, pvals_ghigh = dict(), dict()
-hold_cdf_vals = dict()
-max_nsims = p_nsims
-if max_nsims > 5:
-    max_nsims = 5
-for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values())):
-    for lkey, arr in zip(iter(tomos_exp_fdsts[tkey].keys()), iter(tomos_exp_fdsts[tkey].values())):
-        try:
-
-            tomo_sim_fdsts = tomos_sim_fdsts[tkey][lkey]
-            for sim_fdsts in tomo_sim_fdsts[:max_nsims]:
-                cdf_bins, cdf_vals = compute_cdf(sim_fdsts, ana_nbins, ana_rmax)
-                plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
-                try:
-                    hold_cdf_vals[lkey].append(cdf_vals)
-                except KeyError:
-                    hold_cdf_vals[lkey] = list()
-                    hold_cdf_vals[lkey].append(cdf_vals)
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
-            continue
-for lkey, cdf_vals in zip(iter(hold_cdf_vals.keys()), iter(hold_cdf_vals.values())):
-    cdf_mat = np.asarray(cdf_vals, dtype=np.float32)
-    lbl = lkey
-    if lkey == '0':
-        lbl = 'CONTROL'
-    elif lkey == '1':
-        lbl = 'RAPA'
-    plt.plot(cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
-plt.xlim(0, 35)
-plt.legend(loc=4)
-plt.tight_layout()
-# plt.grid(True)
-if fig_fmt is None:
-    plt.show(block=True)
-else:
-    plt.savefig(out_tomos_dir + '/sims_F.png')
-plt.close()
-
 print('\t\t-Plotting histogram for all simulations:')
 plt.figure()
-# plt.title('Null-model')
-plt.ylabel('Probability density')
-plt.xlabel('Scale [nm]')
+plt.title('Univariate 1st order for all simulations')
+plt.ylabel('Frequency')
+plt.xlabel('Distance [nm]')
 pvals_glow, pvals_ghigh = dict(), dict()
 hold_hist_vals = dict()
 for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values())):
     for lkey, arr in zip(iter(tomos_exp_dsts[tkey].keys()), iter(tomos_exp_dsts[tkey].values())):
         try:
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
-            for sim_dsts in tomo_sim_dsts[:max_nsims]:
+            for sim_dsts in tomo_sim_dsts:
                 hist_bins, hist_vals = compute_hist(sim_dsts, ana_nbins, ana_rmax)
                 plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
                 try:
@@ -645,8 +576,8 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
                 except KeyError:
                     hold_hist_vals[lkey] = list()
                     hold_hist_vals[lkey].append(hist_vals)
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
 for lkey, hist_vals in zip(iter(hold_hist_vals.keys()), iter(hold_hist_vals.values())):
     hist_mat = np.asarray(hist_vals, dtype=np.float32)
@@ -655,11 +586,10 @@ for lkey, hist_vals in zip(iter(hold_hist_vals.keys()), iter(hold_hist_vals.valu
         lbl = 'CONTROL'
     elif lkey == '1':
         lbl = 'RAPA'
-    plt.plot(hist_bins, np.median(hist_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
-plt.xlim(8, 35)
-# plt.legend(loc=0)
+    plt.plot(hist_bins, np.median(hist_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='--')
+plt.legend(loc=0)
 plt.tight_layout()
-# plt.grid(True)
+plt.grid(True)
 if fig_fmt is None:
     plt.show(block=True)
 else:
@@ -672,40 +602,31 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     for lkey, arr in zip(iter(tomos_exp_fdsts[tkey].keys()), iter(tomos_exp_fdsts[tkey].values())):
         try:
-            if len(arr[0]) == 0:
-                # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
-                continue
             cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
             tomo_sim_fdsts = tomos_sim_fdsts[tkey][lkey]
             sims_cdf_fvals = list()
             for sim_fdsts in tomo_sim_fdsts:
                 sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
-            n_exp, n_sim = len(arr[0]), len(sims_cdf_fvals)
-            if n_sim > 0:
+            if len(sims_cdf_fvals) > 0:
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_fvals))
                 pvals_flow[tkey], pvals_fhigh[tkey] = compute_pvals(cdf_vals, np.asarray(sims_cdf_fvals))
             else:
                 raise ValueError
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
-        plt.ylabel('Function-F')
-        plt.xlabel('Scale [nm]')
+        plt.ylabel('Contact function distribution')
+        plt.xlabel('Distance [nm]')
         plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], label=lkey, linewidth=2.0)
-        # plt.legend(loc=4)
+        plt.legend(loc=4)
         # plt.plot(cdf_bins, ic_low, 'k--')
         plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(cdf_bins, ic_high, 'k--')
         plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
-        diff = cdf_vals - ic_med
-        i_dm = np.argmax(np.abs(diff))
-        dm, r_dm = diff[i_dm], cdf_bins[i_dm]
-        alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-        plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
         plt.tight_layout()
-        # plt.grid(True)
+        plt.grid(True)
         if fig_fmt is None:
             plt.show(block=True)
         else:
@@ -715,27 +636,23 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
             plt.savefig(out_fig_dir + '/F_' + lkey + '.png')
         plt.close()
 
-        print('\t\t-Plotting KS-test results for tomogram ' + str(tkey) + ' and list ' + str(lkey) + ':')
-        print('\t\t\t+Dm: ' + str(dm))
-        print('\t\t\t+rD: ' + str(r_dm))
-        print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
-        print('\t\t\t+alpha: ' + str(alpha))
-        print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100. * (1. - alpha)) + '  %')
-
 print('\t\t-Plotting Function-F p-values (tomo[s_low, s_high]= (min_pval, max_pval)):')
 min_pvals, max_pvals = list(), list()
 for tkey, pvals_low, pvals_high in zip(iter(pvals_flow.keys()), iter(pvals_flow.values()), iter(pvals_fhigh.values())):
-    pvals_hmin, pvals_hmax = np.copy(pvals_low), np.copy(pvals_high)
-    pvals_hmin[cdf_bins <= pr_ss] = -1
-    pvals_hmax[cdf_bins <= pr_ss] = -1
-    idx_min, idx_max = np.argmax(pvals_hmin), np.argmax(pvals_hmax)
-    min_pval, max_pval = pvals_hmin[idx_min], pvals_hmax[idx_max]
-    print('\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' + \
-          str(min_pval) + ', ' + str(max_pval) + ')')
-    min_pvals.append(pvals_hmin[idx_min])
-    max_pvals.append(pvals_hmax[idx_max])
+    try:
+        pvals_hmin, pvals_hmax = np.copy(pvals_low), np.copy(pvals_high)
+        pvals_hmin[cdf_bins <= pr_ss] = -1
+        pvals_hmax[cdf_bins <= pr_ss] = -1
+        idx_min, idx_max = np.argmax(pvals_hmin), np.argmax(pvals_hmax)
+        min_pval, max_pval = pvals_hmin[idx_min], pvals_hmax[idx_max]
+        print('\t\t\t+' + tkey + '[' + str(cdf_bins[idx_min]) + ', ' + str(cdf_bins[idx_max]) + ']= (' + \
+              str(min_pval) + ', ' + str(max_pval) + ')')
+        min_pvals.append(pvals_hmin[idx_min])
+        max_pvals.append(pvals_hmax[idx_max])
+    except TypeError:
+        continue
 plt.figure()
-# plt.title('Function-F p-values box-plot')
+plt.title('Function-F p-values box-plot')
 plt.ylabel('Function-F (p-values)')
 plt.boxplot([min_pvals, max_pvals], labels=['Low', 'High'])
 plt.tight_layout()
@@ -751,9 +668,6 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
     for lkey, farr in zip(iter(tomos_exp_fdsts[tkey].keys()), iter(tomos_exp_fdsts[tkey].values())):
         arr = tomos_exp_dsts[tkey][lkey]
         try:
-            if len(arr[0]) == 0:
-                # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
-                continue
             cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
             cdf_fvals = compute_cdf(farr, ana_nbins, ana_rmax)[1]
             cdf_jvals = compute_J(cdf_vals, cdf_fvals, high=p_jhigh)
@@ -770,15 +684,15 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
                 cdf_sim_jhigh = compute_J(ic_high, icf_low, high=p_jhigh)
             else:
                 raise ValueError
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
-        plt.ylabel('Function-J')
-        plt.xlabel('Scale [nm]')
+        plt.ylabel('J-function')
+        plt.xlabel('Distance [nm]')
         plt.plot(cdf_bins[:len(cdf_jvals)], cdf_jvals, color=lists_color[lkey], label=lkey, linewidth=2.0)
-        # plt.legend(loc=4)
+        plt.legend(loc=4)
         # plt.plot(cdf_bins[:len(cdf_sim_jlow)], cdf_sim_jlow, 'k--')
         plt.plot(cdf_bins[:len(cdf_sim_jmed)], cdf_sim_jmed, 'k', linewidth=2.0)
         # plt.plot(cdf_bins[:len(cdf_sim_jhigh)], cdf_sim_jhigh, 'k--')
@@ -787,9 +701,8 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
             cdf_sim_len = len(cdf_sim_jlow)
         plt.fill_between(cdf_bins[:cdf_sim_len], cdf_sim_jlow[:cdf_sim_len], cdf_sim_jhigh[:cdf_sim_len],
                          alpha=0.5, color='gray', edgecolor='w')
-        plt.xlim(0, 20)
         plt.tight_layout()
-        # plt.grid(True)
+        plt.grid(True)
         if fig_fmt is None:
             plt.show(block=True)
         else:
@@ -835,12 +748,12 @@ for tkey, ltomo in zip(iter(tomos_exp_mnnd.keys()), iter(tomos_exp_mnnd.values()
                     ic2_low, ic2_med, ic2_high = compute_ic(p_per, np.asarray(sims2_hist_vals))
                 else:
                     raise ValueError
-            except (ValueError, IndexError, RuntimeWarning):
-                # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+            except ValueError or IndexError:
+                print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
                 continue
             plt.figure()
-            plt.ylabel('Function-G inter-Surface distribution')
-            plt.xlabel('Scale [nm]')
+            plt.ylabel('Nearest Neighbor inter-Surface distribution')
+            plt.xlabel('Distance [nm]')
             plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
             plt.legend(loc=4)
             # plt.plot(hist_bins, ic_low, 'k--')
@@ -852,7 +765,7 @@ for tkey, ltomo in zip(iter(tomos_exp_mnnd.keys()), iter(tomos_exp_mnnd.values()
             # plt.plot(hist_bins, ic2_high, 'c--')
             plt.fill_between(hist_bins, ic2_low, ic2_high, alpha=0.5, color='cyan', edgecolor='c')
             plt.tight_layout()
-            # plt.grid(True)
+            plt.grid(True)
             if fig_fmt is None:
                 plt.show(block=True)
             else:
@@ -872,7 +785,7 @@ print('\t\t-Plotting Histogram...')
 for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
-        hist_bins, hist_vals = compute_hist(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)
+        hist_bins, hist_vals = compute_hist(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
         list_sim_dsts = lists_sim_dsts[lkey]
         sims_hist_vals = list()
         for sim_dsts in list_sim_dsts:
@@ -881,22 +794,19 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_hist_vals))
         else:
             raise ValueError
-    except (ValueError, IndexError, RuntimeWarning):
-        print(np.concatenate(np.asarray(ltomo, dtype=object)))
-        # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+    except ValueError or IndexError:
+        print(np.concatenate(np.asarray(ltomo)))
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     # plt.title('Nearest distance histogram for ' + lkey_short)
-    plt.ylabel('Probability density')
-    plt.xlabel('Scale [nm]')
+    plt.ylabel('Frequency')
+    plt.xlabel('Distance [nm]')
     plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(hist_bins, ic_low, 'k--')
     plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(hist_bins, ic_high, 'k--')
     plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
-    arg_max = np.argmax(hist_vals)
-    plt.plot((hist_bins[arg_max], hist_bins[arg_max]), (0, hist_vals[arg_max]), 'k--', linewidth=2.0)
-    plt.xlim(8, 40)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -908,34 +818,27 @@ print('\t\t-Plotting Function-G...')
 for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
-        exp_vals, sim_vals = np.concatenate(np.asarray(ltomo, dtype=object)), np.concatenate(np.asarray(list_sim_dsts, dtype=object))
-        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)
+        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
         list_sim_dsts = lists_sim_dsts[lkey]
         sims_cdf_vals = list()
         for sim_dsts in list_sim_dsts:
             sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
-        n_exp, n_sim = len(exp_vals), len(sims_cdf_vals)
-        if n_sim > 0:
+        if len(sims_cdf_vals) > 0:
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
         else:
             raise ValueError
-    except (ValueError, IndexError, RuntimeWarning):
-        # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+    except ValueError or IndexError:
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     # plt.title('Univariate 1st order for ' + lkey_short)
-    plt.ylabel('Function-G')
-    plt.xlabel('Scale [nm]')
+    plt.ylabel('Nearest neighbor distribution')
+    plt.xlabel('Distance [nm]')
     plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(cdf_bins, ic_low, 'k--')
     plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(cdf_bins, ic_high, 'k--')
     plt.fill_between(cdf_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
-    diff = cdf_vals - ic_med
-    i_dm = np.argmax(np.abs(diff))
-    dm, r_dm = diff[i_dm], cdf_bins[i_dm]
-    alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-    plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -943,51 +846,31 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
         plt.savefig(out_lists_dir + '/G_' + lkey_short + '.png', dpi=600)
     plt.close()
 
-    print('\t\t-Plotting KS-test results for ' + str(lkey_short) + ':')
-    print('\t\t\t+Dm: ' + str(dm))
-    print('\t\t\t+rD: ' + str(r_dm))
-    print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
-    print('\t\t\t+alpha: ' + str(alpha))
-    print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100.*(1. - alpha)) + '  %')
-
-    print('\t\t-Plotting KS-test two-samples two-sided scipy results for ' + str(lkey_short) + ' :')
-    dm, p_ks = sp.stats.ks_2samp(exp_vals, sim_vals, alternative='two-sided')
-    print('\t\t\t+Dm: ' + str(dm))
-    print('\t\t\t+p: ' + str(p_ks))
-    print('\t\t\t+Experimental does not follow null-model confidence 100*(1-p): ' + str(100. * (1. - p_ks)) + '  %')
-
 print('\t\t-Plotting Function-F...')
 for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
-        exp_vals, sim_vals = np.concatenate(np.asarray(ltomo, dtype=object)), np.concatenate(np.asarray(list_sim_dsts, dtype=object))
-        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)
+        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
         list_sim_fdsts = lists_sim_fdsts[lkey]
         sims_cdf_vals = list()
         for sim_fdsts in list_sim_fdsts:
             sims_cdf_vals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
-        n_exp, n_sim = len(exp_vals), len(sims_cdf_vals)
-        if n_sim > 0:
+        if len(sims_cdf_vals) > 0:
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
         else:
             raise ValueError
-    except (ValueError, IndexError, RuntimeWarning):
-        # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+    except ValueError or IndexError:
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     plt.figure()
     # plt.title('Univariate 1st order for ' + lkey_short)
-    plt.ylabel('Function-F')
-    plt.xlabel('Scale [nm]')
+    plt.ylabel('Contact function distribution')
+    plt.xlabel('Distance [nm]')
     plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(cdf_bins, ic_low, 'k--')
     plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(cdf_bins, ic_high, 'k--')
     plt.fill_between(cdf_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
-    diff = cdf_vals - ic_med
-    i_dm = np.argmax(np.abs(diff))
-    dm, r_dm = diff[i_dm], cdf_bins[i_dm]
-    alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-    plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -995,25 +878,12 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
         plt.savefig(out_lists_dir + '/F_' + lkey_short + '.png', dpi=600)
     plt.close()
 
-    print('\t\t-Plotting KS-test results for ' + str(lkey_short) + ':')
-    print('\t\t\t+Dm: ' + str(dm))
-    print('\t\t\t+rD: ' + str(r_dm))
-    print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
-    print('\t\t\t+alpha: ' + str(alpha))
-    print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100.*(1. - alpha)) + '  %')
-
-    print('\t\t-Plotting KS-test two-samples two-sided scipy results for ' + str(lkey_short) + ' :')
-    dm, p_ks = sp.stats.ks_2samp(exp_vals, sim_vals, alternative='two-sided')
-    print('\t\t\t+Dm: ' + str(dm))
-    print('\t\t\t+p: ' + str(p_ks))
-    print('\t\t\t+Experimental does not follow null-model confidence 100*(1-p): ' + str(100. * (1. - p_ks)) + '  %')
-
 print('\t\t-Plotting Function-J...')
 for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
-        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(lists_exp_dsts[lkey], dtype=object)), ana_nbins, ana_rmax)
-        cdf_fvals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)[1]
+        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(lists_exp_dsts[lkey])), ana_nbins, ana_rmax)
+        cdf_fvals = compute_cdf(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)[1]
         cdf_jvals = compute_J(cdf_vals, cdf_fvals, high=p_jhigh)
         list_sim_fdsts = lists_sim_fdsts[lkey]
         sims_cdf_vals, sims_cdf_fvals = list(), list()
@@ -1021,20 +891,20 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
             sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
             sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
         if (len(sims_cdf_vals) > 0) and (len(sims_cdf_fvals) > 0):
-            ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals, dtype=object))
-            icf_low, icf_med, icf_high = compute_ic(p_per, np.asarray(sims_cdf_fvals, dtype=object))
+            ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
+            icf_low, icf_med, icf_high = compute_ic(p_per, np.asarray(sims_cdf_fvals))
             cdf_sim_jlow = compute_J(ic_low, icf_high, high=p_jhigh)
             cdf_sim_jmed = compute_J(ic_med, icf_med, high=p_jhigh)
             cdf_sim_jhigh = compute_J(ic_high, icf_low, high=p_jhigh)
         else:
             raise ValueError
-    except (ValueError, IndexError, RuntimeWarning):
-        # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+    except ValueError or IndexError:
+        print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
         continue
     fig = plt.figure()
     ax = fig.add_subplot(111)
     # plt.title('Univariate 1st order for ' + lkey_short)
-    plt.ylabel('Function-J')
+    plt.ylabel('J-function')
     plt.xlabel('Scale (nm)')
     plt.plot(cdf_bins[:len(cdf_jvals)], cdf_jvals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(cdf_bins[:len(cdf_sim_jlow)], cdf_sim_jlow, 'k--')
@@ -1043,10 +913,9 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
     cdf_sim_len = len(cdf_sim_jhigh)
     if len(cdf_sim_jlow) < len(cdf_sim_jhigh):
         cdf_sim_len = len(cdf_sim_jlow)
-    plt.fill_between(cdf_bins[:cdf_sim_len].astype(np.float), cdf_sim_jlow[:cdf_sim_len].astype(np.float),
-                     cdf_sim_jhigh[:cdf_sim_len].astype(np.float), alpha=0.5, color='gray', edgecolor='w')
-    # ax.set_xlim((0, 60))
-    plt.xlim(0, min((cdf_bins[len(cdf_jvals)], cdf_bins[len(cdf_sim_jmed)])))
+    plt.fill_between(cdf_bins[:cdf_sim_len], cdf_sim_jlow[:cdf_sim_len], cdf_sim_jhigh[:cdf_sim_len],
+                     alpha=0.5, color='gray', edgecolor='w')
+    ax.set_xlim((0, 60))
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -1085,12 +954,12 @@ for lkey, ltomo in zip(iter(lists_exp_mnnd.keys()), iter(lists_exp_mnnd.values()
                 ic2_low, ic2_med, ic2_high = compute_ic(p_per, np.asarray(sims2_hist_vals))
             else:
                 raise ValueError
-        except (ValueError, IndexError, RuntimeWarning):
-            # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
+        except ValueError or IndexError:
+            print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
             continue
         plt.figure()
         plt.ylabel('Nearest Neighbor inter-Surface distribution')
-        plt.xlabel('Scale [nm]')
+        plt.xlabel('Distance [nm]')
         plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
         plt.legend(loc=4)
         # plt.plot(hist_bins, ic_low, 'k--')

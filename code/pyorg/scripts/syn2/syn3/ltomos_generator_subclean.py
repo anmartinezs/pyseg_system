@@ -30,13 +30,13 @@ __author__ = 'Antonio Martinez-Sanchez'
 ########################################################################################
 
 # ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn/sub/relion/fils/pst'
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
+ROOT_PATH = '/fs/pool/pool-lucic2/christos/workspace/glur' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex/syn3'
 
 # Input STAR file
-in_star = ROOT_PATH + '/org/pst/in/all_pst_subclean.star' # '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star'
+in_star = ROOT_PATH + '/org/pst/in/all_pst_subclean.star' # '/org/pst/in/all_pst_subclean.star' # '/org/pst/in/all_H_L_avgs.star' # '/org/pst/in/all_pst_pick.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
+in_seg = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_glur.star' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/in/syn_seg_no_l14_gap.star' # ROOT_PATH + '/in/syn_seg_11_2.star'
 
 # Output directory
 out_dir = ROOT_PATH + '/org/pst/ltomos/ltomos_all_pst_subclean' # '/org/pst/ltomos/ltomos_H_L_avgs_proj' # '/org/pst/ltomos/ltomos_pst_pick' # '/org/pst/ltomos/ltomos_all_pst_v6_gluta2.5_with_an_pst_pre_ss7.31px_min10_anmin5' # '/ref_a3/ltomos'
@@ -54,7 +54,7 @@ sg_voi_mask = True
 # Post-processing
 pt_min_parts = 0 # {'0': 10, '1': 10, '2': 10, '3': 10, '4': 10, '5':10, '6': 10, '7': 10, '8': 10, '9': 10, '10': 10, '11': 10}
 pt_keep = None
-pt_ssup = 14.62 # 7.31 # 20 # voxels
+pt_ssup = 11.89 # 14.62 # 7.31 # 20 # voxels
 pt_ssup_ref = '1' # None
 
 ########################################################################################

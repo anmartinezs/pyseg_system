@@ -49,13 +49,13 @@ ROOT_PATH = '/fs/pool/pool-ruben/antonio/nuc_mito'
 
 # Input STAR file
 in_star = ROOT_PATH + '/rln/mito/ref1/run1_blob_it017_data_nopost.star' # '/class/mito_bin0_ali2_blob2/class_ap_r_1_nopost_k0_split.star' # '/rec/nali/run1_bin0_it006_data.star' # '/class/mb/mb_merge.star' # '/rec/particles_rln.star' #
-in_mask = ROOT_PATH + '/masks/mask_cyl_256_95_190_50.mrc' # '/masks/mask_cyl_100_37_85_25.mrc'
+in_mask = ROOT_PATH + '/masks/mask_cyl_256_95_168_35_r.mrc' # '/masks/mask_cyl_100_37_85_25.mrc'
 in_mask_mb = None # ROOT_PATH + '/masks/mask_cyl_256_95_130_50_mt.mrc' # '/masks/mask_cyl_100_37_53_25_r.mrc'
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/rec/particles_bin0_post_gauss_cres4.5_ca0.1' # '/rec/particles_bin0_post_mt0.2' # '/rec/particles_ali_post_mb'
-out_star = ROOT_PATH + '/rec/particles_bin0_post_gauss_cres4.5_ca0.1.star' # '/rec/particles_bin0_post_mt0.2.star' # '/rec/particles_ali_post_mb.star'
+out_part_dir = ROOT_PATH + '/rec/particles_bin0_post_gauss_cres4_ca0.01' # '/rec/particles_bin0_post_mt0.2' # '/rec/particles_ali_post_mb'
+out_star = ROOT_PATH + '/rec/particles_bin0_post_gauss_cres4_ca0.01.star' # '/rec/particles_bin0_post_mt0.2.star' # '/rec/particles_ali_post_mb.star'
 
 ####### Particles pre-processing settings
 
@@ -180,6 +180,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
                 svol *= mask_mb
             # Adding noise
             if in_mask is not None:
+                svol *= mask
                 stat_vol = svol[mask > 0]
                 mn, st = stat_vol.mean(), stat_vol.std()
                 if st > 0:

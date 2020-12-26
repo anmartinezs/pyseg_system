@@ -39,9 +39,9 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 BAR_WIDTH = .35
 
-rcParams['axes.labelsize'] = 14
-rcParams['xtick.labelsize'] = 14
-rcParams['ytick.labelsize'] = 14
+rcParams['axes.labelsize'] = 22 # 14
+rcParams['xtick.labelsize'] = 22 # 14
+rcParams['ytick.labelsize'] = 22 # 14
 
 ########################################################################################
 # PARAMETERS
@@ -50,26 +50,26 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos_v2/all_no_pid/all_L_ltomos.star'
-in_wspace = ROOT_PATH + '/tests/uni_dsa_shell_all/test_8_300_3_15_sim_5_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos_v2/test_no_pid_p3/all_L_ltomos.star' # '/ltomos_v2/all_no_pid_p3/all_L_ltomos.star'
+in_wspace = None # ROOT_PATH + '/tests/uni_dsa_shell_all_p3/test_8_300_3_sim_5_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/tests/uni_dsa_shell_all/'
-out_stem = 'test_8_300_3_15_sim_5_3'
+out_dir = ROOT_PATH + '/tests/uni_dsa_test_p3/' # '/tests/uni_dsa_shell_all_p3/'
+out_stem = 'test_8_300_3_sim_1'
 
 # Analysis variables
 ana_res = 2.096 # nm/voxel
 ana_rg = np.arange(8, 300, 3) # in nm
-ana_shell_thick = 15 # 10 # None # 5
+ana_shell_thick = None # 10 # 5
 ana_rdf = False
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
 ana_fmm = False
-ana_npr = 10 # None means Auto
+ana_npr = 1 # 5 # 10 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 5 # 50
+p_nsims = 1 # 5 # 50
 p_per = 5 # %
 
 ##### Advanced settings
@@ -324,7 +324,7 @@ if in_wspace is None:
 
 else:
     print('\tLoading the workspace: ' + in_wspace)
-    with open(in_wspace, 'r') as pkl:
+    with open(in_wspace, 'rb') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
     lists_hash, tomos_hash = wspace[2], wspace[3]
@@ -429,7 +429,7 @@ for tkey, ltomo in zip(iter(tomos_exp.keys()), iter(tomos_exp.values())):
             pass
         plt.fill_between(ana_rg, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
         # plt.ylim(-9, 8)
-        plt.grid(True)
+        # plt.grid(True)
         plt.tight_layout()
         if fig_fmt is None:
             plt.show(block=True)
@@ -500,7 +500,7 @@ for lkey, vals in zip(iter(hold_sim_vals.keys()), iter(hold_sim_vals.values())):
         lbl = 'RAPA'
     plt.plot(ana_rg, np.median(vals_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='--')
 plt.xlabel('Scale [nm]')
-plt.grid(True)
+# plt.grid(True)
 plt.legend(loc=4)
 plt.tight_layout()
 if fig_fmt is None:
@@ -546,15 +546,15 @@ for lkey, tlist in zip(iter(lists_den.keys()), iter(lists_den.values())):
     arr = tlist[np.where(tlist > 0)[0]]
     den_low, den_med, den_high = np.percentile(arr, p_per), np.percentile(arr, 50), np.percentile(arr, 100 - p_per)
     den_low, den_med, den_high = den_low * ana_res_3_i, den_med * ana_res_3_i, den_high * ana_res_3_i
-    plt.bar(count, den_med, width=.40, color=lists_color[lkey], edgecolor='k', linewidth=2)
-    plt.errorbar(count, den_med, yerr=np.asarray([[den_med - den_low, den_high - den_med], ]).reshape(2, 1),
+    plt.bar(.5 * count, den_med, width=.40, color=lists_color[lkey], edgecolor='k', linewidth=2)
+    plt.errorbar(.5 * count, den_med, yerr=np.asarray([[den_med - den_low, den_high - den_med], ]).reshape(2, 1),
                  ecolor='k', elinewidth=4, capthick=4, capsize=8)
     if lkey == '0':
-        ticks['CONTROL'] = count
+        ticks['CONTROL'] = .5 * count
     elif lkey == '1':
-        ticks['RAPA'] = count
+        ticks['RAPA'] = .5 * count
     else:
-        ticks[lkey] = count
+        ticks[lkey] = .5 * count
     count += 1
 plt.xticks(list(ticks.values()), list(ticks.keys()))
 plt.tight_layout()

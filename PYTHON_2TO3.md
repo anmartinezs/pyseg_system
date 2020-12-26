@@ -89,3 +89,12 @@ dst_field = np.ma.MaskedArray(dst_field, np.invert(self.__voi))
 self.__dst_field = skfmm.distance(dst_field, dx=1) 
 # skfmm.travel_time(dst_field, self.__voi.astype(np.float32), dx=1) # Python 2.7
 ```
+
+### Catching exceptions
+
+The syntax has changed for catching several exceptions at once:
+
+```{python}
+except (ValueError, IndexError):
+# except ValueError, IndexError: # Python 2.7
+```

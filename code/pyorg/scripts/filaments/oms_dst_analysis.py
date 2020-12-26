@@ -52,7 +52,7 @@ in_wspace = ROOT_PATH + '/ana/oms_dsts/oms_all/oms_fil_ctrl_25_250_3_svg_v3_wspa
 
 # Output directory
 out_dir = ROOT_PATH + '/ana/oms_dsts/oms_all' # '/ana/oms_dsts/oms_fil_ctrl' # '/ana/oms_dsts/oms_vols/'
-out_stem = 'oms_fil_ctrl_25_250_3_svg_v4' # 'oms_fil_ctrl_25_250_3_png_2'
+out_stem = 'oms_fil_ctrl_25_250_3_svg_v5' # 'oms_fil_ctrl_25_250_3_png_2'
 
 # Analysis variables
 pt_per = 95 # %

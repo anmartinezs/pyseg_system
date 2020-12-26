@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt, rcParams
 RAD_RG = np.arange(2, 80, 3)
 SHELL_THICKS = (3, 6, 9, 12)
 THICK_COLORS = ('b', 'r', 'g', 'c')
-CONV_ITER = 1000 # 1000
+CONV_ITER = 100 # 10 # 1000
 MAX_ITER = 100000
 N_SIMS = 100 # 1000
 PERCENT = 5 # %
@@ -92,8 +92,8 @@ class TestListNhoodVol(TestCase):
         plt.plot(RAD_RG, ic_med, linewidth=2, color='k')
         plt.plot(RAD_RG, ic_high, linewidth=2, color='k', linestyle='--')
         plt.xlim(RAD_RG.min(), RAD_RG.max())
-        # plt.ylim(-100, 100)
-        plt.ylim(-25, 25)
+        plt.ylim(-100, 100)
+        # plt.ylim(-25, 25)
         plt.tight_layout()
         # plt.show(block=True)
         plt.savefig(OUT_DIR + '/mcs_sph_err_' + str(CONV_ITER) + '.png')
@@ -111,8 +111,8 @@ class TestListNhoodVol(TestCase):
         plt.plot(RAD_RG, ic_med, linewidth=2, color='k')
         plt.plot(RAD_RG, ic_high, linewidth=2, color='k', linestyle='--')
         plt.xlim(RAD_RG.min(), RAD_RG.max())
-        # plt.ylim(-100, 100)
-        plt.ylim(-25, 25)
+        plt.ylim(-100, 100)
+        # plt.ylim(-25, 25)
         plt.tight_layout()
         # plt.show(block=True)
         plt.savefig(OUT_DIR + '/mcs_she_err_' + str(CONV_ITER) + '.png')

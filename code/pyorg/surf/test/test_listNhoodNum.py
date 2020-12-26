@@ -284,7 +284,8 @@ class TestListNhoodNum(TestCase):
         voi_surf = poly_decimate(voi_surf, .9)
 
         # Computations loop
-        n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=str(N_PARTS).count('0')).astype(np.int)
+        # n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=str(N_PARTS).count('0')).astype(np.int)
+        n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=4*str(N_PARTS).count('0')).astype(np.int)
         sph_times = np.zeros(shape=(len(n_parts_arr), N_SIMS), dtype=np.float32)
         she_times = np.zeros(shape=(len(n_parts_arr), N_SIMS), dtype=np.float32)
         sph_times_surf = np.zeros(shape=(len(n_parts_arr), N_SIMS), dtype=np.float32)

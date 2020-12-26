@@ -4258,14 +4258,14 @@ class SetListTomoParticles(object):
             for tomo in llist.get_tomo_list():
                 for part in tomo.get_particles():
                     hold_part = part
-                    if hold_part is None:
-                        break
-                if hold_part is None:
-                    break
-            if hold_part is None:
-                break
-        if hold_part is None:
-            return None
+        #             if hold_part is None:
+        #                 break
+        #         if hold_part is None:
+        #             break
+        #     if hold_part is None:
+        #         break
+        # if hold_part is None:
+        #     return None
         meta_dic = hold_part.get_meta()
         for key in meta_dic.keys():
             star_part.add_column(key)

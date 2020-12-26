@@ -30,13 +30,13 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH =  '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
+ROOT_PATH =  '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/v1_org_curated.star'
+in_star = ROOT_PATH + '/in/v1_bpoints.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
+in_seg = ROOT_PATH + '/in/mts_clines_1_mts_t3_t6_pcorr.star'
 
 # Output directory
 out_dir = ROOT_PATH + '/ltomos/v1' # '/stat/ltomos/trans_run2_test_swapxy'
@@ -59,11 +59,11 @@ sg_sg = 0 # Gaussian filtering for surface conversion
 sg_dec = 0.9 # Decimation factor for the triangle mesh
 
 # Post-processing
-pt_ssup = 6 # nm - scale suppression for the input particles
+pt_ssup = None # 6 # nm - scale suppression for the input particles
 pt_ss_ref = None # ('0', '1') # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = 6 # for using different scale-suppression distances for crossed scale suppression
-pt_min_parts = 10 # Tomograms with less particles are removed
-pt_min_by_tomo = True # If True particle from all patterns are considered
+pt_min_parts = 0 # 10 # Tomograms with less particles are removed
+pt_min_by_tomo = False # If True particle from all patterns are considered
 pt_keep = None # To keep just the indicated highly populated tomograms
 pt_pparts = False # Print the particles found in an output tomogram
 pt_mode_over = False # If True particles of all parttern are printed overlapped in the same scalar field

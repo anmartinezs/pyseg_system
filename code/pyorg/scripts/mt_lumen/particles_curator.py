@@ -18,6 +18,9 @@ import scipy as sp
 import sys
 import time
 import shutil
+#from surf_dst import pexceptions, sub, disperse_io, surf
+#from surf_dst import globals as gl
+import pyorg
 from pyorg import pexceptions, sub, disperse_io, surf
 from pyorg import globals as gl
 
@@ -30,22 +33,23 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/neuronal_picking'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/0_picking.star'
+in_star = ROOT_PATH + '/in/0_lattice_break_center_points.star' # '/in/0_picking_mrc.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/mts_clines_mts_seg_picking_v1.star'
+in_seg = ROOT_PATH + '/in/mts_clines_1_mts_t3_t6_pcorr.star' # '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
 
 # Output directory
-out_star = ROOT_PATH + '/in/0_picking_curated.star'
+out_star = ROOT_PATH + '/in/0_lattice_break_center_points_curated.star'
 
-p_bin = 8
-p_max_dst = 10 # nm
-p_res = 1.796 # nm/pixel
+p_bin = 1 # since particle coordinates are binned in the relion star file corresponding to picking resolution
+p_max_dst = 1000 # 10 # nm
+p_res = 1.368 # nm/pixel
 p_swapxy = True
-p_cp_ptomo = True # Copy column '_mtParticlesTomo' values to '_rlnMicrographName'
+p_cp_ptomo = False # Copy column '_rlnMicrographName' values to '_mtParticlesTomo'
+p_cp_mt_to_mn = True # if '_mtParticleTomo' does not exist, it is taken from '_rlnMicrographName'
 
 ########################################################################################
 # MAIN ROUTINE
@@ -67,6 +71,8 @@ print('\t\t-Picking data resolution: ' + str(p_res) + ' nm/vx')
 print('\t\t-Swap X and Y.')
 if p_cp_ptomo:
     print('\t\t-Copying _mtParticlesTomo -> _rlnMicrographName.')
+if p_cp_mt_to_mn:
+    print('\t\t-Copying _rlnMicrographName -> _mtParticlesTomo.')
 print('')
 
 ######### Process
@@ -122,6 +128,13 @@ if p_cp_ptomo:
     for row in range(star_seg.get_nrows()):
         star_seg.set_element(key='_rlnMicrographName', val=star_seg.get_element('_mtParticlesTomo', row), row=row)
 
+if p_cp_mt_to_mn:
+    if not star.has_column('_mtParticlesTomo'):
+        print('\t\t-Copying column values mtParticlesTomo to rlnMicrographName...')
+        star.add_column('_mtParticlesTomo')
+        for row in range(star.get_nrows()):
+            star.set_element(key='_mtParticlesTomo', val=star.get_element('_rlnMicrographName', row), row=row)
+
 print('\tLoop for MT: ')
 seg_dic = dict()
 for row_ct in range(star_seg.get_nrows()):
@@ -161,6 +174,8 @@ for row_ct in range(star_seg.get_nrows()):
             star.set_element(key='_psSegImage', val=hold_seg, row=row)
             part_dsts[row] = hold_min
 
+print(part_dsts)
+
 print('\tDeleting unidentified particles...')
 del_ids = list()
 for row in range(star.get_nrows()):
@@ -170,7 +185,7 @@ for row in range(star.get_nrows()):
         hold_mic = star.get_element('_rlnMicrographName', row)
         hold_seg = star.get_element('_psSegImage', row)
         if seg_dic[hold_seg] != hold_mic:
-            print('Row [' + str(row) + ']: ' + hold_seg + ', ' + hold_mic)
+            print('Row [' + str(row) + ']: ' + seg_dic[hold_seg] + ', ' + hold_mic)
             del_ids.append(row)
 star.del_rows(del_ids)
 print('\t\t-Final number of particles: ' + str(star.get_nrows()))

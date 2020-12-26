@@ -36,10 +36,10 @@ ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
 in_star = ROOT_PATH + '/in/in_ltomos_all.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_all.star'
+in_seg = ROOT_PATH + '/in/in_seg_test.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos_v2/all_no_pid' # '/stat/ltomos/trans_run2_test_swapxy'
+out_dir = ROOT_PATH + '/ltomos_v2/test_no_pid_p3' # '/stat/ltomos/trans_run2_test_swapxy'
 out_stem = 'all_L' # 'pre'
 
 pt_res = 2.096 # nm/vx - resolution

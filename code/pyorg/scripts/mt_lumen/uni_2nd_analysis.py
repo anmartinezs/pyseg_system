@@ -47,28 +47,28 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/neuronal_picking'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/neuronal_picking'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star'
-in_wspace = None # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star' # '/ltomos/v1/v1_ltomos.star'
+in_wspace = None # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa/uni_2nd/v1/fmm_6_150_3_sim_20_wspace.pkl' # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/uni_2nd/v1'
-out_stem = 'fmm_6_150_3_sim_20'
+out_dir = ROOT_PATH + '/uni_2nd/v2'
+out_stem = 'fmm_6_150_3_sim_20_v3'
 
 # Analysis variables
-ana_res = 1.796 # nm/voxel
+ana_res = 1.368 # 1.796 # nm/voxel
 ana_rg = np.arange(6, 150, 6) # in nm
 ana_shell_thick = None # 15 # None # 5
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
 ana_fmm = True
-ana_npr = 2 # None means Auto
+ana_npr = 10 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 2 # 20 # 200
+p_nsims = 20 # 200
 p_per = 5 # %
 
 ##### Advanced settings
@@ -76,7 +76,7 @@ p_per = 5 # %
 ana_border = True
 
 # Particle surface
-p_vtp = ROOT_PATH + '/in/sphere_6nm_res1.796.vtp'
+p_vtp = ROOT_PATH + '/vtp/sphere_6nm_res1.368.vtp' # ROOT_PATH + '/in/sphere_6nm_res1.796.vtp'
 
 # Figure saving options
 fig_fmt = '.png' # if None they are displayed instead
@@ -323,7 +323,7 @@ if in_wspace is None:
 
 else:
     print('\tLoading the workspace: ' + in_wspace)
-    with open(in_wspace, 'r') as pkl:
+    with open(in_wspace, 'rb') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
     lists_hash, tomos_hash = wspace[2], wspace[3]
