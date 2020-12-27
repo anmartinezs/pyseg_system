@@ -210,7 +210,7 @@ for row in range(gl_star.get_nrows()):
         del ids_mask
     # ps.disperse_io.save_numpy(tomo_mb, out_dir + '/hold.mrc')
     if sg_th is not None:
-        print '\tMembrane thresholding...'
+        print('\tMembrane thresholding...')
         tomo_sz = ps.globals.global_analysis(tomo_mb, 0.5, c=26)
         tomo_mb = tomo_sz > sg_sz
         ps.disperse_io.save_numpy(tomo_mb, '/fs/pool/pool-lucic2/antonio/carsten/dan_mirror/hold.mrc')
