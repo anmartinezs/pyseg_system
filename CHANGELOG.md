@@ -45,4 +45,5 @@
     + Corrections for the statistical analysis of filaments organization
 * **26/12/2020**
     + Adding comments to explain XML files
-    
+* **27/12/2020**
+    + Segmentation pre-processing scripts in tutorial using global_analysis function

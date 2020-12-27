@@ -1761,6 +1761,77 @@ def get_sub_copy(tomo, sub_pt, sub_shape):
 
     return hold_sv
 
+def global_analysis(tomo, b_th, c=18):
+    """
+    Perform a simple global analysis for tomogram segmentation, firstly binarizes and secondly labels tomogram
+    structures according to their size.
+
+    REFERENCES:
+    [1] Martinez-Sanchez A., et al. Robust membrane detection based on tensor voting
+        for electron tomography. J Struct Biol. 186 (2014) 49-61.
+    :param tomo: Input tomogram
+    :param b_th: Binarization threshold
+    :param c: Voxel connectivity: 6, 18 (default) or 26
+    :return: Output tomogram with the structures labeled according their size
+    """
+
+    ## Thesholding and Volume analysis
+    if c == 6:
+        con_mat = [ [[0, 0, 0], [0, 1, 0], [0, 0, 0]],
+                    [[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+                    [[0, 0, 0], [0, 1, 0], [0, 0, 0]] ]
+    elif c == 18:
+        con_mat = [[[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+                   [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+                   [[0, 1, 0], [1, 1, 1], [0, 1, 0]]]
+    elif c == 26:
+        con_mat = [[[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+                   [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+                   [[1, 1, 1], [1, 1, 1], [1, 1, 1]]]
+    else:
+        raise ValueError
+    tomo_lbl, num_lbls = sp.ndimage.label(tomo, structure=np.ones(shape=[3, 3, 3]))
+    tomo_out = np.zeros(shape=tomo.shape, dtype=np.int)
+    lut = np.zeros(shape=num_lbls+1, dtype=np.int)
+
+    ## COUNTING REGIONS METHODS
+    # import time
+    # hold_t = time.time()
+    # for lbl in range(1, num_lbls + 1):
+    #     ids = tomo == lbl
+    #     feat_sz = len(ids)
+    #     tomo_out[ids] = feat_sz
+    #     # print('[1]:', lbl, 'of', num_lbls)
+    # print time.time() - hold_t
+
+    ## COUNTING PIXELS METHOD
+    ## Count loop
+    # cont, total = 0, np.prod(tomo.shape)
+    # import time
+    # hold_t = time.time()
+    for x in range(tomo.shape[0]):
+        for y in range(tomo.shape[1]):
+            for z in range(tomo.shape[2]):
+                id = tomo_lbl[x, y, z]
+                lut[id] += 1
+    #             cont += 1
+    #             print('[1]:', cont, 'of', total)
+    #
+    ## Write loop
+    # cont, total = 0, np.prod(tomo.shape)
+
+    for x in range(tomo.shape[0]):
+        for y in range(tomo.shape[1]):
+            for z in range(tomo.shape[2]):
+                id = tomo_lbl[x, y, z]
+                if id > 0:
+                   tomo_out[x, y, z] = lut[id]
+    #             cont += 1
+    #             print('[1]:', cont, 'of', total)
+    # print time.time() - hold_t
+
+    return tomo_out
+
 ################################################################################################
 #  Class for modelling a thresholding procedure
 #  If th_high >= th_low then everything in range [th_low, th_high] is pass the test
