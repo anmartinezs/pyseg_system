@@ -212,8 +212,8 @@ class MbGraphMCF(GraphMCF):
                                 self.set_prop_entry_fast(key_al_id, (fil.get_apex_length(),), v_id, 1)
                                 self.set_prop_entry_fast(key_cont_id, (contact[0], contact[1], contact[2]),
                                                          v_id, 3)
-                            else:
-                                print 'WARNING: filament with less than 3 points!'
+                            # else:
+                            #     print 'WARNING: filament with less than 3 points!'
 
     def add_mb_fil(self, v_id, v_ids, p_ids):
         self.__mb_fils[v_id] = FilamentLDG(v_ids, p_ids, self)
@@ -1336,7 +1336,8 @@ class SynGraphMCF(GraphMCF):
                                 try:
                                     fil = FilamentLDG(fil_v_ids, fil_p_ids, self)
                                 except IndexError:
-                                    print 'WARNING: filament with less than 3 points!'
+                                    pass
+                                #     print 'WARNING: filament with less than 3 points!'
                                 if sd == SYN_PST_LBL:
                                     self.__mb_fils_pst[v_id] = fil
                                     self.set_prop_entry_fast(key_pst_dst_id, (fil.get_dst(),), v_id, 1)
@@ -1351,8 +1352,8 @@ class SynGraphMCF(GraphMCF):
                                     self.set_prop_entry_fast(key_pre_sin_id, (fil.get_sinuosity(),), v_id, 1)
                                     self.set_prop_entry_fast(key_pre_cont_id, (contact[0], contact[1], contact[2]),
                                                              v_id, 3)
-                            else:
-                                print 'WARNING: filament with less than 3 points!'
+                            # else:
+                            #     print 'WARNING: filament with less than 3 points!'
 
     # Returns: returns a 2-tuple (pst, pre) with the the two possible filaments (if a filament does not exist is None)
     # if mb_id == SYN_PST|PRE_LBL only one filament is returned

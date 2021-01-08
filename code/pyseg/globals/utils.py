@@ -1761,6 +1761,7 @@ def get_sub_copy(tomo, sub_pt, sub_shape):
 
     return hold_sv
 
+
 def global_analysis(tomo, b_th, c=18):
     """
     Perform a simple global analysis for tomogram segmentation, firstly binarizes and secondly labels tomogram
@@ -1790,7 +1791,7 @@ def global_analysis(tomo, b_th, c=18):
                    [[1, 1, 1], [1, 1, 1], [1, 1, 1]]]
     else:
         raise ValueError
-    tomo_lbl, num_lbls = sp.ndimage.label(tomo, structure=np.ones(shape=[3, 3, 3]))
+    tomo_lbl, num_lbls = sp.ndimage.label(tomo >= b_th, structure=np.ones(shape=[3, 3, 3]))
     tomo_out = np.zeros(shape=tomo.shape, dtype=np.int)
     lut = np.zeros(shape=num_lbls+1, dtype=np.int)
 

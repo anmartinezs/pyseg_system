@@ -47,3 +47,6 @@
     + Adding comments to explain XML files
 * **27/12/2020**
     + Segmentation pre-processing scripts in tutorial using global_analysis function
+* **08/01/2020**
+    + Eliminating 'WARNING: filament with less than 3 points!' messages
+    + Preparing scripts to build an independant repository for filaments quantitative analysis 
