@@ -28,6 +28,7 @@ import time
 import copy
 import pyto
 import random
+import argparse
 import pyseg as ps
 import numpy as np
 import multiprocessing as mp
@@ -45,16 +46,16 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
-ROOT_PATH = '../../../..'
-
-# Input STAR file
-in_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_all/class_ap_r_ali_k25_split.star'
-in_mask = ROOT_PATH + '/data/tutorials/synth_sumb/class/mask_cyl_130_15_115_40.mrc'
-
-####### Output data
-
-out_part_dir = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25'
-out_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25_split_post.star'
+# ROOT_PATH = '../../../..'
+#
+# # Input STAR file
+# in_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_all/class_ap_r_ali_k25_split.star'
+# in_mask = ROOT_PATH + '/data/tutorials/synth_sumb/class/mask_cyl_130_15_115_40.mrc'
+#
+# ####### Output data
+#
+# out_part_dir = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25'
+# out_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25_split_post.star'
 
 ####### Particles pre-processing settings
 
@@ -63,7 +64,7 @@ do_ang_rnd = ['Rot']
 
 ####### Multiprocessing settings
 
-mp_npr = 10 # 1
+# mp_npr = 10 # 1
 
 ########################################################################################
 # Local functions
@@ -193,134 +194,155 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     qu.put(rln_star)
     sys.exit(pr_id)
 
+
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
 
-# Print initial message
-print 'Extracting transmembrane features.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
-print '\tInput mask: ' + in_mask
-print '\tOutput directory for reconstructed particles: ' + out_part_dir
-print '\tOutput STAR file: ' + out_star
-print '\tParticles pre-processing settings: '
-if len(do_ang_prior) > 0:
-    for ang_prior in do_ang_prior:
-        if ang_prior not in ['Rot', 'Tilt', 'Psi']:
-            print 'ERROR: unrecognized angle: ' + ang_prior
+
+def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--inStar', required=True, help='Input star file.')
+    parser.add_argument('--inMask', required=True, help='Input mask file.')
+    parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
+    parser.add_argument('--outStar', required=True, help='Output star file.')
+    parser.add_argument('-j', default=2, type=int, help='Number of processors.')
+    args = parser.parse_args()
+
+    in_star = args.inStar
+    in_mask = args.inMask
+    out_part_dir = args.outDir
+    out_star = args.outStar
+    mp_npr = args.j
+
+    # Print initial message
+    print 'Extracting transmembrane features.'
+    print '\tAuthor: ' + __author__
+    print '\tDate: ' + time.strftime("%c") + '\n'
+    print 'Options:'
+    print '\tInput STAR file: ' + in_star
+    print '\tInput mask: ' + in_mask
+    print '\tOutput directory for reconstructed particles: ' + out_part_dir
+    print '\tOutput STAR file: ' + out_star
+    print '\tParticles pre-processing settings: '
+    if len(do_ang_prior) > 0:
+        for ang_prior in do_ang_prior:
+            if ang_prior not in ['Rot', 'Tilt', 'Psi']:
+                print 'ERROR: unrecognized angle: ' + ang_prior
+                print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+                sys.exit(-1)
+        print '\t\t-Adding prior for angles: ' + ang_prior
+    if len(do_ang_rnd) > 0:
+        for ang_rnd in do_ang_rnd:
+            if ang_rnd not in ['Rot', 'Tilt', 'Psi']:
+                print 'ERROR: unrecognized angle: ' + ang_rnd
+                print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+                sys.exit(-1)
+        print '\t\t-Setting random values for angles: ' + ang_rnd
+    print '\tMultiprocessing settings: '
+    print '\t\t-Number processes: ' + str(mp_npr)
+    print ''
+
+
+    print 'Loading input STAR file...'
+    star, rln_star = sub.Star(), sub.Star()
+    try:
+        star.load(in_star)
+    except pexceptions.PySegInputError as e:
+        print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
+        print 'Terminated. (' + time.strftime("%c") + ')'
+        sys.exit(-1)
+    if not os.path.exists(out_part_dir):
+        os.makedirs(out_part_dir)
+
+    print '\tInitializing output Relion STAR file: '
+    rln_star.add_column(key='_rlnMicrographName')
+    rln_star.add_column(key='_rlnCtfImage')
+    rln_star.add_column(key='_rlnImageName')
+    rln_star.add_column(key='_rlnCoordinateX')
+    rln_star.add_column(key='_rlnCoordinateY')
+    rln_star.add_column(key='_rlnCoordinateZ')
+    rln_star.add_column(key='_rlnOriginX')
+    rln_star.add_column(key='_rlnOriginY')
+    rln_star.add_column(key='_rlnOriginZ')
+    if ANGLE_NAMES[0] in do_ang_prior:
+        if star.has_column(key='_rlnAngleRot'):
+            rln_star.add_column(key='_rlnAngleRot')
+            rln_star.add_column(key='_rlnAngleRotPrior')
+        else:
+            print 'ERROR: Prior Rot angle cannot be added since not Rot angle in the input tomogram.'
             print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
-    print '\t\t-Adding prior for angles: ' + ang_prior
-if len(do_ang_rnd) > 0:
-    for ang_rnd in do_ang_rnd:
-        if ang_rnd not in ['Rot', 'Tilt', 'Psi']:
-            print 'ERROR: unrecognized angle: ' + ang_rnd
+    if ANGLE_NAMES[1] in do_ang_prior:
+        if star.has_column(key='_rlnAngleTilt'):
+            rln_star.add_column(key='_rlnAngleTilt')
+            rln_star.add_column(key='_rlnAngleTiltPrior')
+        else:
+            print 'ERROR: Prior Tilt angle cannot be added since not Tilt angle in the input tomogram.'
             print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
             sys.exit(-1)
-    print '\t\t-Setting random values for angles: ' + ang_rnd
-print '\tMultiprocessing settings: '
-print '\t\t-Number processes: ' + str(mp_npr)
-print ''
+    if ANGLE_NAMES[2] in do_ang_prior:
+        if star.has_column(key='_rlnAnglePsi'):
+            rln_star.add_column(key='_rlnAnglePsi')
+            rln_star.add_column(key='_rlnAnglePsiPrior')
+        else:
+            print 'ERROR: Prior Psi angle cannot be added since not Psi angle in the input tomogram.'
+            print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+            sys.exit(-1)
+    if ANGLE_NAMES[0] in do_ang_rnd:
+        if not rln_star.has_column(key='_rlnAngleRot'):
+            rln_star.add_column(key='_rlnAngleRot')
+    if ANGLE_NAMES[1] in do_ang_rnd:
+        if not rln_star.has_column(key='_rlnAngleTilt'):
+            rln_star.add_column(key='_rlnAngleTilt')
+    if ANGLE_NAMES[2] in do_ang_rnd:
+        if not rln_star.has_column(key='_rlnAnglePsi'):
+            rln_star.add_column(key='_rlnAnglePsi')
+
+    print '\tInitializing multiprocessing with ' + str(mp_npr) + ' processes: '
+    settings = Settings()
+    settings.out_part_dir = out_part_dir
+    settings.out_star = out_star
+    settings.in_mask = in_mask
+    settings.do_ang_prior = do_ang_prior
+    settings.do_ang_rnd = do_ang_rnd
+    processes = list()
+    qu = mp.Queue()
+    spl_ids = np.array_split(range(star.get_nrows()), mp_npr)
+    # Starting the processes
+    for pr_id in range(mp_npr):
+        pr = mp.Process(target=pr_worker, args=(pr_id, star, rln_star, spl_ids[pr_id], settings, qu))
+        pr.start()
+        processes.append(pr)
+    # Getting processes results
+    pr_results, stars = list(), list()
+    for pr in processes:
+        stars.append(qu.get())
+    for pr_id, pr in enumerate(processes):
+        pr.join()
+        pr_results.append(pr.exitcode)
+        if pr_id != pr_results[pr_id]:
+            print 'ERROR: Process ' + str(pr_id) + ' ended incorrectly.'
+            print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+            sys.exit(-1)
+    gc.collect()
+    # Merging output STAR files
+    rln_merged_star = sub.Star()
+    keys = stars[0].get_column_keys()
+    for key in keys:
+        rln_merged_star.add_column(key)
+    for star in stars:
+        for row in range(star.get_nrows()):
+            hold_row = dict()
+            for key in keys:
+                hold_row[key] = star.get_element(key, row)
+            rln_merged_star.add_row(**hold_row)
+
+    print '\tStoring output STAR file in: ' + out_star
+    rln_merged_star.store(out_star)
+    print 'Successfully terminated. (' + time.strftime("%c") + ')'
 
 
-print 'Loading input STAR file...'
-star, rln_star = sub.Star(), sub.Star()
-try:
-    star.load(in_star)
-except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
-    sys.exit(-1)
-if not os.path.exists(out_part_dir):
-    os.makedirs(out_part_dir)
-
-print '\tInitializing output Relion STAR file: '
-rln_star.add_column(key='_rlnMicrographName')
-rln_star.add_column(key='_rlnCtfImage')
-rln_star.add_column(key='_rlnImageName')
-rln_star.add_column(key='_rlnCoordinateX')
-rln_star.add_column(key='_rlnCoordinateY')
-rln_star.add_column(key='_rlnCoordinateZ')
-rln_star.add_column(key='_rlnOriginX')
-rln_star.add_column(key='_rlnOriginY')
-rln_star.add_column(key='_rlnOriginZ')
-if ANGLE_NAMES[0] in do_ang_prior:
-    if star.has_column(key='_rlnAngleRot'):
-        rln_star.add_column(key='_rlnAngleRot')
-        rln_star.add_column(key='_rlnAngleRotPrior')
-    else:
-        print 'ERROR: Prior Rot angle cannot be added since not Rot angle in the input tomogram.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
-        sys.exit(-1)
-if ANGLE_NAMES[1] in do_ang_prior:
-    if star.has_column(key='_rlnAngleTilt'):
-        rln_star.add_column(key='_rlnAngleTilt')
-        rln_star.add_column(key='_rlnAngleTiltPrior')
-    else:
-        print 'ERROR: Prior Tilt angle cannot be added since not Tilt angle in the input tomogram.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
-        sys.exit(-1)
-if ANGLE_NAMES[2] in do_ang_prior:
-    if star.has_column(key='_rlnAnglePsi'):
-        rln_star.add_column(key='_rlnAnglePsi')
-        rln_star.add_column(key='_rlnAnglePsiPrior')
-    else:
-        print 'ERROR: Prior Psi angle cannot be added since not Psi angle in the input tomogram.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
-        sys.exit(-1)
-if ANGLE_NAMES[0] in do_ang_rnd:
-    if not rln_star.has_column(key='_rlnAngleRot'):
-        rln_star.add_column(key='_rlnAngleRot')
-if ANGLE_NAMES[1] in do_ang_rnd:
-    if not rln_star.has_column(key='_rlnAngleTilt'):
-        rln_star.add_column(key='_rlnAngleTilt')
-if ANGLE_NAMES[2] in do_ang_rnd:
-    if not rln_star.has_column(key='_rlnAnglePsi'):
-        rln_star.add_column(key='_rlnAnglePsi')
-
-print '\tInitializing multiprocessing with ' + str(mp_npr) + ' processes: '
-settings = Settings()
-settings.out_part_dir = out_part_dir
-settings.out_star = out_star
-settings.in_mask = in_mask
-settings.do_ang_prior = do_ang_prior
-settings.do_ang_rnd = do_ang_rnd
-processes = list()
-qu = mp.Queue()
-spl_ids = np.array_split(range(star.get_nrows()), mp_npr)
-# Starting the processes
-for pr_id in range(mp_npr):
-    pr = mp.Process(target=pr_worker, args=(pr_id, star, rln_star, spl_ids[pr_id], settings, qu))
-    pr.start()
-    processes.append(pr)
-# Getting processes results
-pr_results, stars = list(), list()
-for pr in processes:
-    stars.append(qu.get())
-for pr_id, pr in enumerate(processes):
-    pr.join()
-    pr_results.append(pr.exitcode)
-    if pr_id != pr_results[pr_id]:
-        print 'ERROR: Process ' + str(pr_id) + ' ended incorrectly.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
-        sys.exit(-1)
-gc.collect()
-# Merging output STAR files
-rln_merged_star = sub.Star()
-keys = stars[0].get_column_keys()
-for key in keys:
-    rln_merged_star.add_column(key)
-for star in stars:
-    for row in range(star.get_nrows()):
-        hold_row = dict()
-        for key in keys:
-            hold_row[key] = star.get_element(key, row)
-        rln_merged_star.add_row(**hold_row)
-
-print '\tStoring output STAR file in: ' + out_star
-rln_merged_star.store(out_star)
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
-
+if __name__ == '__main__':
+    main()
