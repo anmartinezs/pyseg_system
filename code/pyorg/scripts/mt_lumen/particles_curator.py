@@ -36,13 +36,13 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/0_lattice_break_center_points.star' # '/in/0_picking_mrc.star'
+in_star = ROOT_PATH + '/in/0_picking.star' # '/in/0_lattice_break_center_points.star' # '/in/0_picking_mrc.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/mts_clines_1_mts_t3_t6_pcorr.star' # '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
+in_seg = ROOT_PATH + '/in/mts_clines_1_mts_t2_t3_t6_pcorr.star' # '/in/mts_clines_1_mts_t3_t6_pcorr.star' # '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
 
 # Output directory
-out_star = ROOT_PATH + '/in/0_lattice_break_center_points_curated.star'
+out_star = ROOT_PATH + '/in/1_picking_curated.star' # '/in/0_lattice_break_center_points_curated.star'
 
 p_bin = 1 # since particle coordinates are binned in the relion star file corresponding to picking resolution
 p_max_dst = 1000 # 10 # nm

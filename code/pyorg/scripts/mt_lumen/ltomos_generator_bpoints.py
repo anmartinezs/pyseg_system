@@ -36,11 +36,11 @@ ROOT_PATH =  '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice
 in_star = ROOT_PATH + '/in/v1_bpoints.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/mts_clines_1_mts_t3_t6_pcorr.star'
+in_seg = ROOT_PATH + '/in/mts_clines_1_mts_t2_t3_t6_pcorr.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/v1' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'v1' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/v1_nobc_proj' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'v1_nobc_proj' # 'pre'
 
 pt_res = 1.368 # 1.792 # nm/vx - resolution
 
@@ -48,9 +48,9 @@ pt_res = 1.368 # 1.792 # nm/vx - resolution
 
 # Segmentation pre-processing
 sg_lbl = 1 # segmented label
-sg_bc = True # False
+sg_bc = False # True
 sg_bm = 'center' # Embedding checking mode
-sg_pj = False # Project particles to VOI's surfaces
+sg_pj = True # False # Project particles to VOI's surfaces
 sg_origins = [8, 8, 8, 8, 8] # If not None, subtomoavg shiftings are considered,
                     # then scale factor (one per each pattern in in_star) from picked particle to subtomograms
 sg_swap_xy = False # Swap X and Y coordinates of the input particle STAR files
@@ -62,7 +62,7 @@ sg_dec = 0.9 # Decimation factor for the triangle mesh
 pt_ssup = None # 6 # nm - scale suppression for the input particles
 pt_ss_ref = None # ('0', '1') # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = 6 # for using different scale-suppression distances for crossed scale suppression
-pt_min_parts = 0 # 10 # Tomograms with less particles are removed
+pt_min_parts = 1 # 10 # Tomograms with less particles are removed
 pt_min_by_tomo = False # If True particle from all patterns are considered
 pt_keep = None # To keep just the indicated highly populated tomograms
 pt_pparts = False # Print the particles found in an output tomogram

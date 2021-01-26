@@ -378,11 +378,12 @@ def gen_tlist2(n_tomos, n_part_tomo, model_class, mode_emb='full', npr=None, tmp
 #
 class Model(object, metaclass=abc.ABCMeta):
 
-    def __init__(self, voi, part, vect=(0, 0, 1)):
+    def __init__(self, voi, part, vect=(0, 0, 1), check_inter=0):
         self.__part, self.__vect, self.__voi = None, None, None
         self.set_voi(voi)
         self.set_part(part, vect)
         self.__type_name = None
+        self.__check_inter = float(check_inter)
         # Pickling variables
         self.__part_fname = None
         self.__voi_fname = None
@@ -548,10 +549,15 @@ class Model(object, metaclass=abc.ABCMeta):
 #
 class ModelCSRV(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    def __init__(self, voi=None, part=None, vect=(0., 0., 1.)):
-        super(ModelCSRV, self).__init__(voi, part, vect)
+    def __init__(self, voi=None, part=None, vect=(0., 0., 1.), check_inter=0):
+        """
+        Constructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param vect: orientation vector for the particle
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        """
+        super(ModelCSRV, self).__init__(voi, part, vect, check_inter)
         self._Model__type_name = 'CSRV'
 
     def gen_instance(self, n_parts, tomo_fname, mode='full', coords=False, max_ntries_factor=10):
@@ -629,7 +635,7 @@ class ModelCSRV(Model):
 
             # Checking embedding and no overlapping
             try:
-                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=True)
+                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
             except pexceptions.PySegInputError:
                 if count_it > MAX_ITER_CONV:
                     break
@@ -660,14 +666,19 @@ class ModelCSRV(Model):
 #
 class ModelSRPV(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    # n_cycles: 3-tuple with the number of cycles for the sinusoidal in each dimension (X, Y, Z)
-    #           (default (1,1,1))
-    # sin_t: sinus threshold (default 0.5)
-    # phase: 3-Tuple for phase shifting (default (0, 0, 0)) in radians
-    def __init__(self, voi=None, part=None, vect=(0,0,1), n_cycles=(1,1,1), sin_t=0.5, phase=(0,0,0)):
-        super(ModelSRPV, self).__init__(voi, part, vect)
+    def __init__(self, voi=None, part=None, vect=(0,0,1), check_inter=0, n_cycles=(1,1,1), sin_t=0.5, phase=(0,0,0)):
+        """
+        Constructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param vect: orientation vector for the particle
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        :param n_cycles: 3-tuple with the number of cycles for the sinusoidal in each dimension (X, Y, Z)
+                        (default (1,1,1))
+        :param sin_t: sinus threshold (default 0.5)
+        :param phase: 3-Tuple for phase shifting (default (0, 0, 0)) in radians
+        """
+        super(ModelSRPV, self).__init__(voi, part, vect, check_inter)
         if (not hasattr(n_cycles, '__len__')) or (len(n_cycles) != 3):
             error_msg = 'Invalid vector must be 3-tuple!'
             raise pexceptions.PySegInputError(expr='__init__ (ModelSRPV)', msg=error_msg)
@@ -756,7 +767,7 @@ class ModelSRPV(Model):
 
             # Checking embedding and no overlapping
             try:
-                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=True)
+                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
             except pexceptions.PySegInputError:
                 continue
             out_coords.append((coord_rnd[0], coord_rnd[1], coord_rnd[2]))
@@ -783,13 +794,17 @@ class ModelSRPV(Model):
 #
 class Model2CCSRV(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    # dst: characteristic interparticle averaged distance (default 0)
-    # std: standard deviation for modeling Gaussian co-localization, if sg is None (default)
-    #     two output patterns are un-correlated
-    def __init__(self, voi=None, part=None, dst=0, std=None):
-        super(Model2CCSRV, self).__init__(voi, part)
+    def __init__(self, voi=None, part=None, dst=0, std=None, check_inter=0):
+        """
+        Contructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param dst: characteristic interparticle averaged distance (default 0)
+        :param std: standard deviation for modeling Gaussian co-localicacion, if sg is None (default)
+                    the two output patterns are un-correlated
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        """
+        super(Model2CCSRV, self).__init__(voi, part, check_inter=check_inter)
         self._Model__type_name = '2CCSRV'
         self.__dst = float(dst)
         self.__std = std
@@ -898,8 +913,8 @@ class Model2CCSRV(Model):
 
             # Checking embedding and no overlapping for the pair of pair particles
             try:
-                tomo1.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=True)
-                tomo2.insert_particle(hold_part2, check_bounds=True, mode=mode, check_inter=True)
+                tomo1.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
+                tomo2.insert_particle(hold_part2, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
             except pexceptions.PySegInputError:
                 continue
 
@@ -920,10 +935,14 @@ class Model2CCSRV(Model):
 #
 class ModelRR(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    def __init__(self, voi=None, part=None):
-        super(ModelRR, self).__init__(voi, part)
+    def __init__(self, voi=None, part=None, check_inter=0):
+        """
+        Constructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        """
+        super(ModelRR, self).__init__(voi, part, check_inter=check_inter)
         self._Model__type_name = 'RR'
 
     def gen_instance(self, in_coords, tomo_fname, mode='center', coords=False, nrot_tries=10):
@@ -977,7 +996,7 @@ class ModelRR(Model):
 
                 # Checking embedding and no overlapping
                 try:
-                    tomo.insert_particle(hold_part, check_bounds=False, mode=mode, check_inter=False)
+                    tomo.insert_particle(hold_part, check_bounds=False, mode=mode, check_inter=self._Model__check_inter)
                     out_coords.append((in_coord[0], in_coord[1], in_coord[2]))
                     out_rots.append((rot_rnd, tilt_rnd, psi_rnd))
                     count += 1

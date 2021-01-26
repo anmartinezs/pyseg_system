@@ -47,19 +47,19 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-ruben/Jonathan/PhD/clustering_analysis_antonio'
+ROOT_PATH = '/fs/pool/pool-ruben/antonio/groel' # '/fs/pool/pool-ruben/Jonathan/PhD/clustering_analysis_antonio'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos/test_reduced/test_reduced_ltomos.star'
-in_wspace = ROOT_PATH + '/tests/test_reduced/test_reduced_20_400_10_10_sim_20_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/tomo12006_all/all_ltomos_surf.star' # '/ltomos/test_reduced/test_reduced_ltomos.star'
+in_wspace = None # ROOT_PATH + '/tests/test_reduced/test_reduced_20_400_10_10_sim_20_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/tests/test_reduced/'
-out_stem = 'test_reduced_20_400_10_10_sim_20_2'
+out_dir = ROOT_PATH + '/ana/tomo12006' # '/tests/test_reduced/'
+out_stem = 'uni_2nd_8_300_10_10_sim_50_over0.05'
 
 # Analysis variables
 ana_res = 1.408 # nm/voxel
-ana_rg = np.arange(10, 400, 10) # in nm
+ana_rg = np.arange(8, 300, 10) # in nm
 ana_shell_thick = None # 15 # None # 5
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
@@ -68,7 +68,7 @@ ana_npr = 10 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 10
+p_nsims = 50
 p_per = 5 # %
 
 ##### Advanced settings
@@ -76,7 +76,8 @@ p_per = 5 # %
 ana_border = True
 
 # Particle surface
-p_vtp = ROOT_PATH + '/in/bref_16_14.08_cent_dec.vtp'
+p_vtp = None # ROOT_PATH + '/in/bref_16_14.08_cent_dec.vtp'
+p_cinter = 0.05 # Maximum fraction of overlapping between particles
 
 # Figure saving options
 fig_fmt = '.png' # if None they are displayed instead
@@ -150,7 +151,8 @@ if in_wspace is None:
 print('\tP-Value computation setting:')
 print('\t\t-Percentile: ' + str(p_per) + ' %')
 print('\t\t-Number of instances for simulations: ' + str(p_nsims))
-print('\t\t-Particle surface: ' + p_vtp)
+if p_vtp is not None:
+    print('\t\t-Particle surface: ' + p_vtp)
 if fig_fmt is not None:
     print('\tStoring figures:')
     print('\t\t-Format: ' + str(fig_fmt))
@@ -185,17 +187,22 @@ if in_wspace is None:
         print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
         print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
-    set_lists = surf.SetListTomoParticles()
+    set_lists, lists_dic_rows = surf.SetListTomoParticles(), dict()
     for row in range(star.get_nrows()):
         ltomos_pkl = star.get_element('_psPickleFile', row)
         ltomos = unpickle_obj(ltomos_pkl)
         set_lists.add_list_tomos(ltomos, ltomos_pkl)
-    try:
-        part_vtp = disperse_io.load_poly(p_vtp)
-    except pexceptions.PySegInputError as e:
-        print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
-        print('Terminated. (' + time.strftime("%c") + ')')
-        sys.exit(-1)
+        fkey = os.path.split(ltomos_pkl)[1]
+        short_key_idx = fkey.index('_')
+        short_key = fkey[:short_key_idx]
+        lists_dic_rows[short_key] = row
+    if p_vtp is not None:
+        try:
+            part_vtp = disperse_io.load_poly(p_vtp)
+        except pexceptions.PySegInputError as e:
+            print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
+            print('Terminated. (' + time.strftime("%c") + ')')
+            sys.exit(-1)
 
     print('\tBuilding the dictionaries...')
     lists_count, tomos_count = 0, 0
@@ -244,6 +251,15 @@ if in_wspace is None:
         llist = lists_dic[lkey]
         sim_obj_list = surf.ListSimulations()
         print('\t\t-Processing list: ' + lkey)
+        hold_row = lists_dic_rows[lkey]
+        if p_vtp is None:
+            try:
+                p_vtp = star.get_element('_suSurfaceVtpSim', hold_row)
+            except KeyError:
+                print('ERROR: _suSurfaceVtpSim is required in the input STAR file "' + in_star + '"')
+                print('Terminated. (' + time.strftime("%c") + ')')
+                sys.exit(-1)
+        part_vtp = disperse_io.load_poly(p_vtp)
 
         print('\t\t\t+Tomograms computing loop:')
         for tkey in tomos_hash.keys():
@@ -289,7 +305,7 @@ if in_wspace is None:
                     lists_exp[lkey].append(hold_arr)
 
             print('\t\t\t\t\t-Simulating univariate second order metrics...')
-            model_csrv = ModelCSRV()
+            model_csrv = ModelCSRV(check_inter=p_cinter)
             hold_arr = ltomo.simulate_uni_2nd_order(p_nsims, model_csrv, part_vtp, 'center', ana_rg_v, border=ana_border,
                                                     thick=ana_shell_thick_v, fmm=ana_fmm,
                                                     conv_iter=ana_conv_iter, max_iter=ana_max_iter,

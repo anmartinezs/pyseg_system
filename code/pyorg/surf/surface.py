@@ -24,7 +24,7 @@ import ctypes
 import multiprocessing as mp
 import abc
 import skfmm
-from vtk.util import numpy_support
+from pyorg.spatial.sparse import distances_to_point
 try:
     import pickle as pickle
 except:
@@ -45,7 +45,6 @@ MIN_THICK = 1e-6
 SPH_CTE = 4. / 3.
 ONE_THIRD = 1. / 3.
 VTK_RAY_TOLERANCE = 0.001 # 0.000001
-OVER_TOLERANCE = 0.01 # .02
 MP_NUM_ATTEMPTS, MP_MIN_TIME, MP_JOIN_TIME = 10, 0.5, 10
 MAX_TRIES_FACTOR = 10 # 100
 PARTS_LBL_FIELD = 'parts_field'
@@ -252,6 +251,7 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
             part_centers_2 = sim_tomo.get_particle_coords()
         else:
             sim_tomo = tem_model.gen_instance(len(part_centers_1), 'tomo_sim_' + str(i), mode=mode_emb)
+            # disperse_io.save_vtp(sim_tomo.gen_particles_vtp(), '/fs/pool/pool-engel/antonio/ribo/hold_' + str(sim_id) + '.vtp')
             part_centers_1 = sim_tomo.get_particle_coords()
             part_centers_2 = part_centers_1
         if voi_fname is None:
@@ -309,7 +309,7 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
             sph_mask = rgs[:, 0] <= 0
 
             ### Compute number of embedded and volumes at once
-            num, dem = nhoods.analyse(particles_2)
+            num, dem = nhoods.analyse(particles_2, eud=fmm)
 
             # If thick is None the Ripley's L metric is assumed so center particle contribution must be cancel
             if not bi_mode:
@@ -1467,7 +1467,13 @@ class TomoParticles(object):
 
     # Checks intersection with other already inserted particles
     # part: input particle
-    def check_particles_itersection(self, part):
+    def check_particles_itersection(self, part, over_tolerance=0):
+        """
+        Checks intersection with other already inserted particles
+        :param part: input particle
+        :param over_tolerance: fraction of overlapping tolerance (default)
+        :return:
+        """
 
         # Initialization
         selector = vtk.vtkSelectEnclosedPoints()
@@ -1486,31 +1492,31 @@ class TomoParticles(object):
 
         # Particles loop, for the shake of speed first check bounds ovelapping
         # Checking by cells
-        over = 0
         for host_part in self.__parts:
             if part.bound_in_bounds(host_part.get_bounds()):
                 poly_b = host_part.get_vtp()
                 count, n_points = 0., poly_b.GetNumberOfPoints()
-                n_points_f = float(n_points)
+                n_points_if = 1. / float(n_points)
                 for i in range(n_points):
                     if selector.IsInsideSurface(poly_b.GetPoint(i)) > 0:
                         count += 1
-                        over = count / n_points_f
-                        if over > OVER_TOLERANCE:
+                        over = count * n_points_if
+                        if over > over_tolerance:
                             # print('Overlapping: ' + str(100. * over) + ' %')
                             return True
 
         # print('Overlapping: ' + str(100. * over) + ' %')
         return False
 
-    def insert_particle(self, part, check_bounds=True, mode='full', check_inter=False, voi_pj=False,
+    def insert_particle(self, part, check_bounds=True, mode='full', check_inter=0, voi_pj=False,
                         voi_to_pj=None, meta=None):
         """
-
+        Insert a new particle
         :param part: particle to insert in the tomogram, it must be fully embedded by the tomogram
         :param check_bounds: exception if input surface is not fully embedded
         :param mode: to disable bounds checking (default True)
-        :param check_inter: embedding mode, only applies if check_bounds is True (see is_embedded)
+        :param check_inter: if >= 0 (default 0) represente the maximum fraction of overlapping allowed with respect an
+                            already inserted particle, otherwise particle overlapping is not checked
         :param voi_pj: if True (default False) particle center is projected on tomogram voi thourgh the normal to its
         closest point.
         :param voi_to_pj: if not None (default) then the VOI where the particle is projected, only
@@ -1524,7 +1530,7 @@ class TomoParticles(object):
         if (not isinstance(part, Particle)) and (not isinstance(part, ParticleL)):
             error_msg = 'Input object must be a Surface instance.'
             raise pexceptions.PySegInputError(expr='insert_surface (TomoParticles)', msg=error_msg)
-        if check_inter and self.check_particles_itersection(part):
+        if (check_inter >= 0) and self.check_particles_itersection(part, over_tolerance=check_inter):
             error_msg = 'This particle intersect with another already inserted one.'
             raise pexceptions.PySegInputError(expr='insert_surface (TomoParticles)', msg=error_msg)
 
@@ -4576,7 +4582,7 @@ class Nhood(object, metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def analyse(self, coord):
+    def analyse(self, coord, eud=False):
         raise NotImplementedError
 
     # INTERNAL FUNCTIONALITY
@@ -4665,11 +4671,13 @@ class SphereNhood(Nhood):
         else:
             return self.__compute_volume_mca()
 
-    def analyse(self, coords):
+    def analyse(self, coords, eud=False):
         """
         It computes the Nhood volume and the number of embedded coordiantes at once, so it is more efficient than
         call to get_num_embedded() and compute_volume() seperatedly for DSA and FMM
         :param coords: array [n, 3] with the n coordinates to test
+        :param eud: if True (default False) Euclidean direct distance (without DT) is checked, useful for FMM to discard
+                    fake point at distance 0
         :return: 2-tuple with the number of embedded coords and volumes
         """
 
@@ -4687,12 +4695,22 @@ class SphereNhood(Nhood):
         else:
             # Compute the VOI
             voi = (self._Nhood__dst_field >= 0) & (self._Nhood__dst_field <= self._Nhood__rad)
-            for coord in coords:
-                x, y, z = coord
-                if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
-                        (z < voi.shape[2]):
-                    if voi[x, y, z]:
-                        count += 1
+            if eud:
+                hold_dsts = distances_to_point(self._Nhood__center, coords)
+                for i, coord in enumerate(coords):
+                    x, y, z = coord
+                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
+                            (z < voi.shape[2]):
+                        if voi[x, y, z]:
+                            if (hold_dsts[i] <= self._Nhood__dst_field[x, y, z]) or (self._Nhood__dst_field[x, y, z] >= 1):
+                                count += 1
+            else:
+                for coord in coords:
+                    x, y, z = coord
+                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
+                            (z < voi.shape[2]):
+                        if voi[x, y, z]:
+                            count += 1
 
         # Compute VOI volume
         if self._Nhood__voi is None:
@@ -4838,11 +4856,13 @@ class ShellNhood(Nhood):
         else:
             return self.__compute_volume_mca()
 
-    def analyse(self, coords):
+    def analyse(self, coords, eud=False):
         """
         It computes the Nhood volume and the number of embedded coordiantes at once, so it is more efficient than
         call to get_num_embedded() and compute_volume() seperatedly for DSA and FMM
         :param coords: array [n, 3] with the n coordinates to test
+        :param eud: if True (default False) Euclidean direct distance (without DT) is checked, useful for FMM to discard
+                    fake point at distance 0
         :return: 2-tuple with the number of embedded coords and volumes
         """
 
@@ -5025,17 +5045,19 @@ class ListNhood(object, metaclass=abc.ABCMeta):
             dens.append(nhood.compute_density(coords, one_less=one_less, area=area))
         return dens
 
-    def analyse(self, coords):
+    def analyse(self, coords, eud=False):
         """
         It computes the ListNhood volumes and the number of embedded coordinates at once, so it is more efficient than
         call to get_nums_embedded() and compute_volumes() separatedly for DSA and FMM
         :param coords: array [n, 3] with the n coordinates to test
+        :param eud: if True (default False) Euclidean direct distance (without DT) is checked, useful for FMM to discard
+                    fake point at distance 0
         :return: 2-tuple with two arrays with the number of embedded coords and volumes
         """
         n_hoods = len(self.__nhoods)
         nums, vols = np.zeros(shape=n_hoods, dtype=float), np.zeros(shape=n_hoods, dtype=float)
         for i in range(n_hoods):
-            hold = self.__nhoods[i].analyse(coords)
+            hold = self.__nhoods[i].analyse(coords, eud)
             nums[i], vols[i] = hold[0], hold[1]
         return nums, vols
 

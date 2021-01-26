@@ -36,13 +36,11 @@ ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
 in_star = ROOT_PATH + '/in/in_ltomos_all.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_test.star'
+in_seg = ROOT_PATH + '/in/in_seg_all.star' # '/in/in_seg_test.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos_v2/test_no_pid_p3' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'all_L' # 'pre'
-
-pt_res = 2.096 # nm/vx - resolution
+out_dir = ROOT_PATH + '/ltomos_v2/all_no_pid_p3_proj_swapxy' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'all_L_proj' # 'pre'
 
 #### Advanced settings
 
@@ -50,10 +48,11 @@ pt_res = 2.096 # nm/vx - resolution
 sg_lbl = 1 # segmented label
 sg_bc = False # True
 sg_bm = 'center' # Embedding checking mode
-sg_pj = False # Project particles to VOI's surfaces
+sg_cinter = 0.05 # Maximum particle overlapping fraction, not considered when when <0
+sg_pj = True # False # Project particles to VOI's surfaces
 sg_origins = (4, 4) # If not None, subtomoavg shiftings are considered,
                     # then scale factor (one per each pattern in in_star) from picked particle to subtomograms
-sg_swap_xy = False # Swap X and Y coordinates of the input particle STAR files
+sg_swap_xy = True # False # Swap X and Y coordinates of the input particle STAR files
 sg_voi_surf = False # It forces to convert VOI to a surface (vtkPolyData object)
 sg_sg = 0 # Gaussian filtering for surface conversion
 sg_dec = 0.9 # Decimation factor for the triangle mesh
@@ -89,16 +88,15 @@ if sg_dec is not None:
     print('\t\t-Triangle decimation factor: ' + str(sg_dec))
 if sg_bc:
     print('\t\t-Checking particles VOI boundary with mode: ' + str(sg_bm))
+if sg_cinter >= 0:
+    print('\t\t-Maximum particle overlapping fraction:', str(sg_cinter))
 if sg_pj:
     print('\t\t-Activated particles projecting on surface VOI.')
-if sg_origins is not None:
-    print('\t\t-Scale factor for subtomo-averaging origins: ' + str(sg_origins))
 if sg_voi_surf:
     print('\t\t-Forcing surface VOI mode activated!')
 if sg_swap_xy:
     print('\t\t-Swap X and Y particle coordinates.')
 print('\tPost-processing: ')
-print('\t\t-Resolution: ' + str(pt_res) + ' nm/vx')
 print('\t\t-Scale suppression: ' + str(pt_ssup) + ' nm')
 if (pt_ss_ref is not None) and (pt_ss_ref_dst is not None):
     print('\t\t-Reference key for crossed scale suppresion: ' + str(pt_ss_ref))
@@ -144,12 +142,16 @@ star, star_out = sub.Star(), sub.Star()
 try:
     star.load(in_star)
     star_out.add_column('_psPickleFile')
+    star_out.add_column('_suSurfaceVtp')
+    star_out.add_column('_suSurfaceVtpSim')
 except pexceptions.PySegInputError as e:
     print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 print('\tLoop for generating tomograms VOIs: ')
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
 vois, nvois = dict(), dict()
 for tomo_row in range(star_seg.get_nrows()):
     mic_str, seg_str = star_seg.get_element('_rlnMicrographName', tomo_row), \
@@ -187,6 +189,7 @@ for star_row in range(star.get_nrows()):
     list_tomos = surf.ListTomoParticles()
     part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
                                    star.get_element('_suSurfaceVtp', star_row)
+    pick_res, svol_res = star.get_element('_psPixelSize', star_row), star.get_element('_psPixelSizeSvol', star_row)
     for tomo_fname, voi in zip(iter(vois.keys()), iter(vois.values())):
         if isinstance(voi, str):
             voi_ext = os.path.splitext(voi)[1]
@@ -238,17 +241,17 @@ for star_row in range(star.get_nrows()):
         seg_str = star_seg.get_element('_psSegImage', seg_row)
         seg_mic_dir[seg_str] = mic_str
         mic = disperse_io.load_tomo(mic_str, mmap=True)
+        sg_origin = pick_res / svol_res
         if sg_swap_xy:
-            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=sg_origins[star_row], rots=True)
+            (cy, cx, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=sg_origin, rots=True)
         else:
-            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=sg_origins[star_row],
-                                                                           rots=True)
+            (cx, cy, cz), (rho, tilt, psi) = star_part.get_particle_coords(part_row, orig=sg_origin, rots=True)
         part_center, part_eu_angs = np.asarray((cx, cy, cz), dtype=np.float32), \
                                     np.asarray((rho, tilt, psi), dtype=np.float32)
 
         # Segmentation rigid body transformations
         if sg_swap_xy:
-            mic_center = np.asarray((.5*mic.shape[1], .5*mic.shape[0], .5*mic.shape[2]), dtype=np.float32)
+            mic_center = np.asarray((.5 * mic.shape[1], .5 * mic.shape[0], .5 * mic.shape[2]), dtype=np.float32)
         else:
             mic_center = np.asarray((.5 * mic.shape[0], .5 * mic.shape[1], .5 * mic.shape[2]), dtype=np.float32)
 
@@ -284,7 +287,8 @@ for star_row in range(star.get_nrows()):
             # part = surf.Particle(part_vtp, center=(0, 0, 0))
             # part.rotation(part_eu_angs[0], part_eu_angs[1], part_eu_angs[2])
             # part.translation(part_center[0], part_center[1], part_center[2])
-            list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj)
+            list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj,
+                                       check_inter=sg_cinter)
             parts_inserted += 1
             nvois[seg_str] += 1
         except pexceptions.PySegInputError as e:
@@ -295,6 +299,7 @@ for star_row in range(star.get_nrows()):
         part_coords[part_row, :] = part_center
     del_l = list(np.where(part_lut == False)[0])
     if pt_ssup is not None:
+        pt_res = star.get_element('_psPixelSize', star_row)
         pt_ssup_v = pt_ssup / pt_res
         print('\t\tApplying scale suppresion (' + str(pt_ssup_v) + ')...')
         list_tomos.scale_suppression(pt_ssup_v)
@@ -378,15 +383,23 @@ if pt_pparts:
 
 for star_row in range(star.get_nrows()):
 
-    part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
-                                   star.get_element('_suSurfaceVtp', star_row)
+    part_star_str, part_surf_str, part_surf_sim_str = star.get_element('_psStarFile', star_row), \
+                                                      star.get_element('_suSurfaceVtp', star_row), \
+                                                      star.get_element('_suSurfaceVtpSim', star_row)
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
     list_tomos = set_lists.get_lists_by_key(star_stem)
+    if sg_bm is not None:
+        if not list_tomos.ensure_embedding():
+            print('ERROR: Not all particles are embedded for list in row  ' + str(star_row))
+            print('Terminated. (' + time.strftime("%c") + ')')
+            sys.exit(-1)
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
     print('\t\tPickling the list of tomograms in the file: ' + out_pkl)
     try:
         list_tomos.pickle(out_pkl)
-        kwargs = {'_psPickleFile': out_pkl}
+        kwargs = {'_psPickleFile': out_pkl,
+                  '_suSurfaceVtp': part_star_str,
+                  '_suSurfaceVtpSim': part_surf_sim_str}
         star_out.add_row(**kwargs)
     except pexceptions.PySegInputError as e:
         print('ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"')

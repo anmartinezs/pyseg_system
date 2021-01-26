@@ -347,10 +347,13 @@ def coords_to_dense_mask(coords, mask, rots=None):
             pass
 
         return dense, np.asarray(out_coords, dtype=np.float), np.asarray(out_rots, dtype=np.float)
-
-# Computes Nearest Neighbour Distance of a cloud of points in a Euclidean space
-# cloud: array with point coordinates
+0
 def nnde(cloud):
+    """
+    Computes Nearest Neighbour Distance of a cloud of points in a Euclidean space
+    :param cloud: array with point coordinates
+    :return: a numpy array with the computed distances
+    """
     dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
     for i in range(len(dists)):
         hold = cloud[i] - cloud
@@ -370,6 +373,16 @@ def cnnde(cloud, cloud_ref):
         hold = np.sum(hold*hold, axis=1)
         dists[i] = math.sqrt(np.min(hold))
     return dists
+
+def distances_to_point(point, cloud):
+    """
+    Computes all Euclidean distances of a point with respect a cloud of points
+    :param point: input point coordinates
+    :param cloud: array with points coordinates
+    :return: an array with the distance to each point
+    """
+    hold = point - cloud
+    return np.sqrt(np.sum(hold * hold, axis=1))
 
 # Compute Histogram Function from a one-dimensional array of random samples
 # var: array of stochastic samples
