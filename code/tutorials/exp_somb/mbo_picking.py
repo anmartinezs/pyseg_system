@@ -90,10 +90,10 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--inStar', required=True, help='Input star file.')
-    parser.add_argument('--outDir', required=True, help='Input mask file.')
+    parser.add_argument('--outDir', required=True, help='Output directory.')
     parser.add_argument('--slicesFile', required=True, help='Slices xml file.')
-    parser.add_argument('--peakTh', type=float, default=0, help='.')
-    parser.add_argument('--peakNs', type=float, default=0.5, help='.')
+    parser.add_argument('--peakTh', type=float, default=0, help='.')  # TODO
+    parser.add_argument('--peakNs', type=float, default=0.5, help='.')  # TODO
     args = parser.parse_args()
 
     in_star = args.inStar
