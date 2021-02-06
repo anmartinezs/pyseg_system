@@ -50,17 +50,18 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/groel' # '/fs/pool/pool-ruben/Jonathan/PhD/clustering_analysis_antonio'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos/tomo12006_all/all_ltomos_surf.star' # '/ltomos/test_reduced/test_reduced_ltomos.star'
+in_star = ROOT_PATH + '/ltomos/tomo12006_all/all_ltomos.star' # '/ltomos/test_reduced/test_reduced_ltomos.star'
 in_wspace = None # ROOT_PATH + '/tests/test_reduced/test_reduced_20_400_10_10_sim_20_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/ana/tomo12006' # '/tests/test_reduced/'
-out_stem = 'uni_2nd_8_300_10_10_sim_50_over0.05'
+out_stem = 'uni_2nd_8_200_5_rdf_10_sim_10_over0.05'
 
 # Analysis variables
 ana_res = 1.408 # nm/voxel
-ana_rg = np.arange(8, 300, 10) # in nm
-ana_shell_thick = None # 15 # None # 5
+ana_rg = np.arange(8, 300, 5) # in nm
+ana_shell_thick = 15 # None # 5
+ana_rdf = True
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
 ana_fmm = False
@@ -68,7 +69,7 @@ ana_npr = 10 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 50
+p_nsims = 10 # 50
 p_per = 5 # %
 
 ##### Advanced settings
@@ -135,6 +136,10 @@ if ana_shell_thick is None:
 else:
     print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm')
     print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels')
+    if ana_rdf:
+        print('\t\t-Computing Radial Distribution Function.')
+    else:
+        print('\t\t-Computing Function-O.')
 if in_wspace is None:
     if (ana_conv_iter is not None) and (ana_max_iter is not None):
         print('\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter))
@@ -298,7 +303,7 @@ if in_wspace is None:
             print('\t\t\t\t\t-Computing univariate second order metrics...')
             hold_arr = ltomo.compute_uni_2nd_order(ana_rg_v, thick=ana_shell_thick_v, border=ana_border,
                                                    conv_iter=ana_conv_iter, max_iter=ana_max_iter, fmm=ana_fmm,
-                                                   npr=ana_npr)
+                                                   rdf=ana_rdf, npr=ana_npr)
             if hold_arr is not None:
                 tomos_exp[tkey][lkey].append(hold_arr)
                 for i in range(ltomo.get_num_particles()):
@@ -308,7 +313,7 @@ if in_wspace is None:
             model_csrv = ModelCSRV(check_inter=p_cinter)
             hold_arr = ltomo.simulate_uni_2nd_order(p_nsims, model_csrv, part_vtp, 'center', ana_rg_v, border=ana_border,
                                                     thick=ana_shell_thick_v, fmm=ana_fmm,
-                                                    conv_iter=ana_conv_iter, max_iter=ana_max_iter,
+                                                    conv_iter=ana_conv_iter, max_iter=ana_max_iter, rdf=ana_rdf,
                                                     npr=ana_npr)
             if hold_arr is not None:
                 sim_obj = surf.Simulation(ana_rg, ana_shell_thick, np.array(hold_arr))
@@ -339,7 +344,7 @@ if in_wspace is None:
 
 else:
     print('\tLoading the workspace: ' + in_wspace)
-    with open(in_wspace, 'r') as pkl:
+    with open(in_wspace, 'rb') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
     lists_hash, tomos_hash = wspace[2], wspace[3]
@@ -421,9 +426,12 @@ for tkey, ltomo in zip(iter(tomos_exp.keys()), iter(tomos_exp.values())):
         plt.figure()
         plt.title('Univariate 2nd order for ' + tkey_short + ' and ' + lkey)
         if ana_shell_thick is None:
-            plt.ylabel('Ripley\'s L')
+            plt.ylabel('Function L')
         else:
-            plt.ylabel('Ripley\'s O')
+            if ana_rdf:
+                plt.ylabel('Radial Distribution Function')
+            else:
+                plt.ylabel('Function O')
         plt.xlabel('Scale [nm]')
         if lkey == '0':
             plt.plot(ana_rg, arr, color=lists_color[lkey], label='CONTROL')
@@ -441,6 +449,7 @@ for tkey, ltomo in zip(iter(tomos_exp.keys()), iter(tomos_exp.values())):
             pass
         plt.fill_between(ana_rg, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
         # plt.ylim(-9, 8)
+        # plt.grid(True)
         plt.tight_layout()
         if fig_fmt is None:
             plt.show(block=True)
@@ -470,6 +479,55 @@ for tkey, ltomo in zip(iter(tomos_exp.keys()), iter(tomos_exp.values())):
             os.makedirs(hold_dir)
         plt.savefig(hold_dir + '/pvals.png')
     plt.close()
+
+print('\t\t-Plotting 2nd order metric (all simulations)...')
+plt.figure()
+# plt.title('Univariate 2nd order for all simulations')
+hold_sim_vals = dict()
+max_nsims = p_nsims
+if max_nsims > 5:
+    max_nsims = 5
+for tkey, ltomo in zip(iter(tomos_exp.keys()), iter(tomos_exp.values())):
+    p_values = dict()
+    tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
+    for lkey, arr in zip(iter(tomos_exp[tkey].keys()), iter(tomos_exp[tkey].values())):
+        try:
+            hold_sims = np.asarray(tomos_sim[tkey][lkey], dtype=np.float32)
+            for hold_sim in hold_sims[:max_nsims]:
+                plt.plot(ana_rg, hold_sim, color=lists_color[lkey], alpha=.3)
+                try:
+                    hold_sim_vals[lkey].append(hold_sim)
+                except KeyError:
+                    hold_sim_vals[lkey] = list()
+                    hold_sim_vals[lkey].append(hold_sim)
+        except IndexError:
+            print('\t\t\t+WARNING: no data for tomogram ' + tkey + ' and list ' + lkey)
+            continue
+        if ana_shell_thick is None:
+            plt.ylabel('Function L')
+        else:
+            if ana_rdf:
+                plt.ylabel('Radial Distribution Function')
+            else:
+                plt.ylabel('Function O')
+                plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+for lkey, vals in zip(iter(hold_sim_vals.keys()), iter(hold_sim_vals.values())):
+    vals_mat = np.asarray(vals, dtype=np.float32)
+    lbl = lkey
+    if lkey == '0':
+        lbl = 'CONTROL'
+    elif lkey == '1':
+        lbl = 'RAPA'
+    plt.plot(ana_rg, np.median(vals_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='--')
+plt.xlabel('Scale [nm]')
+# plt.grid(True)
+plt.legend(loc=4)
+plt.tight_layout()
+if fig_fmt is None:
+    plt.show(block=True)
+else:
+    plt.savefig(out_tomos_dir + '/uni_sims.png')
+plt.close()
 
 print('\tLISTS PLOTTING LOOP: ')
 
@@ -502,20 +560,21 @@ plt.figure()
 plt.ylabel('Density [#/$\mu m^3$]')
 # plt.xlabel('Tomograms')
 count, ticks = 1, dict()
-ana_res_3_i = 1. / float(1e3**3 * ana_res**3)
+ana_res_3_i = 1. / float((1e-3 * ana_res)**3)
+plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 for lkey, tlist in zip(iter(lists_den.keys()), iter(lists_den.values())):
     arr = tlist[np.where(tlist > 0)[0]]
     den_low, den_med, den_high = np.percentile(arr, p_per), np.percentile(arr, 50), np.percentile(arr, 100 - p_per)
     den_low, den_med, den_high = den_low * ana_res_3_i, den_med * ana_res_3_i, den_high * ana_res_3_i
-    plt.bar(count, den_med, width=.40, color=lists_color[lkey], edgecolor='k', linewidth=2)
-    plt.errorbar(count, den_med, yerr=np.asarray([[den_med - den_low, den_high - den_med], ]).reshape(2, 1),
+    plt.bar(.5 * count, den_med, width=.40, color=lists_color[lkey], edgecolor='k', linewidth=2)
+    plt.errorbar(.5 * count, den_med, yerr=np.asarray([[den_med - den_low, den_high - den_med], ]).reshape(2, 1),
                  ecolor='k', elinewidth=4, capthick=4, capsize=8)
     if lkey == '0':
-        ticks['CONTROL'] = count
+        ticks['CONTROL'] = .5 * count
     elif lkey == '1':
-        ticks['RAPA'] = count
+        ticks['RAPA'] = .5 * count
     else:
-        ticks[lkey] = count
+        ticks[lkey] = .5 * count
     count += 1
 plt.xticks(list(ticks.values()), list(ticks.keys()))
 plt.tight_layout()
@@ -525,6 +584,55 @@ else:
     plt.savefig(out_lists_dir + '/den_lists.png')
 plt.close()
 
+print('\t\t-Plotting gathered 2nd order metric...')
+sims, do_pval = list(), True
+exps_low, exps_med, exps_high = list(), list(), list()
+plt.figure()
+# plt.title('Univariate 2nd order for ' + lkey)
+if ana_shell_thick is None:
+    plt.ylabel('Function L')
+else:
+    if ana_rdf:
+        plt.ylabel('Radial Distribution Function')
+        plt.plot((0, ana_rg[-1]), (1, 1), linestyle='--', linewidth=1.0, color='k')
+    else:
+        plt.ylabel('Function O')
+        plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+plt.xlabel('Scale [nm]')
+for lkey, tlist in zip(iter(lists_exp.keys()), iter(lists_exp.values())):
+    # Getting experimental IC
+    exp_low, exp_med, exp_high = compute_ic(p_per, np.asarray(tlist))
+    # plt.plot(ana_rg, exp_low, color=lists_color[lkey], linestyle='--', label=lkey)
+    plt.plot(ana_rg, exp_med, color=lists_color[lkey], linestyle='-', linewidth=2.0, label=lkey)
+    # plt.plot(ana_rg, exp_high, color=lists_color[lkey], linestyle='--', label=lkey)
+    plt.fill_between(ana_rg, exp_low, exp_high, alpha=0.3, color=lists_color[lkey], edgecolor='w')
+    sims += lists_sim[lkey]
+    exps_low.append(exp_low)
+    exps_med.append(exp_med)
+    exps_high.append(exp_high)
+# Getting simulations IC
+hold_sim = np.asarray(sims)
+hold_sim[np.isnan(hold_sim) | np.isinf(hold_sim)] = 0
+ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(hold_sim))
+try:
+    # plt.plot(ana_rg, ic_low, 'k--')
+    plt.plot(ana_rg, ic_med, 'k', linewidth=2.0)
+    # plt.plot(ana_rg, ic_high, 'k--')
+except (NameError, ValueError):
+    do_pval = False
+plt.fill_between(ana_rg, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+plt.tight_layout()
+plt.xlim((0, ana_rg[-1]))
+# plt.ylim((-9, 8))
+# extraticks = [5,]
+# plt.xticks(list(plt.xticks()[0]) + extraticks)
+if fig_fmt is None:
+    plt.show(block=True)
+else:
+    # plt.show(block=True)
+    plt.savefig(out_lists_dir + '/uni_lists_gathered_' + str(lkey) + '.png', dpi=600)
+plt.close()
+
 print('\t\t-Plotting 2nd order metric...')
 sims, do_pval = list(), True
 exps_low, exps_med, exps_high = list(), list(), list()
@@ -532,9 +640,14 @@ for lkey, tlist in zip(iter(lists_exp.keys()), iter(lists_exp.values())):
     plt.figure()
     # plt.title('Univariate 2nd order for ' + lkey)
     if ana_shell_thick is None:
-        plt.ylabel('Ripley\'s L')
+        plt.ylabel('Function L')
     else:
-        plt.ylabel('Ripley\'s O')
+        if ana_rdf:
+            plt.ylabel('Radial Distribution Function')
+            plt.plot((0, ana_rg[-1]), (1, 1), linestyle='--', linewidth=1.0, color='k')
+        else:
+            plt.ylabel('Function O')
+            plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     plt.xlabel('Scale [nm]')
     # Getting experimental IC
     exp_low, exp_med, exp_high = compute_ic(p_per, np.asarray(tlist))

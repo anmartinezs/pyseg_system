@@ -6,3 +6,5 @@
     + Using global_analysis within pre-procesing segmentation scripts in PySeg tutorials
 * **26/01/2021**
     + Adding particle surface overlapping fraction option
+* **06/02/2021**
+    + Using numpy histogram funtion to increase the speed for computational units in PyOrg.

@@ -196,7 +196,7 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
                                   eu_angs=(float(angs[0]), float(angs[1]), float(angs[2])))
             if norm_v is not None:
                 hold_part.add_prop('normal_v', vtk.vtkFloatArray, norm_v)
-            hold_tomo.insert_particle(hold_part, check_bounds=False, check_inter=False)
+            hold_tomo.insert_particle(hold_part, check_bounds=False, check_inter=-1)
         t_count += 1
         ltomos.add_tomo(hold_tomo)
 

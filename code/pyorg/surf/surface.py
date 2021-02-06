@@ -169,7 +169,10 @@ def pr_2nd_tomo(pr_id, part_ids, part_centers_1, part_centers_2, distances, thic
         # dem = np.array(nhoods.get_volumes(), dtype=float)
 
         ### Compute number of embedded and volumes at once
-        num, dem = nhoods.analyse(particles_2)
+        if (conv_iter is not None) and (max_iter is not None):
+            num, dem = nhoods.analyse(particles_2, eud=fmm)
+        else:
+            num, dem = nhoods.analyse_hist(particles_2, eud=fmm, bi=bi_mode)
 
         # If thick is None the Ripley's L metric is assumed so center particle contribution must be cancel
         if not bi_mode:
@@ -309,7 +312,10 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
             sph_mask = rgs[:, 0] <= 0
 
             ### Compute number of embedded and volumes at once
-            num, dem = nhoods.analyse(particles_2, eud=fmm)
+            if (conv_iter is not None) and (max_iter is not None):
+                num, dem = nhoods.analyse(particles_2, eud=fmm)
+            else:
+                num, dem = nhoods.analyse_hist(particles_2, eud=fmm, bi=bi_mode)
 
             # If thick is None the Ripley's L metric is assumed so center particle contribution must be cancel
             if not bi_mode:
@@ -5061,6 +5067,10 @@ class ListNhood(object, metaclass=abc.ABCMeta):
             nums[i], vols[i] = hold[0], hold[1]
         return nums, vols
 
+    @abc.abstractmethod
+    def analyse_hist(self, coords, eud=False, bi=False):
+        raise NotImplementedError
+
     # Returns a list with every Nhood as a vtkPolyData
     def get_vtps(self):
         vtps = list()
@@ -5111,6 +5121,71 @@ class ListSphereNhood(ListNhood):
                                                        max_iter=self._ListNhood__max_iter,
                                                        dst_field=self._ListNhood__dst_field))
 
+    def analyse_hist(self, coords, eud=False, bi=False):
+        """
+        Faster alternative to analyse() based in the application of numpy.histogram
+        :param coords: array [n, 3] with the n coordinates to test
+        :param eud: if True (default False) Euclidean direct distance (without DT) is checked, useful for FMM to discard
+                    fake point at distance 0
+        :param bi: if True (default False) then bivariate analysis is considered, otherwise univariate
+        :return: 2-tuple with two arrays with the number of embedded coords and volumes
+        """
+
+        r_min, r_max = self._ListNhood__range.min(), self._ListNhood__range.max()
+        bins = [0.,]
+        for val in self._ListNhood__range:
+            bins.append(val)
+        bins = np.asarray(bins)
+        if eud:
+            r_min = 1
+        else:
+            r_min = 0
+
+        # Counting computation
+        # Get the number of embedded coordiantes in the pre-computed VOI
+        if self._ListNhood__dst_field is None:
+            nums = np.zeros(shape=len(self._ListNhood__range), dtype=float)
+            if len(coords) > 0:
+                hold = self._ListNhood__center - coords
+                dsts = np.sqrt((hold * hold).sum(axis=1))
+                nums = np.histogram(dsts, bins=bins, range=(r_min, r_max), density=False)[0]
+            vols = np.asarray(self.get_volumes(), dtype=float)
+
+        else:
+            # Volume computation
+            voi = np.copy(self._ListNhood__dst_field)
+            vols = np.histogram(voi.flatten(), bins=bins, range=(r_min, r_max), density=False)[0]
+
+            # Compute the VOI
+            dsts = (-1) * np.ones(shape=coords.shape[0], dtype=float)
+            if eud:
+                for i, coord in enumerate(coords):
+                    x, y, z = coord
+                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
+                            (z < voi.shape[2]):
+                        hold_dst = voi[x, y, z]
+                        if hold_dst >= 1:
+                            dsts[i] = hold_dst
+                vols[0] += 1
+            else:
+                for i, coord in enumerate(coords):
+                    x, y, z = coord
+                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
+                            (z < voi.shape[2]):
+                        dsts[i] = voi[x, y, z]
+            nums = np.histogram(dsts, bins=bins, range=(r_min, r_max), density=False)[0]
+            if eud and (not bi):
+                nums[0] += 1
+
+        hold_nums, hold_vols = nums, vols
+        nums, vols = np.zeros(shape=hold_nums.shape, dtype=float), np.zeros(shape=hold_vols.shape, dtype=float)
+        nums[0], vols[0] = hold_nums[0], hold_vols[0]
+        for i in range(1, hold_nums.shape[0]):
+            nums[i] = nums[i-1] + hold_nums[i]
+            vols[i] = vols[i-1] + hold_vols[i]
+
+        return nums, vols
+
 
 ############################################################################
 # Class for a list of shell nhoods
@@ -5142,6 +5217,7 @@ class ListShellNhood(ListNhood):
             selector_voi = vtk.vtkSelectEnclosedPoints()
             selector_voi.SetTolerance(VTK_RAY_TOLERANCE)
             selector_voi.Initialize(voi)
+        self.__thick_f = thick_f
 
         # Generate the spheres
         for rad in self._ListNhood__range:
@@ -5150,3 +5226,109 @@ class ListShellNhood(ListNhood):
                                                       conv_iter=self._ListNhood__conv_iter,
                                                       max_iter=self._ListNhood__max_iter,
                                                       dst_field=self._ListNhood__dst_field))
+
+
+    def analyse_hist(self, coords, eud=False, bi=True):
+        """
+        Faster alternative to analyse() based in the application of numpy.histogram
+        :param coords: array [n, 3] with the n coordinates to test
+        :param eud: if True (default False) Euclidean direct distance (without DT) is checked, useful for FMM to discard
+                    fake point at distance 0
+        :param bi: if True (default False) then bivariate analysis is considered, otherwise univariate
+        :return: 2-tuple with two arrays with the number of embedded coords and volumes
+        """
+
+        thick_h = .5 * self.__thick_f
+        r_min, r_max = self._ListNhood__range.min(), self._ListNhood__range.max()
+        r_min -= thick_h
+        if eud and (r_min < 1):
+            r_min = 1
+        elif (not eud) and (r_max < 0):
+            r_min = 0
+        bins = [r_min,]
+        for val in self._ListNhood__range:
+            bins.append(val)
+        r_max += thick_h
+        bins.append(r_max)
+        bins = np.asarray(bins)
+
+        # Counting computation
+        # Get the number of embedded coordiantes in the pre-computed VOI
+        if self._ListNhood__dst_field is None:
+            nums = np.zeros(shape=len(self._ListNhood__range), dtype=float)
+            if len(coords) > 0:
+                hold = self._ListNhood__center - coords
+                dsts = np.sqrt((hold * hold).sum(axis=1))
+                nums = np.histogram(dsts, bins=bins, range=(r_min, r_max), density=False)[0]
+            vols = self.get_volumes()
+            vols.insert(0, 0.)
+            vols = np.asarray(vols, dtype=float)
+
+        else:
+            # Volume computation
+            voi = np.copy(self._ListNhood__dst_field)
+            vols = np.histogram(voi.flatten(), bins=bins, range=(r_min, r_max), density=False)[0]
+
+            # Compute the VOI
+            dsts = (-1) * np.ones(shape=coords.shape[0], dtype=float)
+            if eud:
+                for i, coord in enumerate(coords):
+                    x, y, z = coord
+                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
+                            (z < voi.shape[2]):
+                        hold_dst = voi[x, y, z]
+                        if hold_dst >= 1:
+                            dsts[i] = hold_dst
+                if bins[0] <= 1:
+                    vols[0] += 1
+            else:
+                for i, coord in enumerate(coords):
+                    x, y, z = coord
+                    if (x >= 0) and (y >= 0) and (z >= 0) and (x < voi.shape[0]) and (y < voi.shape[1]) and \
+                            (z < voi.shape[2]):
+                        dsts[i] = voi[x, y, z]
+            nums = np.histogram(dsts, bins=bins, range=(r_min, r_max), density=False)[0]
+            if eud and (bins[0] <= 1 and (not bi)):
+                nums[0] += 1
+
+        hold_nums, hold_vols = nums, vols
+        nums, vols = np.zeros(shape=hold_nums.shape[0]-1, dtype=float), np.zeros(shape=hold_vols.shape[0]-1, dtype=float)
+        nums[0], vols[0] = hold_nums[0], hold_vols[0]
+        n_bins = bins.shape[0] - 1
+        for i in range(1, n_bins):
+
+            o_low, o_high = bins[i] - thick_h, bins[i] + thick_h
+
+            # Search for contributions of lower rings
+            hold_num, hold_vol = 0., 0.
+            sample = bins[i]
+            j = i
+            while (j > 0) and (sample >= o_low):
+                if o_low <= bins[j-1]:
+                    prop = 1
+                else:
+                    prop = (bins[j]-o_low) / (bins[j]-bins[j-1])
+                hold_num += (prop * hold_nums[j-1])
+                hold_vol += (prop * hold_vols[j-1])
+                sample = bins[j - 1]
+                j -= 1
+            nums[i-1] += hold_num
+            vols[i-1] += hold_vol
+
+            # Search for contributions of higher rings
+            hold_num, hold_vol = 0., 0.
+            sample = bins[i]
+            j = i
+            while (j < n_bins) and (sample <= o_high):
+                if o_high >= bins[j+1]:
+                    prop = 1
+                else:
+                    prop = (o_high - bins[j]) / (bins[j+1] - bins[j])
+                hold_num += (prop * hold_nums[j])
+                hold_vol += (prop * hold_vols[j])
+                sample = bins[j + 1]
+                j += 1
+            nums[i-1] += hold_num
+            vols[i-1] += hold_vol
+
+        return nums, vols

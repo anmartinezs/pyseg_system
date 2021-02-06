@@ -50,26 +50,26 @@ rcParams['ytick.labelsize'] = 22 # 14
 ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos_v2/all_no_pid_p3_proj_swapxy/all_L_proj_ltomos.star' # '/ltomos_v2/test_no_pid_p3_proj_swapxy/all_L_proj_ltomos.star' # '/ltomos_v2/all_no_pid_p3/all_L_ltomos.star'
+in_star = ROOT_PATH + '/ltomos_v2/test_no_pid_p3_proj_swapxy/all_L_proj_ltomos.star' # '/ltomos_v2/all_no_pid_p3_proj_swapxy/all_L_proj_ltomos.star' # '/ltomos_v2/all_no_pid_p3/all_L_ltomos.star'
 in_wspace = None # ROOT_PATH + '/tests/uni_dsa_test_p3_proj_swapxy/test_8_300_3_sim_1_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/ana_2nd/uni_dsa_test_p3_proj_swapxy_over0/' # '/tests/uni_dsa_shell_all_p3/'
-out_stem = 'test_8_300_6_sim_10'
+out_dir = ROOT_PATH + '/tests/uni_dsa_shell_all_p3/' # '/ana_2nd/uni_dsa_test_p3_proj_swapxy_over0/' # '/tests/uni_dsa_shell_all_p3/'
+out_stem = 'time_test_8_50_3_rdf_10_fmm_sim_1'
 
 # Analysis variables
 ana_res = 2.096 # nm/voxel
-ana_rg = np.arange(8, 300, 6) # in nm
-ana_shell_thick = None # 10 # 5
-ana_rdf = False
+ana_rg = np.arange(8, 50, 3) # in nm
+ana_shell_thick = 10 # None # 5
+ana_rdf = False # False
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
-ana_fmm = True
-ana_npr = 10 # None means Auto
+ana_fmm = True # False
+ana_npr = 1 # 10 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 10 # 1 # 5 # 50
+p_nsims = 1 # 5 # 50
 p_per = 5 # %
 
 ##### Advanced settings
@@ -136,6 +136,10 @@ if ana_shell_thick is None:
 else:
     print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm')
     print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels')
+    if ana_rdf:
+        print('\t\t-Computing Radial Distribution Function.')
+    else:
+        print('\t\t-Computing Function-O.')
 if in_wspace is None:
     if (ana_conv_iter is not None) and (ana_max_iter is not None):
         print('\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter))

@@ -556,6 +556,8 @@ class TestListTomoParticles(TestCase):
 
     def test_compute_uni_2nd_dsa(self):
 
+        # return
+
         # Initialization
         voi = self.gen_rect_voi_array(TOMO_SHAPE)
         part = disperse_io.load_poly(PARTICLE_SURF)
