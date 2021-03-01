@@ -58,6 +58,7 @@ in_ref_dir = None # '/media/martinez/DATAPART1/syn/in'
 in_seg = None # ROOT_PATH + '/two_segmentations.star'
 
 out_debug_dir = None
+out_level = 3 # Processing level: 1-particles flattening, 2-CC matrix / Feature matrix, 3-Classification
 
 # Particles pre-processing
 pp_rln_norm = False
@@ -119,6 +120,12 @@ elif in_ext == '.star':
     print('\tOutput stem: ' + str(out_stem))
     if out_debug_dir is not None:
         print('\tDebugging directory: ' + str(out_debug_dir))
+    if out_level == 1:
+        print('\tProcessing level ' + str(out_level) + ': particle flattening')
+    elif out_level == 2:
+        print('\tProcessing level ' + str(out_level) + ': CC matrix / Feature vectors')
+    else:
+        print('\tProcessing level ' + str(out_level) + ': Full classification')
     if cc_npy is not None:
         print('\tCC matrix already computed in file: ' + cc_npy)
     else:
@@ -237,6 +244,10 @@ else:
             print('Terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
 
+        if out_level == 1:
+            print('Terminated up to level 1 (Particles flattening). (' + time.strftime("%c") + ')')
+            sys.exit(1)
+
         if cu_mode == 'ncc_2dz':
             print('\tBuilding the NCC matrix...')
             try:
@@ -289,6 +300,10 @@ else:
                 plt.ylabel('Accumulated fraction of total correlation')
                 plt.tight_layout()
                 plt.savefig(out_dir + '/' + out_stem + '_cdf_evs.png', dpi=300)
+
+        if out_level == 2:
+            print('Terminated up to level 1 (CC Matrix / Feature vectors). (' + time.strftime("%c") + ')')
+            sys.exit(1)
 
 print('\tClassification...')
 try:

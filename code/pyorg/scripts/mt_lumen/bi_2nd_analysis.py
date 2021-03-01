@@ -49,17 +49,17 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering'
 
 # Input STAR file
-in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
+in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
 in_ref_short_key = '0' # '0'
-in_star = ROOT_PATH + '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
+in_star = ROOT_PATH + '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
 in_wspace = None # ROOT_PATH + '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/org/bi/bi_2nd/'
-out_stem = 'v1_nobc_proj_sph_10_600_10'  # 'uni_sph_4_60_5'
+out_stem = 'v1_nobc_proj_sph_10_600_10_switch'  # 'uni_sph_4_60_5'
 
 # Analysis variables
 ana_res = 1.368  # nm/voxel
@@ -83,10 +83,10 @@ ana_max_iter = None # 100000
 
 ana_border = True
 
-p_switch = False  # True
-
 # Particle surface
 p_vtp = None
+p_cinter = 0.05
+p_switch = True  # False
 
 # Figure saving options
 fig_fmt = '.png'  # if None they showed instead
@@ -166,8 +166,10 @@ if in_wspace is None:
 print('\tP-Value computation setting:')
 print('\t\t-Percentile: ' + str(p_per) + ' %')
 print('\t\t-Number of instances for simulations: ' + str(p_nsims))
-if p_vtp:
-    print('\t\t-Particle surface: ' + str(p_vtp))
+print('\tSurface settings:')
+if p_vtp is not None:
+    print('\t\t-Particle surface: ' + p_vtp)
+print('\t\t-Maximum fraction of overlapping surface for simulated particles:' + str(p_cinter))
 if p_switch:
     print('\t\t-Random simulations using the reference pattern.')
 if fig_fmt is not None:
@@ -320,7 +322,7 @@ if in_wspace is None:
                     lists_exp[lkey].append(hold_arr)
 
             print('\t\t\t\t\t-Simulating bivariate second order metrics...')
-            model_csrv = ModelCSRV()
+            model_csrv = ModelCSRV(check_inter=p_cinter)
             # hold_arr = ltomo.simulate_uni_2nd_order(p_nsims, model_csrv, part_vtp, 'center', ana_rg_v,
             #                                         border=ana_border,
             #                                         thick=ana_shell_thick_v, fmm=ana_fmm,

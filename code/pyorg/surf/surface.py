@@ -198,7 +198,7 @@ def pr_2nd_tomo(pr_id, part_ids, part_centers_1, part_centers_2, distances, thic
 
 def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, thick, border,
                     conv_iter, max_iter, fmm, bi_mode,
-                    voi_fname, tem_model, part_vtp, mode_emb, voi_shape, voi_shared,
+                    voi_fname, tem_model, part_vtp, mode_emb, voi_shape, voi_shared, switched,
                     shared_mat_num, shared_mat_vol, shared_mat_spart):
     """
     Parallel univariate particle local density for one tomogram in a list of neighborhoods
@@ -218,6 +218,8 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
     :param mode_emb: mode for particle embedding
     :param voi_shape: 3-tuple with VOI shape when it is a ndarray
     :param voi_shared: shared array for VOI as ndarray
+    :param switched: if True then the simulated patter is based in self (reference pattern), otherwise in tomo (default)
+                     only used in bi-variate mode
     :param shared_mat_*: output shared matrices (number of points, local volumes, number of simulated particles)
     :return:
     """
@@ -250,8 +252,12 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
 
         # Simulate the model
         if bi_mode:
-            sim_tomo = tem_model.gen_instance(len(part_centers_2), 'tomo_sim_' + str(i), mode=mode_emb)
-            part_centers_2 = sim_tomo.get_particle_coords()
+            if switched:
+                sim_tomo = tem_model.gen_instance(len(part_centers_1), 'tomo_sim_' + str(i), mode=mode_emb)
+                part_centers_1 = sim_tomo.get_particle_coords()
+            else:
+                sim_tomo = tem_model.gen_instance(len(part_centers_2), 'tomo_sim_' + str(i), mode=mode_emb)
+                part_centers_2 = sim_tomo.get_particle_coords()
         else:
             sim_tomo = tem_model.gen_instance(len(part_centers_1), 'tomo_sim_' + str(i), mode=mode_emb)
             # disperse_io.save_vtp(sim_tomo.gen_particles_vtp(), '/fs/pool/pool-engel/antonio/ribo/hold_' + str(sim_id) + '.vtp')
@@ -2183,14 +2189,14 @@ class TomoParticles(object):
         if npr <= 1:
             pr_sim_2nd_tomo(-1, spl_ids[0], parts_centers_1, parts_centers_2, distances, thick, border,
                             conv_iter, max_iter, fmm, False,
-                            voi_fname, temp_model, part_vtp, mode_emb, voi_shape, voi_shared,
+                            voi_fname, temp_model, part_vtp, mode_emb, voi_shape, voi_shared, False,
                             shared_mat_1, shared_mat_2, shared_mat_3)
         else:
             for pr_id in range(npr):
                 pr = mp.Process(target=pr_sim_2nd_tomo, args=(pr_id, spl_ids[pr_id], parts_centers_1, parts_centers_2,
                                                               distances, thick, border,
                                                               conv_iter, max_iter, fmm, False,
-                                                              voi_fname, temp_model, part_vtp, mode_emb, voi_shape, voi_shared,
+                                                              voi_fname, temp_model, part_vtp, mode_emb, voi_shape, voi_shared, False,
                                                               shared_mat_1, shared_mat_2, shared_mat_3))
                 pr.start()
                 processes.append(pr)
@@ -2242,7 +2248,7 @@ class TomoParticles(object):
         Simulate instances of Bivariate 2nd order statistics of an input model
         :param tomo: tomogram with particles to compare
         :param n_sims: number of of instances for the simulation
-        :param switched: if True (default) then the analysis is self->tomo, otherwise tomo->self
+        :param switched: if True then the simulated patter is based in self (reference pattern), otherwise in tomo (default)
         :param the-rest: same as simulate_uni_2nd_order()
         :return: a matrix with n rows for every particle simulated and r columns for the distances
         """
@@ -2297,39 +2303,25 @@ class TomoParticles(object):
             voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, int(voi_len))
             voi_shared = np.ctypeslib.as_array(voi_shared_raw)
             voi_shared[:] = hold_voi.reshape(voi_len).astype(np.uint8)
-        if switched:
-            n_parts = tomo.get_num_particles()
-        else:
-            n_parts = self.get_num_particles()
+        n_parts = self.get_num_particles()
         n_dsts = len(distances)
         shared_mat_1 = mp.Array('f', n_parts * n_dsts * n_sims)
         shared_mat_2 = mp.Array('f', n_parts * n_dsts * n_sims)
         shared_mat_3 = mp.Array('f', n_sims)
 
         # Get particle points
-        if switched:
-            parts_centers_1 = np.zeros(shape=(n_parts, len(tomo.__parts[0].get_center())),
-                                       dtype=np.float32)
-            parts_centers_2 = np.zeros(shape=(self.get_num_particles(), len(self.__parts[0].get_center())),
-                                       dtype=np.float32)
-            for i in range(n_parts):
-                parts_centers_1[i] = tomo.__parts[i].get_center()
-            for i in range(self.get_num_particles()):
-                parts_centers_2[i] = self.__parts[i].get_center()
-        else:
-            parts_centers_1 = np.zeros(shape=(n_parts, len(self.__parts[0].get_center())), dtype=np.float32)
-            parts_centers_2 = np.zeros(shape=(tomo.get_num_particles(), len(tomo.__parts[0].get_center())),
-                                       dtype=np.float32)
-            for i in range(n_parts):
-                parts_centers_1[i] = self.__parts[i].get_center()
-            for i in range(tomo.get_num_particles()):
-                parts_centers_2[i] = tomo.__parts[i].get_center()
+        parts_centers_1 = np.zeros(shape=(n_parts, len(self.__parts[0].get_center())), dtype=np.float32)
+        parts_centers_2 = np.zeros(shape=(tomo.get_num_particles(), len(tomo.__parts[0].get_center())), dtype=np.float32)
+        for i in range(n_parts):
+            parts_centers_1[i] = self.__parts[i].get_center()
+        for i in range(tomo.get_num_particles()):
+            parts_centers_2[i] = tomo.__parts[i].get_center()
 
         # Particles loop (Parallel)
         if npr <= 1:
             pr_sim_2nd_tomo(-1, spl_ids[0], parts_centers_1, parts_centers_2, distances, thick, border,
                             conv_iter, max_iter, fmm, True,
-                            voi_fname, temp_model, part_vtp, mode_emb, voi_shape, voi_shared,
+                            voi_fname, temp_model, part_vtp, mode_emb, voi_shape, voi_shared, switched,
                             shared_mat_1, shared_mat_2, shared_mat_3)
         else:
             for pr_id in range(npr):
@@ -2337,7 +2329,7 @@ class TomoParticles(object):
                                                               distances, thick, border,
                                                               conv_iter, max_iter, fmm, True,
                                                               voi_fname, temp_model, part_vtp, mode_emb, voi_shape,
-                                                              voi_shared,
+                                                              voi_shared, switched,
                                                               shared_mat_1, shared_mat_2, shared_mat_3))
                 pr.start()
                 processes.append(pr)

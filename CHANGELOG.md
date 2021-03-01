@@ -8,3 +8,5 @@
     + Adding particle surface overlapping fraction option
 * **06/02/2021**
     + Using numpy histogram funtion to increase the speed for computational units in PyOrg.
+* **01/03/2021**
+    + Adding computation level option (out_level) to plane_align_class.py 
