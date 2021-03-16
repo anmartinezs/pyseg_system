@@ -46,16 +46,16 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
-# ROOT_PATH = '../../../..'
-#
-# # Input STAR file
-# in_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_all/class_ap_r_ali_k25_split.star'
-# in_mask = ROOT_PATH + '/data/tutorials/synth_sumb/class/mask_cyl_130_15_115_40.mrc'
-#
-# ####### Output data
-#
-# out_part_dir = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25'
-# out_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25_split_post.star'
+ROOT_PATH = '../../../..'
+
+# Input STAR file
+in_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_all/class_ap_r_ali_k25_split.star'
+in_mask = ROOT_PATH + '/data/tutorials/synth_sumb/class/mask_cyl_130_15_115_40.mrc'
+
+####### Output data
+
+out_part_dir = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25'
+out_star = ROOT_PATH + '/data/tutorials/synth_sumb/class/mbf_align_post/class_ap_r_ali_k25_split_post.star'
 
 ####### Particles pre-processing settings
 
@@ -64,7 +64,7 @@ do_ang_rnd = ['Rot']
 
 ####### Multiprocessing settings
 
-# mp_npr = 10 # 1
+mp_npr = 10 # 1
 
 ########################################################################################
 # Local functions
@@ -201,21 +201,6 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
 
 
 def main():
-    # Parse arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--inStar', required=True, help='Input star file.')
-    parser.add_argument('--inMask', required=True, help='Input mask file.')
-    parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
-    parser.add_argument('--outStar', required=True, help='Output star file.')
-    parser.add_argument('-j', default=2, type=int, help='Number of processors.')
-    args = parser.parse_args()
-
-    in_star = args.inStar
-    in_mask = args.inMask
-    out_part_dir = args.outDir
-    out_star = args.outStar
-    mp_npr = args.j
-
     # Print initial message
     print 'Extracting transmembrane features.'
     print '\tAuthor: ' + __author__
@@ -345,4 +330,21 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--inMask', required=True, help='Input mask file.')
+        parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
+        parser.add_argument('--outStar', required=True, help='Output star file.')
+        parser.add_argument('-j', default=2, type=int, help='Number of processors.')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        in_mask = args.inMask
+        out_part_dir = args.outDir
+        out_star = args.outStar
+        mp_npr = args.j
+        main()
+    except:
+        main()

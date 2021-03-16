@@ -45,23 +45,23 @@ SEG_TAG = '_seg'
 
 ####### Input data
 
-# ROOT_PATH = '../../../..'  # Data path
-#
-# # Input STAR file with segmentations
-# in_star = ROOT_PATH + '/data/tutorials/synth_sumb/segs/test_1_seg.star'
-# npr = 5 # number of parallel processes
+ROOT_PATH = '../../../..'  # Data path
+
+# Input STAR file with segmentations
+in_star = ROOT_PATH + '/data/tutorials/synth_sumb/segs/test_1_seg.star'
+npr = 5 # number of parallel processes
 
 ####### Output data
 
-# output_dir = ROOT_PATH + '/data/tutorials/synth_sumb/graphs'
+output_dir = ROOT_PATH + '/data/tutorials/synth_sumb/graphs'
 
 ####### GraphMCF perameter
 
-# res = 1.048  # nm/pix
-# s_sig = 1.0  # 1.5
-# v_den = 0.0035  # 0.007 # 0.0025 # nm^3
-# ve_ratio = 4  # 2
-# max_len = 10  # 15 # 30 # nm
+res = 1.048  # nm/pix
+s_sig = 1.0  # 1.5
+v_den = 0.0035  # 0.007 # 0.0025 # nm^3
+ve_ratio = 4  # 2
+max_len = 10  # 15 # 30 # nm
 
 ####### Advanced parameters
 
@@ -90,35 +90,6 @@ prop_topo = ps.globals.STR_FIELD_VALUE  # ps.globals.STR_FIELD_VALUE_EQ # None i
 
 
 def main():
-    # Parse arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--inStar', required=True,
-                        help='Input star file.')
-    parser.add_argument('--outDir', required=True,
-                        help='Output files directory.')
-    parser.add_argument('--pixelSize', type=float, required=True,
-                        help='Resolution in nm/pix.')
-    parser.add_argument('--sSig', type=float, default=1,
-                        help='Sigma for gaussian filtering.')
-    parser.add_argument('--vDen', type=float, default=0.0035,
-                        help='Vertex density within membranes in cubic nm.')
-    parser.add_argument('--veRatio', type=float, default=4,
-                        help='Averaged ratio vertex/edge in the graph within membrane.')
-    parser.add_argument('--maxLen', type=float, default=10,
-                        help='Maximum euclidean shortest distance to membrane in nm.')
-    parser.add_argument('-j', default=2, type=int,
-                        help='Number of processors.')
-    args = parser.parse_args()
-
-    in_star = args.inStar
-    output_dir = args.outDir
-    res = args.pixelSize
-    s_sig = args.sSig
-    v_den = args.vDen
-    ve_ratio = args.veRatio
-    max_len = args.maxLen
-    npr = args.j
-
     # Print initial message
     print 'Extracting GraphMCF and NetFilament objects from tomograms'
     print '\tAuthor: ' + __author__
@@ -351,4 +322,35 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True,
+                            help='Input star file.')
+        parser.add_argument('--outDir', required=True,
+                            help='Output files directory.')
+        parser.add_argument('--pixelSize', type=float, required=True,
+                            help='Resolution in nm/pix.')
+        parser.add_argument('--sSig', type=float, default=1,
+                            help='Sigma for gaussian filtering.')
+        parser.add_argument('--vDen', type=float, default=0.0035,
+                            help='Vertex density within membranes in cubic nm.')
+        parser.add_argument('--veRatio', type=float, default=4,
+                            help='Averaged ratio vertex/edge in the graph within membrane.')
+        parser.add_argument('--maxLen', type=float, default=10,
+                            help='Maximum euclidean shortest distance to membrane in nm.')
+        parser.add_argument('-j', default=2, type=int,
+                            help='Number of processors.')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        output_dir = args.outDir
+        res = args.pixelSize
+        s_sig = args.sSig
+        v_den = args.vDen
+        ve_ratio = args.veRatio
+        max_len = args.maxLen
+        npr = args.j
+        main()
+    except:
+        main()

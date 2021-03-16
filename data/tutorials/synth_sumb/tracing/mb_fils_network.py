@@ -35,33 +35,33 @@ except:
 # PARAMETERS
 ########################################################################################
 
-# ####### Input data
-#
-# ROOT_PATH = '../../../..' # Data path
-#
-# # Input STAR file with the GraphMCF pickles
-# in_star = ROOT_PATH + '/data/tutorials/synth_sumb/graphs/test_1_seg_mb_graph.star' # The outuput of mb_graph.py
-#
-# # Sources slice XML file
-# in_sources = ROOT_PATH + '/data/tutorials/synth_sumb/fils/in/mb_sources.xml'
-#
-# # Targets slice XML file
-# in_targets = ROOT_PATH + '/data/tutorials/synth_sumb/fils/in/no_mb_targets.xml'
-#
-# ####### Output data
-#
-# out_dir = ROOT_PATH + '/data/tutorials/synth_sumb/fils/out' # '/fils/cyto'
-# out_int_g = True
-#
-# ####### Filament geometrical parameters
-#
-# g_rg_len = [1, 60] # [1, 50] # [1, 75] # nm (>0)
-# g_rg_sin = [0, 3]
-# g_rg_eud = [1, 25] # [1, 15] # [1, 25] # nm (>0)
-#
-# ####### Graph thresholding (Advanced parameters)
-#
-# th_mode = 'in' # 'out'
+####### Input data
+
+ROOT_PATH = '../../../..' # Data path
+
+# Input STAR file with the GraphMCF pickles
+in_star = ROOT_PATH + '/data/tutorials/synth_sumb/graphs/test_1_seg_mb_graph.star' # The outuput of mb_graph.py
+
+# Sources slice XML file
+in_sources = ROOT_PATH + '/data/tutorials/synth_sumb/fils/in/mb_sources.xml'
+
+# Targets slice XML file
+in_targets = ROOT_PATH + '/data/tutorials/synth_sumb/fils/in/no_mb_targets.xml'
+
+####### Output data
+
+out_dir = ROOT_PATH + '/data/tutorials/synth_sumb/fils/out' # '/fils/cyto'
+out_int_g = True
+
+####### Filament geometrical parameters
+
+g_rg_len = [1, 60] # [1, 50] # [1, 75] # nm (>0)
+g_rg_sin = [0, 3]
+g_rg_eud = [1, 25] # [1, 15] # [1, 25] # nm (>0)
+
+####### Graph thresholding (Advanced parameters)
+
+th_mode = 'in' # 'out'
 
 ########################################################################################
 # MAIN ROUTINE
@@ -71,31 +71,6 @@ out_int_g = True
 
 
 def main():
-    # Parse arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--inStar', required=True, help='Input star file.')
-    parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
-    parser.add_argument('--inSources', required=True, help='Sources xml file.')
-    parser.add_argument('--inTargets', required=True, help='Targets xml file.')
-    parser.add_argument('--thMode', required=True, choices=['in', 'out'],
-                        help='Orientation with respect to the membrane/filament.')
-    parser.add_argument('--gRgLen', nargs='+', type=int, default=[1, 60],
-                        help='Geodesic distance trough the graph between source and target vertices in nm.')
-    parser.add_argument('--gRgSin', nargs='+', type=int, default=[0, 3],
-                        help='Filament sinuosity, geodesic/euclidean distances ratio.')
-    parser.add_argument('--gRgEud', nargs='+', type=int, default=[1, 25],
-                        help='Euclidean distance between source and target vertices in nm.')
-    args = parser.parse_args()
-
-    in_star = args.inStar
-    out_dir = args.outDir
-    in_sources = args.inSources
-    in_targets = args.inTargets
-    th_mode = args.thMode
-    g_rg_len = args.gRgLen
-    g_rg_sin = args.gRgSin
-    g_rg_eud = args.gRgEud
-
     # Print initial message
     print 'Filtering a MbGraphMCF by filaments network.'
     print '\tAuthor: ' + __author__
@@ -203,4 +178,31 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
+        parser.add_argument('--inSources', required=True, help='Sources xml file.')
+        parser.add_argument('--inTargets', required=True, help='Targets xml file.')
+        parser.add_argument('--thMode', required=True, choices=['in', 'out'],
+                            help='Orientation with respect to the membrane/filament.')
+        parser.add_argument('--gRgLen', nargs='+', type=int, default=[1, 60],
+                            help='Geodesic distance trough the graph between source and target vertices in nm.')
+        parser.add_argument('--gRgSin', nargs='+', type=int, default=[0, 3],
+                            help='Filament sinuosity, geodesic/euclidean distances ratio.')
+        parser.add_argument('--gRgEud', nargs='+', type=int, default=[1, 25],
+                            help='Euclidean distance between source and target vertices in nm.')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        out_dir = args.outDir
+        in_sources = args.inSources
+        in_targets = args.inTargets
+        th_mode = args.thMode
+        g_rg_len = args.gRgLen
+        g_rg_sin = args.gRgSin
+        g_rg_eud = args.gRgEud
+        main()
+    except:
+        main()

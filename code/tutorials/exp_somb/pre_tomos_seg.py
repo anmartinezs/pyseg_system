@@ -45,32 +45,32 @@ MB_NEIGH_INT, MB_NEIGH_EXT = 2, 3
 # PARAMETERS
 ########################################################################################
 
-# ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
-#
-# # Input STAR file
-# in_star = ROOT_PATH + '/pre/in/mb_seg_single_oriented.star'
-#
-# # Output directory
-# out_dir = ROOT_PATH + '/pre/mbo_nosplit'
-#
-# # Subvolume splitting settings
-# sp_split = None # (2, 2, 1)
-# sp_off_voxels = 30 # vox
-#
-# # Membrane segmentation
-# sg_res = 0.52 # nm/voxel
-# sg_th = None # 8
-# sg_sz = None # 3e3
-# sg_mb_thick = 4 # nm
-# sg_mb_neigh = 15 # nm
+ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
+
+# Input STAR file
+in_star = ROOT_PATH + '/pre/in/mb_seg_single_oriented.star'
+
+# Output directory
+out_dir = ROOT_PATH + '/pre/mbo_nosplit'
+
+# Subvolume splitting settings
+sp_split = None # (2, 2, 1)
+sp_off_voxels = 30 # vox
+
+# Membrane segmentation
+sg_res = 0.52 # nm/voxel
+sg_th = None # 8
+sg_sz = None # 3e3
+sg_mb_thick = 4 # nm
+sg_mb_neigh = 15 # nm
 
 # CSV file pre-processing
-#cv_coords_cools = (1, 2, 3)
-#cv_id_col = 4
+cv_coords_cools = (1, 2, 3)
+cv_id_col = 4
 
 # Microtubule settings
-#mt_rad = 30 # nm
-#mt_swap_xy = False
+mt_rad = 30 # nm
+mt_swap_xy = False
 
 
 ########################################################################################
@@ -85,30 +85,6 @@ def main():
     # Microtubule settings
     mt_rad = 30  # nm
     mt_swap_xy = False
-
-    # Parse arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--inStar', required=True, help='Input star file.')
-    parser.add_argument('--outDir', required=True, help='Output directory.')
-    parser.add_argument('--spSplit', nargs='+', type=int, default=None, help='Number of splits (X, Y, Z).')
-    parser.add_argument('--spOffVoxels', type=int, default=30, help='Offset voxels.')
-    parser.add_argument('--sgVoxelSize', required=True, type=float, help='Voxel size (nm/voxel).')
-    parser.add_argument('--sgThreshold', type=int, default=None, help='Density threshold.')
-    parser.add_argument('--sgSizeThreshold', type=int, default=None, help='Size threshold (voxels).')
-    parser.add_argument('--sgMembThk', required=True, type=float, default=4, help='Segmented membrane thickness (nm)')
-    parser.add_argument('--sgMembNeigh', required=True, type=float, default=15,
-                        help='Segmented membrane neighbours (nm)')
-    args = parser.parse_args()
-
-    in_star = args.inStar
-    out_dir = args.outDir
-    sp_split = None if args.spSplit == [-1] else args.spSplit
-    sp_off_voxels = args.spOffVoxels
-    sg_res = args.sgVoxelSize
-    sg_th = None if args.sgThreshold == -1 else args.sgThreshold
-    sg_sz = None if args.sgSizeThreshold == -1 else args.sgSizeThreshold
-    sg_mb_thick = args.sgMembThk
-    sg_mb_neigh = args.sgMembNeigh
 
     ########## Print initial message
 
@@ -397,4 +373,31 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--outDir', required=True, help='Output directory.')
+        parser.add_argument('--spSplit', nargs='+', type=int, default=None, help='Number of splits (X, Y, Z).')
+        parser.add_argument('--spOffVoxels', type=int, default=30, help='Offset voxels.')
+        parser.add_argument('--sgVoxelSize', required=True, type=float, help='Voxel size (nm/voxel).')
+        parser.add_argument('--sgThreshold', type=int, default=None, help='Density threshold.')
+        parser.add_argument('--sgSizeThreshold', type=int, default=None, help='Size threshold (voxels).')
+        parser.add_argument('--sgMembThk', required=True, type=float, default=4,
+                            help='Segmented membrane thickness (nm)')
+        parser.add_argument('--sgMembNeigh', required=True, type=float, default=15,
+                            help='Segmented membrane neighbours (nm)')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        out_dir = args.outDir
+        sp_split = None if args.spSplit == [-1] else args.spSplit
+        sp_off_voxels = args.spOffVoxels
+        sg_res = args.sgVoxelSize
+        sg_th = None if args.sgThreshold == -1 else args.sgThreshold
+        sg_sz = None if args.sgSizeThreshold == -1 else args.sgSizeThreshold
+        sg_mb_thick = args.sgMembThk
+        sg_mb_neigh = args.sgMembNeigh
+        main()
+    except:
+        main()

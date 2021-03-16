@@ -34,23 +34,23 @@ from pyseg.sub import TomoPeaks, SetTomoPeaks
 ########################################################################################
 
 
-# ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
-#
-# # Input STAR file
-# in_star = ROOT_PATH + '/fils/out/fil_mb_sources_to_ext_targets_net.star'
-#
-# ####### Output data
-#
-# output_dir = ROOT_PATH + '/pick/out'
-#
-# ###### Slices settings file
-#
-# slices_file = ROOT_PATH + '/pick/in/mb_ext.xml'
-#
-# ###### Peaks configuration
-#
-# peak_th = 0 # Percentile %
-# peak_ns = 0.5 # 5 # nm
+ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
+
+# Input STAR file
+in_star = ROOT_PATH + '/fils/out/fil_mb_sources_to_ext_targets_net.star'
+
+####### Output data
+
+output_dir = ROOT_PATH + '/pick/out'
+
+###### Slices settings file
+
+slices_file = ROOT_PATH + '/pick/in/mb_ext.xml'
+
+###### Peaks configuration
+
+peak_th = 0 # Percentile %
+peak_ns = 0.5 # 5 # nm
 peak_emb = True
 
 ###### Advanced peaks configuration
@@ -87,21 +87,6 @@ ms_clst_all = True
 
 
 def main():
-    # Parse arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--inStar', required=True, help='Input star file.')
-    parser.add_argument('--outDir', required=True, help='Output directory.')
-    parser.add_argument('--slicesFile', required=True, help='Slices xml file.')
-    parser.add_argument('--peakTh', type=float, default=0, help='.')  # TODO
-    parser.add_argument('--peakNs', type=float, default=0.5, help='.')  # TODO
-    args = parser.parse_args()
-
-    in_star = args.inStar
-    output_dir = args.outDir
-    slices_file = args.slicesFile
-    peak_th = args.peakTh
-    peak_ns = args.peakNs
-
     ########## Print initial message
 
     print 'Extracting slices from synapses.'
@@ -379,4 +364,21 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--outDir', required=True, help='Output directory.')
+        parser.add_argument('--slicesFile', required=True, help='Slices xml file.')
+        parser.add_argument('--peakTh', type=float, default=0, help='.')  # TODO
+        parser.add_argument('--peakNs', type=float, default=0.5, help='.')  # TODO
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        output_dir = args.outDir
+        slices_file = args.slicesFile
+        peak_th = args.peakTh
+        peak_ns = args.peakNs
+        main()
+    except:
+        main()
