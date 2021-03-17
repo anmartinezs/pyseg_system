@@ -99,7 +99,7 @@ def _argsPassedFromCli(in_star, out_dir, in_sources, in_targets, th_mode, g_rg_l
     return in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud
 
 in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud = \
-    (in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud)
+    _argsPassedFromCli(in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud)
 
 # Print initial message
 print 'Filtering a MbGraphMCF by filaments network.'
