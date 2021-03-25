@@ -7,8 +7,8 @@ This GitHub repository have two branches (git checkout <feature_branch>):
 * **nightly**: the latest develpments and corrections.
 * **python3**: temporary branch with the code modifications to migrate pyseg from Python 2.7 to 3.8, after a suscessfull validation it will be closed and master will be updated for Python 3.
 
-# What's new from v1.0.0
-Code changes for being compatible with [Scipio](https://github.com/scipion-em/scipion-em-pyseg.git)
+## What's new from v1.0.0
+Code changes for being compatible with [Scipion](https://github.com/scipion-em/scipion-em-pyseg.git)
 
 ### CONTENTS
 
