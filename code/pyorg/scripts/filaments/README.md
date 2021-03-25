@@ -17,3 +17,4 @@ This folder contains the scripts for describing quantitavely filament networks b
 ## References
 
 The results of this scripts on \alpha-Synuclein *in situ* inclusion are presented in **[Trinkaus et al. (2020). In situ architecture of neuronal alpha-Synuclein inclusion bodies. *Nature Communications*]**
+
