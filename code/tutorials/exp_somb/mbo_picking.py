@@ -17,9 +17,17 @@
 
 __author__ = 'Antonio Martinez-Sanchez'
 
+import argparse
+import os
+import gc
+import csv
+import time
 import operator
+import numpy as np
 import pyseg as ps
 from pyseg.globals.utils import coords_scale_supression
+from pyseg.xml_io import SliceSet
+from pyseg.sub import TomoPeaks, SetTomoPeaks
 
 ########################################################################################
 # PARAMETERS
@@ -72,23 +80,35 @@ del_v_sl = True # if True vertices are being deleted from graph as they detected
 ms_bg = None # 10 # nm (if None then Mean Shift is not applied)
 ms_clst_all = True
 
+
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
 
-################# Package import
+# Get them from the command line if they were passed through it
+def _argsPassedFromCli(in_star, output_dir, slices_file, peak_th, peak_ns):
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--outDir', required=True, help='Output directory.')
+        parser.add_argument('--slicesFile', required=True, help='Slices xml file.')
+        parser.add_argument('--peakTh', type=float, default=0)
+        parser.add_argument('--peakNs', type=float, default=0.5)
+        args = parser.parse_args()
 
-import os
-import gc
-import csv
-import time
-import operator
-import numpy as np
-from pyseg.xml_io import SliceSet
-from pyseg.spatial import UniStat
-from pyseg.sub import TomoPeaks, SetTomoPeaks
+        in_star = args.inStar
+        output_dir = args.outDir
+        slices_file = args.slicesFile
+        peak_th = args.peakTh
+        peak_ns = args.peakNs
+    except:
+        pass
 
-########## Global variables
+    return in_star, output_dir, slices_file, peak_th, peak_ns
+
+in_star, output_dir, slices_file, peak_th, peak_ns = \
+    _argsPassedFromCli(in_star, output_dir, slices_file, peak_th, peak_ns)
 
 ########## Print initial message
 

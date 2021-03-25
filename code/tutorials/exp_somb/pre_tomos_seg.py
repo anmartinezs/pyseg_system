@@ -30,8 +30,8 @@ import math
 import time
 import pyseg as ps
 import scipy as sp
-import skimage as sk
 import numpy as np
+import argparse
 from pyseg.globals import signed_distance_2d
 
 ###### Global variables
@@ -40,6 +40,8 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 MB_LBL, MB_NEIGH = 1, 2
 MB_NEIGH_INT, MB_NEIGH_EXT = 2, 3
+
+# argsFromCli, in_star, out_dir, sp_split, sp_off_voxels, sg_res, sg_th, sg_sz, sg_mb_thick, sg_mb_neigh = _argsPassedFromCli()
 
 ########################################################################################
 # PARAMETERS
@@ -72,10 +74,43 @@ cv_id_col = 4
 mt_rad = 30 # nm
 mt_swap_xy = False
 
-
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Get them from the command line if they were passed through it
+def _argsPassedFromCli(in_star, out_dir, sp_split, sp_off_voxels, sg_res, sg_th, sg_sz, sg_mb_thick, sg_mb_neigh):
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--outDir', required=True, help='Output directory.')
+        parser.add_argument('--spSplit', nargs='+', type=int, default=None, help='Number of splits (X, Y, Z).')
+        parser.add_argument('--spOffVoxels', type=int, default=30, help='Offset voxels.')
+        parser.add_argument('--sgVoxelSize', required=True, type=float, help='Voxel size (nm/voxel).')
+        parser.add_argument('--sgThreshold', type=int, default=None, help='Density threshold.')
+        parser.add_argument('--sgSizeThreshold', type=int, default=None, help='Size threshold (voxels).')
+        parser.add_argument('--sgMembThk', required=True, type=float, default=4,
+                            help='Segmented membrane thickness (nm)')
+        parser.add_argument('--sgMembNeigh', required=True, type=float, default=15,
+                            help='Segmented membrane neighbours (nm)')
+        args = parser.parse_args()
+        in_star = args.inStar
+        out_dir = args.outDir
+        sp_split = None if args.spSplit == [-1] else args.spSplit
+        sp_off_voxels = args.spOffVoxels
+        sg_res = args.sgVoxelSize
+        sg_th = None if args.sgThreshold == -1 else args.sgThreshold
+        sg_sz = None if args.sgSizeThreshold == -1 else args.sgSizeThreshold
+        sg_mb_thick = args.sgMembThk
+        sg_mb_neigh = args.sgMembNeigh
+    except:
+        pass
+
+    return in_star, out_dir, sp_split, sp_off_voxels, sg_res, sg_th, sg_sz, sg_mb_thick, sg_mb_neigh
+
+in_star, out_dir, sp_split, sp_off_voxels, sg_res, sg_th, sg_sz, sg_mb_thick, sg_mb_neigh = \
+    _argsPassedFromCli(in_star, out_dir, sp_split, sp_off_voxels, sg_res, sg_th, sg_sz, sg_mb_thick, sg_mb_neigh)
 
 ########## Print initial message
 
@@ -152,11 +187,6 @@ for row in range(gl_star.get_nrows()):
     wide_y = off_mask_max_y - off_mask_min_y
     wide_z = off_mask_max_z - off_mask_min_z
 
-    if mode_oriented:
-        seg_center = np.asarray((gl_star.get_element('_rlnOriginX', row),
-                                 gl_star.get_element('_rlnOriginY', row),
-                                 gl_star.get_element('_rlnOriginZ', row)))
-
     if gl_star.has_column('_mtMtubesCsv'):
         in_csv = gl_star.get_element('_mtMtubesCsv', row)
         print '\tReading input CSV file: ' + in_csv
@@ -183,7 +213,7 @@ for row in range(gl_star.get_nrows()):
         else:
             tomo_mb = tomo_mb > 0
     else:
-        tomo_mb = (tomo_mb >= sg_th).astype(dtype=int)
+        tomo_mb = tomo_mb >= sg_th
     if gl_star.has_column('_mtMtubesCsv'):
         tomo_mb *= mt_mask
         del mt_mask
@@ -216,16 +246,18 @@ for row in range(gl_star.get_nrows()):
     # ps.disperse_io.save_numpy(tomo_mb, out_dir + '/hold.mrc')
     if sg_th is not None:
         print '\tMembrane thresholding...'
-        # tomo_mb, num_lbls = sp.ndimage.measurements.label(tomo_mb, structure=conn_mask)
-        tomo_mb, num_lbls = sk.measure.label(tomo_mb, connectivity=3, return_num=True)
-        tomo_sz = np.zeros(shape=tomo_mb.shape, dtype=np.int32)
-        for lbl in range(1, num_lbls + 1):
-            ids = tomo_mb == lbl
-            feat_sz = ids.sum()
-            if feat_sz >= sg_sz:
-                tomo_sz[ids] = feat_sz
-        tomo_mb = tomo_sz > 0
+        tomo_sz = ps.globals.global_analysis(tomo_mb, 0.5, c=26)
+        tomo_mb = tomo_sz > sg_sz
+        ps.disperse_io.save_numpy(tomo_mb, '/fs/pool/pool-lucic2/antonio/carsten/dan_mirror/hold.mrc')
         del tomo_sz
+
+    if mode_oriented:
+        seg_center = np.asarray((gl_star.get_element('_rlnOriginX', row),
+                                 gl_star.get_element('_rlnOriginY', row),
+                                 gl_star.get_element('_rlnOriginZ', row)))
+        seg_center[0] -= off_mask_min_x
+        seg_center[1] -= off_mask_min_y
+        seg_center[2] -= off_mask_min_z
 
     print '\tSegmenting the membranes...'
     if sp_split is None:

@@ -810,29 +810,28 @@ class ListTomoFilaments(object):
         self.__tomos = dict()
         # For pickling
         self.__pkls = None
-        self.__res, self.__rad = 1, 1
 
     # EXTERNAL FUNCTIONALITY
 
-    def set_resolution(self, res):
+    def set_resolution(self, res, key):
         """
         Set resolution in nm/pixel
         :param res: input value
+        :param key: tomogram key for indexing
         :return:
         """
-        for tomo in self.__tomos.itervalues():
-            tomo.set_resolution(res)
-        self.__res = res
+        tomo = self.get_tomo_by_key(key)
+        tomo.set_resolution(res)
 
-    def set_fils_radius(self, rad):
+    def set_fils_radius(self, rad, key):
         """
         Set filaments radius
         :param res: input value
+        :param key: tomogram key for indexing
         :return:
         """
-        for tomo in self.__tomos.itervalues():
-            tomo.set_fils_radius(rad)
-        self.__rad = rad
+        tomo = self.get_tomo_by_key(key)
+        tomo.set_fils_radius(rad)
 
     def get_tomos(self):
         return self.__tomos

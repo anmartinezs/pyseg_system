@@ -42,17 +42,17 @@ ANGLE_NAMES = ['Rot', 'Tilt', 'Psi']
 
 ####### Input data
 
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex'
+ROOT_PATH = '/fs/pool/pool-lucic2/christos/workspace/glur' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex'
 
 # Input STAR file
-in_star = ROOT_PATH + '/syn2/rec/pre/fil_sources_to_targets_net_parts.star'
-in_ctf = ROOT_PATH + '/syn2/rec/ctfs'
+in_star = ROOT_PATH + '/fils/pst2/sub/fil_sources_pre_to_targets_pre_net_parts.star' # '/syn2/rec/pre/fil_sources_to_targets_net_parts.star'
+in_ctf = ROOT_PATH + '/rln/pst/rec/ctfs_64' # '/syn2/rec/ctfs'
 in_parts_root = ROOT_PATH
 
 ####### Output data
 
-out_part_dir = ROOT_PATH + '/syn2/rec/pre/particles'
-out_star = ROOT_PATH + '/syn2/rec/pre/particles_pre.star'
+out_part_dir = ROOT_PATH + '/rln/pst/rec/particles_nocont' # '/syn2/rec/pre/particles'
+out_star = ROOT_PATH + '/rln/pst/rec/particles_nocont.star' # '/syn2/rec/pre/particles_pre.star'
 
 ####### Particles pre-processing settings
 
@@ -63,7 +63,7 @@ do_noise = False
 do_use_fg = True
 do_norm = True
 # Required if '_psSegImage' not in input STAR
-in_mask_norm = ROOT_PATH + '/syn2/rec/mask_sph_64_25.mrc'
+in_mask_norm = ROOT_PATH + '/rln/pst/masks/mask_sph_64_30.mrc' # '/syn2/rec/mask_sph_64_25.mrc'
 
 ####### Multiprocessing settings
 

@@ -13,9 +13,9 @@ from matplotlib import pyplot as plt, rcParams
 RAD_RG = np.arange(2, 80, 3)
 SHELL_THICKS = (3, 6, 9, 12)
 THICK_COLORS = ('b', 'r', 'g', 'c')
-CONV_ITER = 1000 # 1000
+CONV_ITER = 100 # 1000
 MAX_ITER = 100000
-N_SIMS = 100 # 1000
+N_SIMS = 1000 # 100
 PERCENT = 5 # %
 BAR_WIDTH = .4
 OUT_DIR = './surf/test/out/nhood_vol'

@@ -37,3 +37,16 @@
     + Adding tutorial exp_domb (/{code,data}/tutorials/exp_domb)
 * **17/07/2020**
     + Adding filament analysis scrits in code/pyorg/scripts/filaments
+* **03/09/2020**
+    + Correction bug in script /code/tutorials/exp_somb/pre_tomos_seg.py
+* **11/09/2020**
+    + Corrections for test in module /code/pyorg/surf
+* **08/10/2020**
+    + Corrections for the statistical analysis of filaments organization
+* **26/12/2020**
+    + Adding comments to explain XML files
+* **27/12/2020**
+    + Segmentation pre-processing scripts in tutorial using global_analysis function
+* **08/01/2020**
+    + Eliminating 'WARNING: filament with less than 3 points!' messages
+    + Preparing scripts to build an independant repository for filaments quantitative analysis 

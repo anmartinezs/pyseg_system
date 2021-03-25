@@ -15,6 +15,7 @@
 ################# Package import
 
 import os
+import csv
 import pickle
 import numpy as np
 import scipy as sp
@@ -49,12 +50,12 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-engel/antonio/rubisco/org'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos/L2Tomo8/L2Tomo8_code_parts_ltomos_surfs.star' # '/ltomos/test_v2/test_remove_parts_ltomos_surfs.star' # '/ltomos/all_v2/all_v2_ltomos_surf.star' # '/ltomos/L2Tomo8/L2Tomo8_ltomos_surf.star' # '/ltomos/all_pid/all_pid_ltomos_surf.star'
-in_wspace = None # ROOT_PATH + '/uni_1st/all_v2/all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_wspace.pkl'  # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/all_v2/all_v2_ltomos_surf.star' # '/ltomos/L2Tomo8/L2Tomo8_code_parts_ltomos_surfs.star' # '/ltomos/test_v2/test_remove_parts_ltomos_surfs.star' # '/ltomos/L2Tomo8/L2Tomo8_ltomos_surf.star' # '/ltomos/all_pid/all_pid_ltomos_surf.star'
+in_wspace = ROOT_PATH + '/uni_1st/all_v2/all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_wspace.pkl'  # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/uni_1st/L2Tomo8/' # '/uni_1st/test_v2/' # '/uni_1st/all_v2/' # '/uni_1st/L2Tomo8/'
-out_stem = 'test_remove_parts' # 'all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_2'
+out_dir = ROOT_PATH + '/uni_1st/all_v2/' # '/uni_1st/L2Tomo8/' # '/uni_1st/test_v2/' # '/uni_1st/L2Tomo8/'
+out_stem = 'all_v2_align_100_30_mxcon_1_rg_min_neg_dst_0_low_tol_abs_3' # 'test_remove_parts' #
 
 # List pre-processing options
 pr_ss = None # 10 # nm
@@ -1184,6 +1185,25 @@ for lkey, ltomo in zip(lists_exp_mnnd.iterkeys(), lists_exp_mnnd.itervalues()):
     else:
         plt.savefig(out_lists_dir + '/NNS_merged_' + lkey_short + '.svg')
     plt.close()
+
+    fieldnames, rows = list(), dict()
+    fieldnames.append('distance')
+    rows['distance'] = hist_bins
+    fieldnames.append('probability_low')
+    fieldnames.append('probability_med')
+    fieldnames.append('probability_high')
+    rows['probability_low'] = ice_low
+    rows['probability_med'] = ice_med
+    rows['probability_high'] = ice_high
+    out_csv_file = out_lists_dir + '/NNS_merged_' + lkey_short + '.csv'
+    with open(out_csv_file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
+        writer.writeheader()
+        for i in range(len(rows['distance'])):
+            row = dict()
+            for key in rows.iterkeys():
+                row[key] = rows[key][i]
+            writer.writerow(row)
 
 # if star.has_column('_psStartSurfIds') and star.has_column('_psEndSurfIds'):
 ana_ndst_rg[1] = 15

@@ -26,18 +26,18 @@ from pyseg.globals.utils import coords_scale_supression
 ########################################################################################
 
 
-ROOT_PATH = '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex'
+ROOT_PATH = '/fs/pool/pool-lucic2/christos/workspace/glur' # '/fs/pool/pool-lucic2/antonio/workspace/psd_an/ex'
 
 # Input STAR file
-in_star = ROOT_PATH + '/syn/fils/pre/fil_sources_to_targets_net.star'
+in_star = ROOT_PATH + '/fils/pre/fil_sources_pre_to_targets_pre_net.star' # '/syn/fils/pst/fil_sources_to_targets_net.star'
 
 ####### Output data
 
-output_dir = ROOT_PATH + '/syn2/rec/pre'
+output_dir = ROOT_PATH + '/fils/pst2/sub'
 
 ###### Slices settings file
 
-slices_file = ROOT_PATH + '/syn2/rec/xmls/pre.xml'
+slices_file = ROOT_PATH + '/fils/pst2/pst.xml' # '/syn2/rec/xmls/pst.xml'
 
 ###### Peaks configuration
 

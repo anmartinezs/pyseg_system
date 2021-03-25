@@ -212,8 +212,8 @@ class MbGraphMCF(GraphMCF):
                                 self.set_prop_entry_fast(key_al_id, (fil.get_apex_length(),), v_id, 1)
                                 self.set_prop_entry_fast(key_cont_id, (contact[0], contact[1], contact[2]),
                                                          v_id, 3)
-                            else:
-                                print 'WARNING: filament with less than 3 points!'
+                            # else:
+                            #     print 'WARNING: filament with less than 3 points!'
 
     def add_mb_fil(self, v_id, v_ids, p_ids):
         self.__mb_fils[v_id] = FilamentLDG(v_ids, p_ids, self)
@@ -1336,7 +1336,8 @@ class SynGraphMCF(GraphMCF):
                                 try:
                                     fil = FilamentLDG(fil_v_ids, fil_p_ids, self)
                                 except IndexError:
-                                    print 'WARNING: filament with less than 3 points!'
+                                    pass
+                                #     print 'WARNING: filament with less than 3 points!'
                                 if sd == SYN_PST_LBL:
                                     self.__mb_fils_pst[v_id] = fil
                                     self.set_prop_entry_fast(key_pst_dst_id, (fil.get_dst(),), v_id, 1)
@@ -1351,8 +1352,8 @@ class SynGraphMCF(GraphMCF):
                                     self.set_prop_entry_fast(key_pre_sin_id, (fil.get_sinuosity(),), v_id, 1)
                                     self.set_prop_entry_fast(key_pre_cont_id, (contact[0], contact[1], contact[2]),
                                                              v_id, 3)
-                            else:
-                                print 'WARNING: filament with less than 3 points!'
+                            # else:
+                            #     print 'WARNING: filament with less than 3 points!'
 
     # Returns: returns a 2-tuple (pst, pre) with the the two possible filaments (if a filament does not exist is None)
     # if mb_id == SYN_PST|PRE_LBL only one filament is returned
@@ -1435,8 +1436,8 @@ class SynGraphMCF(GraphMCF):
             gl = self.get_prop_entry_fast(gl_id, v_id, 1, gl_dt)[0]
             sin = self.get_prop_entry_fast(sin_id, v_id, 1, sin_dt)[0]
             gol = self.get_prop_entry_fast(gol_id, v_id, 1, gol_dt)[0]
-            if (gol > 0) and (gl > 0) and (gol < gl):
-                continue
+            # if (gol > 0) and (gl > 0) and (gol < gl):
+            #     continue
             if slice.test(seg=seg, eu_dst=eu, geo_dst=geo, geo_len=gl, sin=sin):
                     h_v_ids.append(v_id)
 

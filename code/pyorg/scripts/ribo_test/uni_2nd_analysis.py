@@ -50,17 +50,17 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos_v2/all_no_pid/all_L_ltomos.star'
-in_wspace = ROOT_PATH + '/tests/uni_dsa_shell_all/test_8_300_3_15_sim_5_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos_v2/test_no_pid/all_L_ltomos.star' # '/ltomos_v2/all_no_pid/all_L_ltomos.star'
+in_wspace = None # ROOT_PATH + '/tests/uni_dsa_shell_all/test_8_300_3_15_sim_5_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/tests/uni_dsa_shell_all/'
-out_stem = 'test_8_300_3_15_sim_5_3'
+out_dir = ROOT_PATH + '/tests/uni_dsa_test/' # '/tests/uni_dsa_shell_all/'
+out_stem = 'test_8_300_3_15_sim_1'
 
 # Analysis variables
 ana_res = 2.096 # nm/voxel
 ana_rg = np.arange(8, 300, 3) # in nm
-ana_shell_thick = 15 # 10 # None # 5
+ana_shell_thick = None # 5 # 15 # 10 #
 ana_rdf = False
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
@@ -69,7 +69,7 @@ ana_npr = 10 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 5 # 50
+p_nsims = 1 # 5 # 50
 p_per = 5 # %
 
 ##### Advanced settings

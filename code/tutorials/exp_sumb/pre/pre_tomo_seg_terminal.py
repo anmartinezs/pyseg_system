@@ -183,7 +183,7 @@ for row in range(gl_star.get_nrows()):
         else:
             tomo_mb = tomo_mb > 0
     else:
-        tomo_mb = (tomo_mb >= sg_th).astype(dtype=int)
+        tomo_mb = tomo_mb >= sg_th
     if gl_star.has_column('_mtMtubesCsv'):
         tomo_mb *= mt_mask
         del mt_mask
@@ -216,15 +216,9 @@ for row in range(gl_star.get_nrows()):
     # ps.disperse_io.save_numpy(tomo_mb, out_dir + '/hold.mrc')
     if sg_th is not None:
         print '\tMembrane thresholding...'
-        # tomo_mb, num_lbls = sp.ndimage.measurements.label(tomo_mb, structure=conn_mask)
-        tomo_mb, num_lbls = sk.measure.label(tomo_mb, connectivity=3, return_num=True)
-        tomo_sz = np.zeros(shape=tomo_mb.shape, dtype=np.int32)
-        for lbl in range(1, num_lbls + 1):
-            ids = tomo_mb == lbl
-            feat_sz = ids.sum()
-            if feat_sz >= sg_sz:
-                tomo_sz[ids] = feat_sz
-        tomo_mb = tomo_sz > 0
+        tomo_sz = ps.globals.global_analysis(tomo_mb, 0.5, c=26)
+        tomo_mb = tomo_sz > sg_sz
+        ps.disperse_io.save_numpy(tomo_mb, '/fs/pool/pool-lucic2/antonio/carsten/dan_mirror/hold.mrc')
         del tomo_sz
 
     print '\tSegmenting the membranes...'
