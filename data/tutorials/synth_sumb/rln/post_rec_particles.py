@@ -28,6 +28,7 @@ import time
 import copy
 import pyto
 import random
+import argparse
 import pyseg as ps
 import numpy as np
 import multiprocessing as mp
@@ -193,9 +194,33 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     qu.put(rln_star)
     sys.exit(pr_id)
 
+
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Get them from the command line if they were passed through it
+def _argsPassedFromCli(in_star, in_mask, out_part_dir, out_star, mp_npr):
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--inMask', required=True, help='Input mask file.')
+        parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
+        parser.add_argument('--outStar', required=True, help='Output star file.')
+        parser.add_argument('-j', default=2, type=int, help='Number of processors.')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        in_mask = args.inMask
+        out_part_dir = args.outDir
+        out_star = args.outStar
+        mp_npr = args.j
+    except:
+        pass
+    return in_star, in_mask, out_part_dir, out_star, mp_npr
+
+in_star, in_mask, out_part_dir, out_star, mp_npr = _argsPassedFromCli(in_star, in_mask, out_part_dir, out_star, mp_npr)
 
 # Print initial message
 print 'Extracting transmembrane features.'
@@ -323,4 +348,3 @@ for star in stars:
 print '\tStoring output STAR file in: ' + out_star
 rln_merged_star.store(out_star)
 print 'Successfully terminated. (' + time.strftime("%c") + ')'
-

@@ -19,6 +19,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 import time
 import sys
+import argparse
 import pyseg as ps
 import scipy as sp
 import os
@@ -82,9 +83,48 @@ v_mode = None  # 'low'
 e_mode = 'low'
 prop_topo = ps.globals.STR_FIELD_VALUE  # ps.globals.STR_FIELD_VALUE_EQ # None is ps.globals.STR_FIELD_VALUE
 
+
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Get them from the command line if they were passed through it
+def _argsPassedFromCli(in_star, output_dir, res, s_sig, v_den, ve_ratio, max_len, npr):
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True,
+                            help='Input star file.')
+        parser.add_argument('--outDir', required=True,
+                            help='Output files directory.')
+        parser.add_argument('--pixelSize', type=float, required=True,
+                            help='Resolution in nm/pix.')
+        parser.add_argument('--sSig', type=float, default=1,
+                            help='Sigma for gaussian filtering.')
+        parser.add_argument('--vDen', type=float, default=0.0035,
+                            help='Vertex density within membranes in cubic nm.')
+        parser.add_argument('--veRatio', type=float, default=4,
+                            help='Averaged ratio vertex/edge in the graph within membrane.')
+        parser.add_argument('--maxLen', type=float, default=10,
+                            help='Maximum euclidean shortest distance to membrane in nm.')
+        parser.add_argument('-j', default=2, type=int,
+                            help='Number of processors.')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        output_dir = args.outDir
+        res = args.pixelSize
+        s_sig = args.sSig
+        v_den = args.vDen
+        ve_ratio = args.veRatio
+        max_len = args.maxLen
+        npr = args.j
+    except:
+        pass
+    return in_star, output_dir, res, s_sig, v_den, ve_ratio, max_len, npr
+
+in_star, output_dir, res, s_sig, v_den, ve_ratio, max_len, npr = \
+    _argsPassedFromCli(in_star, output_dir, res, s_sig, v_den, ve_ratio, max_len, npr)
 
 # Print initial message
 print 'Extracting GraphMCF and NetFilament objects from tomograms'

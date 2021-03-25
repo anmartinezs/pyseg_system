@@ -22,6 +22,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 import gc
 import os
 import time
+import argparse
 import pyseg as ps
 try:
     import cPickle as pickle
@@ -65,6 +66,40 @@ th_mode = 'in' # 'out'
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Get them from the command line if they were passed through it
+def _argsPassedFromCli(in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud):
+    try:
+        # Parse arguments
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--inStar', required=True, help='Input star file.')
+        parser.add_argument('--outDir', required=True, help='Output subtomograms directory.')
+        parser.add_argument('--inSources', required=True, help='Sources xml file.')
+        parser.add_argument('--inTargets', required=True, help='Targets xml file.')
+        parser.add_argument('--thMode', required=True, choices=['in', 'out'],
+                            help='Orientation with respect to the membrane/filament.')
+        parser.add_argument('--gRgLen', nargs='+', type=int, default=[1, 60],
+                            help='Geodesic distance trough the graph between source and target vertices in nm.')
+        parser.add_argument('--gRgSin', nargs='+', type=int, default=[0, 3],
+                            help='Filament sinuosity, geodesic/euclidean distances ratio.')
+        parser.add_argument('--gRgEud', nargs='+', type=int, default=[1, 25],
+                            help='Euclidean distance between source and target vertices in nm.')
+        args = parser.parse_args()
+
+        in_star = args.inStar
+        out_dir = args.outDir
+        in_sources = args.inSources
+        in_targets = args.inTargets
+        th_mode = args.thMode
+        g_rg_len = args.gRgLen
+        g_rg_sin = args.gRgSin
+        g_rg_eud = args.gRgEud
+    except:
+        pass
+    return in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud
+
+in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud = \
+    _argsPassedFromCli(in_star, out_dir, in_sources, in_targets, th_mode, g_rg_len, g_rg_sin, g_rg_eud)
 
 # Print initial message
 print 'Filtering a MbGraphMCF by filaments network.'
@@ -170,3 +205,4 @@ print '\tStoring output STAR file in: ' + out_star
 star.store(out_star)
 
 print 'Terminated. (' + time.strftime("%c") + ')'
+
