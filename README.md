@@ -1,4 +1,4 @@
-# pyseg_system (v 1.0.0)
+# pyseg_system (v 1.1.0)
 De novo analysis for cryo-electron tomography.
 The code and data here is also available in CodeOcean (https://doi.org/10.24433/CO.0526052.v2), there you can test and run the software remotedly.
 
@@ -6,6 +6,9 @@ This GitHub repository have two branches (git checkout <feature_branch>):
 * **master**: (default) a permanent branch which always reflects the release history.
 * **nightly**: the latest develpments and corrections.
 * **python3**: temporary branch with the code modifications to migrate pyseg from Python 2.7 to 3.8, after a suscessfull validation it will be closed and master will be updated for Python 3.
+
+# What's new from v1.0.0
+Code changes for being compatible with [Scipio](https://github.com/scipion-em/scipion-em-pyseg.git)
 
 ### CONTENTS
 
