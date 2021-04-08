@@ -149,7 +149,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
             svol = tomo_shift(svol, (shift_y, shift_x, shift_z))
         svol_sp = np.asarray(svol.shape, dtype=np.int)
         svol_cent = np.asarray((int(.5 * svol_sp[0]), int(.5 * svol_sp[1]), int(.5 * svol_sp[2])), dtype=np.float32)
-        svol = r3d.transformArray(svol, origin=svol_cent, order=3, prefilter=True)
+        svol = r3d.transformArray(svol, center=svol_cent, order=3, prefilter=True)
         stat_vol = svol[mask > 0]
         mn, st = stat_vol.mean(), stat_vol.std()
         if st > 0:
@@ -157,7 +157,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
         svol = ps.globals.randomize_voxel_mask(svol, mask, ref='fg')
         r3d_inv = pyto.geometry.Rigid3D()
         r3d_inv.q = r3d.make_r_euler(angles=np.radians(angs), mode='zyz_in_passive')
-        svol = r3d_inv.transformArray(svol, origin=svol_cent, order=3, prefilter=True)
+        svol = r3d_inv.transformArray(svol, center=svol_cent, order=3, prefilter=True)
         if (shift_x != 0) or (shift_y != 0) or (shift_z != 0):
             svol = tomo_shift(svol, (-shift_y, -shift_x, -shift_z))
 
@@ -237,14 +237,14 @@ if len(do_ang_prior) > 0:
             print('ERROR: unrecognized angle: ' + ang_prior)
             print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
-    print('\t\t-Adding prior for angles: ' + ang_prior)
+        print('\t\t-Adding prior for angles: ' + ang_prior)
 if len(do_ang_rnd) > 0:
     for ang_rnd in do_ang_rnd:
         if ang_rnd not in ['Rot', 'Tilt', 'Psi']:
             print('ERROR: unrecognized angle: ' + ang_rnd)
             print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
-    print('\t\t-Setting random values for angles: ' + ang_rnd)
+        print('\t\t-Setting random values for angles: ' + ang_rnd)
 print('\tMultiprocessing settings: ')
 print('\t\t-Number processes: ' + str(mp_npr))
 print('')
