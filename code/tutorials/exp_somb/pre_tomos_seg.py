@@ -22,7 +22,7 @@
 """
 
 ################# Package import
-
+import argparse
 import gc
 import os
 import sys
@@ -30,13 +30,14 @@ import math
 import time
 import pyseg as ps
 import scipy as sp
-import skimage as sk
 import numpy as np
 from pyseg.globals import signed_distance_2d
 
 ###### Global variables
 
 __author__ = 'Antonio Martinez-Sanchez'
+
+from scipy import ndimage
 
 MB_LBL, MB_NEIGH = 1, 2
 MB_NEIGH_INT, MB_NEIGH_EXT = 2, 3
@@ -76,6 +77,29 @@ mt_swap_xy = False
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Get them from the command line if they were passed through it
+parser = argparse.ArgumentParser()
+parser.add_argument('--inStar', default=in_star, help='Input star file.')
+parser.add_argument('--outDir', default=out_dir, help='Output directory.')
+parser.add_argument('--spSplit', nargs='+', type=int, default=sp_split, help='Number of splits (X, Y, Z).')
+parser.add_argument('--spOffVoxels', type=int, default=sp_off_voxels, help='Offset voxels.')
+parser.add_argument('--sgVoxelSize', default=sg_res, type=float, help='Voxel size (nm/voxel).')
+parser.add_argument('--sgThreshold', type=int, default=sg_th, help='Density threshold.')
+parser.add_argument('--sgSizeThreshold', type=int, default=sg_sz, help='Size threshold (voxels).')
+parser.add_argument('--sgMembThk', default=sg_mb_thick, type=float, help='Segmented membrane thickness (nm)')
+parser.add_argument('--sgMembNeigh', default=sg_mb_neigh, type=float, help='Segmented membrane neighbours (nm)')
+
+args = parser.parse_args()
+in_star = args.inStar
+out_dir = args.outDir
+sp_split = None if args.spSplit == [-1] else args.spSplit
+sp_off_voxels = args.spOffVoxels
+sg_res = args.sgVoxelSize
+sg_th = None if args.sgThreshold == -1 else args.sgThreshold
+sg_sz = None if args.sgSizeThreshold == -1 else args.sgSizeThreshold
+sg_mb_thick = args.sgMembThk
+sg_mb_neigh = args.sgMembNeigh
 
 ########## Print initial message
 
@@ -152,6 +176,7 @@ for row in range(gl_star.get_nrows()):
     wide_y = off_mask_max_y - off_mask_min_y
     wide_z = off_mask_max_z - off_mask_min_z
 
+    mt_mask = None
     if gl_star.has_column('_mtMtubesCsv'):
         in_csv = gl_star.get_element('_mtMtubesCsv', row)
         print('\tReading input CSV file: ' + in_csv)
@@ -163,7 +188,7 @@ for row in range(gl_star.get_nrows()):
 
         print('\tSegmenting the microtubules...')
         mt_mask = ps.globals.points_to_mask(mts_points, tomo_mb.shape, inv=True)
-        mt_mask = sp.ndimage.morphology.distance_transform_edt(mt_mask, sampling=sg_res, return_indices=False)
+        mt_mask = ndimage.morphology.distance_transform_edt(mt_mask, sampling=sg_res, return_indices=False)
         mt_mask = mt_mask > mt_rad
 
     mb_lbl = 0
@@ -216,6 +241,7 @@ for row in range(gl_star.get_nrows()):
         ps.disperse_io.save_numpy(tomo_mb, '/fs/pool/pool-lucic2/antonio/carsten/dan_mirror/hold.mrc')
         del tomo_sz
 
+    seg_center = None
     if mode_oriented:
         seg_center = np.asarray((gl_star.get_element('_rlnOriginX', row),
                                  gl_star.get_element('_rlnOriginY', row),

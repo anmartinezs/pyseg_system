@@ -16,7 +16,7 @@
 __author__ = 'Antonio Martinez-Sanchez'
 
 # ################ Package import
-
+import argparse
 import time
 import sys
 import pyseg as ps
@@ -86,6 +86,29 @@ prop_topo = ps.globals.STR_FIELD_VALUE  # ps.globals.STR_FIELD_VALUE_EQ # None i
 # MAIN ROUTINE
 ########################################################################################
 
+# Get them from the command line if they were passed through itparser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
+parser.add_argument('--inStar', default=in_star, help='Input star file.')
+parser.add_argument('--outDir', default=output_dir, help='Output files directory.')
+parser.add_argument('--pixelSize', type=float, default=res, help='Resolution in nm/pix.')
+parser.add_argument('--sSig', type=float, default=s_sig, help='Sigma for gaussian filtering.')
+parser.add_argument('--vDen', type=float, default=v_den, help='Vertex density within membranes in cubic nm.')
+parser.add_argument('--veRatio', type=float, default=ve_ratio,
+                    help='Averaged ratio vertex/edge in the graph within membrane.')
+parser.add_argument('--maxLen', type=float, default=max_len,
+                    help='Maximum euclidean shortest distance to membrane in nm.')
+parser.add_argument('-j', default=npr, type=int, help='Number of processors.')
+
+args = parser.parse_args()
+in_star = args.inStar
+output_dir = args.outDir
+res = args.pixelSize
+s_sig = args.sSig
+v_den = args.vDen
+ve_ratio = args.veRatio
+max_len = args.maxLen
+npr = args.j
+
 # Print initial message
 print('Extracting GraphMCF and NetFilament objects from tomograms')
 print('\tAuthor: ' + __author__)
@@ -107,8 +130,8 @@ print('Graph density thresholds:')
 if v_prop is None:
     print('\tTarget vertex density (membrane) ' + str(v_den) + ' vertex/nm^3 for topological simplification')
 else:
-    print('\tTarget vertex density (membrane) ' + str(
-        v_den) + ' vertex/nm^3 for property ' + v_prop + ' with mode ' + v_mode)
+    print('\tTarget vertex density (membrane) ' +
+          str(v_den) + ' vertex/nm^3 for property ' + v_prop + ' with mode ' + v_mode)
 print('\tTarget edge/vertex ratio (non membrane) ' + str(ve_ratio) + ' for property ' + e_prop + ' with mode ' + e_mode)
 if do_clahe:
     print('\t-Computing CLAHE.')
