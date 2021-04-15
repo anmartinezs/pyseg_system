@@ -486,6 +486,8 @@ class RelionCols(object):
                        '_rlnMaxValueProbDistribution',
                        '_rlnNrOfSignificantSamples',
                        '_rlnRandomSubset',
+                       '_rlnDetectorPixelSize',
+                       '_rlnMagnification',
                        # PySeg: Graph analysis
                        '_psGhMCFPickle',
                        # PySeg: Segmentation
@@ -528,6 +530,8 @@ class RelionCols(object):
                          float,
                          int,
                          int,
+                         float,
+                         float,
                          # PySeg: Graph analysis
                          str,
                          # PySeg: Segmentation

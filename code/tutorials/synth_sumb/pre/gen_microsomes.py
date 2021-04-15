@@ -549,7 +549,7 @@ for in_model in mc_in_models:
         sys.exit(-1)
     hold_ref_sz = np.asarray(hold_ref.shape, dtype=np.int)
     temp = np.zeros(shape=tm_rsz, dtype=hold_ref.dtype)
-    off = (np.asarray(tm_rsz, dtype=np.int) / 2) - (hold_ref_sz / 2)
+    off = np.asarray((np.asarray(tm_rsz, dtype=np.int) / 2) - (hold_ref_sz / 2), dtype=np.int)
     temp[off[0]:off[0] + hold_ref_sz[0],
          off[1]:off[1] + hold_ref_sz[1],
          off[2]:off[2] + hold_ref_sz[2]] = hold_ref

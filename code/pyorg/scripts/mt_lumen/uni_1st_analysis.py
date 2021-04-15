@@ -15,6 +15,7 @@
 ################# Package import
 
 import os
+import csv
 import pickle
 import numpy as np
 import scipy as sp
@@ -49,11 +50,11 @@ ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa
 
 # Input STAR files
 in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star'
-in_wspace = None # ROOT_PATH + '/uni_1nd/v2/v2_100_60_sim_20_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_wspace =ROOT_PATH + '/uni_1nd/v2/v2_25_25_sim_50_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/uni_1nd/v2'
-out_stem = 'v2_25_25_sim_50'
+out_stem = 'v2_25_25_sim_50_2'
 
 # List pre-processing options
 pr_ss = None # 10 # nm
@@ -783,6 +784,7 @@ os.makedirs(out_lists_dir)
 
 print('\t\t-Plotting Histogram...')
 for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):
+    fieldnames, rows = list(), dict()
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         hist_bins, hist_vals = compute_hist(np.concatenate(np.asarray(ltomo)), ana_nbins, ana_rmax)
@@ -813,6 +815,32 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
     else:
         plt.savefig(out_lists_dir + '/H_' + lkey_short + '.png', dpi=600)
     plt.close()
+
+    fieldnames.append('distance')
+    fieldnames.append(lkey_short)
+    fieldnames.append(lkey_short + '_low')
+    fieldnames.append(lkey_short + '_med')
+    fieldnames.append(lkey_short + '_high')
+    rows['distance'] = list()
+    rows[lkey_short] = list()
+    rows[lkey_short + '_low'] = list()
+    rows[lkey_short + '_med'] = list()
+    rows[lkey_short + '_high'] = list()
+    for i in range(len(hist_bins)):
+        rows['distance'].append(hist_bins[i])
+        rows[lkey_short].append(hist_vals[i])
+        rows[lkey_short + '_low'].append(ic_low[i])
+        rows[lkey_short + '_med'].append(ic_med[i])
+        rows[lkey_short + '_high'].append(ic_high[i])
+    out_csv_file = out_lists_dir + '/H_' + lkey_short + '.csv'
+    with open(out_csv_file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
+        writer.writeheader()
+        for i in range(len(rows['distance'])):
+            row = dict()
+            for key in rows.keys():
+                row[key] = rows[key][i]
+            writer.writerow(row)
 
 print('\t\t-Plotting Function-G...')
 for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):

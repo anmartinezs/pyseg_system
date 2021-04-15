@@ -44,7 +44,7 @@ PT_ID = 'part_id'
 MIN_THICK = 1e-6
 SPH_CTE = 4. / 3.
 ONE_THIRD = 1. / 3.
-VTK_RAY_TOLERANCE = 0.001 # 0.000001
+VTK_RAY_TOLERANCE = 0.000001 # 0.001
 MP_NUM_ATTEMPTS, MP_MIN_TIME, MP_JOIN_TIME = 10, 0.5, 10
 MAX_TRIES_FACTOR = 10 # 100
 PARTS_LBL_FIELD = 'parts_field'
@@ -1271,7 +1271,6 @@ class TomoParticles(object):
         :param lbl: label which marks the VOI (Volume Of Interest)
         :param voi: if None (default) unused, otherwise VOI is already available so 'lbl' will not be considered
         :param sg: sigma Gaussian smoothing to reduce surface stepping, default None. Only valid if VOI is None
-        :param meta_info: if not None (default) an input dictionary to add meta information
         """
 
         # Input parsing
@@ -1285,6 +1284,7 @@ class TomoParticles(object):
         self.__fname = tomo_fname
         self.__meta_info = dict()
         self.__df_voi, self.__df_dst_ids = None, None
+        self.__voi_mmap, self.__dsts_mmap = None, None
 
         # Getting VOI
         self.__voi_selector = None
@@ -1369,8 +1369,6 @@ class TomoParticles(object):
         return len(self.__parts)
 
 
-    # EXTERNAL FUNCTIONALITY AREA
-
     # Particle bounds are extended distance within the valid range of the tomogram
     # Returns: the extended surface
     def get_extended_bounds(self, part, ex_dst):
@@ -1397,6 +1395,40 @@ class TomoParticles(object):
             hold_bounds[5] = self.__bounds[5]
 
         return hold_bounds
+
+    # EXTERNAL FUNCTIONALITY AREA
+
+    def as_mmap(self, voi_path, dsts_path):
+        """
+        Store heavy member variables (VOI and distance map) as memory maps.
+        Its usage is only recommended to aleviated memory loads.
+        :param voi_path: path to the memory map associated to VOI
+        :param dsts_path: path to the memory map associated to distance map
+        :return:
+        """
+        np.save(voi_path, self.__voi)
+        # self.__voi_mmap = np.memmap(voi_path, dtype=self.__voi.dtype, mode='r', shape=self.__voi.shape)
+        self.__voi_mmap = np.load(voi_path, mmap_mode='r')
+        self.__voi = self.__voi_mmap
+        np.save(dsts_path, self.__voi_dst_ids)
+        # self.__dsts_mmap = np.memmap(dsts_path, dtype=self.__voi_dst_ids.dtype, mode='r', shape=self.__voi_dst_ids.shape)
+        self.__dsts_mmap = np.load(dsts_path, mmap_mode='r')
+        self.__voi_dst_ids = self.__dsts_mmap
+
+
+    def as_ndarray(self, clean_mmaps=True):
+        """
+        Converts memory maps into numpy arrays.
+        :param clean_mmaps: if True (default) then memory map files are delete
+        :return:
+        """
+        self.__voi = np.ndarray(self.__voi_mmap, dtype=self.__voi_mmap.dtype, buffer=self.__voi_mmap)
+        self.__voi_dst_ids = np.ndarray(self.__dsts_mmap, dtype=self.__dsts_mmap.dtype, buffer=self.__dsts_mmap)
+        if clean_mmaps:
+            self.__voi_mmap.close()
+            self.__dsts_mmap.close()
+            self.__voi_mmap, self.__dsts_mmap = None, None
+
 
     def make_voi_surf(self, iso_th=.5, dec=.9):
         """
@@ -2994,7 +3026,9 @@ class TomoParticles(object):
         else:
             self.__voi, self.__voi_dst_ids = None, None
             self.__voi = np.load(self.__voi_fname, mmap_mode='r')
+            self.__voi_mmap = self.__voi
             self.__voi_dst_ids = np.load(self.__voi_ids_fname, mmap_mode='r')
+            self.__dsts_mmap = self.__voi_dst_ids
         # Load particles from STAR file
         self.load_particles_pickle(self.__parts_fname)
 
