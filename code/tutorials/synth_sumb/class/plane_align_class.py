@@ -12,19 +12,17 @@
 
 __author__ = 'Antonio Martinez-Sanchez'
 
-
-###### Global variables
-
-CDF_TH = 0.95 # Threshold for accumulated correlation
-
-################# Package import
-
 import os
 import sys
 import time
 import numpy as np
 import pyseg as ps
 from matplotlib import pyplot as plt
+import argparse
+
+# Global variables
+
+CDF_TH = 0.95 # Threshold for accumulated correlation
 
 ########################################################################################
 # PARAMETERS
@@ -41,14 +39,14 @@ out_stem = 'class_ap_r_ali' # 'class_ap_r'
 
 # Particles pre-processing
 pp_mask = ROOT_PATH + '/data/tutorials/synth_sumb/class/mask_cyl_130_30_110_30_nomb.mrc' # '/data/tutorials/synth_sumb/class/mask_cyl_130_30_110_30.mrc'
-pp_low_sg = 4 # voxels
+pp_low_sg = 4  # voxels
 pp_3d = True
 
 # Affinity propagation settings
-ap_pref = -6 # -10 # -3
+ap_pref = -6  # -10 # -3
 
 # Multiprocessing settings
-mp_npr = 20 # Number of parallel processors if None then auto
+mp_npr = 20  # Number of parallel processors if None then auto
 
 ###### Advanced settings
 
@@ -98,6 +96,53 @@ cp_min_ccap = 0.4 # 0.6 # 0.6 #
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--inStar', default=in_star, help='Input star file.')
+parser.add_argument('--inMask', default=pp_mask, help='Input mask file.')
+parser.add_argument('--outDir', default=out_dir, help='Output subtomograms directory.')
+parser.add_argument('--filterSize', default=pp_low_sg, help='Filter size (voxels).')
+parser.add_argument('--procLevel', default=out_level, help='Processing level: 1-particles flattening, 2-CC matrix '
+                                                           '/ Feature matrix, 3-Classification.')
+parser.add_argument('--doCC3d', default=pp_3d, help='Do 3D radial compensation.')
+parser.add_argument('--ccMetric', default=cc_metric, help='Cross correlation metric: cc, similarity or cc_full.')
+parser.add_argument('--clusteringAlg', default=cu_alg, help='Clustering algorithm: AP, AG or Kmeans.')
+parser.add_argument('--distanceMetric', default=cu_mode, help='Distance metric: ncc_2dz or vectors (ncc_2dz only valid '
+                                                              'for AP).')
+parser.add_argument('--pcaComps', default=cu_n_comp, help='Number of components for PCA dimensionality reduction.')
+parser.add_argument('--aggNClusters', default=ag_n_clusters, help='Number of clusters to find.')
+parser.add_argument('--apPref', default=ap_pref, help='Affinity propagation preference (-inf, inf).')
+parser.add_argument('--apDumping', default=ap_damp, help='AP dumping [0.5, 1).')
+parser.add_argument('--apMaxIter', default=ap_max_iter, help='AP maximum number of iterations.')
+parser.add_argument('--apConvIter', default=ap_conv_iter, help='AP iterations for fitting the convergence criteria.')
+parser.add_argument('--apReference', default=ap_ref, help='AP reference 2D image used for classes: exemplar or'
+                                                          ' average.')
+parser.add_argument('--apPartSizeFilter', default=cp_min_cz, help='AP post-processing: minimum number of particles '
+                                                                  'per class.')
+parser.add_argument('--apDumping', default=cp_min_ccap, help='AP post-processing: Purge classes with the cross '
+                                                             'correlation against the reference lower than the '
+                                                             'specified value..')
+
+args = parser.parse_args()
+in_star = args.inStar
+pp_mask = args.inMask
+out_dir = args.outDir
+pp_low_sg = args.filterSize
+out_level = args.procLevel
+pp_3d = args.doCC3d
+cc_metric = args.ccMetric
+cu_alg = args.clusteringAlg
+cu_mode = args.distanceMetric
+cu_n_comp = args.pcaComps
+ag_n_clusters = args.aggNClusters
+ap_pref = args.apPref
+ap_damp = args.apDumping
+ap_max_iter = args.apMaxIter
+ap_conv_iter = args.apConvIter
+ap_ref = args.apReference
+cp_min_cz = args.apPartSizeFilter
+cp_min_ccap = args.apDumping
 
 ########## Print initial message
 
@@ -185,7 +230,7 @@ elif (cu_alg == 'Kmeans') and (cu_mode == 'vectors') and (cc_npy is None):
 else:
     print('ERROR: invalid input mode for classification, valid: AP, AG or Kmeans (only with cu_mode==vectors)')
     print('Terminated. (' + time.strftime("%c") + ')')
-if cu_alg == 'AG':
+if cu_alg == 'AP':
     print('\tClassification post-processing: ')
     if cp_min_ccap is not None:
         print('\t\t-Purge purge particles with CCAP against reference lower than: ' + str(cp_min_ccap))

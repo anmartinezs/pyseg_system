@@ -197,10 +197,8 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
 # MAIN ROUTINE
 ########################################################################################
 
-# Get them from the command line if they were passed through it
-# def _argsPassedFromCli(in_star, in_mask, out_part_dir, out_star, mp_npr):
-#     try:
-        # Parse arguments
+
+# Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--inStar', default=in_star, help='Input star file.')
 parser.add_argument('--inMask', default=in_mask, help='Input mask file.')
@@ -214,12 +212,6 @@ in_mask = args.inMask
 out_part_dir = args.outDir
 out_star = args.outStar
 mp_npr = args.j
-#     except:
-#         pass
-#     return in_star, in_mask, out_part_dir, out_star, mp_npr
-#
-#
-# in_star, in_mask, out_part_dir, out_star, mp_npr = _argsPassedFromCli(in_star, in_mask, out_part_dir, out_star, mp_npr)
 
 # Print initial message
 print('Extracting transmembrane features.')
