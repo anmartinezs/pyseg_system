@@ -120,9 +120,9 @@ parser.add_argument('--apReference', default=ap_ref, help='AP reference 2D image
                                                           ' average.')
 parser.add_argument('--apPartSizeFilter', default=cp_min_cz, help='AP post-processing: minimum number of particles '
                                                                   'per class.')
-parser.add_argument('--apDumping', default=cp_min_ccap, help='AP post-processing: Purge classes with the cross '
-                                                             'correlation against the reference lower than the '
-                                                             'specified value..')
+parser.add_argument('--apCCRefFilter', default=cp_min_ccap, help='AP post-processing: Purge classes with the cross '
+                                                                 'correlation against the reference lower than the '
+                                                                 'specified value..')
 
 args = parser.parse_args()
 in_star = args.inStar
