@@ -116,19 +116,21 @@ parser.add_argument('--pcaComps', default=cu_n_comp, type=int, help='Number of c
                                                                     'reduction.')
 parser.add_argument('--aggNClusters', default=ag_n_clusters, type=int, help='Number of clusters to find with HAC '
                                                                             'algorithm.')
-parser.add_argument('--kmeansNClusters', default=km_n_clusters, type=int, help='Number of clusters to find with k-means '
-                                                                               'algorithm.')
-parser.add_argument('--apPref', default=ap_pref, help='Affinity propagation preference (-inf, inf).')
-parser.add_argument('--apDumping', default=ap_damp, help='AP dumping [0.5, 1).')
-parser.add_argument('--apMaxIter', default=ap_max_iter, help='AP maximum number of iterations.')
-parser.add_argument('--apConvIter', default=ap_conv_iter, help='AP iterations for fitting the convergence criteria.')
+parser.add_argument('--kmeansNClusters', default=km_n_clusters, type=int, help='Number of clusters to find with '
+                                                                               'k-means algorithm.')
+parser.add_argument('--apPref', default=ap_pref, type=float, help='Affinity propagation preference (-inf, inf).')
+parser.add_argument('--apDumping', default=ap_damp, type=float, help='AP dumping [0.5, 1).')
+parser.add_argument('--apMaxIter', default=ap_max_iter, type=int, help='AP maximum number of iterations.')
+parser.add_argument('--apConvIter', default=ap_conv_iter, type=int, help='AP iterations for fitting the convergence '
+                                                                         'criteria.')
 parser.add_argument('--apReference', default=ap_ref, help='AP reference 2D image used for classes: exemplar or'
                                                           ' average.')
-parser.add_argument('--apPartSizeFilter', default=cp_min_cz, help='AP post-processing: minimum number of particles '
-                                                                  'per class.')
-parser.add_argument('--apCCRefFilter', default=cp_min_ccap, help='AP post-processing: Purge classes with the cross '
-                                                                 'correlation against the reference lower than the '
-                                                                 'specified value..')
+parser.add_argument('--apPartSizeFilter', default=cp_min_cz, type=int, help='AP post-processing: minimum number of'
+                                                                            ' particles per class.')
+parser.add_argument('--apCCRefFilter', default=cp_min_ccap, type=float, help='AP post-processing: Purge classes with '
+                                                                             'the cross correlation against the '
+                                                                             'reference lower than the specified '
+                                                                             'value.')
 parser.add_argument('-j', default=mp_npr, type=int, help='Number of processors.')
 
 args = parser.parse_args()
@@ -151,7 +153,7 @@ ap_max_iter = args.apMaxIter
 ap_conv_iter = args.apConvIter
 ap_ref = args.apReference
 cp_min_cz = args.apPartSizeFilter
-cp_min_ccap = args.apDumping
+cp_min_ccap = args.apCCRefFilter
 mp_npr = args.j
 
 if in_root_dir == 'scipion':
@@ -247,9 +249,9 @@ if out_level == 3:
         print('Terminated. (' + time.strftime("%c") + ')')
     if cu_alg == 'AP':
         print('\tClassification post-processing: ')
-        if cp_min_ccap is not None:
+        if cp_min_ccap:
             print('\t\t-Purge purge particles with CCAP against reference lower than: ' + str(cp_min_ccap))
-        if cp_min_cz is not None:
+        if cp_min_cz:
             print('\t\t-Purge classes with less than ' + str(cp_min_cz) + ' particles')
 print('')
 
@@ -389,13 +391,13 @@ star_class.update_relion_classes()
 if cu_alg == 'AP':
     print('\tClassification post-processing...')
     try:
-        if cp_min_ccap is not None:
+        if cp_min_ccap:
             print('\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap))
             purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
             print('\t\t\t+Purged output classes: ')
             for klass, nk_parts in purged_klasses.items():
                 print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
-        if cp_min_cz is not None:
+        if cp_min_cz:
             print('\t\t-Purging classes smaller than: ' + str(cp_min_cz))
             purged_klasses = star_class.purge_small_classes(cp_min_cz)
             print('\t\t\t+Purged output classes: ')
