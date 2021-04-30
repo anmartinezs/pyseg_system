@@ -22,7 +22,7 @@ import argparse
 
 # Global variables
 
-CDF_TH = 0.95 # Threshold for accumulated correlation
+CDF_TH = 0.95  # Threshold for accumulated correlation
 
 ########################################################################################
 # PARAMETERS
@@ -388,25 +388,24 @@ except ps.pexceptions.PySegInputError as e:
     sys.exit(-1)
 star_class.update_relion_classes()
 
-if cu_alg == 'AP':
-    print('\tClassification post-processing...')
-    try:
-        if cp_min_ccap:
-            print('\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap))
-            purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
-            print('\t\t\t+Purged output classes: ')
-            for klass, nk_parts in purged_klasses.items():
-                print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
-        if cp_min_cz:
-            print('\t\t-Purging classes smaller than: ' + str(cp_min_cz))
-            purged_klasses = star_class.purge_small_classes(cp_min_cz)
-            print('\t\t\t+Purged output classes: ')
-            for klass, nk_parts in purged_klasses.items():
-                print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
-    except ps.pexceptions.PySegInputError as e:
-        print('ERROR: Post-processing failed because of "' + e.get_message() + '"')
-        print('Terminated. (' + time.strftime("%c") + ')')
-        sys.exit(-1)
+print('\tClassification post-processing...')
+try:
+    if cu_alg == 'AP' and cp_min_ccap:
+        print('\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap))
+        purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
+        print('\t\t\t+Purged output classes: ')
+        for klass, nk_parts in purged_klasses.items():
+            print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
+    if cp_min_cz:
+        print('\t\t-Purging classes smaller than: ' + str(cp_min_cz))
+        purged_klasses = star_class.purge_small_classes(cp_min_cz)
+        print('\t\t\t+Purged output classes: ')
+        for klass, nk_parts in purged_klasses.items():
+            print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
+except ps.pexceptions.PySegInputError as e:
+    print('ERROR: Post-processing failed because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
+    sys.exit(-1)
 
 out_pkl = out_dir + '/' + out_stem + '_class_star.pkl'
 print('\tPickling classification object in: ' + out_pkl)

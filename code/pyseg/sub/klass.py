@@ -1589,7 +1589,8 @@ class ClassStar(object):
             # Purge particles, masks and moments array
             self.__particles = self.__particles[del_mask]
             self.__masks = self.__masks[del_mask]
-            self.__momes = self.__momes[del_mask]
+            if self.__momes:
+                self.__momes = self.__momes[del_mask]
             self.__star = hold_star
 
         return d_fnparts
