@@ -50,26 +50,26 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/groel' # '/fs/pool/pool-ruben/Jonathan/PhD/clustering_analysis_antonio'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos/tomo12006_all/all_ltomos.star' # '/ltomos/test_reduced/test_reduced_ltomos.star'
-in_wspace = None # ROOT_PATH + '/tests/test_reduced/test_reduced_20_400_10_10_sim_20_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/set1_di/set_di_ltomos.star' # '/ltomos/tomo12006_all/all_ltomos.star' # '/ltomos/test_reduced/test_reduced_ltomos.star'
+in_wspace = ROOT_PATH + '/ana/set1_di/uni_2nd_8_300_5_sim_5_over0.05_wspace.pkl' # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/ana/tomo12006' # '/tests/test_reduced/'
-out_stem = 'uni_2nd_8_200_5_rdf_10_sim_10_over0.05'
+out_dir = ROOT_PATH + '/ana/set1_di' # '/ana/tomo12006' # '/tests/test_reduced/'
+out_stem = 'uni_2nd_8_300_5_sim_5_over0.05_2'
 
 # Analysis variables
 ana_res = 1.408 # nm/voxel
 ana_rg = np.arange(8, 300, 5) # in nm
-ana_shell_thick = 15 # None # 5
-ana_rdf = True
+ana_shell_thick = None # 15 # None # 5
+ana_rdf = False
 ana_conv_iter = None # 100
 ana_max_iter = None # 100000
 ana_fmm = False
-ana_npr = 10 # None means Auto
+ana_npr = 5 # None means Auto
 
 # P-value computation settings
 # Simulation model (currently only CSRV)
-p_nsims = 10 # 50
+p_nsims = 5 # 50
 p_per = 5 # %
 
 ##### Advanced settings

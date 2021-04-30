@@ -239,7 +239,8 @@ def pr_load_parts(pr_id, p_ids, mask, star, low_sg, rln_norm, avg_norm, rad_3D, 
     count = 1
     for row in p_ids:
 
-        # print 'Processing particle ' + str(count) + ' of ' + str(len(p_ids)) + ' for process ' + str(pr_id)
+        # print('Processing particle ' + str(count) + ' of ' + str(len(p_ids)) + ' for process ' + str(pr_id))
+        # sys.stdout.flush()
         count += 1
 
         ### Getting the coordinates
@@ -617,16 +618,23 @@ class ClassStar(object):
                 self.__star.set_element('_psSegTilt', row, 0)
                 self.__star.set_element('_psSegPsi', row, 0)
 
-    # Saves CC matrix in file as numpy (2D)array
-    # fname: full path where CC 2D numpy array will be stored, see numpy.save for more details
-    def save_cc(self, fname):
+    def save_cc(self, fname, txt=False):
+        """
+        Saves CC matrix in file as numpy (2D)array
+        :param fname: full path where CC 2D numpy array will be stored, see numpy.save for more details
+        :param txt: if False (default) the is saved as binary data, otherwise as human readable text
+        :return:
+        """
 
         # Input parsing
         if self.__cc is None:
             error_msg = 'No CC matrix, call build_cc_*() methods first!'
             raise pexceptions.PySegInputError(expr='save_cc (ClassStar)', msg=error_msg)
 
-        np.save(fname, self.__cc)
+        if txt:
+            np.savetxt(fname, self.__cc)
+        else:
+            np.save(fname, self.__cc)
 
     # Loads numpy array from disk and store it as a CC matrix
     # fname: full path where CC 2D numpy array is stored, see numpy.load for more details
@@ -865,6 +873,24 @@ class ClassStar(object):
         self.__vectors = np.ones(shape=(npart,nfeat), dtype=np.float32)
         for i in range(npart):
             self.__vectors[i, :] = self.__particles[i].reshape(1, nfeat)
+
+    def save_vectors(self, fname, txt=False):
+        """
+        Saves vectors in file as numpy (2D)array
+        :param fname: full path where vectors 2D numpy array will be stored, see numpy.save for more details
+        :param txt: if False (default) the is saved as binary data, otherwise as human readable text
+        :return
+        """
+
+        # Input parsing
+        if self.__vectors is None:
+            error_msg = 'No CC matrix, call build_vectors() methods first!'
+            raise pexceptions.PySegInputError(expr='save_cc (ClassStar)', msg=error_msg)
+
+        if txt:
+            np.savetxt(fname, self.__vectors)
+        else:
+            np.save(fname, self.__vectors)
 
     # Reduces moments dimensionality (see SciPy sklearn for detailed information)
     # n_comp: number of components (moments) after the reductions, default 3, if 'mle' the Minka's MLE is used to
@@ -1738,12 +1764,16 @@ class ClassStar(object):
             error_msg = 'Mode ' + str(mode) + ' is not valid!'
             raise pexceptions.PySegInputError(expr='save_class_dir (ClassStar)', msg=error_msg)
 
-    # Store particles (and masks) in a folder when particles have already been saved in a directory
-    # out_dir: output directory
-    # out_stem: output file stem (default '')
-    # masks: if True (default False) the masks are also stored
-    # stack: if True particles are stored independently, otherwise they are stacked in a mrc file (avoided for 3D particles)
+
     def save_particles(self, out_dir, out_stem, masks=False, stack=False):
+        """
+        Store particles (and masks) in a folder when particles have already been saved in a directory
+        :param out_dir: output directory
+        :param out_stem: output file stem (default '')
+        :param masks: if True the masks are also stored
+        :param stack: if True particles are stored independently, otherwise they are stacked in a mrc file (avoided for 3D particles)
+        :return:
+        """
 
         # Input parsing
         if (self.__particles is None) and (len(self.__particles) > 0):

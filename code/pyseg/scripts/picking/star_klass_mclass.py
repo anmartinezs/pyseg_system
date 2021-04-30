@@ -24,8 +24,8 @@ import sys
 import time
 import pyseg as ps
 import numpy as np
-from imageio import imwrite
 from matplotlib import pyplot as plt
+from matplotlib import image as mimg
 
 ########################################################################################
 # PARAMETERS
@@ -34,16 +34,16 @@ from matplotlib import pyplot as plt
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/pick_test'
 
 # Input STAR file to classify
-in_star = ROOT_PATH + '/klass/mclass_data/test_unequal_mb_big/test_1.star' # '/klass/mclass_data/test_equal_mb/test_1.star' # '/klass/mclass_data/test_realist/test_6.star' # '/klass/mclass_data/test_1_nk8_snr0.01.star'
+in_star = ROOT_PATH + '/klass/mclass_data/test_realistic_uniovi/test_1_big.star' # '/klass/mclass_data/test_equal_mb/test_1.star' # '/klass/mclass_data/test_realist/test_6.star' # '/klass/mclass_data/test_1_nk8_snr0.01.star'
 
 # Output directory for the star files
-out_dir = ROOT_PATH + '/klass/mclass_data/out_ap/unequal_mb_big' # '/klass/mclass_data/out_ap/equal_mb' # '/klass/mclass_data/out_ap/test_realist/test_6'
+out_dir = ROOT_PATH + '/klass/mclass_data/out_ap/realistic_uniovi_pca_big_mb' # '/klass/mclass_data/out_ap/equal_mb' # '/klass/mclass_data/out_ap/test_realist/test_6'
 out_stem = 'klass_hc'
 
 # Particles pre-processing
-pp_mask = ROOT_PATH + '/klass/mclass_data/masks/mask_cyl_160_35_125_30_nomb.mrc' # '/klass/mclass_data/mask_90_0_90_30_nomb.mrc' # '/masks/mask_cyl_160_81_128_20.mrc' #
+pp_mask = ROOT_PATH + '/klass/mclass_data/mask_90_0_90_30.mrc' # '/klass/mclass_data/masks/mask_cyl_160_35_125_30_nomb.mrc' # '/masks/mask_cyl_160_81_128_20.mrc' #
 pp_low_sg = 4 # voxels
-pp_npr = 10 # Number of parallel processors if None then auto
+pp_npr = 40 # Number of parallel processors if None then auto
 ap_pref = -6
 
 ###### Advanced settings
@@ -57,11 +57,11 @@ pp_n_sset = None # 3000
 
 # CC 2d radial matrix computation parameters
 cc_metric = 'cc' # 'cc' or 'similarity'
-cc_npr = 20 # None # 1 # None # if None then auto
+cc_npr = 40 # None # 1 # None # if None then auto
 
 ## Clustering
-cu_mode = 'ncc_2dz' # 'vectors' # 'moments' # 'ncc_2dz'
-cu_n_comp = 21 # None
+cu_mode = 'vectors' # 'moments' # 'ncc_2dz'
+cu_n_comp = 20 # None
 
 # Affinity Propagation clustering parameters
 ap_damp = 0.9
@@ -148,6 +148,7 @@ try:
         print('\t\tGetting a random subset of ' + str(pp_n_sset) + ' particles')
         star = star.gen_random_subset(pp_n_sset)
     star_class = ps.sub.ClassStar(star)
+    np.savetxt(out_dir + '/labels.txt', star.get_column_data('_rlnClassNumber'), fmt='%d')
 except ps.pexceptions.PySegInputError as e:
     print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')
@@ -158,8 +159,8 @@ try:
     mask = ps.disperse_io.load_tomo(pp_mask)
     star_class.load_particles(mask, low_sg=pp_low_sg, avg_norm=pp_2d_norm, rln_norm=pp_rln_norm, rad_3D=pp_3d,
                               npr=pp_npr, debug_dir=None, ref_dir=None, direct_rec=pp_direct)
-    star_class.save_particles(out_dir+'/all_particles', out_stem, masks=True, stack=True)
-    imwrite(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
+    star_class.save_particles(out_dir+'/all_particles', out_stem, masks=False, stack=False)
+    mimg.imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
 except ps.pexceptions.PySegInputError as e:
     print('ERROR: Particles could not be loaded because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')
@@ -169,6 +170,7 @@ if cu_mode == 'ncc_2dz':
     print('\tBuilding the NCC matrix...')
     try:
         star_class.build_ncc_z2d(metric=cc_metric, npr=cc_npr)
+        star_class.save_cc(out_dir + '/cc_matrix.txt', txt=True)
     except ps.pexceptions.PySegInputError as e:
         print('ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"')
         print('Terminated. (' + time.strftime("%c") + ')')
@@ -177,6 +179,9 @@ elif cu_mode == 'vectors':
     print('\tBuilding vectors...')
     try:
         star_class.build_vectors()
+        if (do_ag == True) and (ag_ncomp is not True):
+            star_class.vectors_dim_reduction(n_comp=ag_ncomp, method='pca')
+        star_class.save_vectors(out_dir + '/vectors.txt', txt=True)
         if cu_n_comp is not None:
             star_class.vectors_dim_reduction(n_comp=cu_n_comp, method='pca')
     except ps.pexceptions.PySegInputError as e:

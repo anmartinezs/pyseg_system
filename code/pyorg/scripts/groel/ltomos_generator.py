@@ -33,14 +33,15 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-ruben/antonio/groel' # '/fs/pool/pool-ruben/Jonathan/PhD/clustering_analysis_antonio'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/12006/tomo12006_all.star' # '/in/example_bref_16_parts.star'
+in_star = ROOT_PATH + '/in/set1/set1_di.star' # '/in/12006/tomo12006_all.star' # '/in/example_bref_16_parts.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/12006/tomo12006_seg.star' # '/in/cluster_seg_reduced.star'
+in_seg = ROOT_PATH + '/in/set1/set1_seg.star' # '/in/12006/tomo12006_seg.star' # '/in/cluster_seg_reduced.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/tomo12006_all' # '/ltomos/test_reduced' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'all' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/set1_di' # '/ltomos/tomo12006_all' # '/ltomos/test_reduced' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'set_di' # 'all'
+out_mmap_dir = ROOT_PATH + '/ltomos/set1_di/mmaps'
 
 #### Advanced settings
 
@@ -157,7 +158,8 @@ for tomo_row in range(star_seg.get_nrows()):
     mic_str, seg_str = star_seg.get_element('_rlnMicrographName', tomo_row), \
                        star_seg.get_element('_psSegImage', tomo_row)
     print('\t\t-Generating VOI from segmentation: ' + str(mic_str))
-    tomo = disperse_io.load_tomo(seg_str, mmap=True).swapaxes(0, 1)
+    # tomo = disperse_io.load_tomo(seg_str, mmap=True).swapaxes(0, 1)
+    tomo = disperse_io.load_tomo(seg_str, mmap=True)
     if sg_voi_surf:
         tomo = (tomo == sg_lbl).astype(np.float32)
         if (sg_sg is not None) and (sg_sg > 0):
@@ -180,6 +182,7 @@ for tomo_row in range(star_seg.get_nrows()):
     nvois[seg_str] = 0
 
 print('\tLoop for tomograms in the list: ')
+tomo_processed = 1
 parts_inserted = 0
 shape_paths, seg_mic_dir = dict(), dict()
 set_lists = surf.SetListTomoParticles()
@@ -202,7 +205,16 @@ for star_row in range(star.get_nrows()):
                 print('Terminated. (' + time.strftime("%c") + ')')
                 sys.exit(-1)
         hold_tomo = surf.TomoParticles(tomo_fname, sg_lbl, voi=voi)
-        list_tomos.add_tomo(surf.TomoParticles(tomo_fname, sg_lbl, voi=voi))
+        hold_tomo.as_mmap(voi_path=out_mmap_dir + '/' + tomo_fname.replace('/', '_') + '_voi.npy',
+                         dsts_path=out_mmap_dir + '/' + tomo_fname.replace('/', '_') + '_dsts.npy')
+        list_tomos.add_tomo(hold_tomo)
+
+
+        # print('[MSG] N tomo processed: ' + str(tomo_processed))
+        # tomo_processed += 1
+        # with open('/proc/self/status') as f:
+        #     memusage = f.read().split('VmRSS:')[1].split('\n')[0][:-3]
+        #     print('[MSG] Mem. usage: ' + str(int(memusage.strip())/1e6) + 'GB')
 
     print('\t\tLoading particles STAR file(s):')
     star_part = sub.Star()
@@ -405,6 +417,7 @@ for star_row in range(star.get_nrows()):
         print('ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"')
         print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
+
 
     out_app = out_dir + '/' + star_stem + '_app'
     if not os.path.exists(out_app):
