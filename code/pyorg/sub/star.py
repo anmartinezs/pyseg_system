@@ -110,6 +110,8 @@ class RelionCols(object):
                        # PyOrg: Microtubules
                        '_mtCenterLine',
                        '_mtParticlesTomo',
+                       '_mtMtubesCsv',
+                       '_mtParticlesTomo',
                        # PyOrg: generic fibers or filaments
                        '_fbCurve',
                        '_fbTomoFilaments',
@@ -172,6 +174,8 @@ class RelionCols(object):
                          str,
                          str,
                          # PyOrg: Microtubules
+                         str,
+                         str,
                          str,
                          str,
                          # PyOrg: generic fibers
@@ -711,6 +715,33 @@ class Star(object):
                 hold += (str(self.__data[keys[-1]][i]) + '\n')
         return hold + '\n'
 
+    def header_to_string(self):
+        """
+        :return: an string with the STAR file with the header and columns name
+        """
+        hold = str()
+        for line in self.__header_1:
+            hold += line
+        for i, key in enumerate(self.__cols):
+            hold += (key + ' ' + '#' + str(i + 1) + '\n')
+        return hold
+
+    def row_to_string(self, row=-1):
+        """
+        :param row: row index (default -1, the last one)
+        :return: an string with the STAR file with the specified row
+        """
+        hold = str()
+        if self.get_ncols() > 0:
+            keys = self.get_column_keys()
+            for key in keys[:-1]:
+                hold += (str(self.__data[key][row]) + '\t')
+            hold += (str(self.__data[keys[-1]][row]) + '\n')
+        else:
+            error_msg = 'No rows.'
+            raise PySegInputError(expr='row_to_string (Star)', msg=error_msg)
+        return hold
+
     # Store in a STAR
     # fname: output file name
     # sv: if not None (default), it specified shape (all dimensions must be even) for subvolumes that will be stored in a sub-folder called 'sub'
@@ -790,6 +821,27 @@ class Star(object):
         # STAR file
         with open(fname, 'w') as ffile:
             ffile.write(self.to_string())
+
+    def store_header(self, fname):
+        """
+         Store just the header with column name of in STAR file
+        :param fname: output file name
+        :return:
+        """
+        # STAR file
+        with open(fname, 'w') as ffile:
+            ffile.write(self.header_to_string())
+
+    def append_row_to_file(self, fname, row=-1):
+        """
+        The specified row is appended to input file
+        :param fname: output file name
+        :param row: row index (default -1)
+        :return:
+        """
+        # STAR file
+        with open(fname, 'a') as ffile:
+            ffile.write(self.row_to_string(row))
 
     # Compute alignment against a reference star file
     # ref_star: reference STAR file, with the same (at least partially) particles
