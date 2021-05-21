@@ -156,8 +156,10 @@ cp_min_cz = args.apPartSizeFilter
 cp_min_ccap = args.apCCRefFilter
 mp_npr = args.j
 
+forceMRC = False
 if in_root_dir == 'scipion':
     in_root_dir = None
+    forceMRC = True
 
 ########## Print initial message
 
@@ -417,9 +419,9 @@ try:
     star_class.save_star(out_dir, out_stem, parse_rln=True, mode='split')
     if cc_npy is None:
         star_class.save_star(out_dir, out_stem, mode='particle')
-        star_class.save_class(out_dir, out_stem, purge_k=16, mode='averages')
+        star_class.save_class(out_dir, out_stem, purge_k=16, mode='averages', forceMRC=forceMRC)
         if cu_alg == 'AP':
-            star_class.save_class(out_dir, out_stem, purge_k=16, mode='exemplars')
+            star_class.save_class(out_dir, out_stem, purge_k=16, mode='exemplars', forceMRC=forceMRC)
 except ps.pexceptions.PySegInputError as e:
     print('ERROR: Result could not be stored because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')
