@@ -251,7 +251,7 @@ parser.add_argument('--outStar', default=out_star, help='Output star file.')
 parser.add_argument('--doGaussLowPass', default=do_glp, type=bool, help='Do gaussian low pass filter for particles.')
 parser.add_argument('--resolution', default=glp_res, type=float, help='Resolution (voxel size) in nm/vx.')
 parser.add_argument('--cutOffRes', default=glp_cres, type=float, help='Cut-off resolution in nm.')
-parser.add_argument('--AmpCutOff', default=glp_ca, type=float, help='Amplitude at cut-off.')
+parser.add_argument('--ampCutOff', default=glp_ca, type=float, help='Amplitude at cut-off.')
 parser.add_argument('--filterCTF', default=glp_ctf, type=bool, help='Apply gaussian low pass filter to the CTF.')
 parser.add_argument('-j', default=mp_npr, type=int, help='Number of processors.')
 args = parser.parse_args()
@@ -259,15 +259,14 @@ args = parser.parse_args()
 in_star = args.inStar
 in_mask = args.inMask
 in_mask_mb = None if args.inMaskMbSup == 'None' else args.inMaskMbSup  # Scipion handling
-do_mb_sf = None if args.mbSupFactor == 'None' else args.mbSupFactor  # Same
+do_mb_sf = args.mbSupFactor
 out_part_dir = args.outDir
 out_star = args.outStar
 do_glp = args.doGaussLowPass
-glp_res = args.glp_res
-glp_cres = args.glp_cres
-glp_ca = args.glp_ca
-glp_ctf = args.glp_ctf
-
+glp_res = args.resolution
+glp_cres = args.cutOffRes
+glp_ca = args.ampCutOff
+glp_ctf = args.filterCTF
 mp_npr = args.j
 
 # Print initial message
