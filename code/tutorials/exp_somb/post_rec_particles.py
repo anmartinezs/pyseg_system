@@ -245,16 +245,30 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--inStar', default=in_star, help='Input star file.')
 parser.add_argument('--inMask', default=in_mask, help='Input mask file.')
 parser.add_argument('--inMaskMbSup', default=in_mask_mb, help='Input mask for membrane supression.')
-parser.add_argument('--MbSupFactor', default=mp_npr, type=float, help='Membrane suppression factor.')
+parser.add_argument('--mbSupFactor', default=do_mb_sf, type=float, help='Membrane suppression factor.')
 parser.add_argument('--outDir', default=out_part_dir, help='Output subtomograms directory.')
 parser.add_argument('--outStar', default=out_star, help='Output star file.')
-parser.add_argument('--doGaussLowPass', default=do_glp, type=bool, help='Do gaussian low pass filter fot particles.')
+parser.add_argument('--doGaussLowPass', default=do_glp, type=bool, help='Do gaussian low pass filter for particles.')
 parser.add_argument('--resolution', default=glp_res, type=float, help='Resolution (voxel size) in nm/vx.')
 parser.add_argument('--cutOffRes', default=glp_cres, type=float, help='Cut-off resolution in nm.')
 parser.add_argument('--AmpCutOff', default=glp_ca, type=float, help='Amplitude at cut-off.')
-parser.add_argument('--outStar', default=glp_ctf, type=bool, help='Apply gaussian low pass filter to the CTF.')
+parser.add_argument('--filterCTF', default=glp_ctf, type=bool, help='Apply gaussian low pass filter to the CTF.')
 parser.add_argument('-j', default=mp_npr, type=int, help='Number of processors.')
 args = parser.parse_args()
+
+in_star = args.inStar
+in_mask = args.inMask
+in_mask_mb = None if args.inMaskMbSup == 'None' else args.inMaskMbSup  # Scipion handling
+do_mb_sf = None if args.mbSupFactor == 'None' else args.mbSupFactor  # Same
+out_part_dir = args.outDir
+out_star = args.outStar
+do_glp = args.doGaussLowPass
+glp_res = args.glp_res
+glp_cres = args.glp_cres
+glp_ca = args.glp_ca
+glp_ctf = args.glp_ctf
+
+mp_npr = args.j
 
 # Print initial message
 print('Extracting transmembrane features.')
