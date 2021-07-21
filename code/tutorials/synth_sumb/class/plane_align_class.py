@@ -12,6 +12,7 @@
 
 __author__ = 'Antonio Martinez-Sanchez'
 
+import ast
 import os
 import sys
 import time
@@ -107,7 +108,7 @@ parser.add_argument('--filterSize', default=pp_low_sg, type=int, help='Filter si
 parser.add_argument('--procLevel', default=out_level, type=int, help='Processing level: 1-particles flattening, '
                                                                      '2-CC matrix / Feature matrix, '
                                                                      '3-Classification.')
-parser.add_argument('--doCC3d', default=pp_3d, type=bool, help='Do 3D radial compensation.')
+parser.add_argument('--doCC3d', default=pp_3d, help='Do 3D radial compensation.')
 parser.add_argument('--ccMetric', default=cc_metric, help='Cross correlation metric: cc, similarity or cc_full.')
 parser.add_argument('--clusteringAlg', default=cu_alg, help='Clustering algorithm: AP, AG or Kmeans.')
 parser.add_argument('--distanceMetric', default=cu_mode, help='Distance metric: ncc_2dz or vectors (ncc_2dz only valid '
@@ -140,7 +141,7 @@ pp_mask = args.inMask
 out_dir = args.outDir
 pp_low_sg = args.filterSize
 out_level = args.procLevel
-pp_3d = args.doCC3d
+pp_3d = ast.literal_eval(args.doCC3d)
 cc_metric = args.ccMetric
 cu_alg = args.clusteringAlg
 cu_mode = args.distanceMetric

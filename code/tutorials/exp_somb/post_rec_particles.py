@@ -21,6 +21,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 # ################ Package import
 import argparse
+import ast
 import gc
 import os
 import sys
@@ -91,20 +92,7 @@ class Settings(object):
     in_mask_mb = None
 
 
-def pr_worker(pr_id, star, sh_star, rows, settings, qu):
-    """
-    Function which implements the functionality for the paralled workers.
-    Each worker process a pre-splited set of rows of Star object
-    :param pr_id: process ID
-    :param star: Star object with input information
-    :param rln_star: shared output Star object
-    :param rows: list with Star rows to process for the worker
-    :param settings: object with the settings
-    :param qu: queue to store the output Star object
-    :return: stored the reconstructed tomograms and insert the corresponding entries in the
-             input Star object
-    """
-
+def _processParticles(pr_id, star, sh_star, rows, settings):
     # Initialization
     out_part_dir = settings.out_part_dir
     do_ang_prior = settings.do_ang_prior
@@ -124,7 +112,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
         glp_params = settings.do_glp
 
     # print '\tLoop for particles: '
-    count, n_rows = 0, len(rows)
+    count, n_rows = 1, len(rows)
     for row in rows:
 
         # print '\t\t\t+Reading the entry...'
@@ -232,8 +220,24 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
 
         count += 1
 
+    return rln_star
+
+
+def pr_worker(pr_id, star, sh_star, rows, settings, qu):
+    """
+    Function which implements the functionality for the paralled workers.
+    Each worker process a pre-splited set of rows of Star object
+    :param pr_id: process ID
+    :param star: Star object with input information
+    :param rln_star: shared output Star object
+    :param rows: list with Star rows to process for the worker
+    :param settings: object with the settings
+    :param qu: queue to store the output Star object
+    :return: stored the reconstructed tomograms and insert the corresponding entries in the
+             input Star object
+    """
     # Finishing the process
-    qu.put(rln_star)
+    qu.put(_processParticles(pr_id, star, sh_star, rows, settings))
     sys.exit(pr_id)
 
 ########################################################################################
@@ -248,11 +252,11 @@ parser.add_argument('--inMaskMbSup', default=in_mask_mb, help='Input mask for me
 parser.add_argument('--mbSupFactor', default=do_mb_sf, type=float, help='Membrane suppression factor.')
 parser.add_argument('--outDir', default=out_part_dir, help='Output subtomograms directory.')
 parser.add_argument('--outStar', default=out_star, help='Output star file.')
-parser.add_argument('--doGaussLowPass', default=do_glp, type=bool, help='Do gaussian low pass filter for particles.')
+parser.add_argument('--doGaussLowPass', default=do_glp, help='Do gaussian low pass filter for particles.')
 parser.add_argument('--resolution', default=glp_res, type=float, help='Resolution (voxel size) in nm/vx.')
 parser.add_argument('--cutOffRes', default=glp_cres, type=float, help='Cut-off resolution in nm.')
 parser.add_argument('--ampCutOff', default=glp_ca, type=float, help='Amplitude at cut-off.')
-parser.add_argument('--filterCTF', default=glp_ctf, type=bool, help='Apply gaussian low pass filter to the CTF.')
+parser.add_argument('--filterCTF', default=glp_ctf, help='Apply gaussian low pass filter to the CTF.')
 parser.add_argument('-j', default=mp_npr, type=int, help='Number of processors.')
 args = parser.parse_args()
 
@@ -262,11 +266,11 @@ in_mask_mb = None if args.inMaskMbSup == 'None' else args.inMaskMbSup  # Scipion
 do_mb_sf = args.mbSupFactor
 out_part_dir = args.outDir
 out_star = args.outStar
-do_glp = args.doGaussLowPass
+do_glp = ast.literal_eval(args.doGaussLowPass)
 glp_res = args.resolution
 glp_cres = args.cutOffRes
 glp_ca = args.ampCutOff
-glp_ctf = args.filterCTF
+glp_ctf = ast.literal_eval(args.filterCTF)
 mp_npr = args.j
 
 # Print initial message
@@ -382,8 +386,10 @@ if do_glp:
     settings.do_glp = (glp_res, glp_cres, glp_ca, glp_ctf)
 stars, qu = list(), mp.Queue()
 if mp_npr <= 1:
-    pr_worker(-1, star, rln_star, list(range(star.get_nrows())), settings, qu)
-    stars.append(qu.get())
+    rel_star = _processParticles(-1, star, rln_star, list(range(star.get_nrows())), settings)
+    stars.append(rel_star)
+    # pr_worker(-1, star, rln_star, list(range(star.get_nrows())), settings, qu)
+    # stars.append(qu.get())
 else:
     processes = list()
     spl_ids = np.array_split(list(range(star.get_nrows())), mp_npr)
