@@ -30,7 +30,7 @@ class TestListNhoodVol(TestCase):
     # Check precision for Nhoods using VOIs as 3D surfaces and Monte Carlo method
     def test_volume_MCS(self):
 
-        return
+        # return
 
         # VOI Creation
         # cuber = vtk.vtkCubeSource()
@@ -157,7 +157,7 @@ class TestListNhoodVol(TestCase):
     # Check precision for Nhoods using VOIs as 3D arrays and Monte Carlo method
     def test_volume_MCA(self):
 
-        return
+        # return
 
         # VOI array creation
         rad_max = RAD_RG.max()
@@ -342,9 +342,10 @@ class TestListNhoodVol(TestCase):
     # Check precision for Nhoods using VOIs as 3D arrays and Direct Sum method
     def test_times(self):
 
-        return
+        # return
 
         # VOI array creation
+        N_SIMS = 1
         rad_max = RAD_RG.max()
         max_size = int(math.ceil(2 * 200 + SHELL_THICKS[2]))
         voi = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
@@ -355,7 +356,7 @@ class TestListNhoodVol(TestCase):
         voi_surf = poly_decimate(voi_surf, .9)
 
         # Loop for maximum radius
-        n_rads_arr = np.arange(10, 200, 5)
+        n_rads_arr = np.arange(15, 200, 5)
         sph_times_dsa = np.zeros(shape=(len(n_rads_arr), N_SIMS), dtype=np.float32)
         she_times_dsa = np.zeros(shape=(len(n_rads_arr), N_SIMS), dtype=np.float32)
         sph_times_mcs = np.zeros(shape=(len(n_rads_arr), N_SIMS), dtype=np.float32)
@@ -398,19 +399,21 @@ class TestListNhoodVol(TestCase):
 
         # Plotting times
         plt.figure()
-        plt.title('SPHERE')
+        plt.title('HALF-SPHERE')
         plt.ylabel('Time/v.u. [s]')
         plt.xlabel('Maximum scale')
-        ic_low = np.percentile(sph_times_dsa, PERCENT, axis=1, interpolation='linear')
-        ic_med = np.percentile(sph_times_dsa, 50, axis=1, interpolation='linear')
-        ic_high = np.percentile(sph_times_dsa, 100 - PERCENT, axis=1, interpolation='linear')
-        plt.plot(n_rads_arr, ic_med, color='blue', linewidth=2, label='DSA')
-        plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='blue', edgecolor='w')
-        ic_low = np.percentile(sph_times_mcs, PERCENT, axis=1, interpolation='linear')
-        ic_med = np.percentile(sph_times_mcs, 50, axis=1, interpolation='linear')
-        ic_high = np.percentile(sph_times_mcs, 100 - PERCENT, axis=1, interpolation='linear')
-        plt.plot(n_rads_arr, ic_med, color='red', linewidth=2, linestyle='--', label='MCS')
-        plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='red', edgecolor='w')
+        # ic_low = np.percentile(sph_times_dsa, PERCENT, axis=1, interpolation='linear')
+        # ic_med = np.percentile(sph_times_dsa, 50, axis=1, interpolation='linear')
+        # ic_high = np.percentile(sph_times_dsa, 100 - PERCENT, axis=1, interpolation='linear')
+        # plt.plot(n_rads_arr, ic_med, color='blue', linewidth=2, label='3D Array')
+        plt.plot(n_rads_arr, sph_times_dsa[:, 0], color='blue', linewidth=2, label='3D Array')
+        # plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='blue', edgecolor='w')
+        # ic_low = np.percentile(sph_times_mcs, PERCENT, axis=1, interpolation='linear')
+        # ic_med = np.percentile(sph_times_mcs, 50, axis=1, interpolation='linear')
+        # ic_high = np.percentile(sph_times_mcs, 100 - PERCENT, axis=1, interpolation='linear')
+        # plt.plot(n_rads_arr, ic_med, color='red', linewidth=2, linestyle='--', label='MCS')
+        plt.plot(n_rads_arr, sph_times_mcs[:, 0], color='red', linewidth=2, label='MCS')
+        # plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='red', edgecolor='w')
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         plt.legend(loc=1)
         plt.tight_layout()
@@ -420,19 +423,21 @@ class TestListNhoodVol(TestCase):
 
         # Plotting times
         plt.figure()
-        plt.title('SHELL')
+        plt.title('HALF-SHELL')
         plt.ylabel('Time/a.u. [s]')
         plt.xlabel('Maximum scale')
-        ic_low = np.percentile(she_times_dsa, PERCENT, axis=1, interpolation='linear')
-        ic_med = np.percentile(she_times_dsa, 50, axis=1, interpolation='linear')
-        ic_high = np.percentile(she_times_dsa, 100 - PERCENT, axis=1, interpolation='linear')
-        plt.plot(n_rads_arr, ic_med, color='blue', linewidth=2, label='DSA')
-        plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='blue', edgecolor='w')
-        ic_low = np.percentile(she_times_mcs, PERCENT, axis=1, interpolation='linear')
-        ic_med = np.percentile(she_times_mcs, 50, axis=1, interpolation='linear')
-        ic_high = np.percentile(she_times_mcs, 100 - PERCENT, axis=1, interpolation='linear')
-        plt.plot(n_rads_arr, ic_med, color='red', linewidth=2, linestyle='--', label='MCS')
-        plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='red', edgecolor='w')
+        # ic_low = np.percentile(she_times_dsa, PERCENT, axis=1, interpolation='linear')
+        # ic_med = np.percentile(she_times_dsa, 50, axis=1, interpolation='linear')
+        # ic_high = np.percentile(she_times_dsa, 100 - PERCENT, axis=1, interpolation='linear')
+        # plt.plot(n_rads_arr, ic_med, color='blue', linewidth=2, label='3D Array')
+        plt.plot(n_rads_arr, she_times_dsa[:, 0], color='blue', linewidth=2, label='3D Array')
+        # plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='blue', edgecolor='w')
+        # ic_low = np.percentile(she_times_mcs, PERCENT, axis=1, interpolation='linear')
+        # ic_med = np.percentile(she_times_mcs, 50, axis=1, interpolation='linear')
+        # ic_high = np.percentile(she_times_mcs, 100 - PERCENT, axis=1, interpolation='linear')
+        # plt.plot(n_rads_arr, ic_med, color='red', linewidth=2, linestyle='--', label='MCS')
+        plt.plot(n_rads_arr, she_times_mcs[:, 0], color='red', linewidth=2, label='MCS')
+        # plt.fill_between(n_rads_arr, ic_low, ic_high, alpha=0.5, color='red', edgecolor='w')
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         plt.legend(loc=1)
         plt.tight_layout()

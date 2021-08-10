@@ -501,6 +501,7 @@ class RelionCols(object):
                        '_psSegOffY',
                        '_psSegOffZ',
                        '_psCCScores',
+                       '_psMaskImage',
                        # PySeg: Affinity Propagation
                        '_psAPClass',
                        '_psAPCenter',
@@ -545,6 +546,7 @@ class RelionCols(object):
                          float,
                          float,
                          float,
+                         str,
                          # PySeg: Affinity Propagation
                          int,
                          int,
