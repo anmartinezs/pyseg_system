@@ -33,15 +33,15 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool' # '/fs/pool/pool-ruben/antonio/groel' # '/fs/pool/pool-ruben/Jonathan/PhD/clustering_analysis_antonio'
 
 # Input STAR file
-in_star = ROOT_PATH + '/pool-ruben/antonio/groel/in/set1/set1_wt.star' # '/in/12006/tomo12006_all.star' # '/in/example_bref_16_parts.star'
+in_star = ROOT_PATH + '/pool-ruben/antonio/groel/in/set1/set1_hs.star' # '/in/12006/tomo12006_all.star' # '/in/example_bref_16_parts.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = ROOT_PATH + '/pool-ruben/antonio/groel/in/set1/set1_seg.star' # '/in/12006/tomo12006_seg.star' # '/in/cluster_seg_reduced.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/pool-ruben2/antonio/groel/ltomos/set1_wt' # '/ltomos/tomo12006_all' # '/ltomos/test_reduced' # '/stat/ltomos/trans_run2_test_swapxy'
+out_dir = ROOT_PATH + '/pool-ruben2/antonio/groel/ltomos/set1_hs' # '/ltomos/tomo12006_all' # '/ltomos/test_reduced' # '/stat/ltomos/trans_run2_test_swapxy'
 out_stem = 'set_di' # 'all'
-out_mmap_dir = ROOT_PATH + '/pool-ruben2/antonio/groel/ltomos/set1_wt/mmaps'
+out_mmap_dir = ROOT_PATH + '/pool-ruben2/antonio/groel/ltomos/set1_hs/mmaps'
 
 #### Advanced settings
 

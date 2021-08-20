@@ -33,16 +33,16 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/1_picking.star' # '/in/0_plus_end_center_points.star' # '/in/0_picking.star' # '/in/0_lattice_break_center_points.star' # '/in/0_picking_mrc.star'
+in_star = ROOT_PATH + '/in/0_plus_end_center_points.star' # '/in/1_picking.star' # '/in/0_picking.star' # '/in/0_lattice_break_center_points.star' # '/in/0_picking_mrc.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = ROOT_PATH + '/in/mts_clines_mts.star' # '/in/mts_clines_1_mts_t3_t6_pcorr.star' # '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
 
 # Output directory
-out_star = ROOT_PATH + '/in/1_picking_curated.star' # '/in/0_plus_end_center_points_curated.star' # '/in/1_picking_curated.star' # '/in/0_lattice_break_center_points_curated.star'
+out_star = ROOT_PATH + '/in/0_plus_end_center_points_curated.star' # '/in/1_picking_curated.star' # '/in/1_picking_curated.star' # '/in/0_lattice_break_center_points_curated.star'
 
 p_bin = 1 # since particle coordinates are binned in the relion star file corresponding to picking resolution
 p_max_dst = 1000 # 10 # nm
@@ -50,6 +50,7 @@ p_res = 1.368 # nm/pixel
 p_swapxy = True
 p_cp_ptomo = False # Copy column '_rlnMicrographName' values to '_mtParticlesTomo'
 p_cp_mt_to_mn = True # if '_mtParticleTomo' does not exist, it is taken from '_rlnMicrographName'
+p_is_end = True # if True then only MT centerline extrema are considered
 
 ########################################################################################
 # MAIN ROUTINE
@@ -105,9 +106,10 @@ except pexceptions.PySegInputError as e:
     print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-part_dsts= dict().fromkeys(list(range(star.get_nrows())))
+part_dsts, part_end = dict().fromkeys(list(range(star.get_nrows()))), dict().fromkeys(list(range(star.get_nrows())))
 for key in part_dsts.keys():
     part_dsts[key] = np.finfo(np.float).max
+    part_end[key] = np.asarray((0., 0., 0.), dtype=float)
 
 if p_bin > 0:
     print('\t\t-Binning the input coordinates: ')
@@ -161,18 +163,31 @@ for row_ct in range(star_seg.get_nrows()):
         seg_offy, seg_offx, seg_offz = star_seg.get_element('_psSegOffX', row_ct), \
                                        star_seg.get_element('_psSegOffY', row_ct), \
                                        star_seg.get_element('_psSegOffZ', row_ct)
+
         if p_swapxy:
-            part_center -= np.asarray((seg_offy, seg_offx, seg_offz), dtype=np.float32)
+            off_array = np.asarray((seg_offy, seg_offx, seg_offz), dtype=np.float32)
         else:
-            part_center -= np.asarray((seg_offx, seg_offy, seg_offz), dtype=np.float32)
+            off_array = np.asarray((seg_offx, seg_offy, seg_offz), dtype=np.float32)
+        part_center -= off_array
 
         # Finding the minimum distance
+        hold_mic = star.get_element('_rlnMicrographName', row)
+        hold_seg = star_seg.get_element('_psSegImage', row_ct)
         hold = ct_points - part_center
         hold_min = np.sqrt((hold * hold).sum(axis=1)).min()
-        if hold_min < part_dsts[row]:
+        if (seg_dic[hold_seg] == hold_mic) and (hold_min < part_dsts[row]):
             hold_seg = star_seg.get_element('_psSegImage', row_ct)
             star.set_element(key='_psSegImage', val=hold_seg, row=row)
             part_dsts[row] = hold_min
+            if p_is_end:
+                hold1, hold2 = ct_points[0, :] - part_center, ct_points[-1, :] - part_center
+                hold1, hold2 = np.sqrt((hold1 * hold1).sum()), np.sqrt((hold2 * hold2).sum())
+                if hold1 < hold2:
+                    hold_min, part_center = hold1, ct_points[0, :]
+                else:
+                    hold_min, part_center = hold2, ct_points[-1, :]
+                part_center += off_array
+                part_end[row] = part_center
 
 print(part_dsts)
 
@@ -187,6 +202,10 @@ for row in range(star.get_nrows()):
         if seg_dic[hold_seg] != hold_mic:
             print('Row [' + str(row) + ']: ' + seg_dic[hold_seg] + ', ' + hold_mic)
             del_ids.append(row)
+        elif p_is_end:
+                star.set_element('_rlnCoordinateX', row, part_end[row][0])
+                star.set_element('_rlnCoordinateY', row, part_end[row][1])
+                star.set_element('_rlnCoordinateZ', row, part_end[row][2])
 star.del_rows(del_ids)
 print('\t\t-Final number of particles: ' + str(star.get_nrows()))
 

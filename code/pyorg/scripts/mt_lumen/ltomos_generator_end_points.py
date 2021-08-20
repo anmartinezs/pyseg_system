@@ -30,7 +30,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
 in_star = ROOT_PATH + '/in/v1_end_points.star' # '/in/v1_bpoints.star'
@@ -39,8 +39,8 @@ in_star = ROOT_PATH + '/in/v1_end_points.star' # '/in/v1_bpoints.star'
 in_seg = ROOT_PATH + '/in/mts_clines_mts.star' # '/in/mts_clines_1_mts_t2_t3_t6_pcorr.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/v1_nobc_proj' # '/ltomos/v1_nobc_proj' # '/stat/ltomos/trans_run2_test_swapxy'
-out_stem = 'v1_nobc_proj' # 'pre'
+out_dir = ROOT_PATH + '/ltomos/v1_nobc' # '/ltomos/v1_nobc_proj' # '/stat/ltomos/trans_run2_test_swapxy'
+out_stem = 'v1_nobc' # 'pre'
 
 pt_res = 1.368 # 1.792 # nm/vx - resolution
 
@@ -50,7 +50,7 @@ pt_res = 1.368 # 1.792 # nm/vx - resolution
 sg_lbl = 1 # segmented label
 sg_bc = False # True
 sg_bm = 'center' # Embedding checking mode
-sg_pj = True # False # Project particles to VOI's surfaces
+sg_pj = False # True # Project particles to VOI's surfaces
 sg_origins = [8, 8, 8, 8, 8] # If not None, subtomoavg shiftings are considered,
                     # then scale factor (one per each pattern in in_star) from picked particle to subtomograms
 sg_swap_xy = False # Swap X and Y coordinates of the input particle STAR files
