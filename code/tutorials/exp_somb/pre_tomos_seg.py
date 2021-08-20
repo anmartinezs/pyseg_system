@@ -30,14 +30,13 @@ import math
 import time
 import pyseg as ps
 import scipy as sp
+import skimage as sk
 import numpy as np
 from pyseg.globals import signed_distance_2d
 
 ###### Global variables
 
 __author__ = 'Antonio Martinez-Sanchez'
-
-from scipy import ndimage
 
 MB_LBL, MB_NEIGH = 1, 2
 MB_NEIGH_INT, MB_NEIGH_EXT = 2, 3
@@ -188,7 +187,7 @@ for row in range(gl_star.get_nrows()):
 
         print('\tSegmenting the microtubules...')
         mt_mask = ps.globals.points_to_mask(mts_points, tomo_mb.shape, inv=True)
-        mt_mask = ndimage.morphology.distance_transform_edt(mt_mask, sampling=sg_res, return_indices=False)
+        mt_mask = sp.ndimage.morphology.distance_transform_edt(mt_mask, sampling=sg_res, return_indices=False)
         mt_mask = mt_mask > mt_rad
 
     mb_lbl = 0
@@ -238,7 +237,6 @@ for row in range(gl_star.get_nrows()):
         print('\tMembrane thresholding...')
         tomo_sz = ps.globals.global_analysis(tomo_mb, 0.5, c=26)
         tomo_mb = tomo_sz > sg_sz
-        ps.disperse_io.save_numpy(tomo_mb, '/fs/pool/pool-lucic2/antonio/carsten/dan_mirror/hold.mrc')
         del tomo_sz
 
     seg_center = None

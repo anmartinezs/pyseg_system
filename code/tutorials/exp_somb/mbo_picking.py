@@ -335,8 +335,6 @@ for (input_pkl, in_tomo_ref, in_seg, in_img, in_off, in_rot) in \
 
             # Initialization
             vec_tlist = pt_coord - coord
-            # rho, tilt, psi = ps.globals.vect_to_zrelion(np.asarray((vec_tlist[1], vec_tlist[0], vec_tlist[2]),
-            #                                             dtype=np.float32), mode='passive')
 
             # Coordinate transformation for IMOD
             coord_imod, pt_coord_imod = coord + gcrop_off, pt_coord + gcrop_off

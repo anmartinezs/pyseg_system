@@ -1308,8 +1308,8 @@ class ModelFilsRSR(ModelFils):
         np.random.seed(seed=int(str(math.fabs(int(timestamp)-timestamp))[2:9])) # getting second decimals
 
         # Initialization
-        TomoFilaments(tomo_fname, -1, voi=self._ModelFils__voi, res=self._ModelFils__res, rad=self._ModelFils__rad)
-        tomo = TomoFilaments(tomo_fname, -1, self._ModelFils__voi)
+        tomo = TomoFilaments(tomo_fname, -1, voi=self._ModelFils__voi, res=self._ModelFils__res, rad=self._ModelFils__rad)
+        # tomo = TomoFilaments(tomo_fname, -1, self._ModelFils__voi)
         if mode == 'full':
             check_bounds, check_inter = True, self._ModelFils__rad / self._ModelFils__res
         elif mode == 'none':
