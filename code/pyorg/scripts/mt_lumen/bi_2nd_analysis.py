@@ -52,20 +52,20 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering'
 
 # Input STAR file
-in_star_ref = ROOT_PATH + '/ltomos/v1_nobc/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
+in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded4/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
 in_ref_short_key = '0' # '0'
-in_star = ROOT_PATH + '/ltomos/v1_nobc/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
+in_star = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded4/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
 in_wspace = None # ROOT_PATH + '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/org/bi/bi_2nd/'
-out_stem = 'v1_nobc_sph_10_600_50'  # 'uni_sph_4_60_5'
+out_stem = 'v1_nobc_proj_lumen_eroded4_10_600_25_switch'  # 'uni_sph_4_60_5'
 
 # Analysis variables
 ana_res = 1.368  # nm/voxel
-ana_rg = np.arange(10, 600, 50)  # in nm
-ana_shell_thick = 25  # 15 # 5 # None
-ana_rdf = True # False
+ana_rg = np.arange(10, 600, 25)  # in nm
+ana_shell_thick = None  # 15 # 5
+ana_rdf = False # True
 ana_fmm = True # False
 
 # P-value computation settings
@@ -86,7 +86,7 @@ ana_border = True
 # Particle surface
 p_vtp = None
 p_cinter = 0.05
-p_switch = False # True
+p_switch = True # False
 
 # Figure saving options
 fig_fmt = '.png'  # if None they showed instead
