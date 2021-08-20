@@ -113,6 +113,8 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
     in_mask_norm = settings.in_mask_norm
     hold_ctf = settings.in_ctf
     tomo_bin = settings.do_bin
+    if in_mask_norm is not None:
+        mask_norm = ps.disperse_io.load_tomo(in_mask_norm)
 
     # Making a copy of the shared object
     rln_star = copy.deepcopy(sh_star)
@@ -191,7 +193,7 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
             if in_mask_norm is None:
                 part_svol = ps.sub.relion_norm(part_svol, seg_svol, inv=do_inv)
             else:
-                part_svol = ps.sub.relion_norm(part_svol, seg_svol, inv=do_inv)
+                part_svol = ps.sub.relion_norm(part_svol, mask_norm, inv=do_inv)
 
         # Adding entry to particles STAR file
         out_part = out_part_dir + '/particle_rln_' + str(row) + '.mrc'
@@ -260,7 +262,6 @@ if do_norm:
     print('\t\t-Applying relion normalization: ')
     if in_mask_norm is not None:
         print('\t\t\t-Tomogram for FG: ' + in_mask_norm)
-        mask_norm = ps.disperse_io.load_tomo(in_mask_norm)
     if do_inv:
         print('\t\t-Invert density values.')
 if do_noise:
