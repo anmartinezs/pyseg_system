@@ -11,6 +11,7 @@ __author__ = 'Antonio Martinez-Sanchez'
 # import cv2
 
 import gc
+import os
 import sys
 import pyto
 import copy
@@ -1589,7 +1590,8 @@ class ClassStar(object):
             # Purge particles, masks and moments array
             self.__particles = self.__particles[del_mask]
             self.__masks = self.__masks[del_mask]
-            self.__momes = self.__momes[del_mask]
+            if self.__momes:
+                self.__momes = self.__momes[del_mask]
             self.__star = hold_star
 
         return d_fnparts
@@ -1648,7 +1650,7 @@ class ClassStar(object):
     #          (default 0)
     # mode: 'averages' (default) then the direct sum of every particle class is stored,
     #       'exemplars' then exemplar particles obtained by AP are stored,
-    def save_class(self, out_dir, out_stem, purge_k=0, mode='averages'):
+    def save_class(self, out_dir, out_stem, purge_k=0, mode='averages', forceMRC=False):
 
         if mode == 'averages':
             hold_dir = out_dir + '/' + out_stem + '_averages'
@@ -1668,10 +1670,13 @@ class ClassStar(object):
                 hold_avg, hold_nparts = d_parts[k_id], float(d_count[k_id])
                 if hold_nparts > 0:
                     hold_avg /= hold_nparts
-                if n_dim == 2:
-                    imwrite(hold_dir+'/class_k'+str(k_id)+'.png', lin_map(hold_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
+                if forceMRC:
+                    disperse_io.save_numpy(hold_avg, hold_dir + '/class_k' + str(k_id) + '.mrc')
                 else:
-                    disperse_io.save_numpy(hold_avg, hold_dir+'/class_k'+str(k_id)+'.mrc')
+                    if n_dim == 2:
+                        imwrite(hold_dir+'/class_k'+str(k_id)+'.png', lin_map(hold_avg,0,np.iinfo(np.uint16).max).astype(np.uint16))
+                    else:
+                        disperse_io.save_numpy(hold_avg, hold_dir+'/class_k'+str(k_id)+'.mrc')
 
         elif mode == 'exemplars':
             if not self.__star.has_column('_psAPCenter'):
@@ -1683,10 +1688,13 @@ class ClassStar(object):
             for row in range(self.__star.get_nrows()):
                 hold = self.__star.get_element('_psAPCenter', row)
                 if hold >= 0:
-                    if len(self.__particles[row].shape) == 2:
-                        imwrite(hold_dir+'/class_k'+str(hold)+'.png', lin_map(self.__particles[row],0,np.iinfo(np.uint16).max).astype(np.uint16))
+                    if forceMRC:
+                        disperse_io.save_numpy(self.__particles[row], hold_dir + '/class_k' + str(hold) + '.mrc')
                     else:
-                        disperse_io.save_numpy(self.__particles[row], hold_dir+'/class_k'+str(hold)+'.mrc')
+                        if len(self.__particles[row].shape) == 2:
+                            imwrite(hold_dir+'/class_k'+str(hold)+'.png', lin_map(self.__particles[row],0,np.iinfo(np.uint16).max).astype(np.uint16))
+                        else:
+                            disperse_io.save_numpy(self.__particles[row], hold_dir+'/class_k'+str(hold)+'.mrc')
 
         else:
             error_msg = 'Mode ' + str(mode) + ' is not valid!'

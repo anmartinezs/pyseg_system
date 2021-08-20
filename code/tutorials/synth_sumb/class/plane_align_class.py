@@ -12,19 +12,18 @@
 
 __author__ = 'Antonio Martinez-Sanchez'
 
-
-###### Global variables
-
-CDF_TH = 0.95 # Threshold for accumulated correlation
-
-################# Package import
-
+import ast
 import os
 import sys
 import time
 import numpy as np
 import pyseg as ps
 from matplotlib import pyplot as plt
+import argparse
+
+# Global variables
+
+CDF_TH = 0.95  # Threshold for accumulated correlation
 
 ########################################################################################
 # PARAMETERS
@@ -41,24 +40,24 @@ out_stem = 'class_ap_r_ali' # 'class_ap_r'
 
 # Particles pre-processing
 pp_mask = ROOT_PATH + '/data/tutorials/synth_sumb/class/mask_cyl_130_30_110_30_nomb.mrc' # '/data/tutorials/synth_sumb/class/mask_cyl_130_30_110_30.mrc'
-pp_low_sg = 4 # voxels
+pp_low_sg = 4  # voxels
 pp_3d = True
 
 # Affinity propagation settings
-ap_pref = -6 # -10 # -3
+ap_pref = -6  # -10 # -3
 
 # Multiprocessing settings
-mp_npr = 20 # Number of parallel processors if None then auto
+mp_npr = 20  # Number of parallel processors if None then auto
 
 ###### Advanced settings
 
 in_root_dir = ROOT_PATH
-in_ref_dir = None # '/media/martinez/DATAPART1/syn/in'
+in_ref_dir = None  # '/media/martinez/DATAPART1/syn/in'
 # Input STAR file with segmentation information to focus the masks
-in_seg = None # ROOT_PATH + '/two_segmentations.star'
+in_seg = None  # ROOT_PATH + '/two_segmentations.star'
 
 out_debug_dir = None
-out_level = 3 # Processing level: 1-particles flattening, 2-CC matrix / Feature matrix, 3-Classification
+out_level = 3  # Processing level: 1-particles flattening, 2-CC matrix / Feature matrix, 3-Classification
 
 # Particles pre-processing
 pp_rln_norm = False
@@ -69,7 +68,7 @@ pp_bin = None
 
 # CC 2d radial matrix computation parameters
 cc_metric = 'cc' # 'cc' or 'similarity'
-cc_npy = None # ROOT_PATH + '/test_whole/test_1_cc.npy'
+cc_npy = None  # ROOT_PATH + '/test_whole/test_1_cc.npy'
 
 ## Clustering
 cu_alg = 'AP' # 'AG' # 'Kmeans'
@@ -81,8 +80,8 @@ cu_n_comp = 20
 ap_damp = 0.9
 ap_max_iter = 2000
 ap_conv_iter = 40
-ap_ref = 'exemplar' # 'average'
-ap_ref_per = 33 # %
+ap_ref = 'exemplar'  # 'average'
+ap_ref_per = 33  # %
 
 # Agglomerative Clustering (HAC)
 ag_n_clusters = 50
@@ -98,6 +97,70 @@ cp_min_ccap = 0.4 # 0.6 # 0.6 #
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('--inRootDir', default=in_root_dir)
+parser.add_argument('--inStar', default=in_star, help='Input star file.')
+parser.add_argument('--inMask', default=pp_mask, help='Input mask file.')
+parser.add_argument('--outDir', default=out_dir, help='Output subtomograms directory.')
+parser.add_argument('--filterSize', default=pp_low_sg, type=int, help='Filter size (voxels).')
+parser.add_argument('--procLevel', default=out_level, type=int, help='Processing level: 1-particles flattening, '
+                                                                     '2-CC matrix / Feature matrix, '
+                                                                     '3-Classification.')
+parser.add_argument('--doCC3d', default=pp_3d, help='Do 3D radial compensation.')
+parser.add_argument('--ccMetric', default=cc_metric, help='Cross correlation metric: cc, similarity or cc_full.')
+parser.add_argument('--clusteringAlg', default=cu_alg, help='Clustering algorithm: AP, AG or Kmeans.')
+parser.add_argument('--distanceMetric', default=cu_mode, help='Distance metric: ncc_2dz or vectors (ncc_2dz only valid '
+                                                              'for AP).')
+parser.add_argument('--pcaComps', default=cu_n_comp, type=int, help='Number of components for PCA dimensionality '
+                                                                    'reduction.')
+parser.add_argument('--aggNClusters', default=ag_n_clusters, type=int, help='Number of clusters to find with HAC '
+                                                                            'algorithm.')
+parser.add_argument('--kmeansNClusters', default=km_n_clusters, type=int, help='Number of clusters to find with '
+                                                                               'k-means algorithm.')
+parser.add_argument('--apPref', default=ap_pref, type=float, help='Affinity propagation preference (-inf, inf).')
+parser.add_argument('--apDumping', default=ap_damp, type=float, help='AP dumping [0.5, 1).')
+parser.add_argument('--apMaxIter', default=ap_max_iter, type=int, help='AP maximum number of iterations.')
+parser.add_argument('--apConvIter', default=ap_conv_iter, type=int, help='AP iterations for fitting the convergence '
+                                                                         'criteria.')
+parser.add_argument('--apReference', default=ap_ref, help='AP reference 2D image used for classes: exemplar or'
+                                                          ' average.')
+parser.add_argument('--apPartSizeFilter', default=cp_min_cz, type=int, help='AP post-processing: minimum number of'
+                                                                            ' particles per class.')
+parser.add_argument('--apCCRefFilter', default=cp_min_ccap, type=float, help='AP post-processing: Purge classes with '
+                                                                             'the cross correlation against the '
+                                                                             'reference lower than the specified '
+                                                                             'value.')
+parser.add_argument('-j', default=mp_npr, type=int, help='Number of processors.')
+
+args = parser.parse_args()
+in_root_dir = args.inRootDir
+in_star = args.inStar
+pp_mask = args.inMask
+out_dir = args.outDir
+pp_low_sg = args.filterSize
+out_level = args.procLevel
+pp_3d = ast.literal_eval(args.doCC3d)
+cc_metric = args.ccMetric
+cu_alg = args.clusteringAlg
+cu_mode = args.distanceMetric
+cu_n_comp = args.pcaComps
+ag_n_clusters = args.aggNClusters
+km_n_clusters = args.kmeansNClusters
+ap_pref = args.apPref
+ap_damp = args.apDumping
+ap_max_iter = args.apMaxIter
+ap_conv_iter = args.apConvIter
+ap_ref = args.apReference
+cp_min_cz = args.apPartSizeFilter
+cp_min_ccap = args.apCCRefFilter
+mp_npr = args.j
+
+forceMRC = False
+if in_root_dir == 'scipion':
+    in_root_dir = None
+    forceMRC = True
 
 ########## Print initial message
 
@@ -148,49 +211,51 @@ elif in_ext == '.star':
             print('\t\t-Direct particles loading activated.')
         if pp_n_sset:
             print('\t\t-Taking a random subset of: ' + str(pp_n_sset) + ' particles')
-        print('\tCC Z-axis radially averages matrix parameters: ')
-        print('\t\t-Metric: ' + str(cc_metric))
 else:
     print('ERROR: unrecognized extension for the input file, valid: .star, .pkl')
     print('Terminated. (' + time.strftime("%c") + ')')
-print('\tClustering: ')
-if cu_mode == 'ncc_2dz':
-    print('\t\t-CC used as distance.')
-    if cu_alg != 'AP':
-        print('ERROR: ncc_2dz is a non-metric space only valid for AP clustering.')
+if out_level >= 2:
+    print('\tCC Z-axis radially averages matrix parameters: ')
+    print('\t\t-Metric: ' + str(cc_metric))
+    print('\t\t-Mode: ' + str(cu_mode))
+    if cu_mode == 'ncc_2dz':
+        print('\t\t-CC used as distance.')
+        if cu_alg != 'AP':
+            print('ERROR: ncc_2dz is a non-metric space only valid for AP clustering.')
+            print('Terminated. (' + time.strftime("%c") + ')')
+    elif cu_mode == 'vectors':
+        print('\t\t-Euclidean distance among image vectors used as distance metric.')
+        print('\t\t-Number of components for PCA dimensionality reduction: ' + str(cu_n_comp))
+    else:
+        print('ERROR: invalid input mode for clustering distance, valid: ncc_2dz or vectors')
         print('Terminated. (' + time.strftime("%c") + ')')
-elif cu_mode == 'vectors':
-    print('\t\t-Euclidean distance among image vectors used as distance metric.')
-    print('\t\t-Number of components for PCA dimensionality reduction: ' + str(cu_n_comp))
-else:
-    print('ERROR: invalid input mode for clustering distance, valid: ncc_2dz or vectors')
-    print('Terminated. (' + time.strftime("%c") + ')')
-print('\t\t-Mode: ' + str(cu_mode))
-if cu_alg == 'AP':
-    print('\t\tAffinity Propagation clustering settings: ')
-    print('\t\t\t-Damping: ' + str(ap_damp))
-    if ap_pref is not None:
-        print('\t\t\t-Affinity propagation preference: ' + str(ap_pref))
-    print('\t\t\t-Maximum number of iterations: ' + str(ap_max_iter))
-    print('\t\t\t-Iterations for convergence: ' + str(ap_conv_iter))
-    print('\t\t\t-Reference for statistics: ' + str(ap_ref))
-    print('\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %')
-elif cu_alg == 'AG':
-    print('\t\tHierarchical Ascending Clustering (or Agglomerative Clustering) settings: ')
-    print('\t\t\t-Number of clusters to find: ' + str(ag_n_clusters))
-    print('\t\t\t-Linkage: ' + str(ag_linkage))
-elif (cu_alg == 'Kmeans') and (cu_mode == 'vectors') and (cc_npy is None):
-    print('\t\tKmeans clustering settings: ')
-    print('\t\t\t-Number of clusters to find: ' + str(km_n_clusters))
-else:
-    print('ERROR: invalid input mode for classification, valid: AP, AG or Kmeans (only with cu_mode==vectors)')
-    print('Terminated. (' + time.strftime("%c") + ')')
-if cu_alg == 'AG':
-    print('\tClassification post-processing: ')
-    if cp_min_ccap is not None:
-        print('\t\t-Purge purge particles with CCAP against reference lower than: ' + str(cp_min_ccap))
-    if cp_min_cz is not None:
-        print('\t\t-Purge classes with less than ' + str(cp_min_cz) + ' particles')
+if out_level == 3:
+    print('\tClustering: ')
+    if cu_alg == 'AP':
+        print('\t\tAffinity Propagation clustering settings: ')
+        print('\t\t\t-Damping: ' + str(ap_damp))
+        if ap_pref is not None:
+            print('\t\t\t-Affinity propagation preference: ' + str(ap_pref))
+        print('\t\t\t-Maximum number of iterations: ' + str(ap_max_iter))
+        print('\t\t\t-Iterations for convergence: ' + str(ap_conv_iter))
+        print('\t\t\t-Reference for statistics: ' + str(ap_ref))
+        print('\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %')
+    elif cu_alg == 'AG':
+        print('\t\tHierarchical Ascending Clustering (or Agglomerative Clustering) settings: ')
+        print('\t\t\t-Number of clusters to find: ' + str(ag_n_clusters))
+        print('\t\t\t-Linkage: ' + str(ag_linkage))
+    elif (cu_alg == 'Kmeans') and (cu_mode == 'vectors') and (cc_npy is None):
+        print('\t\tKmeans clustering settings: ')
+        print('\t\t\t-Number of clusters to find: ' + str(km_n_clusters))
+    else:
+        print('ERROR: invalid input mode for classification, valid: AP, AG or Kmeans (only with cu_mode==vectors)')
+        print('Terminated. (' + time.strftime("%c") + ')')
+    if cu_alg == 'AP':
+        print('\tClassification post-processing: ')
+        if cp_min_ccap:
+            print('\t\t-Purge purge particles with CCAP against reference lower than: ' + str(cp_min_ccap))
+        if cp_min_cz:
+            print('\t\t-Purge classes with less than ' + str(cp_min_cz) + ' particles')
 print('')
 
 ######### Process
@@ -246,7 +311,7 @@ else:
 
         if out_level == 1:
             print('Terminated up to level 1 (Particles flattening). (' + time.strftime("%c") + ')')
-            sys.exit(1)
+            sys.exit()
 
         if cu_mode == 'ncc_2dz':
             print('\tBuilding the NCC matrix...')
@@ -303,7 +368,7 @@ else:
 
         if out_level == 2:
             print('Terminated up to level 1 (CC Matrix / Feature vectors). (' + time.strftime("%c") + ')')
-            sys.exit(1)
+            sys.exit()
 
 print('\tClassification...')
 try:
@@ -326,25 +391,24 @@ except ps.pexceptions.PySegInputError as e:
     sys.exit(-1)
 star_class.update_relion_classes()
 
-if cu_alg == 'AP':
-    print('\tClassification post-processing...')
-    try:
-        if cp_min_ccap is not None:
-            print('\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap))
-            purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
-            print('\t\t\t+Purged output classes: ')
-            for klass, nk_parts in purged_klasses.items():
-                print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
-        if cp_min_cz is not None:
-            print('\t\t-Purging classes smaller than: ' + str(cp_min_cz))
-            purged_klasses = star_class.purge_small_classes(cp_min_cz)
-            print('\t\t\t+Purged output classes: ')
-            for klass, nk_parts in purged_klasses.items():
-                print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
-    except ps.pexceptions.PySegInputError as e:
-        print('ERROR: Post-processing failed because of "' + e.get_message() + '"')
-        print('Terminated. (' + time.strftime("%c") + ')')
-        sys.exit(-1)
+print('\tClassification post-processing...')
+try:
+    if cu_alg == 'AP' and cp_min_ccap:
+        print('\t\t-Purging purging classes with CC against reference lower than: ' + str(cp_min_ccap))
+        purged_klasses = star_class.purge_low_ccap_particles(cp_min_ccap)
+        print('\t\t\t+Purged output classes: ')
+        for klass, nk_parts in purged_klasses.items():
+            print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
+    if cp_min_cz:
+        print('\t\t-Purging classes smaller than: ' + str(cp_min_cz))
+        purged_klasses = star_class.purge_small_classes(cp_min_cz)
+        print('\t\t\t+Purged output classes: ')
+        for klass, nk_parts in purged_klasses.items():
+            print('\t\t\t\t-Number of particles in class ' + str(klass) + ': ' + str(nk_parts))
+except ps.pexceptions.PySegInputError as e:
+    print('ERROR: Post-processing failed because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
+    sys.exit(-1)
 
 out_pkl = out_dir + '/' + out_stem + '_class_star.pkl'
 print('\tPickling classification object in: ' + out_pkl)
@@ -356,9 +420,9 @@ try:
     star_class.save_star(out_dir, out_stem, parse_rln=True, mode='split')
     if cc_npy is None:
         star_class.save_star(out_dir, out_stem, mode='particle')
-        star_class.save_class(out_dir, out_stem, purge_k=16, mode='averages')
+        star_class.save_class(out_dir, out_stem, purge_k=16, mode='averages', forceMRC=forceMRC)
         if cu_alg == 'AP':
-            star_class.save_class(out_dir, out_stem, purge_k=16, mode='exemplars')
+            star_class.save_class(out_dir, out_stem, purge_k=16, mode='exemplars', forceMRC=forceMRC)
 except ps.pexceptions.PySegInputError as e:
     print('ERROR: Result could not be stored because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')

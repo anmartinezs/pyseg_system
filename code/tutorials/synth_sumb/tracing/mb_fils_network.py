@@ -18,7 +18,7 @@
 __author__ = 'Antonio Martinez-Sanchez'
 
 # ################ Package import
-
+import argparse
 import gc
 import os
 import time
@@ -65,6 +65,31 @@ th_mode = 'in' # 'out'
 ########################################################################################
 # MAIN ROUTINE
 ########################################################################################
+
+# Get them from the command line if they were passed through it
+parser = argparse.ArgumentParser()
+parser.add_argument('--inStar', default=in_star, help='Input star file.')
+parser.add_argument('--outDir', default=out_dir, help='Output subtomograms directory.')
+parser.add_argument('--inSources', default=in_sources, help='Sources xml file.')
+parser.add_argument('--inTargets', default=in_targets, help='Targets xml file.')
+parser.add_argument('--thMode', default=th_mode, choices=['in', 'out'],
+                    help='Orientation with respect to the membrane/filament.')
+parser.add_argument('--gRgLen', nargs='+', type=int, default=g_rg_len,
+                    help='Geodesic distance trough the graph between source and target vertices in nm.')
+parser.add_argument('--gRgSin', nargs='+', type=int, default=g_rg_sin,
+                    help='Filament sinuosity, geodesic/euclidean distances ratio.')
+parser.add_argument('--gRgEud', nargs='+', type=int, default=g_rg_eud,
+                    help='Euclidean distance between source and target vertices in nm.')
+args = parser.parse_args()
+
+in_star = args.inStar
+out_dir = args.outDir
+in_sources = args.inSources
+in_targets = args.inTargets
+th_mode = args.thMode
+g_rg_len = args.gRgLen
+g_rg_sin = args.gRgSin
+g_rg_eud = args.gRgEud
 
 # Print initial message
 print('Filtering a MbGraphMCF by filaments network.')

@@ -17,9 +17,17 @@
 
 __author__ = 'Antonio Martinez-Sanchez'
 
+import argparse
 import operator
 import pyseg as ps
 from pyseg.globals.utils import coords_scale_supression
+import os
+import gc
+import csv
+import time
+import numpy as np
+from pyseg.xml_io import SliceSet
+from pyseg.sub import TomoPeaks, SetTomoPeaks
 
 ########################################################################################
 # PARAMETERS
@@ -55,8 +63,6 @@ peak_prop_norm = 'smb_normal'
 peak_prop_rot = 'norm_rot'
 peak_dst = ps.globals.STR_VERT_DST
 
-del_v_sl = True # if True vertices are being deleted from graph as they detected in a slice
-
 ###### Advanced normal configuration
 
 norm_sg = 2 # sigma for gaussian smoothing
@@ -76,19 +82,20 @@ ms_clst_all = True
 # MAIN ROUTINE
 ########################################################################################
 
-################# Package import
+# Get them from the command line if they were passed through it
+parser = argparse.ArgumentParser()
+parser.add_argument('--inStar', default=in_star, help='Input star file.')
+parser.add_argument('--outDir', default=output_dir, help='Output directory.')
+parser.add_argument('--slicesFile', default=slices_file, help='Slices xml file.')
+parser.add_argument('--peakTh', type=float, default=peak_th)
+parser.add_argument('--peakNs', type=float, default=peak_ns)
+args = parser.parse_args()
 
-import os
-import gc
-import csv
-import time
-import operator
-import numpy as np
-from pyseg.xml_io import SliceSet
-from pyseg.spatial import UniStat
-from pyseg.sub import TomoPeaks, SetTomoPeaks
-
-########## Global variables
+in_star = args.inStar
+output_dir = args.outDir
+slices_file = args.slicesFile
+peak_th = args.peakTh
+peak_ns = args.peakNs
 
 ########## Print initial message
 
@@ -328,8 +335,8 @@ for (input_pkl, in_tomo_ref, in_seg, in_img, in_off, in_rot) in \
 
             # Initialization
             vec_tlist = pt_coord - coord
-            rho, tilt, psi = ps.globals.vect_to_zrelion(np.asarray((vec_tlist[1], vec_tlist[0], vec_tlist[2]),
-                                                        dtype=np.float32), mode='passive')
+            # rho, tilt, psi = ps.globals.vect_to_zrelion(np.asarray((vec_tlist[1], vec_tlist[0], vec_tlist[2]),
+            #                                             dtype=np.float32), mode='passive')
 
             # Coordinate transformation for IMOD
             coord_imod, pt_coord_imod = coord + gcrop_off, pt_coord + gcrop_off
