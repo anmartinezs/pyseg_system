@@ -1,0 +1,18 @@
+### Python binaries
+*.pyc
+*.pyo
+
+#unused submodule
+.gitmodules
+
+
+### IDES files (Eclipse, pycharm,... and so on)
+.project
+.cproject
+.pydevproject
+.classpath
+.idea
+*.iml
+
+### pip package files
+*.egg-info
