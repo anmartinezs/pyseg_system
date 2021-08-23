@@ -4,11 +4,12 @@ Tests module numpy_plus.
 
 Currently tests trim_slice() only.
 
-# Author: Vladan Lucic
-# $Id: test_numpy_plus.py 882 2012-06-11 09:14:58Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 882 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -17,9 +18,7 @@ import numpy
 import numpy.testing as np_test 
 import scipy
 
-import pyto.util.numpy_plus
-#import pyto.util.numpy_plus as np_plus             # doesn't work
-from pyto.util.numpy_plus import trim_slice
+from  pyto.util.numpy_plus import trim_slice
 
 class TestNumpyPlus(np_test.TestCase):
     """

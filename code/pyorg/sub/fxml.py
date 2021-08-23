@@ -70,7 +70,7 @@ class XMLFilaments(object):
         nodes, points, segments = dict(), dict(), dict()
         for child in root:
             if 'Worksheet' in child.tag:
-                for key_i, val_i in zip(child.attrib.iterkeys(), child.attrib.itervalues()):
+                for key_i, val_i in zip(iter(child.attrib.keys()), iter(child.attrib.values())):
                     if ('Name' in key_i) and ('Nodes' in val_i):
                         sub_child = child[0]
                         if 'Table' in sub_child.tag:
@@ -81,7 +81,7 @@ class XMLFilaments(object):
                                         if 'Cell' in cell.tag:
                                             for dat in cell:
                                                 if 'Data' in dat.tag:
-                                                    for key_ii, val_ii in zip(dat.attrib.keys(), dat.attrib.values()):
+                                                    for key_ii, val_ii in zip(list(dat.attrib.keys()), list(dat.attrib.values())):
                                                         if ('Type' in key_ii) and ('String' in val_ii):
                                                             col_names[cell_id] = dat.text
                                                             nodes[dat.text] = list()
@@ -97,7 +97,7 @@ class XMLFilaments(object):
                                         if 'Cell' in cell.tag:
                                             for dat in cell:
                                                 if 'Data' in dat.tag:
-                                                    for key_ii, val_ii in zip(dat.attrib.keys(), dat.attrib.values()):
+                                                    for key_ii, val_ii in zip(list(dat.attrib.keys()), list(dat.attrib.values())):
                                                         if ('Type' in key_ii) and ('String' in val_ii):
                                                             col_names[cell_id] = dat.text
                                                             points[dat.text] = list()
@@ -113,7 +113,7 @@ class XMLFilaments(object):
                                         if 'Cell' in cell.tag:
                                             for dat in cell:
                                                 if 'Data' in dat.tag:
-                                                    for key_ii, val_ii in zip(dat.attrib.keys(), dat.attrib.values()):
+                                                    for key_ii, val_ii in zip(list(dat.attrib.keys()), list(dat.attrib.values())):
                                                         if ('Type' in key_ii) and ('String' in val_ii):
                                                             if ',' in dat.text:
                                                                 segments[col_names[cell_id]].append(dat.text.split(','))

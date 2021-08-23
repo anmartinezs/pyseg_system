@@ -3,10 +3,15 @@
 Tests module observations
  
 # Author: Vladan Lucic
-# $Id: test_observations.py 1275 2015-12-23 14:31:51Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1275 $"
+__version__ = "$Revision$"
 
 import sys
 from copy import copy, deepcopy
@@ -75,6 +80,97 @@ class TestObservations(np_test.TestCase):
         for nam in names:
             np_test.assert_equal(getattr(obs, nam), [])
 
+    def test_get_indexed_data(self):
+        """
+        Tests get_indexed_data()
+        """
+
+        # standard
+        ind_data = self.obs.indexed_data
+        np_test.assert_equal(
+            ind_data.columns.tolist(), ['identifiers', 'ids', 'mean', 'pair'])
+        np_test.assert_equal(
+            ind_data.identifiers.unique().tolist(),
+            ['exp_1', 'exp_2', 'exp_6'])
+        np_test.assert_equal(
+            ind_data.ids.tolist(), numpy.hstack(self.obs.ids))
+        np_test.assert_equal(
+            ind_data['mean'].tolist(), numpy.hstack(self.obs.mean))
+        np_test.assert_equal(
+            ind_data.pair.tolist(),
+            [[1,2], [3,4], [5,6], [2,4], [6,8], [10,12], [20,40]])
+
+        # some identifiers
+        ind_data = self.obs.get_indexed_data(
+            identifiers=['exp_6', 'dummy', 'exp_2'], additional=['scalar'])
+        np_test.assert_equal(
+            ind_data.columns.tolist(),
+            ['identifiers', 'ids', 'mean', 'pair', 'scalar'])
+        np_test.assert_equal(ind_data.ids.tolist(), [6, 1, 2, 3])
+        np_test.assert_equal(ind_data['mean'].tolist(), [12, 2, 4, 6])
+        np_test.assert_equal(ind_data.scalar.tolist(), [6, 2, 2, 2])
+
+        # names and additional
+        ind_data = self.obs.get_indexed_data(
+            identifiers=['exp_6', 'dummy', 'exp_2'],
+            names=['pair', 'mean'], additional=['scalar'])
+        np_test.assert_equal(
+            ind_data.columns.tolist(),
+            ['identifiers', 'ids', 'pair', 'mean', 'scalar'])
+
+        # no experiemnts
+        empty = Observations()
+        data = empty.get_indexed_data()
+        np_test.assert_equal(data is None, True)
+        
+    def test_get_scalar_data(self):
+        """
+        Tests get_scalar_data()
+        """
+
+        # no args
+        data = self.obs.scalar_data
+        np_test.assert_equal(
+            data.columns.tolist(), ['identifiers', 'categories', 'scalar'])
+        np_test.assert_equal(
+            data.identifiers.unique().tolist(),
+            ['exp_1', 'exp_2', 'exp_5', 'exp_6'])
+        np_test.assert_equal(
+            data.scalar.tolist(), self.obs.scalar)
+         
+        # some args
+        data = self.obs.get_scalar_data(
+            identifiers=['exp_6', 'dummy', 'exp_2'])
+        np_test.assert_equal(
+            data.columns.tolist(), ['identifiers', 'categories', 'scalar'])
+        np_test.assert_equal(
+            data.identifiers.unique().tolist(), ['exp_6', 'exp_2'])
+        np_test.assert_equal(data.scalar.tolist(), [6, 2])
+        
+        # some args
+        data = self.obs.get_scalar_data(
+            identifiers=['exp_6', 'dummy', 'exp_2'], names=['scalar'])
+        np_test.assert_equal(
+            data.columns.tolist(), ['identifiers', 'scalar'])
+        np_test.assert_equal(
+            data.identifiers.unique().tolist(), ['exp_6', 'exp_2'])
+        np_test.assert_equal(data.scalar.tolist(), [6, 2])
+        
+        # some args
+        data = self.obs.get_scalar_data(
+            identifiers=['exp_6', 'dummy', 'exp_2'],
+            names=['scalar', 'categories'])
+        np_test.assert_equal(
+            data.columns.tolist(), ['identifiers', 'scalar', 'categories'])
+        np_test.assert_equal(
+            data.identifiers.unique().tolist(), ['exp_6', 'exp_2'])
+        np_test.assert_equal(data.scalar.tolist(), [6, 2])
+
+        # no experiemnts
+        empty = Observations()
+        data = empty.get_scalar_data()
+        np_test.assert_equal(data is None, True)
+        
     def testGetExperiment(self):
         """
         Tests getExperiment()
@@ -207,7 +303,7 @@ class TestObservations(np_test.TestCase):
         exp = self.obs.joinExperiments(name=['scalar', 'mean'], mode='join',
                                        identifiers=['exp_6', 'exp_5', 'exp_1'])
         np_test.assert_equal(exp.scalar, [6, 5, 1])
-        np_test.assert_equal(exp.ids, range(1,4))
+        np_test.assert_equal(exp.ids, list(range(1,4)))
         np_test.assert_equal(exp.mean, [12, 2, 6, 10])
         np_test.assert_equal(set(exp.properties), 
                              set(['identifier', 'scalar', 'mean', 
@@ -219,7 +315,7 @@ class TestObservations(np_test.TestCase):
         exp = self.obs.joinExperiments(name=['mean', 'scalar'], mode='join',
                                        identifiers=['exp_5', 'exp_2', 'exp_6'])
         np_test.assert_equal(exp.scalar, [5, 2, 6])
-        np_test.assert_equal(exp.ids, range(1,5))
+        np_test.assert_equal(exp.ids, list(range(1,5)))
         np_test.assert_equal(exp.mean, [2, 4, 6, 12])
         np_test.assert_equal(set(exp.properties), 
                              set(['identifier', 'scalar', 'mean', 
@@ -717,13 +813,14 @@ class TestObservations(np_test.TestCase):
                 stats.getValue(property='data', identifier='exp_6'), [12])
         np_test.assert_equal(numpy.array(stats.mean)[[0,1,3]], [6, 4, 12])
         np_test.assert_equal(numpy.isnan(stats.mean[2]), True)
-        np_test.assert_equal(
-            numpy.isnan(stats.getValue(property='mean', identifier='exp_5')), 
-                        True)
-        np_test.assert_almost_equal(numpy.array(stats.std)[[0,1,2,3]], 
-                             [4., 2., numpy.nan, numpy.nan])
-        np_test.assert_almost_equal(numpy.array(stats.sem)[[0,1,3]], 
-                             [4/numpy.sqrt(3), 2/numpy.sqrt(3), numpy.nan])
+        np_test.assert_equal(numpy.isnan(
+            stats.getValue(property='mean', identifier='exp_5')), True)
+        np_test.assert_almost_equal(
+            numpy.array(stats.std)[[0,1,2,3]], 
+            [4., 2., numpy.nan, numpy.nan])
+        np_test.assert_almost_equal(
+            numpy.array(stats.sem)[[0,1,3]], 
+            [4/numpy.sqrt(3), 2/numpy.sqrt(3), numpy.nan])
         np_test.assert_equal(numpy.isnan(stats.sem[2]), True)
         np_test.assert_equal(stats.n, [3, 3, 0, 1])
 
@@ -745,7 +842,7 @@ class TestObservations(np_test.TestCase):
                 stats.getValue(property='mean', identifier='exp_2'), 4)
         np_test.assert_almost_equal(
                 stats.getValue(property='mean', identifier='exp_6'), 12)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.getValue(property='mean', identifier='exp_5')), 
                         True)
         np_test.assert_almost_equal(

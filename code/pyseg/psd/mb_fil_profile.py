@@ -138,78 +138,78 @@ if (cr_l is not None) or (cr_h is not None):
 
 ########## Print initial message
 
-print 'Spatial analysis on membrane attached filaments.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file(s): ' + input_pkl
-print '\tDimensions to delete: ' + str(del_coord)
-print '\tOutput directory: ' + str(output_dir)
-print '\tFilament thresholds: '
+print('Spatial analysis on membrane attached filaments.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file(s): ' + input_pkl)
+print('\tDimensions to delete: ' + str(del_coord))
+print('\tOutput directory: ' + str(output_dir))
+print('\tFilament thresholds: ')
 if len_th is not None:
-    print '\t\t- Length: ' + len_th.tostring() + ', ' + len_mode
+    print('\t\t- Length: ' + len_th.tostring() + ', ' + len_mode)
 if pen_th is not None:
-    print '\t\t- Penetration: ' + pen_th.tostring() + ', ' + pen_mode
+    print('\t\t- Penetration: ' + pen_th.tostring() + ', ' + pen_mode)
 if pent_th is not None:
-    print '\t\t- Tail penetration: ' + pent_th.tostring() + ', ' + pent_mode
+    print('\t\t- Tail penetration: ' + pent_th.tostring() + ', ' + pent_mode)
 if dst_th is not None:
-    print '\t\t- Head-tail distance: ' + dst_th.tostring() + ', ' + dst_mode
+    print('\t\t- Head-tail distance: ' + dst_th.tostring() + ', ' + dst_mode)
 if fild_th is not None:
-    print '\t\t- Denseness: ' + fild_th.tostring() + ', ' + fild_mode
+    print('\t\t- Denseness: ' + fild_th.tostring() + ', ' + fild_mode)
 if ct_th is not None:
-    print '\t\t- Curvature total: ' + ct_th.tostring() + ', ' + ct_mode
+    print('\t\t- Curvature total: ' + ct_th.tostring() + ', ' + ct_mode)
 if mc_th is not None:
-    print '\t\t- Maximum curvature: ' + mc_th.tostring() + ', ' + mc_mode
+    print('\t\t- Maximum curvature: ' + mc_th.tostring() + ', ' + mc_mode)
 if sin_th is not None:
-    print '\t\t- Sinuosity distance: ' + sin_th.tostring() + ', ' + sin_mode
+    print('\t\t- Sinuosity distance: ' + sin_th.tostring() + ', ' + sin_mode)
 if smo_th is not None:
-    print '\t\t- Denseness: ' + smo_th.tostring() + ', ' + smo_mode
+    print('\t\t- Denseness: ' + smo_th.tostring() + ', ' + smo_mode)
 if car_th is not None:
-    print '\t\t- Cardinality: ' + car_th.tostring() + ', ' + car_mode
+    print('\t\t- Cardinality: ' + car_th.tostring() + ', ' + car_mode)
 if cross_th is not None:
-    print '\t\t- Crossness: ' + str(cross_th) + ' nm'
-print '\tProfile samples for penetration tail: ' + str(pent_samp) + ' nm'
-print '\tCloud features: '
+    print('\t\t- Crossness: ' + str(cross_th) + ' nm')
+print('\tProfile samples for penetration tail: ' + str(pent_samp) + ' nm')
+print('\tCloud features: ')
 if side == 2:
-    print '\t\t- Side A'
+    print('\t\t- Side A')
 elif side == 3:
-    print '\t\t- Side B'
+    print('\t\t- Side B')
 else:
     sys.exit('Non valid side: ' + str(side))
-print '\tClustering mode:'
-print '\tCluster thresholds: '
+print('\tClustering mode:')
+print('\tCluster thresholds: ')
 if cnp_th is not None:
-    print '\t\t- Number of Points: ' + cnp_th.tostring()
+    print('\t\t- Number of Points: ' + cnp_th.tostring())
 if ca_th is not None:
-    print '\t\t- Number of Points: ' + ca_th.tostring()
+    print('\t\t- Number of Points: ' + ca_th.tostring())
 if cd_th is not None:
-    print '\t\t- Number of Points: ' + cd_th.tostring()
+    print('\t\t- Number of Points: ' + cd_th.tostring())
 if cr_th is not None:
-    print '\t\t- Number of Points: ' + cr_th.tostring()
-print '\tAnalysis parameters: '
-print '\t\t- Number of samples: ' + str(n_samples)
-print '\t\t- Number of simulations: ' + str(n_sim)
-print '\t\t- Ripley''s H: '
-print '\t\t\t-Maximum distance : ' + str(max_dist) + ' nm'
+    print('\t\t- Number of Points: ' + cr_th.tostring())
+print('\tAnalysis parameters: ')
+print('\t\t- Number of samples: ' + str(n_samples))
+print('\t\t- Number of simulations: ' + str(n_sim))
+print('\t\t- Ripley''s H: ')
+print('\t\t\t-Maximum distance : ' + str(max_dist) + ' nm')
 if b_mode == 0:
-    print '\t\t\t-Border compensation not active'
+    print('\t\t\t-Border compensation not active')
 elif b_mode == 1:
-    print '\t\t\t-Border compensation by cloud inflation'
+    print('\t\t\t-Border compensation by cloud inflation')
 elif b_mode == 2:
-    print '\t\t\t-Border compensation by Goreaud'
+    print('\t\t\t-Border compensation by Goreaud')
 else:
     sys.exit('Non valid border compensation: ' + str(b_mode))
-print ''
+print('')
 
 ######### Process
 
-print '\tLoading the input clouds: '
+print('\tLoading the input clouds: ')
 if clstring:
     set_clouds = ps.spatial.SetClustersP(n_samples, n_sim, max_dist, b_mode)
 else:
     set_clouds = ps.spatial.SetCloudsP(n_samples, n_sim, max_dist, b_mode)
 
-print '\t\tUnpicking network...'
+print('\t\tUnpicking network...')
 path, fname = os.path.split(input_pkl)
 net = ps.factory.unpickle_obj(input_pkl)
 if side == MB_IN_LBL:
@@ -217,7 +217,7 @@ if side == MB_IN_LBL:
 else:
     box = make_plane_box(net.get_graph_out().compute_bbox(), coord=del_coord) * net.get_resolution()
 
-print '\t\tApplying thresholds to the network...'
+print('\t\tApplying thresholds to the network...')
 if len_th is not None:
     net.threshold_len(len_th, len_mode)
 if pen_th is not None:
@@ -246,22 +246,22 @@ clouds = list()
 for i in range(0, len(pent_samp)-1):
 
     slice_samp = [pent_samp[i], pent_samp[i+1]]
-    print '\t\tProcessing sample: [' + str(round(slice_samp[0], 1)) + ', ' \
-          + str(round(slice_samp[1], 1)) + '] nm'
+    print('\t\tProcessing sample: [' + str(round(slice_samp[0], 1)) + ', ' \
+          + str(round(slice_samp[1], 1)) + '] nm')
 
     sys.stdout.write('\t\tGetting cloud from ')
     if clstring:
         sys.stdout.write('clusters of tails ')
         if side == 2:
-            print 'of side A...'
+            print('of side A...')
         else:
-            print 'of side B...'
+            print('of side B...')
         cloud, cloud_cids = net.get_cloud_clst_slice(side, slice_samp)
         cloud = make_plane(cloud, coord=del_coord) * net.get_resolution()
         clst = ConnDom(cloud, cloud_cids, np.asarray(box, dtype=np.float))
-        print '\t\t\tApplying threshold to clusters...'
+        print('\t\t\tApplying threshold to clusters...')
         clst.threshold(th_npoints=cnp_th, th_areas=ca_th, th_den=cd_th, th_round=cr_th)
-        print '\t\t\tGetting clusters centers of gravity...'
+        print('\t\t\tGetting clusters centers of gravity...')
         cloud = clst.get_clst_cg()
         if plt_clst:
             clst.plot_clusters(prop='npoints', centers=plt_cgs)
@@ -271,12 +271,12 @@ for i in range(0, len(pent_samp)-1):
     else:
         sys.stdout.write('of tails ')
         if side == 2:
-            print 'of side A...'
+            print('of side A...')
         else:
-            print 'of side B...'
+            print('of side B...')
         cloud, cards = net.get_cloud_points_slice(side, slice_samp, card=True)
         cloud = make_plane(cloud, coord=del_coord) * net.get_resolution()
-    print '\t\tInserting cloud in analyzer'
+    print('\t\tInserting cloud in analyzer')
     if clstring:
         mask = clst.get_del_mask()
         if not del_mask:
@@ -285,15 +285,15 @@ for i in range(0, len(pent_samp)-1):
     else:
         set_clouds.insert_cloud(cloud, box, slice_samp, cards)
 
-print '\tAnalyzing...'
+print('\tAnalyzing...')
 set_clouds.analyze(verbose=True)
 
-print '\tPlotting the results (close all windows to end)...'
+print('\tPlotting the results (close all windows to end)...')
 set_clouds.plot(block=True)
 
 output_pkl = output_dir + '/' + stem_name + '.pkl'
-print '\tStoring the result in file ' + output_pkl
+print('\tStoring the result in file ' + output_pkl)
 set_clouds.pickle(output_pkl)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')
 

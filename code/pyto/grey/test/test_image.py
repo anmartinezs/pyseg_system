@@ -3,10 +3,11 @@
 Tests module image
 
 # Author: Vladan Lucic
-# $Id: test_image.py 709 2010-06-21 13:46:58Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 709 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest

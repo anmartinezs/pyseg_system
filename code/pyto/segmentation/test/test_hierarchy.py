@@ -3,12 +3,17 @@
 Tests module hierarchy
 
 # Author: Vladan Lucic
-# $Id: test_hierarchy.py 672 2010-03-03 17:18:59Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 
-__version__ = "$Revision: 672 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 
 import numpy
@@ -19,7 +24,7 @@ from pyto.segmentation.grey import Grey
 from pyto.segmentation.segment import Segment
 from pyto.segmentation.hierarchy import Hierarchy
 from pyto.segmentation.thresh_conn import ThreshConn
-import common as common
+from pyto.segmentation.test import common as common
 
 
 class TestHierarchy(np_test.TestCase):
@@ -29,6 +34,8 @@ class TestHierarchy(np_test.TestCase):
     def setUp(self):
         """
         """
+        importlib.reload(common) # to avoid problems when running multiple tests
+        
         # set flag so that the warning for reordered segment ids is printed
         # only once
         self.reorder_warning = True
@@ -284,7 +291,7 @@ class TestHierarchy(np_test.TestCase):
         level_ids_orig = deepcopy(tc.levelIds)
         data_orig = tc.data.copy()
         contacts_orig = deepcopy(tc.contacts)
-        new_tc = tc.keep(ids=range(2,11), new=True)
+        new_tc = tc.keep(ids=list(range(2,11)), new=True)
 
         # test unchanged hierarchy
         np_test.assert_equal(tc.levelIds, level_ids_orig)

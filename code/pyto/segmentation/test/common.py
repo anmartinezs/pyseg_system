@@ -3,10 +3,15 @@
 Common stuff for tests
 
 # Author: Vladan Lucic
-# $Id: common.py 1301 2016-05-15 22:00:35Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1301 $"
+__version__ = "$Revision$"
 
 import numpy
 import numpy.testing as np_test 
@@ -67,8 +72,8 @@ bound_1in = Segment(bound_ar_inset_1)
 bound_1in.inset = [slice(1, 7), slice(1, 9)]
 
 # expected segmentation
-threshold_1 = range(8)
-ids_1 = range(1,15)
+threshold_1 = list(range(8))
+ids_1 = list(range(1,15))
 levelIds_1 = [[], [1,2], [3,4,5], [6,7,8,9], [10,11], 
                  [12], [13], [14]]
 thresh_1 = [0, 1,1, 2,2,2, 3,3,3,3, 4,4, 5, 6, 7]
@@ -104,7 +109,7 @@ data_1[7] = numpy.array([[0, 14, 0, 0, 14, 14, 14, 0],
                             [14, 0, 14, 0, 14, 0, 14, 14]])
 slice_1 = [slice(2,6), slice(1,9)]
 hi_data_1 =  numpy.zeros((10,10), dtype=int)
-hi_data_1[slice_1] = numpy.array(\
+hi_data_1[tuple(slice_1)] = numpy.array(\
     [[0, 1,  0,  0, 11,  2,  2, 0],
      [0, 3,  0,  0, 11,  0,  4, 0],
      [6, 6, 10, 12, 11, 13,  4, 11],
@@ -165,7 +170,7 @@ bound_2in.inset = [slice(1, 7), slice(1, 9)]
 
 [slice(2,6), slice(1,9)]
 hi_data_1 =  numpy.zeros((10,10), dtype=int)
-hi_data_1[slice_1] = numpy.array(\
+hi_data_1[tuple(slice_1)] = numpy.array(\
     [[0, 1,  0,  0, 11,  2,  2, 0],
      [0, 3,  0,  0, 11,  0,  4, 0],
      [6, 6, 10, 12, 11, 13,  4, 11],
@@ -207,7 +212,7 @@ segment_ar_in_3[0,7,1] = 0
 # make objects
 segment_ar_3 = numpy.zeros((10,10,6), dtype='int')
 inset_3 = [slice(1,9), slice(0,9), slice(1,6)]
-segment_ar_3[inset_3] = segment_ar_in_3
+segment_ar_3[tuple(inset_3)] = segment_ar_in_3
 segment_3 = Segment(segment_ar_3)
 segment_3in = Segment(segment_ar_in_3)
 segment_3in.inset = inset_3
@@ -263,7 +268,7 @@ def id_correspondence(actual, desired, ids=None, current=None):
     # check that individual segments agree
     actual_ids = numpy.unique(actual[actual>0])
     desired_ids = numpy.unique(desired[desired>0])
-    id_dict = dict(zip(desired_ids, actual_ids))
+    id_dict = dict(list(zip(desired_ids, actual_ids)))
     #id_dict = {}
     #for d_id in actual_ids:
     #    a_id = desired[actual==d_id][0]

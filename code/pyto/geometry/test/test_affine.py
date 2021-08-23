@@ -3,10 +3,14 @@
 Tests module affine
 
 # Author: Vladan Lucic
-# $Id: test_affine.py 1430 2017-03-24 13:18:43Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1430 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -341,18 +345,18 @@ class TestAffine(np_test.TestCase):
         np_test.assert_almost_equal(
             af.transform(self.x1, xy_axes='point_dim'), desired)
         
-        # 2D phi=90, 'point_dim', origin = None
+        # 2D phi=90, 'point_dim', center = None
         af = Affine2D(phi=numpy.pi/2, scale=1)
         desired = numpy.array([[0, 0], [0, 2], [-1, 2], [-1, 0]])
         np_test.assert_almost_equal(
-            af.transform(self.x1, xy_axes='point_dim', origin=None), desired)
+            af.transform(self.x1, xy_axes='point_dim', center=None), desired)
         
-        # 2D phi=90, 'point_dim', origin 
+        # 2D phi=90, 'point_dim', center 
         af = Affine2D(phi=numpy.pi/2, scale=1)
         #desired = numpy.array([[0, 0], [0, 2], [-1, 2], [-1, 0]])
         desired = numpy.array([[3, -1], [3, 1], [2, 1], [2, -1]])
         np_test.assert_almost_equal(
-            af.transform(self.x1, xy_axes='point_dim', origin=[2,1]), desired)
+            af.transform(self.x1, xy_axes='point_dim', center=[2,1]), desired)
         
         # 2D phi=-90, 'dim_point'
         af = Affine2D(phi=-numpy.pi/2, scale=1)
@@ -366,7 +370,7 @@ class TestAffine(np_test.TestCase):
         desired = numpy.array([[-3, -3, -2, -2], [1, -1, -1, 1]])
         np_test.assert_almost_equal(
             af.transform(
-                self.x1.transpose(), xy_axes='dim_point', origin=[-1,2]), 
+                self.x1.transpose(), xy_axes='dim_point', center=[-1,2]), 
             desired)
 
         # 2d phi 90, 'mgrid'
@@ -378,32 +382,32 @@ class TestAffine(np_test.TestCase):
         np_test.assert_almost_equal(
             af.transform(grid, xy_axes='mgrid'), desired)
         
-        # 2d phi 90, 'mgrid', origin=0
+        # 2d phi 90, 'mgrid', center=0
         af = Affine2D(phi=numpy.pi/2, scale=1)
         grid = numpy.mgrid[0:3, 0:2]
         desired = numpy.array(
             [[[0, -1], [0, -1], [0, -1]],
              [[0, 0], [1, 1], [2, 2]]])
         np_test.assert_almost_equal(
-            af.transform(grid, xy_axes='mgrid', origin=0), desired)
+            af.transform(grid, xy_axes='mgrid', center=0), desired)
         
-        # 2d phi 90, 'mgrid', origin
+        # 2d phi 90, 'mgrid', center
         af = Affine2D(phi=numpy.pi/2, scale=1)
         grid = numpy.mgrid[0:3, 0:2]
         desired = numpy.array(
             [[[1, 0], [1, 0], [1, 0]],
              [[-3, -3], [-2, -2], [-1, -1]]])
         np_test.assert_almost_equal(
-            af.transform(grid, xy_axes='mgrid', origin=[2,-1]), desired)
+            af.transform(grid, xy_axes='mgrid', center=[2,-1]), desired)
         
-       # 2d phi 90, scale 2, 'mgrid', origin
+       # 2d phi 90, scale 2, 'mgrid', center
         af = Affine2D(phi=numpy.pi/2, scale=2)
         grid = numpy.mgrid[0:3, 0:2]
         desired = numpy.array(
             [[[0., -2], [0, -2], [0, -2]],
              [[-5, -5], [-3, -3], [-1, -1]]])
         np_test.assert_almost_equal(
-            af.transform(grid, xy_axes='mgrid', origin=[2,-1]), desired)
+            af.transform(grid, xy_axes='mgrid', center=[2,-1]), desired)
         
         # 2d phi -90, 'mgrid' (meshgrid)
         af = Affine2D(phi=-numpy.pi/2, scale=1)
@@ -424,7 +428,7 @@ class TestAffine(np_test.TestCase):
         np_test.assert_almost_equal(
             af.transform(grid, xy_axes='mgrid'), desired)
         
-       # 2d phi -90, 'mgrid' (meshgrid), translation, origin
+       # 2d phi -90, 'mgrid' (meshgrid), translation, center
         af = Affine2D(phi=-numpy.pi/2, scale=1)
         af.d = [1, -1]
         grid = numpy.meshgrid([0,2,4], [1,3], indexing='ij')
@@ -432,7 +436,7 @@ class TestAffine(np_test.TestCase):
             [[[5., 7], [5, 7], [5, 7]],
              [[-2, -2], [-4, -4], [-6, -6]]])
         np_test.assert_almost_equal(
-            af.transform(grid, xy_axes='mgrid', origin=[1,-2]), desired)
+            af.transform(grid, xy_axes='mgrid', center=[1,-2]), desired)
  
         # gl
         af = Affine2D(gl=numpy.array([[1., 2], [0, -1]]))
@@ -444,10 +448,10 @@ class TestAffine(np_test.TestCase):
         np_test.assert_almost_equal(
             af.transform([[1], [-1]], xy_axes='dim_point'), [[1], [0]])
         
-        # gl, translation, origin
+        # gl, translation, center
         af = Affine2D(gl=numpy.array([[1., 2], [0, -1]]), d=[2, -1])
         np_test.assert_almost_equal(
-            af.transform([[1], [-1]], xy_axes='dim_point', origin=[1, -1]), 
+            af.transform([[1], [-1]], xy_axes='dim_point', center=[1, -1]), 
             [[3], [-2]])
        
     def testTransformArray(self):
@@ -459,13 +463,13 @@ class TestAffine(np_test.TestCase):
         # 1D
         ar1 = numpy.arange(5, dtype=float)
         af = Affine(gl=[[1.]], d=[1.])
-        trans = af.transformArray(array=ar1, origin=[0], cval=50)
+        trans = af.transformArray(array=ar1, center=[0], cval=50)
         np_test.assert_almost_equal(trans, [50,0,1,2,3])
 
         # 1D fractional
         ar1 = numpy.arange(5, dtype=float)
         af = Affine(gl=[[1.]], d=[0.5])
-        trans = af.transformArray(array=ar1, origin=[0], cval=50)
+        trans = af.transformArray(array=ar1, center=[0], cval=50)
         np_test.assert_almost_equal(trans, [50,0.5,1.5,2.5,3.5])
 
        # 2D array
@@ -473,7 +477,7 @@ class TestAffine(np_test.TestCase):
 
         # translation
         af = Affine2D(phi=0, scale=1, d=[0,1])
-        trans = af.transformArray(array=ar2, origin=[0,0], cval=50)
+        trans = af.transformArray(array=ar2, center=[0,0], cval=50)
         desired = numpy.array(
             [[50,0,1,2,3],
              [50,5,6,7,8],
@@ -483,7 +487,7 @@ class TestAffine(np_test.TestCase):
 
         # translation
         af = Affine2D(phi=0, scale=1, d=[0,-1])
-        trans = af.transformArray(array=ar2, origin=[0,0], cval=50)
+        trans = af.transformArray(array=ar2, center=[0,0], cval=50)
         desired = numpy.array(
             [[1,2,3,4,50],
              [6,7,8,9,50],
@@ -493,7 +497,7 @@ class TestAffine(np_test.TestCase):
 
         # translation
         af = Affine2D(phi=0, scale=1, d=[1,-2])
-        trans = af.transformArray(array=ar2, origin=[0,0], cval=50)
+        trans = af.transformArray(array=ar2, center=[0,0], cval=50)
         desired = numpy.array(
             [[50,50,50,50,50],
              [2,3,4,50,50],
@@ -503,7 +507,7 @@ class TestAffine(np_test.TestCase):
 
         # translation float
         af = Affine2D(phi=0, scale=1, d=[0,0.5])
-        trans = af.transformArray(array=ar2, origin=[0,0], cval=50)
+        trans = af.transformArray(array=ar2, center=[0,0], cval=50)
         desired = numpy.array(
             [[50,0.5,1.5,2.5,3.5],
              [50,5.5,6.5,7.5,8.5],
@@ -513,7 +517,7 @@ class TestAffine(np_test.TestCase):
 
         # translation float
         af = Affine2D(phi=0, scale=1, d=[-0.5,0.5])
-        trans = af.transformArray(array=ar2, origin=[0,0], cval=50)
+        trans = af.transformArray(array=ar2, center=[0,0], cval=50)
         desired = numpy.array(
             [[50,3,4,5,6],
              [50,8,9,10,11],
@@ -521,12 +525,12 @@ class TestAffine(np_test.TestCase):
              [50,50,50,50,50]])
         np_test.assert_almost_equal(trans, desired)
 
-        # 2D rotations different origin 
+        # 2D rotations different center 
         af = Affine2D(phi=numpy.pi/2, scale=1)
-        trans = af.transformArray(array=ar2, origin=[0,0], cval=50)
+        trans = af.transformArray(array=ar2, center=[0,0], cval=50)
         np_test.assert_almost_equal(trans[0,:], [0,5,10,15,50])
         np_test.assert_almost_equal(trans[1:4,:], numpy.zeros((3,5))+50)
-        trans = af.transformArray(array=ar2, origin=[2,1], cval=50)
+        trans = af.transformArray(array=ar2, center=[2,1], cval=50)
         desired = numpy.array(
             [[8,13,18,50,50],
              [7,12,17,50,50],
@@ -536,7 +540,7 @@ class TestAffine(np_test.TestCase):
 
         # 2D rotation + translation
         af = Affine2D(phi=numpy.pi/2, scale=1, d=[0,1])
-        trans = af.transformArray(array=ar2, origin=[2,1], cval=50)
+        trans = af.transformArray(array=ar2, center=[2,1], cval=50)
         desired = numpy.array(
             [[3,8,13,18,50],
              [2,7,12,17,50],
@@ -546,7 +550,7 @@ class TestAffine(np_test.TestCase):
         #desired[0,0] = desired[3,0] = desired[3,1] = 50
         np_test.assert_almost_equal(trans[1:3, 1:4], desired[1:3, 1:4])
         af = Affine2D(phi=numpy.pi/2, scale=1, d=[-1,1])
-        trans = af.transformArray(array=ar2, origin=[2,1], cval=50)
+        trans = af.transformArray(array=ar2, center=[2,1], cval=50)
         desired = numpy.array(
             [[2,7,12,17,50],
              [1,6,11,16,50],

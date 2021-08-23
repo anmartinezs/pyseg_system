@@ -83,97 +83,97 @@ eps_cont = 0.1 # nm
 
 ########## Print initial message
 
-print 'Spatial analysis on membrane attached filaments. (v2)'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(output_dir)
-print '\tSlices file: ' + slices_file
-print ''
+print('Spatial analysis on membrane attached filaments. (v2)')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(output_dir))
+print('\tSlices file: ' + slices_file)
+print('')
 
 ######### Process
 
-print '\tLoading XML file with the slices...'
+print('\tLoading XML file with the slices...')
 slices = SliceSet(slices_file)
 
-print '\tLoading XML file with the thresholds...'
+print('\tLoading XML file with the thresholds...')
 thresholds = ThresSliceSet(slices_file)
 
-print '\tTomograms loop:'
+print('\tTomograms loop:')
 
 for (input_pkl, del_coord, pkl_lbl) in zip(input_pkl_l, del_coord_l, pkl_lbl_l):
 
-    print '\t\tLoading the input graph: ' + input_pkl
+    print('\t\tLoading the input graph: ' + input_pkl)
 
-    print '\t\tUnpicking graph...'
+    print('\t\tUnpicking graph...')
     path, fname = os.path.split(input_pkl)
     stem_name, _ = os.path.splitext(fname)
     graph = ps.factory.unpickle_obj(input_pkl)
     graph.compute_graph_gt()
 
-    print '\t\tSlices loop (' + str(slices.get_num_slices()) + ' slices found):'
+    print('\t\tSlices loop (' + str(slices.get_num_slices()) + ' slices found):')
     names = list()
     clouds = list()
     clouds_ids = list()
     modes = list()
     for sl in slices.get_slices_list():
 
-        print '\t\tProcessing slice ' + sl.get_name() + ':'
-        print '\t\t\t-Euclidean distance: (' + sl.get_eu_dst_sign() + ')[' \
-              + str(sl.get_eu_dst_low()) + ', ' + str(sl.get_eu_dst_high()) + '] nm'
-        print '\t\t\t-Geodesic distance: (' + sl.get_geo_dst_sign() + ')[' \
-              + str(sl.get_geo_dst_low()) + ', ' + str(sl.get_geo_dst_high()) + '] nm'
-        print '\t\t\t-Geodesic length: (' + sl.get_geo_len_sign() + ')[' \
-              + str(sl.get_geo_len_low()) + ', ' + str(sl.get_geo_len_high()) + '] nm'
-        print '\t\t\t-Sinuosity: (' + sl.get_sin_sign() + ')[' \
-              + str(sl.get_sin_low()) + ', ' + str(sl.get_sin_high()) + '] nm'
-        print '\t\t\t-Cluster number of points: (' + sl.get_cnv_sign() + ')[' \
-              + str(sl.get_cnv_low()) + ', ' + str(sl.get_cnv_high()) + ']'
+        print('\t\tProcessing slice ' + sl.get_name() + ':')
+        print('\t\t\t-Euclidean distance: (' + sl.get_eu_dst_sign() + ')[' \
+              + str(sl.get_eu_dst_low()) + ', ' + str(sl.get_eu_dst_high()) + '] nm')
+        print('\t\t\t-Geodesic distance: (' + sl.get_geo_dst_sign() + ')[' \
+              + str(sl.get_geo_dst_low()) + ', ' + str(sl.get_geo_dst_high()) + '] nm')
+        print('\t\t\t-Geodesic length: (' + sl.get_geo_len_sign() + ')[' \
+              + str(sl.get_geo_len_low()) + ', ' + str(sl.get_geo_len_high()) + '] nm')
+        print('\t\t\t-Sinuosity: (' + sl.get_sin_sign() + ')[' \
+              + str(sl.get_sin_low()) + ', ' + str(sl.get_sin_high()) + '] nm')
+        print('\t\t\t-Cluster number of points: (' + sl.get_cnv_sign() + ')[' \
+              + str(sl.get_cnv_low()) + ', ' + str(sl.get_cnv_high()) + ']')
         if sl.get_cont():
-            print '\t\t\t-Contact points mode active.'
+            print('\t\t\t-Contact points mode active.')
             cloud, cloud_ids, mask = graph.get_cloud_mb_slice(sl, cont_mode=True)
-            print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+            print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
             modes.append(True)
         else:
             modes.append(False)
             if sl.get_fil():
-                print '\t\t\t-Filament vertex mode active.'
+                print('\t\t\t-Filament vertex mode active.')
                 cloud, cloud_ids, mask = graph.get_cloud_mb_slice_fils(sl)
-                print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+                print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
             else:
                 cloud, cloud_ids, mask = graph.get_cloud_mb_slice(sl, cont_mode=False)
-                print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+                print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
 
-        print '\t\tLoop for slice thresholding:'
+        print('\t\tLoop for slice thresholding:')
         for thres in thresholds.get_thres_list():
-            print '\t\t\tProcessing threshold ' + thres.get_name() + ':'
-            print '\t\t\t\t-Property key: ' + thres.get_prop_key()
-            print '\t\t\t\t-Range: [' + str(thres.get_value_low()) + ', ' + str(thres.get_value_high()) + ']'
-            print '\t\t\t\t-Mode: ' + thres.get_mode()
-            print '\t\t\tThresholding ...'
+            print('\t\t\tProcessing threshold ' + thres.get_name() + ':')
+            print('\t\t\t\t-Property key: ' + thres.get_prop_key())
+            print('\t\t\t\t-Range: [' + str(thres.get_value_low()) + ', ' + str(thres.get_value_high()) + ']')
+            print('\t\t\t\t-Mode: ' + thres.get_mode())
+            print('\t\t\tThresholding ...')
             cloud, cloud_ids = graph.slice_vertex_threshold(cloud, cloud_ids, thres)
-            print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+            print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
 
         if plane:
-            print '\t\tProjecting coordinates into a plane...'
+            print('\t\tProjecting coordinates into a plane...')
             cloud = make_plane(cloud, del_coord)
             mask = (mask.sum(axis=del_coord) > 0)
-            print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+            print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
 
-        print '\t\tBuilding statistical analyzer...'
-        print '\t\t\tCurrent number of points: ' + str(len(cloud_ids))
-        print '\t\t\tPrint mask size (n voxels): ' + str(mask.sum())
+        print('\t\tBuilding statistical analyzer...')
+        print('\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
+        print('\t\t\tPrint mask size (n voxels): ' + str(mask.sum()))
         unisp = UniStat(cloud, mask, graph.get_resolution(), name=sl.get_name()+'_'+pkl_lbl)
 
-        print '\t\t\t-Vertices found: ' + str(cloud.shape[0])
+        print('\t\t\t-Vertices found: ' + str(cloud.shape[0]))
         output_sp = stem_name + '_' + sl.get_name() + '_unisp.pkl'
-        print '\t\t\t-Storing spatial analyzer as : ' + output_sp
+        print('\t\t\t-Storing spatial analyzer as : ' + output_sp)
         output_sp = output_dir + '/' + output_sp
         unisp.pickle(output_sp)
         if store_seg:
             output_seg = stem_name + '_' + sl.get_name()
-            print '\t\t\t-Storing slices segmentation with name: ' + output_seg
-            print '\t\t\t\tCurrent number of points: ' + str(len(cloud_ids))
+            print('\t\t\t-Storing slices segmentation with name: ' + output_seg)
+            print('\t\t\t\tCurrent number of points: ' + str(len(cloud_ids)))
             output_seg = output_dir + '/' + output_seg
             if sl.get_side() == MB_SEG_LBL:
                 unisp.save_dense(output_seg+'_d.mrc')
@@ -184,4 +184,4 @@ for (input_pkl, del_coord, pkl_lbl) in zip(input_pkl_l, del_coord_l, pkl_lbl_l):
                 ps.disperse_io.save_vtp(graph.slice_to_vtp(cloud_ids), output_seg+'.vtp')
                 ps.disperse_io.save_numpy(graph.print_slice(cloud_ids, th_den=0, slc=True), output_seg+'.vti')
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

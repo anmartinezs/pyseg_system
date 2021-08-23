@@ -3,10 +3,12 @@
 Tests module serial_em
 
 # Author: Vladan Lucic
-# $Id: test_serial_em.py 1314 2016-06-15 09:56:53Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
 
-__version__ = "$Revision: 1314 $"
+__version__ = "$Revision$"
 
 import os
 from copy import copy, deepcopy
@@ -39,8 +41,8 @@ class TestSerialEM(np_test.TestCase):
         """
         Tests parse_single_mdoc()
         """
-        print os.getcwd()
-        print os.path.split(__file__)
+        print(os.getcwd())
+        print(os.path.split(__file__))
 
         mdoc = os.path.join(
             self.dir, 'stack_original/29.08.14_syn_ctrl01_13.08_tomo01.st.mdoc')

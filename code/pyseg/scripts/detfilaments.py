@@ -27,7 +27,7 @@ import graph_tool.all as gt
 import matplotlib.pyplot as plt
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -61,7 +61,7 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
 
     # Initialization
     if verbose:
-        print '\tInitializing...'
+        print('\tInitializing...')
     work_dir = output_dir + '/disperse'
     disperse = disperse_io.DisPerSe(input_file, work_dir)
     # Manifolds for descending fields with the inverted image
@@ -76,7 +76,7 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
 
     # Disperse
     if verbose:
-        print '\tRunning DisPerSe...'
+        print('\tRunning DisPerSe...')
     if f_update:
         disperse.clean_work_dir()
         disperse.mse(no_cut=False, inv=False)
@@ -87,22 +87,22 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
     pkl_sgraph = work_dir + '/skel_graph.pkl'
     if f_update or (not os.path.exists(pkl_sgraph)):
         if verbose:
-            print '\tBuilding graph...'
+            print('\tBuilding graph...')
         graph = GraphMCF(skel, manifolds, density)
         graph.set_resolution(res)
         graph.build_from_skel()
         if verbose:
-            print '\tAdding geometry...'
+            print('\tAdding geometry...')
         graph.build_vertex_geometry()
         if verbose:
-            print '\tPickling...'
+            print('\tPickling...')
         graph.pickle(pkl_sgraph)
         _, stem = os.path.split(input_file)
         stem, _ = os.path.splitext(stem)
         disperse_io.save_vtp(graph.get_vtp(), output_dir + '/' + stem + '_graph.vtp')
     else:
         if verbose:
-            print '\tUnpickling graph...'
+            print('\tUnpickling graph...')
         graph = unpickle_obj(pkl_sgraph)
 
     # TODO: PROVISIONAL
@@ -120,39 +120,39 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
             graph.remove_vertex(v)
 
     if verbose:
-        print '\tThresholding the graph...'
+        print('\tThresholding the graph...')
     # hold_graph = pcopy.deepcopy(graph)
     if low_t is not None:
         if verbose:
-            print '\t\tLow vertex...'
+            print('\t\tLow vertex...')
         graph.threshold_vertices(STR_FIELD_VALUE, low_t, operator.gt)
         # TODO: just for Anselm's data
         # graph.threshold_vertices(STR_FIELD_VALUE, low_t, operator.lt)
     if high_t is not None:
         if verbose:
-            print '\t\tHigh edge...'
+            print('\t\tHigh edge...')
         graph.threshold_edges(STR_FIELD_VALUE, high_t, operator.gt)
     if len_t is not None:
         if verbose:
-            print '\t\tDiameters...'
+            print('\t\tDiameters...')
         graph.compute_diameters()
         graph.threshold_vertices(STR_GRAPH_DIAM, len_t, operator.lt)
     if rel_t is not None:
         if verbose:
-            print '\t\tRelevance...'
+            print('\t\tRelevance...')
         graph.compute_sgraph_relevance()
         graph.threshold_vertices(STR_GRAPH_RELEVANCE, rel_t, operator.lt)
 
 
     if verbose:
-        print '\tSegmentation...'
+        print('\tSegmentation...')
     seg = graph.print_vertices(property=DPSTR_CELL, th_den=sig)
     # seg = graph.print_vertices(property='cross_corr', th_den=sig)
 
     # TODO: PROVISIONAL
 
     if verbose:
-        print '\tGenerating GT graphs'
+        print('\tGenerating GT graphs')
     gt_graph, vertices_gt = graph.get_gt(id_arr=True)
     try:
         gt_fname = output_dir + '/' + stem + '_gt.pdf'
@@ -200,7 +200,7 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
                   #edge_pen_width=gt_graph.edge_properties[STR_FIELD_VALUE])
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
@@ -217,7 +217,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvdi:o:m:r:C:L:H:R:S:f:s:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -235,8 +235,8 @@ def main(argv):
     sig = None
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -266,47 +266,47 @@ def main(argv):
             verbose = True
 
     if (input_file == '') or (output_dir == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for detecting filaments in a tomogram.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
+            print('Running tool for detecting filaments in a tomogram.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
             if mask_file == '':
-                print '\tMask not used.'
+                print('\tMask not used.')
             else:
-                print '\tMask file: ' + mask_file
+                print('\tMask file: ' + mask_file)
             if f_update:
-                print '\tUpdate disperse: yes'
+                print('\tUpdate disperse: yes')
             else:
-                print '\tUpdate disperse: no'
-            print '\tResolution: ' + str(res) + ' nm'
+                print('\tUpdate disperse: no')
+            print('\tResolution: ' + str(res) + ' nm')
             if cut_t is not None:
-                print '\tPersistence threshold: ' + str(cut_t)
+                print('\tPersistence threshold: ' + str(cut_t))
             if low_t is not None:
-                print '\tLow density maxima threshold: ' + str(low_t)
+                print('\tLow density maxima threshold: ' + str(low_t))
             if high_t is not None:
-                print '\tHigh density minima threshold: ' + str(high_t)
+                print('\tHigh density minima threshold: ' + str(high_t))
             if rel_t is not None:
-                print '\tRelevance threshold: ' + str(rel_t)
+                print('\tRelevance threshold: ' + str(rel_t))
             if len_t is not None:
-                print '\tLength threshold: ' + str(len_t)
-            print '\tOutput segmentation format ' + fmt
-            print '\n'
+                print('\tLength threshold: ' + str(len_t))
+            print('\tOutput segmentation format ' + fmt)
+            print('\n')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_det_filament(input_file, output_dir, fmt, mask_file,  res, cut_t, low_t, high_t, rel_t,
                         len_t, f_update, sig, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed.'
+            print(cmd_name + ' successfully executed.')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

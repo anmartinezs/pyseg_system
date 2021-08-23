@@ -48,43 +48,43 @@ b_npr = 6 # None # Auto
 
 ########## Print initial message
 
-print 'Binning a particles STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
-print '\tOutput STAR file: ' + out_star
-print '\tOutput directory for subvolumes: ' + out_svol_dir
-print '\tBinning parameters:'
-print '\t\t-Subvolume original resolution: ' + str(b_res) + ' nm/vx'
-print '\t\t-Binning factor: ' + str(b_factor)
-print '\t\t-Low pass filter cutoff: ' + str(b_cutoff) + ' nm'
-print '\t\t-Number of processes: ' + str(b_npr)
-print ''
+print('Binning a particles STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + in_star)
+print('\tOutput STAR file: ' + out_star)
+print('\tOutput directory for subvolumes: ' + out_svol_dir)
+print('\tBinning parameters:')
+print('\t\t-Subvolume original resolution: ' + str(b_res) + ' nm/vx')
+print('\t\t-Binning factor: ' + str(b_factor))
+print('\t\t-Low pass filter cutoff: ' + str(b_cutoff) + ' nm')
+print('\t\t-Number of processes: ' + str(b_npr))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input list of STAR files could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input list of STAR files could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tBinning particle subvolumes...'
+print('\tBinning particle subvolumes...')
 try:
     star_out = star.gen_binned_copy(out_svol_dir, bin=b_factor, res=b_res, cutoff=b_cutoff, npr=b_npr)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: binning procedure failed because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: binning procedure failed because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\t\tStoring output STAR file in: ' + out_star
+print('\t\tStoring output STAR file in: ' + out_star)
 star_out.store(out_star)
 
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

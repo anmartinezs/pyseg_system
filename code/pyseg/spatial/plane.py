@@ -23,7 +23,7 @@ except:
     from pyseg import pexceptions
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -292,19 +292,9 @@ def ripley_goreaud(cloud, box, n, max_d):
 # Abstract class for doing the spatial analysis
 ###########################################################################################
 
-class SpA(object):
+class SpA(object, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    # n_samp: number of samples for graphs
-    # n_sim_f: number of simulations for generating F and G functions
-    # p_f: confidence percentile for F and G functions
-    # n_sim_r: number of simulations for Ripley's H
-    # r_max: maximum distance for Ripley's H in nm
-    # r_bord: if 0 (default) border compensation is not active, 1 points inflation mode and
-    #         2 Goreaud
-    # p_h: confidence percentile for Ripleys's H
     def __init__(self, n_samp, n_sim_f, p_f, n_sim_r, r_max, r_bord, p_h):
         self.__n = n_samp
         self.__nsim_f, self.__p_f = n_sim_f, p_f
@@ -385,7 +375,7 @@ class SpA(object):
                                                                           self.__r_max, self.__r_bord,
                                                                           self.__p_h)
         if verbose:
-            print '100%'
+            print('100%')
 
     # Plot into figures the current analysis state
     # block: if True (default False) waits for closing windows for finishing the execution
@@ -506,7 +496,7 @@ class SpA(object):
             box = self.__boxes[i]
             area_h = float((box[2] - box[0]) * (box[3] - box[1]))
             if max_d > math.sqrt(area_h*.5):
-                print WRN_RED + 'Warning (ripleys_H): cloud area small compared with maximum distance'
+                print(WRN_RED + 'Warning (ripleys_H): cloud area small compared with maximum distance')
             weights[i] = area_h
             area += area_h
             if border == 1:
@@ -573,7 +563,7 @@ class SpA(object):
                 cloud_1 = gen_rand_cloud(cloud.shape[0], box)
                 area_h = float((box[2] - box[0]) * (box[3] - box[1]))
                 if max_d > math.sqrt(area_h*.5):
-                    print WRN_RED + 'Warning (rand_ripleys_H): cloud area small compared with maximum distance'
+                    print(WRN_RED + 'Warning (rand_ripleys_H): cloud area small compared with maximum distance')
                 if border == 1:
                     # Inflate point cloud
                     cloud_inf = self.__inflate_2D(cloud_1)
@@ -1165,19 +1155,9 @@ class SetClusters(SpA):
 # Abstract class for doing the spatial analysis of a set of slices
 ###########################################################################################
 
-class SlA(object):
+class SlA(object, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    # box: unique bounding box
-    # n_samp: number of samples for graphs
-    # n_sim_f: number of simulations for generating F and G functions
-    # r_max: maximum distance for Ripley's H in nm
-    # r_bord: if 0 (default) border compensation is not active, 1 points inflation mode and
-    #         2 Goreaud
-    # p_h: confidence percentile for Ripleys's H
-    # p_f: percentile for F and G simulations test, if None (default) tests are not done
     def __init__(self, box, n_samp, n_sim_f, r_max, r_bord, p_f=None):
         self.__box = box
         self.__n = n_samp
@@ -1289,7 +1269,7 @@ class SlA(object):
         self.__ripleys_Hp()
         self.__ripleys_Lp()
         if verbose:
-            print '100%'
+            print('100%')
 
     # Plot into figures the current analysis state
     # block: if True (default False) waits for closing windows for finishing the execution
@@ -2711,7 +2691,7 @@ class SetPairClouds(object):
         # Ripley's crossed metrics
 
         if verbose:
-            print '100%'
+            print('100%')
 
     # Plot into figures the current analysis state
     # block: if True (default False) waits for closing windows for finishing the execution
@@ -3783,7 +3763,7 @@ class GroupClouds(object):
                                                                                           self.__p_f)
 
         if verbose:
-            print '100%'
+            print('100%')
 
     def analyze_2(self, verbose=False):
 
@@ -3841,7 +3821,7 @@ class GroupClouds(object):
         self.__cchp = np.corrcoef(hp_mat)
 
         if verbose:
-            print '100%'
+            print('100%')
 
 
 
@@ -3851,9 +3831,9 @@ class GroupClouds(object):
 
         if len(self.__groups_g) == 0:
             if len(self.__names) == 0:
-                print 'WARNING: no groups added, run insert_group() and analyze_1() first!'
+                print('WARNING: no groups added, run insert_group() and analyze_1() first!')
             else:
-                print 'WARNING: run analyze_1() first!'
+                print('WARNING: run analyze_1() first!')
 
         # Initialization
         fig_count = 0
@@ -3925,9 +3905,9 @@ class GroupClouds(object):
 
         if len(self.__groups_g) == 0:
             if len(self.__names) == 0:
-                print 'WARNING: no groups added, run insert_group() and analyze_1() first!'
+                print('WARNING: no groups added, run insert_group() and analyze_1() first!')
             else:
-                print 'WARNING: run analyze_1() first!'
+                print('WARNING: run analyze_1() first!')
 
         # Initialization
         fig_count = 0
@@ -4000,9 +3980,9 @@ class GroupClouds(object):
 
         if len(self.__groups_h) == 0:
             if len(self.__names) == 0:
-                print 'WARNING: no groups added, run insert_group() and analyze_2() first!'
+                print('WARNING: no groups added, run insert_group() and analyze_2() first!')
             else:
-                print 'WARNING: run analyze_2() first!'
+                print('WARNING: run analyze_2() first!')
 
         # Initialization
         fig_count = 0
@@ -4100,9 +4080,9 @@ class GroupClouds(object):
 
         if len(self.__groups_h) == 0:
             if len(self.__names) == 0:
-                print 'WARNING: no groups added, run insert_group() and analyze_1() first!'
+                print('WARNING: no groups added, run insert_group() and analyze_1() first!')
             else:
-                print 'WARNING: run analyze_2() first!'
+                print('WARNING: run analyze_2() first!')
 
         # Initialization
         fig_count = 0
@@ -4386,7 +4366,7 @@ class GroupPlotter(object):
     def plot(self, block=False):
 
         if len(self.__names) == 0:
-            print 'WARNING: no groups added, call insert_group() first!'
+            print('WARNING: no groups added, call insert_group() first!')
 
         # Initialization
         fig_count = 0
@@ -4428,7 +4408,7 @@ class GroupPlotter(object):
     def store_figs(self, path):
 
         if len(self.__names) == 0:
-            print 'WARNING: no groups added, call insert_group() first!'
+            print('WARNING: no groups added, call insert_group() first!')
 
         # Initialization
         fig_count = 0

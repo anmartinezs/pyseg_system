@@ -62,7 +62,7 @@ def randomize_voxel_mask(vol, mask):
     ids = np.where(mask == False)
     l_ids = len(ids[0])
     rnd_ids = np.random.randint(0, l_ids, size=l_ids)
-    for i in xrange(len(ids[0])):
+    for i in range(len(ids[0])):
         rnd_idx = rnd_ids[i]
         x, y, z = ids[0][i], ids[1][i], ids[2][i]
         rnd_x, rnd_y, rnd_z = ids[0][rnd_idx], ids[1][rnd_idx], ids[2][rnd_idx]
@@ -97,67 +97,67 @@ def add_white_noise(vol, mask, per):
 
 ########## Print initial message
 
-print 'Create a mirrored particles STAR with noise.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + str(in_star)
-print '\tInput mask file: ' + str(in_star)
-print '\tOutput STAR file: ' + str(out_star)
-print '\tOutput directory for subvolumens with noise added: ' + str(out_svols_dir)
-print '\tRandomization settings:'
+print('Create a mirrored particles STAR with noise.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + str(in_star))
+print('\tInput mask file: ' + str(in_star))
+print('\tOutput STAR file: ' + str(out_star))
+print('\tOutput directory for subvolumens with noise added: ' + str(out_svols_dir))
+print('\tRandomization settings:')
 if rd_mode == 'swapping':
-    print '\tMode: swapping'
+    print('\tMode: swapping')
 elif rd_mode == 'white':
-    print '\tWhite noise with percentile: ' + rd_per
+    print('\tWhite noise with percentile: ' + rd_per)
 else:
-    print 'ERROR: mode for randomization ' + rd_mode + ' not recognized!'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: mode for randomization ' + rd_mode + ' not recognized!')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-print ''
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input mask...'
+print('\tLoading input mask...')
 try:
     mask = ps.disperse_io.load_tomo(in_mask) > 0
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input mask file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input mask file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 svol_sp = np.asarray(mask.shape, dtype=np.int)
 svol_sp2 = int(.5 * svol_sp[0])
 svol_cent = np.asarray((svol_sp2, svol_sp2, svol_sp2), dtype=np.float32)
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input list of STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input list of STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star_out = np.copy(star)
 
 if not os.path.exists(out_svols_dir):
     os.makedirs(out_svols_dir)
 
-print '\tLoop for input STAR files:'
+print('\tLoop for input STAR files:')
 for row in range(star.get_nrows()):
 
     svol_fname = star.get_element('_rlnImageName', row)
-    print '\t\t-Processing subvolume: ' + svol_fname
+    print('\t\t-Processing subvolume: ' + svol_fname)
 
-    print '\t\t\t+Loading...'
+    print('\t\t\t+Loading...')
     svol = ps.disperse_io.load_tomo(svol_fname)
     if svol.shape != mask.shape:
-        print 'ERROR: particle and mask dimension does not agree!'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: particle and mask dimension does not agree!')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 
-    print '\t\t\t+Transforming to mask space...'
+    print('\t\t\t+Transforming to mask space...')
     try:
         shift_x, shift_y, shift_z = star.get_element('_rlnOriginX', row), star.get_element('_rlnOriginY', row), \
                                     star.get_element('_rlnOriginZ', row)
@@ -173,13 +173,13 @@ for row in range(star.get_nrows()):
     except KeyError:
         angs = None
 
-    print '\t\t\t+Adding noise in background...'
+    print('\t\t\t+Adding noise in background...')
     if rd_mode == 'swapping':
         svol_noise = randomize_voxel_mask(svol, mask)
     elif rd_mode == 'white':
         svol_noise = add_white_noise(svol, mask, rd_per)
 
-    print '\t\t\t+Transforming back to original space...'
+    print('\t\t\t+Transforming back to original space...')
     if angs is not None:
         r3d_inv = pyto.geometry.Rigid3D()
         r3d_inv.q = r3d_inv.make_r_euler(angles=np.radians(angs), mode='zyz_in_pasive')
@@ -188,13 +188,13 @@ for row in range(star.get_nrows()):
         svol_noise = ps.globals.tomo_shift(svol_noise, (-shift_y, -shift_x, -shift_z))
 
     svol_fname_out = out_svols_dir + '/' + os.path.splitext(os.path.split(svol_fname)[1])[0] + '_noise.mrc'
-    print '\t\t\t+Storing output: ' + svol_fname_out
+    print('\t\t\t+Storing output: ' + svol_fname_out)
     ps.disperse_io.save_numpy(svol_noise, svol_fname_out)
 
-    print '\t\t\t+Adding entry to mirror STAR file...'
+    print('\t\t\t+Adding entry to mirror STAR file...')
     star.set_element('_rlnImageName', row, svol_fname_out)
 
-print 'Storing output STAR file in: ' + out_star
+print('Storing output STAR file in: ' + out_star)
 star_out.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

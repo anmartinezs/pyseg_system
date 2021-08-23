@@ -7,10 +7,10 @@ Set of specific utilities for processing biological membranes
 
 __author__ = 'Antonio Martinez-Sanchez'
 
-from connectors import CloudMbConn
-from connectors import ConnSubGraph
-from filament import ConnDom
-from filament import MbFilaments
-from graph import MbGraphMCF, SynGraphMCF
+from .connectors import CloudMbConn
+from .connectors import ConnSubGraph
+from .filament import ConnDom
+from .filament import MbFilaments
+from .graph import MbGraphMCF, SynGraphMCF
 # from variables import *
 

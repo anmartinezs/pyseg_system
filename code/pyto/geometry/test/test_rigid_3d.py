@@ -3,10 +3,14 @@
 Tests module rigid_3d
 
 # Author: Vladan Lucic
-# $Id: test_rigid_3d.py 1430 2017-03-24 13:18:43Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1430 $"
+__version__ = "$Revision$"
 
 #from copy import copy, deepcopy
 import unittest
@@ -101,21 +105,21 @@ class TestRigid3D(np_test.TestCase):
         """
         
         r3d = Rigid3D(q=np.identity(3))
-        np_test.assert_equal(r3d.d, [0,0,0])
+        np_test.assert_almost_equal(r3d.d, [0,0,0])
         r3d = Rigid3D()
-        np_test.assert_equal(r3d.d, [0,0,0])
+        np_test.assert_almost_equal(r3d.d, [0,0,0])
         r3d = Rigid3D(q=np.identity(3), d=-1)
-        np_test.assert_equal(r3d.d, [-1,-1,-1])
+        np_test.assert_almost_equal(r3d.d, [-1,-1,-1])
         r3d = Rigid3D(q=np.identity(3), d=[1,2,3])
-        np_test.assert_equal(r3d.d, [1,2,3])
+        np_test.assert_almost_equal(r3d.d, [1,2,3])
 
         r3d = Rigid3D(q=np.identity(3))
         r3d.d = [2,3,4]
-        np_test.assert_equal(r3d.d, [2,3,4])
+        np_test.assert_almost_equal(r3d.d, [2,3,4])
         r3d.d = Rigid3D.makeD(2)
-        np_test.assert_equal(r3d.d, [2,2,2])
+        np_test.assert_almost_equal(r3d.d, [2,2,2])
         r3d.d = Rigid3D.makeD(d=[5,4,3])
-        np_test.assert_equal(r3d.d, [5,4,3])
+        np_test.assert_almost_equal(r3d.d, [5,4,3])
 
     def testCompose(self):
         """
@@ -1103,11 +1107,11 @@ class TestRigid3D(np_test.TestCase):
         e_res, s_res = Rigid3D().approx_gl2_to_ck3(x=x, y=y[:2,:], ret='both')
         np_test.assert_almost_equal(s_res, 1.)
         np_test.assert_almost_equal(np.abs(e_res[0]), np.abs(e_euler))
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             ((np.sign(e_res[0]) == np.sign(e_euler)).all() or
              (np.sign(e_res[1]) == np.sign(e_euler)).all() or
              (np.sign(e_res[0]) == -np.sign(e_euler)).all() or
-             (np.sign(e_res[1]) == -np.sign(e_euler))).all(), True)
+             (np.sign(e_res[1]) == -np.sign(e_euler)).all()), True)
 
         # arbitrary rotation, euler
         euler = np.array([100, 80, -170.]) * np.pi / 180
@@ -1117,7 +1121,7 @@ class TestRigid3D(np_test.TestCase):
         e_res, s_res = Rigid3D().approx_gl2_to_ck3(x=x, y=y[:2,:], ret='both')
         np_test.assert_almost_equal(s_res, 35.)
         np_test.assert_almost_equal(np.abs(e_res[0]), np.abs(e_euler))
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             ((np.sign(e_res[0]) == np.sign(e_euler)).all() or
              (np.sign(e_res[1]) == np.sign(e_euler)).all() or
              (np.sign(e_res[0]) == -np.sign(e_euler)).all() or
@@ -1132,11 +1136,11 @@ class TestRigid3D(np_test.TestCase):
         e_res, s_res = Rigid3D().approx_gl2_to_ck3(x=x, y=y[:2,:], ret='both')
         np_test.assert_almost_equal(s_res, 1.)
         np_test.assert_almost_equal(np.abs(e_res[0]), np.abs(e_euler))
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             ((np.sign(e_res[0]) == np.sign(e_euler)).all() or
              (np.sign(e_res[1]) == np.sign(e_euler)).all() or
              (np.sign(e_res[0]) == -np.sign(e_euler)).all() or
-             (np.sign(e_res[1]) == -np.sign(e_euler))).all(), True)
+             (np.sign(e_res[1]) == -np.sign(e_euler)).all()), True)
 
         # arbitrary rotation, ck params, theta > pi/2
         e = np.array([-0.3, 0.7, 0.6, np.sqrt(0.06)])
@@ -1149,11 +1153,11 @@ class TestRigid3D(np_test.TestCase):
         e_flipped = Rigid3D.euler_to_ck(euler_flipped)
         np_test.assert_almost_equal(s_res, 1)
         np_test.assert_almost_equal(np.abs(e_res[0]), np.abs(e_flipped))
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             ((np.sign(e_res[0]) == np.sign(e_flipped)).all() or
              (np.sign(e_res[1]) == np.sign(e_flipped)).all() or
              (np.sign(e_res[0]) == -np.sign(e_flipped)).all() or
-             (np.sign(e_res[1]) == -np.sign(e_flipped))).all(), True)
+             (np.sign(e_res[1]) == -np.sign(e_flipped)).all()), True)
 
         # arbitrary rotation, ck params + scale, theta > pi/2
         e = np.array([-0.3, 0.7, 0.6, np.sqrt(0.06)])
@@ -1166,11 +1170,11 @@ class TestRigid3D(np_test.TestCase):
         e_flipped = Rigid3D.euler_to_ck(euler_flipped)
         np_test.assert_almost_equal(s_res, 4.6)
         np_test.assert_almost_equal(np.abs(e_res[0]), np.abs(e_flipped))
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             ((np.sign(e_res[0]) == np.sign(e_flipped)).all() or
              (np.sign(e_res[1]) == np.sign(e_flipped)).all() or
              (np.sign(e_res[0]) == -np.sign(e_flipped)).all() or
-             (np.sign(e_res[1]) == -np.sign(e_flipped))).all(), True)
+             (np.sign(e_res[1]) == -np.sign(e_flipped)).all()), True)
 
     def test_gl2_to_ck3(self):
         """
@@ -1502,10 +1506,10 @@ class TestRigid3D(np_test.TestCase):
         angles = [-1.3, 0.9, 0.4]
         e = Rigid3D.euler_to_ck(angles, mode='zxz_ex_active')
         desired = [
-            np.cos(-0.9/2.) * np.cos(0.9/2.),
-            np.cos(1.7/2.) * np.sin(0.9/2.),
-            np.sin(1.7/2.) * np.sin(0.9/2.),
-            np.sin(-0.9/2.) * np.cos(0.9/2.)]
+            np.cos(-0.9/2) * np.cos(0.9/2),
+            np.cos(1.7/2.) * np.sin(0.9/2),
+            np.sin(1.7/2.) * np.sin(0.9/2),
+            np.sin(-0.9/2) * np.cos(0.9/2)]
         np_test.assert_almost_equal(e, desired)
 
         # compare r, 'zxz_ex_active'
@@ -1519,10 +1523,10 @@ class TestRigid3D(np_test.TestCase):
         angles = [-1.3, 0.9, 0.4]
         e = Rigid3D.euler_to_ck(angles, mode='zyz_ex_active')
         desired = [
-            np.cos(-0.9/2.) * np.cos(0.9/2.),
-            np.cos((1.7 + np.pi)/2.) * np.sin(0.9/2.),
-            np.sin((1.7 + np.pi)/2.) * np.sin(0.9/2.),
-            np.sin(-0.9/2.) * np.cos(0.9/2.)]
+            np.cos(-0.9/2) * np.cos(0.9/2),
+            np.cos((1.7 + np.pi)/2.) * np.sin(0.9/2),
+            np.sin((1.7 + np.pi)/2.) * np.sin(0.9/2),
+            np.sin(-0.9/2) * np.cos(0.9/2)]
         np_test.assert_almost_equal(e, desired)
 
         # compare r, 'zyz_ex_active'
@@ -1591,7 +1595,7 @@ class TestRigid3D(np_test.TestCase):
             res = Rigid3D.make_random_ck(
                 center=[1., 0, 0, 0], distance=distance)
             np_test.assert_almost_equal(np.square(res).sum(), 1)
-            np_test.assert_almost_equal((res[1:] <= distance).all(), True)
+            np_test.assert_equal((res[1:] <= distance).all(), True)
 
             # arbitrary center
             distance = 0.1
@@ -1605,7 +1609,7 @@ class TestRigid3D(np_test.TestCase):
                 r=r_rt_res, ret='one', mode='x')
             rt_res = Rigid3D.euler_to_ck(rt_res_euler)
             np_test.assert_almost_equal(np.square(rt_res).sum(), 1)
-            np_test.assert_almost_equal((rt_res[1:] <= distance).all(), True)
+            np_test.assert_equal((rt_res[1:] <= distance).all(), True)
 
     def test_transform(self):
         """
@@ -1770,14 +1774,14 @@ class TestRigid3D(np_test.TestCase):
              [0,0,0,0,0]])
         pi = np.pi
 
-        # no rotation, origin at 0
+        # no rotation, center at 0
         r3d = Rigid3D(q=np.identity(3))
-        transd = r3d.transformArray(array=gg, origin=[0,0,0])
+        transd = r3d.transformArray(array=gg, center=[0,0,0])
         np_test.assert_almost_equal(transd, gg)
 
-        # no rotation, origin at something
+        # no rotation, center at something
         r3d = Rigid3D(q=np.identity(3))
-        transd = r3d.transformArray(array=gg, origin=[2,3,4])
+        transd = r3d.transformArray(array=gg, center=[2,3,4])
         np_test.assert_almost_equal(transd[4,2:7,2:7], gg[4,2:7,2:7])
 
         # phi = pi/2, zxz_ex_active
@@ -1790,7 +1794,7 @@ class TestRigid3D(np_test.TestCase):
              [1,2,3,4,5],
              [0,0,0,0,0],
              [0,0,0,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1804,7 +1808,7 @@ class TestRigid3D(np_test.TestCase):
              [1,2,3,4,5],
              [0,0,0,0,0],
              [0,0,0,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1818,7 +1822,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[4,2:7,2:7], desired)
 
@@ -1833,7 +1837,7 @@ class TestRigid3D(np_test.TestCase):
              [5,4,3,2,1],
              [0,0,0,0,0],
              [0,0,0,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,2:7,4], desired)
 
@@ -1848,7 +1852,7 @@ class TestRigid3D(np_test.TestCase):
              [1,2,3,4,5],
              [0,0,0,0,0],
              [0,0,0,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,2:7,4], desired)
 
@@ -1863,7 +1867,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,4,0,0],
              [0,0,5,6,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1878,7 +1882,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1892,7 +1896,7 @@ class TestRigid3D(np_test.TestCase):
              [1,2,3,4,5],
              [0,0,0,0,0],
              [0,0,0,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,2:7,4], desired)
 
@@ -1906,7 +1910,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1920,7 +1924,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1934,7 +1938,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1948,7 +1952,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,4,2:7], desired)
 
@@ -1963,7 +1967,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,2:7,4], desired)
 
@@ -1978,7 +1982,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[2:7,2:7,4], desired)
 
@@ -1993,7 +1997,7 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[4,2:7,2:7], desired)
 
@@ -2008,11 +2012,103 @@ class TestRigid3D(np_test.TestCase):
              [0,0,3,0,0],
              [0,0,2,0,0],
              [0,0,1,0,0]])
-        transd = r3d.transformArray(array=gg, origin=[4,4,4])
+        transd = r3d.transformArray(array=gg, center=[4,4,4])
         np_test.assert_almost_equal(transd[4,4,4], 3)
         np_test.assert_almost_equal(transd[4,2:7,2:7], desired)
 
- 
+    def testShiftCenter(self):
+        """
+        Tests Affine.shiftCenter() and indirectly Affine.resetCenter()
+        and transform()
+        """
+
+        # rotation and scale
+        center = [1, 2, 0]
+        q = Rigid3D.make_r_euler(angles=(np.pi/2, 0, 0))
+        ct_1 = Rigid3D(q=q, scale=5, d=[3,-1,2])
+        ct_or = ct_1.shiftCenter(center=center)
+        np_test.assert_almost_equal(ct_or.center, center)
+        np_test.assert_almost_equal(ct_or.gl, ct_1.gl)
+        np_test.assert_almost_equal(ct_or.d, [-8, 2, 2])
+
+        # check shift_center and reset_center are complementary
+        ct_2 = ct_or.resetCenter(center=center)
+        np_test.assert_almost_equal(ct_2.gl, ct_1.gl)
+        np_test.assert_almost_equal(ct_2.d, ct_1.d)
+
+        # transform points
+        points = [[1,2,3], [-2.3,1, 4.9], [-3.4,-2,3]]
+        p1 = ct_1.transform(points, xy_axes='point_dim')
+        por = ct_or.transform(points, center=center, xy_axes='point_dim')
+        p2 = ct_2.transform(points, xy_axes='point_dim')
+        np_test.assert_almost_equal(p1, por)
+        np_test.assert_almost_equal(p2, por)
+        
+        # genaral transformation
+        q = Rigid3D.make_r_euler(angles=(-np.pi/2, np.pi/6, np.pi/3))
+        center = [1.5, -3.7, 3.2]
+        ct_1 = Rigid3D(q=q, scale=3.4, d=[-2.3, 5.1, 2.1])
+        ct_or = ct_1.shift_center(center=center)
+        ct_2 = ct_or.reset_center(center=center)
+        np_test.assert_almost_equal(ct_or.center, center)
+        np_test.assert_almost_equal(ct_or.gl, ct_1.gl)
+        np_test.assert_almost_equal(ct_or.gl, ct_2.gl)
+
+        # transform points
+        points = [[0,2.1,0.3], [2.4,-4.1,4.9], [-3.2,-5,3.5]]
+        p1 = ct_1.transform(points, xy_axes='point_dim')
+        por = ct_or.transform(points, center=center, xy_axes='point_dim')
+        p2 = ct_2.transform(points, xy_axes='point_dim')
+        np_test.assert_almost_equal(p1, por)
+        np_test.assert_almost_equal(p2, por)
+        
+    def testResetCenter(self):
+        """
+        Tests Affine.resetCenter() and indirectly Affine.shiftCenter()
+        and transform()
+        """
+
+        # rotation and scale
+        center = [1, 2, 0]
+        q = Rigid3D.make_r_euler(angles=(np.pi/2, 0, 0))
+        ct_or = Rigid3D(q=q, scale=5, d=[-8,2,2])
+        ct = ct_or.resetCenter(center=center)
+        np_test.assert_almost_equal(
+            (ct.center==None) or (ct.center==0), True)
+        np_test.assert_almost_equal(ct_or.gl, ct.gl)
+        np_test.assert_almost_equal(ct.d, [3, -1, 2])
+
+        # check shift_center and reset_center are complementary
+        ct_or_2 = ct.shiftCenter(center=center)
+        np_test.assert_almost_equal(ct_or_2.gl, ct_or.gl)
+        np_test.assert_almost_equal(ct_or_2.d, ct_or.d)
+        
+        # transform points
+        points = [[5,-2,3.4], [-4.3,1.2, -9], [-3.8,-2.3,-1]]
+        por = ct_or.transform(points, center=center, xy_axes='point_dim')
+        pp = ct.transform(points, xy_axes='point_dim')
+        por2 = ct_or_2.transform(points, center=center, xy_axes='point_dim')
+        np_test.assert_almost_equal(pp, por)
+        np_test.assert_almost_equal(por2, por)
+        
+        # genaral transformation
+        q = Rigid3D.make_r_euler(angles=(-np.pi/2, np.pi/6, np.pi/3))
+        center = [1.5, -3.7, 3.2]
+        ct_or = Rigid3D(q=q, scale=3.4, d=[-2.3, 5.1, 2.1])
+        ct = ct_or.reset_center(center=center)
+        ct_or_2 = ct.shift_center(center=center)
+        np_test.assert_almost_equal(ct_or_2.center, center)
+        np_test.assert_almost_equal(ct_or.gl, ct.gl)
+        np_test.assert_almost_equal(ct_or.gl, ct_or_2.gl)
+
+        # transform points
+        points = [[0,2.1,0.3], [2.4,-4.1,4.9], [-3.2,-5,3.5]]
+        por = ct_or.transform(points, center=center, xy_axes='point_dim')
+        pp = ct.transform(points, xy_axes='point_dim')
+        por2 = ct_or_2.transform(points, center=center, xy_axes='point_dim')
+        np_test.assert_almost_equal(pp, por)
+        np_test.assert_almost_equal(por2, por)
+        
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestRigid3D)

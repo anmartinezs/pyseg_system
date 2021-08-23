@@ -102,9 +102,9 @@ def fil_max_persistence(coords, mx_ang=90., l_iter=0):
 
     # compute persistence
     try:
-        print 'L=' + str(inc_s) + ', ang=' + str(math.degrees(hold_ang)) + ', cos=' + str(math.cos(hold_ang)) + \
-            ', log=' + str(math.log(math.cos(hold_ang))) + ', per=' + str(-inc_s/math.log(math.cos(hold_ang)))
-        print 'Nsteps ' + str(count) + ' of ' + str(nc-1)
+        print('L=' + str(inc_s) + ', ang=' + str(math.degrees(hold_ang)) + ', cos=' + str(math.cos(hold_ang)) + \
+            ', log=' + str(math.log(math.cos(hold_ang))) + ', per=' + str(-inc_s/math.log(math.cos(hold_ang))))
+        print('Nsteps ' + str(count) + ' of ' + str(nc-1))
         return -inc_s/math.log(math.cos(hold_ang)), inc_s
     except ValueError:
         return 0., 0.
@@ -166,7 +166,7 @@ def find_prop_peaks(graph, prop_key_v, prop_key_e, th, ns, nn, prop_key_a=None, 
         id_s = np.argmax(v_vals)
 
         if graph.vp[DPSTR_CELL][graph.vertex(id_s)] == 94576:
-            print 'Jol'
+            print('Jol')
 
         v = graph.vertex(id_s)
         dists = dists_map[v].get_array()
@@ -195,7 +195,7 @@ def find_prop_peaks(graph, prop_key_v, prop_key_e, th, ns, nn, prop_key_a=None, 
                 for n_id in n_ids:
 
                     if graph.vp[DPSTR_CELL][graph.vertex(n_id)] == 94576:
-                        print 'Jol'
+                        print('Jol')
 
                     v_vals[n_id] = mn
                     p_lut[n_id] = True
@@ -593,7 +593,7 @@ class GraphGT(object):
             id_dst_mat = np.invert(id_dst_mat)
             preference = np.median(dst_mat[id_dst_mat])
             if verbose:
-                print 'GraphGT.aff_propagation(): Preference computed: ' + str(preference)
+                print('GraphGT.aff_propagation(): Preference computed: ' + str(preference))
         del id_dst_mat
         aff = AffinityPropagation(damping=damp,
                                   convergence_iter=conv_iter,
@@ -608,7 +608,7 @@ class GraphGT(object):
         # Labels
         n_labels = aff.labels_.max()
         if verbose:
-            print 'GraphGT.aff_propagation(): Number of clusters found: ' + str(n_labels)
+            print('GraphGT.aff_propagation(): Number of clusters found: ' + str(n_labels))
         if rand and (n_labels > 0):
             lut_rand = np.random.randint(0, n_labels, len(aff.labels_))
             array = self.__graph.vertex_properties[STR_AFF_CLUST].get_array()
@@ -1342,7 +1342,7 @@ class GraphGT(object):
         for s in self.__graph.vertices():
 
             if vtp_p is not None:
-                print str(count) + ' of ' + str(nv)
+                print(str(count) + ' of ' + str(nv))
                 count += 1
 
             # Getting neighbours
@@ -2015,7 +2015,7 @@ class GraphGT(object):
         count = 0
         for s_id in s_ids:
             count += 1
-            print str(count) + ' of ' + str(len(s_ids))
+            print(str(count) + ' of ' + str(len(s_ids)))
             s = graph.vertex(s_id)
             dist_map, p_map = gt.shortest_distance(graph, source=s, weights=prop_e_d, max_dist=dist_max,
                                                    pred_map=True)
@@ -2070,8 +2070,8 @@ class GraphGT(object):
             count += 1
 
         if count == m:
-            print >> sys.stderr, 'WARNING (GraphGT, __onthefly_solver): Maximum number of ' \
-                                 'iterations reached.'
+            print('WARNING (GraphGT, __onthefly_solver): Maximum number of ' \
+                                 'iterations reached.', file=sys.stderr)
 
         return p_s_1
 

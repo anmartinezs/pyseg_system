@@ -26,7 +26,7 @@ from factory import unpickle_obj
 from factory import GraphsScalarMask
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -60,7 +60,7 @@ def do_core_grow(input_file, output_dir, fmt, scalar_file=None, mask_file=None, 
 
     # Initialization
     if verbose:
-        print '\tInitializing...'
+        print('\tInitializing...')
     work_dir = output_dir + '/disperse'
     disperse = disperse_io.DisPerSe(input_file, work_dir)
     # Manifolds for descending fields with the inverted image
@@ -75,7 +75,7 @@ def do_core_grow(input_file, output_dir, fmt, scalar_file=None, mask_file=None, 
 
     # Disperse
     if verbose:
-        print '\tRunning DisPerSe...'
+        print('\tRunning DisPerSe...')
     if f_update:
         disperse.clean_work_dir()
         disperse.mse(no_cut=False, inv=False)
@@ -86,26 +86,26 @@ def do_core_grow(input_file, output_dir, fmt, scalar_file=None, mask_file=None, 
     pkl_sgraph = work_dir + '/skel_graph.pkl'
     if f_update or (not os.path.exists(pkl_sgraph)):
         if verbose:
-            print '\tBuilding graph...'
+            print('\tBuilding graph...')
         graph = GraphMCF(skel, manifolds, density)
         graph.set_resolution(res)
         graph.build_from_skel()
         if verbose:
-            print '\tAdding geometry...'
+            print('\tAdding geometry...')
         graph.build_vertex_geometry()
         if verbose:
-            print '\tPickling...'
+            print('\tPickling...')
         graph.pickle(pkl_sgraph)
         _, stem = os.path.split(input_file)
         stem, _ = os.path.splitext(stem)
         disperse_io.save_vtp(graph.get_vtp(), output_dir + '/' + stem + '_graph.vtp')
     else:
         if verbose:
-            print '\tUnpickling graph...'
+            print('\tUnpickling graph...')
         graph = unpickle_obj(pkl_sgraph)
 
     if verbose:
-        print '\tMasking with the scalar field...'
+        print('\tMasking with the scalar field...')
     field = disperse_io.load_tomo(scalar_file)
     factor = GraphsScalarMask(graph, field, FIELD_NAME)
     factor.gen_core_graph(scalar_t, operator.gt)
@@ -114,12 +114,12 @@ def do_core_grow(input_file, output_dir, fmt, scalar_file=None, mask_file=None, 
     ext_g = factor.get_ext_graph()
 
     if verbose:
-        print '\tSegmentation...'
+        print('\tSegmentation...')
     seg_core = core_g.print_vertices(property=DPSTR_CELL, th_den=sig)
     seg_ext = ext_g.print_vertices(property=DPSTR_CELL, th_den=sig)
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
@@ -136,7 +136,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvdi:o:m:n:r:S:C:s:g:f:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -153,8 +153,8 @@ def main(argv):
     max_dist = 0
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -182,41 +182,41 @@ def main(argv):
             verbose = True
 
     if (input_file == '') or (output_dir == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for getting core and extended graphs.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
+            print('Running tool for getting core and extended graphs.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
             if scalar_file == '':
-                print '\tScalar field not used.'
+                print('\tScalar field not used.')
             else:
-                print '\tScalar field file: ' + scalar_file
+                print('\tScalar field file: ' + scalar_file)
             if f_update:
-                print '\tUpdate disperse: yes'
+                print('\tUpdate disperse: yes')
                 if cut_t is not None:
-                    print '\tPersistence threshold: ' + str(cut_t)
+                    print('\tPersistence threshold: ' + str(cut_t))
             else:
-                print '\tUpdate disperse: no'
-            print '\tResolution: ' + str(res) + ' nm'
+                print('\tUpdate disperse: no')
+            print('\tResolution: ' + str(res) + ' nm')
             if scalar_t is not None:
-                print '\tScalar field threshold threshold: ' + str(scalar_t)
-            print '\tOutput segmentation format ' + fmt
-            print '\n'
+                print('\tScalar field threshold threshold: ' + str(scalar_t))
+            print('\tOutput segmentation format ' + fmt)
+            print('\n')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_core_grow(input_file, output_dir, fmt, scalar_file, mask_file, res, cut_t, scalar_t,
                      max_dist, f_update, sig, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed.'
+            print(cmd_name + ' successfully executed.')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

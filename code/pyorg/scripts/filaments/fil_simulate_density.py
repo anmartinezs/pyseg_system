@@ -22,7 +22,7 @@ from pyorg.globals import unpickle_obj, clean_dir, relion_norm
 from pyorg.surf.model import ModelFilsRSR
 from pyorg.surf.filaments import TomoFilaments, ListTomoFilaments, SetListTomoFilaments
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -38,7 +38,7 @@ ROOT_PATH = '/fs/pool/pool-ruben/antonio/filaments'
 
 # Input STAR files
 in_star = None # ROOT_PATH + '/ltomos/fil_den_ps1.408/fil_den_ps1.408_ltomos.star'
-# Only used if in_star != None
+# Only used if in_star is not None
 in_tomo_sz = (1000, 1000, 1000) # (200, 200, 100)
 in_tomo_res = 0.704 # nm/px
 in_tomo_frad = 15 # nm
@@ -69,63 +69,63 @@ sm_max_fils = 200 # 100 # None
 
 ########## Print initial message
 
-print 'Simulates density tomograms from a reference list of filament networkds.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
+print('Simulates density tomograms from a reference list of filament networkds.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
 if in_star is None:
-    print '\tSimulating tomograms with size: ' + str(in_tomo_sz) + ' px'
+    print('\tSimulating tomograms with size: ' + str(in_tomo_sz) + ' px')
 else:
-    print '\tInput STAR file for filaments: ' + str(in_star)
-    print '\t-Tomogram pixel size: ' + str(in_tomo_res) + ' nm/px'
-    print '\t-Filament radius: ' + str(in_tomo_frad) + ' nm'
-print '\tFilament settings: '
-print '\t\t-Input 2D axial density file: ' + str(fl_den_2d)
+    print('\tInput STAR file for filaments: ' + str(in_star))
+    print('\t-Tomogram pixel size: ' + str(in_tomo_res) + ' nm/px')
+    print('\t-Filament radius: ' + str(in_tomo_frad) + ' nm')
+print('\tFilament settings: ')
+print('\t\t-Input 2D axial density file: ' + str(fl_den_2d))
 if fl_den_inv:
-    print '\t\t-Invert model density values.'
-print '\t\t-Filament pitch: ' + str(fl_pitch) + ' nm'
-print '\tTomogram settings: '
+    print('\t\t-Invert model density values.')
+print('\t\t-Filament pitch: ' + str(fl_pitch) + ' nm')
+print('\tTomogram settings: ')
 if tm_snr_rg is None:
-    print '\t\t-No noise.'
+    print('\t\t-No noise.')
 else:
-    print '\t\t-SNR range: ' + str(tm_snr_rg) + ' deg'
+    print('\t\t-SNR range: ' + str(tm_snr_rg) + ' deg')
 if tm_mw is None:
-    print '\t\t-No missing wedge.'
+    print('\t\t-No missing wedge.')
 else:
-    print '\t\t-Angle for missing wedge: ' + str(tm_mw) + ' deg'
-    print '\t\t-Maximum tilt angle in XY plane: ' + str(tm_mwta) + ' deg'
-print '\tSimulation settings: '
+    print('\t\t-Angle for missing wedge: ' + str(tm_mw) + ' deg')
+    print('\t\t-Maximum tilt angle in XY plane: ' + str(tm_mwta) + ' deg')
+print('\tSimulation settings: ')
 if sm_ns <= 0:
-    print 'ERROR: The number of input simulations must be greater than zero: ' + str(sm_ns)
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: The number of input simulations must be greater than zero: ' + str(sm_ns))
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-print '\t\t-Number of simulations per input filament network: ' + str(sm_ns)
+print('\t\t-Number of simulations per input filament network: ' + str(sm_ns))
 if sm_max_fils is None:
-    print '\t\t-Maximum number of filament to instert per tomogram: ' + str(sm_max_fils)
-print ''
+    print('\t\t-Maximum number of filament to instert per tomogram: ' + str(sm_max_fils))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
 out_stem_dir = out_dir + '/' + out_stem
-print '\tCleaning the output dir: ' + out_stem
+print('\tCleaning the output dir: ' + out_stem)
 if os.path.exists(out_stem_dir):
     clean_dir(out_stem_dir)
 else:
     os.makedirs(out_stem_dir)
 
 if in_star is not None:
-    print '\tLoading input data...'
+    print('\tLoading input data...')
     star = sub.Star()
     try:
         star.load(in_star)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: input STAR file for filaments could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: input STAR file for filaments could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     set_lists, lists_dic_rows = SetListTomoFilaments(), dict()
     for row in range(star.get_nrows()):
@@ -145,66 +145,66 @@ else:
     set_lists.add_list_tomos(hltomo, '0_void')
     lists_dic_rows['0'] = 0
 
-print '\tBuilding the dictionaries...'
+print('\tBuilding the dictionaries...')
 lists_count, tomos_count = 0, 0
 lists_dic = dict()
 lists_hash, tomos_hash = dict(), dict()
 set_lists_dic = set_lists.get_lists()
-for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
     fkey = os.path.split(lkey)[1]
-    print '\t\t-Processing list: ' + fkey
+    print('\t\t-Processing list: ' + fkey)
     short_key_idx = fkey.index('_')
     short_key = fkey[:short_key_idx]
-    print '\t\t\t+Short key found: ' + short_key
+    print('\t\t\t+Short key found: ' + short_key)
     try:
         lists_dic[short_key]
     except KeyError:
         lists_dic[short_key] = llist
         lists_hash[lists_count] = short_key
         lists_count += 1
-for lkey, llist in zip(set_lists_dic.iterkeys(), set_lists_dic.itervalues()):
+for lkey, llist in zip(iter(set_lists_dic.keys()), iter(set_lists_dic.values())):
     llist_tomos_dic = llist.get_tomos()
-    for tkey, ltomo in zip(llist_tomos_dic.iterkeys(), llist_tomos_dic.itervalues()):
-        if not(tkey in tomos_hash.keys()):
+    for tkey, ltomo in zip(iter(llist_tomos_dic.keys()), iter(llist_tomos_dic.values())):
+        if not(tkey in list(tomos_hash.keys())):
             tomos_hash[tkey] = tomos_count
             tomos_count += 1
 
-print '\tLIST COMPUTING LOOP:'
-for lkey in lists_hash.itervalues():
+print('\tLIST COMPUTING LOOP:')
+for lkey in lists_hash.values():
 
     llist = lists_dic[lkey]
-    print '\t\t-Processing list: ' + lkey
+    print('\t\t-Processing list: ' + lkey)
     hold_row = lists_dic_rows[lkey]
 
-    print '\t\t\t+Tomograms computing loop:'
-    for tkey in tomos_hash.iterkeys():
+    print('\t\t\t+Tomograms computing loop:')
+    for tkey in tomos_hash.keys():
 
-        print '\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1]
+        print('\t\t\t\t*Processing tomogram: ' + os.path.split(tkey)[1])
         try:
             ltomo = llist.get_tomo_by_key(tkey)
         except KeyError:
-            print '\t\t\t\t\t-Tomogram with key ' + tkey + ' is not in the list ' + lkey + ' , continuing...'
+            print('\t\t\t\t\t-Tomogram with key ' + tkey + ' is not in the list ' + lkey + ' , continuing...')
             continue
         if (in_star is not None) and (ltomo.get_num_filaments() <= 0):
-            print '\t\t\t\t\t-WARNING: no filaments to process, continuing...'
+            print('\t\t\t\t\t-WARNING: no filaments to process, continuing...')
             continue
         else:
-            print('\t\t\t\t\t-Number of filaments found: ' + str(ltomo.get_num_filaments()))
+            print(('\t\t\t\t\t-Number of filaments found: ' + str(ltomo.get_num_filaments())))
 
-        print '\tPre-procesing the input 2D density model: '
+        print('\tPre-procesing the input 2D density model: ')
         model_2D = disperse_io.load_tomo(fl_den_2d)
         # model_2D = relion_norm(model_2D, mask=None, inv=fl_den_inv)
         out_den = out_stem_dir + '/' + tkey.replace('/', '_') + '_fl_den_2d.mrc'
-        print '\t\t-Model stored in: ' + out_den
+        print('\t\t-Model stored in: ' + out_den)
         disperse_io.save_numpy(model_2D, out_den)
 
         if ltomo.get_num_filaments() > 0:
-            print '\t\t\t\t\t-Computing filament to membrane nearest distances...'
+            print('\t\t\t\t\t-Computing filament to membrane nearest distances...')
             hold_arr_dsts = ltomo.compute_fils_seg_dsts()
             out_fils = out_stem_dir + '/' + tkey.replace('/', '_') + '_fils.vtp'
             disperse_io.save_vtp(ltomo.gen_filaments_vtp(), out_fils)
 
-        print '\t\t\t\t\t-Simulating the density tomogrms:'
+        print('\t\t\t\t\t-Simulating the density tomogrms:')
         model = ModelFilsRSR(ltomo.get_voi(), res=ltomo.get_resolution(), rad=ltomo.get_fils_radius(),
                              shifts=[0, 0], rots=[0, 0], density_2d=model_2D[:, :, 0])
         den_model = model.gen_fil_straight_density(2*fl_pitch, pitch=fl_pitch, rnd_iang=0)
@@ -214,7 +214,7 @@ for lkey in lists_hash.itervalues():
                                                     snr=None)
         out_stack = out_stem_dir + '/' + tkey.replace('/', '_') + '_fl_stack.mrc'
         disperse_io.save_numpy(stack_model, out_stack)
-        print '\t\t\t\t\t\t+Saved stack in: ' + str(out_stack)
+        print('\t\t\t\t\t\t+Saved stack in: ' + str(out_stack))
         del den_model
         del stack_model
         for i in range(sm_ns):
@@ -222,7 +222,7 @@ for lkey in lists_hash.itervalues():
                 snr = None
             else:
                 snr = np.random.uniform(tm_snr_rg[0], tm_snr_rg[1])
-            print '\t\t\t\t\t\t+SNR: ' + str(snr)
+            print('\t\t\t\t\t\t+SNR: ' + str(snr))
             if ltomo.get_num_filaments() > 0:
                 fil_sim = model.gen_instance_straights('sim_' + str(i), ltomo.get_filaments(), mode='full', max_ntries=100,
                                                        max_fils=sm_max_fils)
@@ -236,5 +236,5 @@ for lkey in lists_hash.itervalues():
             out_den = out_stem_dir + '/' + tkey.replace('/', '_') + '_sim_' + str(i) + '_den.mrc'
             disperse_io.save_numpy(dim_den, out_den)
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')
 

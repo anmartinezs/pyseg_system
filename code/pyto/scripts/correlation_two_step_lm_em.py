@@ -179,10 +179,13 @@ If you use this script, please consider citing:
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: correlation_two_step_lm_em.py 1430 2017-03-24 13:18:43Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+#from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 1430 $"
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -234,7 +237,7 @@ xy_columns = [2, 3]
 # Note: either lm_markers_rows or lm_markers_rows_gl and lm_markers_rows_d need
 # to be specified.
 lm_markers_file = 'correlation_data.dat'
-lm_markers_rows = range(6, 10)
+lm_markers_rows = list(range(6, 10))
 #lm_markers_rows_gl = range(6, 10)
 #lm_markers_rows_d = range(6, 7)
 
@@ -242,7 +245,7 @@ lm_markers_rows = range(6, 10)
 # Note: either overview_markers_rows or overview_markers_rows_gl and 
 # overview_markers_rows_d need to be specified.
 overview_markers_file = lm_markers_file
-overview_markers_rows = range(0, 4)
+overview_markers_rows = list(range(0, 4))
 #overview_markers_rows_gl = range(0, 4)
 #overview_markers_rows_d = range(0, 1)
 
@@ -261,7 +264,7 @@ overview2search_mode = 'move overview'
 
 # EM overview detail
 overview_detail_file = lm_markers_file
-overview_detail_rows = range(13, 17)
+overview_detail_rows = list(range(13, 17))
 
 # Mosaic mode in combination with move overview
 # Notes: 
@@ -314,7 +317,7 @@ overview2search_type = 'gl'
 
 # LM spots file (most often needed)
 lm_spots_file = lm_markers_file
-lm_spots_rows = range(6, 10)
+lm_spots_rows = list(range(6, 10))
 
 # x and y columns in lm_spots_file
 lm_spots_xy_columns = xy_columns
@@ -477,7 +480,7 @@ def write_results(corr, res_file_name):
                     corr.searchFromLmSpots[:,0], corr.searchFromLmSpots[:,1]]
         out_format = ' %3u   %6.2f %6.2f   %6.0f %6.0f   %6.1f %6.1f '
         n_res = corr.lmSpots.shape[0]
-        ids = range(n_res)
+        ids = list(range(n_res))
         res_tab_1 = pyto.io.util.arrayFormat(arrays=out_vars, format=out_format,
                                              indices=ids, prependIndex=True)
         table.extend(res_tab_1)
@@ -500,7 +503,7 @@ def write_results(corr, res_file_name):
             out_vars_overview += [corr.overviewSpotLabels]
             out_format_overview += '  %s '
         n_res = corr.overviewSpots.shape[0]
-        ids = range(n_res)
+        ids = list(range(n_res))
         res_tab_2 = pyto.io.util.arrayFormat(
             arrays=out_vars_overview, format=out_format_overview,
             indices=ids, prependIndex=True)
@@ -524,7 +527,7 @@ def write_results(corr, res_file_name):
             out_vars_search += [corr.searchSpotLabels]
             out_format_search += '  %s '
         n_res = corr.searchSpots.shape[0]
-        ids = range(n_res)
+        ids = list(range(n_res))
         res_tab_2 = pyto.io.util.arrayFormat(
             arrays=out_vars_search, format=out_format_search,
             indices=ids, prependIndex=True)

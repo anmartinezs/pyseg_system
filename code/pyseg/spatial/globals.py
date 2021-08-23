@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import cm
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -217,8 +217,8 @@ class FuncComparator(object):
             plt.ylabel('Insertion')
             plt.pcolor(crs, cmap='jet', vmin=-1, vmax=1)
             plt.colorbar()
-            plt.yticks(np.arange(.5, crs.shape[1]+.5),range(crs.shape[1]))
-            plt.xticks(np.arange(.5, crs.shape[0]+.5),range(crs.shape[0]))
+            plt.yticks(np.arange(.5, crs.shape[1]+.5),list(range(crs.shape[1])))
+            plt.xticks(np.arange(.5, crs.shape[0]+.5),list(range(crs.shape[0])))
 
         # Show
         plt.show(block=block)
@@ -308,8 +308,8 @@ class FuncComparator(object):
             plt.ylabel('Insertion')
             plt.pcolor(crs, cmap='jet', vmin=-1, vmax=1)
             plt.colorbar()
-            plt.yticks(np.arange(.5, crs.shape[1]+.5),range(crs.shape[1]))
-            plt.xticks(np.arange(.5, crs.shape[0]+.5),range(crs.shape[0]))
+            plt.yticks(np.arange(.5, crs.shape[1]+.5),list(range(crs.shape[1])))
+            plt.xticks(np.arange(.5, crs.shape[0]+.5),list(range(crs.shape[0])))
             plt.savefig(path+'/cor.png')
             plt.close()
 

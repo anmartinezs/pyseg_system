@@ -8,9 +8,9 @@ Set of utilities for segmentation and analysis of n-dimensional images.
 __author__ = 'martinez'
 __version__ = "$Revision: 001 $"
 
-import globals
-import pexceptions
-import disperse_io
-import sub
-import surf
-import diff_geom
+from . import globals
+from . import pexceptions
+from . import disperse_io
+from . import sub
+from . import surf
+from . import diff_geom

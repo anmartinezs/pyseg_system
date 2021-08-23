@@ -3,10 +3,13 @@
 Tests module affine_3d
 
 # Author: Vladan Lucic
-# $Id: test_affine_3d.py 1072 2014-11-06 14:07:58Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision: 1072 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -60,8 +63,8 @@ class TestAffine3D(np_test.TestCase):
         np_test.assert_almost_equal(trans, [-2, 1, 3])
 
         # rotations around other axes
-        vector = [0, numpy.sqrt(3) / 2, 1/2.]
-        axis = [0, 1/2., numpy.sqrt(3) / 2]
+        vector = [0, numpy.sqrt(3)/2, 1/2]
+        axis = [0, 1/2, numpy.sqrt(3)/2]
         aff = Affine3D(alpha=numpy.pi, axis=axis, d=0)
         trans = aff.transform(vector)
         np_test.assert_almost_equal(trans, [0, 0, 1.])

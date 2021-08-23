@@ -3,10 +3,12 @@
 Functions related to attribute get/set python built-ins. 
 
 # Author: Vladan Lucic, Max Planck Institute for Biochemistry
-# $Id: attributes.py 334 2008-12-23 11:32:15Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from past.builtins import basestring
 
-__version__ = "$Revision: 334 $"
+__version__ = "$Revision$"
 
 
 def getattr_deep(object, name):
@@ -20,7 +22,7 @@ def getattr_deep(object, name):
     """
     
     # split name in attributes (list)
-    if isinstance(name, str):
+    if isinstance(name, basestring):
         attributes = name.split('.')
     else:
         attributes = name
@@ -65,7 +67,7 @@ def get_deep_name(name, mode='_'):
         name = attributes.pop()
 
     else:
-        raise ValueError, "Argument mode can be '_', or 'last' but not " + mode
+        raise ValueError("Argument mode can be '_', or 'last' but not " + mode)
 
     return name
     

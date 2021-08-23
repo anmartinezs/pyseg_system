@@ -2,11 +2,16 @@
 
 Tests module analysis.connections.
 
-# Author: Vladan Lucic
-# $Id: test_connections.py 1151 2015-05-26 08:52:30Z vladan $
-"""
+Note: The pickles used here (segmentations/*.pkl) are real, except that
+large (image) arrays that are not needed in tests were removed in
+order to fit the GutHub size limit. 
 
-__version__ = "$Revision: 1151 $"
+# Author: Vladan Lucic
+# $Id$
+"""
+from __future__ import unicode_literals
+
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import pickle
@@ -49,16 +54,16 @@ class TestConnections(np_test.TestCase):
             'operator' : {'77_4' : 'emerson', '78_3' : 'lake', 
                           '75_4' : 'palmer'}
             }
-        for ident, name in catalog._db['tether_files'].items():
+        for ident, name in list(catalog._db['tether_files'].items()):
                catalog._db['tether_files'][ident] = os.path.join(dir_, name)
-        for ident, name in catalog._db['sv_files'].items():
+        for ident, name in list(catalog._db['sv_files'].items()):
                catalog._db['sv_files'][ident] = os.path.join(dir_, name)
         catalog.makeGroups()
         self.catalog = catalog
         
         # read tethers and sv
-        self.tether = Connections.read(files=catalog.tether_files, 
-                                       mode='connectors', catalog=catalog)
+        self.tether = Connections.read(
+            files=catalog.tether_files, mode='connectors', catalog=catalog)
         from pyto.analysis.vesicles import Vesicles
         self.sv = Vesicles.read(files=catalog.sv_files, catalog=catalog)
 
@@ -68,7 +73,7 @@ class TestConnections(np_test.TestCase):
                         '78_3': 'segmentations/conn_78-3_AZ_all.pkl'},
             'rim_altered' : {'75_4' : 'segmentations/conn_75-4_AZ_all.pkl'}}
         for categ in tether_files:
-            for ident, name in tether_files[categ].items():
+            for ident, name in list(tether_files[categ].items()):
                tether_files[categ][ident] = os.path.join(dir_, name)
         self.tether_files = tether_files
 

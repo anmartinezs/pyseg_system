@@ -52,62 +52,62 @@ pr_inv = True
 
 ########## Print initial message
 
-print 'Convert a XML particle list into a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput file: ' + str(out_star)
+print('Convert a XML particle list into a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput file: ' + str(out_star))
 in_xml_ext = os.path.splitext(in_xml)[1]
 if in_xml_ext == '.xml':
-    print '\tInput XML file of particles: ' + str(in_xml)
+    print('\tInput XML file of particles: ' + str(in_xml))
 else:
-    print 'ERROR: No valid input format file for particles: ' + str(in_xml_ext)
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: No valid input format file for particles: ' + str(in_xml_ext))
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 if out_svol is not None:
-    print '\tSub-volumes a stored as MRC in folder: ' + str(out_svol)
+    print('\tSub-volumes a stored as MRC in folder: ' + str(out_svol))
 if pr_inv:
-    print '\t\t+Gray values will be inverted.'
+    print('\t\t+Gray values will be inverted.')
 if out_wedge is not None:
-    print '\tAdd the wedge in path: ' + str(out_wedge)
-print '\t\t-Input reference tomogram: ' + str(in_mic)
-print '\tPre-processing: '
+    print('\tAdd the wedge in path: ' + str(out_wedge))
+print('\t\t-Input reference tomogram: ' + str(in_mic))
+print('\tPre-processing: ')
 if pr_swapxy:
-    print '\t\t-Swap X and Y coordinates.'
-print ''
+    print('\t\t-Swap X and Y coordinates.')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input XML file...'
+print('\tLoading input XML file...')
 plist = sub.ParticleList(in_mic)
 try:
     plist.load(in_xml)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input XML file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input XML file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tConverting to STAR file...'
+print('\tConverting to STAR file...')
 star = sub.Star()
 star.from_TomoPeaks(plist, svols_path=out_svol, gray_inv=pr_inv, ctf_path=out_wedge, del_aln=False, ref=out_ref,
                     keep_pytom=False)
 star.add_column('_rlnMicrographName')
-for row in xrange(star.get_nrows()):
+for row in range(star.get_nrows()):
     star.set_element('_rlnMicrographName', row, in_mic)
 
-print '\tSaving output STAR file...'
+print('\tSaving output STAR file...')
 try:
     star.store(out_star)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: output STAR file could not be saved because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: output STAR file could not be saved because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if out_avg is not None:
-    print '\tComputing the average (without considering CTF)...'
+    print('\tComputing the average (without considering CTF)...')
     disperse_io.save_numpy(star.compute_avg(pytom=False), out_avg)
-    print '\t\t-Stored in: ' + str(out_avg)
+    print('\t\t-Stored in: ' + str(out_avg))
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

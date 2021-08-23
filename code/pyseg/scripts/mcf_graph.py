@@ -24,7 +24,7 @@ import scipy as sp
 from pyseg import disperse_io
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -64,7 +64,7 @@ def do_mcf_graph(input_file, output_dir, mask_file=None, res=1, tilt_rot=None, t
     # Pre-processing
     if gsig is not None:
         if verbose:
-            print '\tGaussian filtering for input data...'
+            print('\tGaussian filtering for input data...')
         input_img = disperse_io.load_tomo(input_file)
         flt_img = sp.ndimage.filters.gaussian_filter(input_img, gsig)
         flt_img = lin_map(flt_img, lb=0, ub=1)
@@ -76,7 +76,7 @@ def do_mcf_graph(input_file, output_dir, mask_file=None, res=1, tilt_rot=None, t
 
     # Initialization
     if verbose:
-        print '\tInitializing...'
+        print('\tInitializing...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     if stem_pkl is None:
@@ -100,21 +100,21 @@ def do_mcf_graph(input_file, output_dir, mask_file=None, res=1, tilt_rot=None, t
 
     # Disperse
     if verbose:
-        print '\tRunning DisPerSe...'
+        print('\tRunning DisPerSe...')
     disperse.mse(no_cut=False, inv=False)
     skel = disperse.get_skel()
     manifolds = disperse.get_manifolds(no_cut=False, inv=False)
 
     # Build the GraphMCF for the membrane
     if verbose:
-        print '\tBuilding MCF graph...'
+        print('\tBuilding MCF graph...')
     graph = GraphMCF(skel, manifolds, density)
     graph.set_resolution(res)
     graph.build_from_skel(basic_props=False)
     graph.filter_self_edges()
     graph.filter_repeated_edges()
     if tilt_rot is not None:
-        print '\tDeleting edges in MW area...'
+        print('\tDeleting edges in MW area...')
         graph.filter_mw_edges(tilt_rot, tilt_ang)
     # Filter nodes close to mask border
     mask = disperse_io.load_tomo(mask_file)
@@ -126,7 +126,7 @@ def do_mcf_graph(input_file, output_dir, mask_file=None, res=1, tilt_rot=None, t
     graph.build_vertex_geometry()
 
     if verbose:
-        print '\tComputing graph properties...'
+        print('\tComputing graph properties...')
     graph.compute_edges_length(SGT_EDGE_LENGTH, 1, 1, 1, False)
     graph.compute_edges_length(SGT_EDGE_LENGTH_W, 1, 1, w_z, False)
     graph.compute_edges_length(SGT_EDGE_LENGTH_WTOTAL, 1, 1, w_z, True)
@@ -141,7 +141,7 @@ def do_mcf_graph(input_file, output_dir, mask_file=None, res=1, tilt_rot=None, t
     # graph.compute_sgraph_relevance()
 
     if verbose:
-        print '\tStoring the result as ' + output_dir + '/' + stem_pkl + '.pkl'
+        print('\tStoring the result as ' + output_dir + '/' + stem_pkl + '.pkl')
     disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
     disperse_io.save_numpy(lin_map(density, lb=0, ub=1),
                            output_dir + '/' + stem + '_inv.vti')
@@ -159,7 +159,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvci:o:m:r:a:b:s:w:C:N:S:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -177,8 +177,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -207,48 +207,48 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file == '') or (output_dir == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for getting the graph mcf of a tomogram.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
+            print('Running tool for getting the graph mcf of a tomogram.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
             if mask_file != '':
-                print '\tMask file: ' + mask_file
-            print '\tOutput directory: ' + output_dir
+                print('\tMask file: ' + mask_file)
+            print('\tOutput directory: ' + output_dir)
             if gsig is not None:
-                print '\tPre-processing gaussian with sigma ' + str(gsig)
+                print('\tPre-processing gaussian with sigma ' + str(gsig))
             if cut_t is not None:
-                print '\tPersistence threshold: ' + str(cut_t)
+                print('\tPersistence threshold: ' + str(cut_t))
             elif nsig_t is not None:
-                print '\tPersistence number of sigmas threshold: ' + str(nsig_t)
-            print '\tN times for skeleton smoothing: ' + str(smooth)
-            print '\tResolution: ' + str(res) + ' nm/vox'
+                print('\tPersistence number of sigmas threshold: ' + str(nsig_t))
+            print('\tN times for skeleton smoothing: ' + str(smooth))
+            print('\tResolution: ' + str(res) + ' nm/vox')
             if tilt_rot is not None:
-                print '\tMissing wedge rotation angle ' + str(tilt_rot) + ' deg'
-                print '\tMaximum tilt angle ' + str(tilt_ang) + ' deg'
+                print('\tMissing wedge rotation angle ' + str(tilt_rot) + ' deg')
+                print('\tMaximum tilt angle ' + str(tilt_ang) + ' deg')
             if rob:
-                print '\tRobustness will be computed.'
-            print '\tZ dimension weighting: ' + str(w_z)
-            print ''
+                print('\tRobustness will be computed.')
+            print('\tZ dimension weighting: ' + str(w_z))
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_mcf_graph(input_file, output_dir, mask_file, res, tilt_rot, tilt_ang, cut_t, rob,
                      nsig_t, gsig, w_z, smooth, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

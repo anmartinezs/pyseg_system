@@ -3,10 +3,14 @@ Contains class Labels for general manipulations of an image that contains
 integer values (label field).
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: labels.py 1435 2017-03-27 14:26:36Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import range
 
-__version__ = "$Revision: 1435 $"
+__version__ = "$Revision$"
 
 
 import warnings
@@ -18,7 +22,7 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from struct_el import StructEl
+from .struct_el import StructEl
 import pyto.util.numpy_plus as np_plus
 import pyto.util.nested as nested
 from pyto.core.image import Image 
@@ -499,10 +503,18 @@ class Labels(Image):
             if keep is not None:
                 remove = numpy.setdiff1d(all, keep)
             else:
-                raise ValueError, \
-                      "Either remove or keep argument need to be specified."  
+                raise ValueError(
+                    "Either remove or keep argument need to be specified.")  
 
-        if mode is 'auto':
+        # make remove and keep lists if needed
+        if remove is not None:
+            if not isinstance(remove, (list, tuple, numpy.ndarray)):
+                remove = [remove]
+        if keep is not None:
+            if not isinstance(keep, (list, tuple, numpy.ndarray)):
+                keep = [keep]
+
+        if mode == 'auto':
 
             # decide which mode to use
             if len(remove) <= len(all) * self._remove_or_keep_factor:
@@ -511,7 +523,7 @@ class Labels(Image):
                 mode = 'keep'
         
         # do the work
-        if mode is 'remove':
+        if mode == 'remove':
 
             # check
             if len(remove) == 0:
@@ -539,7 +551,7 @@ class Labels(Image):
             #condition = reduce(xxx, ids, numpy.zeros(data.shape, dtype=bool))
             data[condition] = value
 
-        elif mode is 'keep':
+        elif mode == 'keep':
 
             # determine keep if needed
             if keep is None:
@@ -566,7 +578,7 @@ class Labels(Image):
             data = numpy.where(condition, data, value)
 
         else:
-            raise ValueError, "Mode can be 'auto', 'delete', or 'keep'."
+            raise ValueError("Mode can be 'auto', 'delete', or 'keep'.")
             
         #
         return data
@@ -672,11 +684,11 @@ class Labels(Image):
         # make default order if not given and get new_ids
         if order is None:
             new_ids = numpy.arange(1, ids.shape[0]+1)
-            new_order = dict(zip(ids, new_ids))
+            new_order = dict(list(zip(ids, new_ids)))
         else:
             new_order = order
             if clean:
-                new_ids = numpy.array(new_order.values()).sort()
+                new_ids = numpy.array(list(new_order.values())).sort()
             else:
                 new_ids = None
            
@@ -823,7 +835,7 @@ class Labels(Image):
         sort_list = values.argsort()
 
         # sort segments
-        new_order = dict(zip(self.ids[sort_list], self.ids))
+        new_order = dict(list(zip(self.ids[sort_list], self.ids)))
         self.reorder(new_order)
 
         # sort contacts
@@ -947,8 +959,8 @@ class Labels(Image):
         """
 
         # generate se
-        se = ndimage.generate_binary_structure(rank=self.ndim,
-                                          connectivity=self.contactStructElConn)
+        se = ndimage.generate_binary_structure(
+            rank=self.ndim, connectivity=self.contactStructElConn)
         return se
 
     contactStructEl = property(
@@ -983,8 +995,8 @@ class Labels(Image):
         """
 
         # generate se
-        se = ndimage.generate_binary_structure(rank=self.ndim,
-                                          connectivity=self.countStructElConn)
+        se = ndimage.generate_binary_structure(
+            rank=self.ndim, connectivity=self.countStructElConn)
         return se
 
     countStructEl = property(
@@ -1063,7 +1075,7 @@ class Labels(Image):
                 distance=distance)
            
             # adjust for inset
-            for one_slice, index in zip (inset, range(len(inset))):
+            for one_slice, index in zip (inset, list(range(len(inset)))):
                 coords[:, index] += one_slice.start
                 
             # output format

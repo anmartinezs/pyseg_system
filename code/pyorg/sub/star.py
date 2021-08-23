@@ -13,7 +13,7 @@ import pyto
 import errno
 from pyorg.globals import *
 # from plist import TomoPeaks
-from plist import *
+from .plist import *
 from pyorg import disperse_io
 import numpy as np
 
@@ -44,7 +44,7 @@ def relion_norm(tomo, mask=None):
     if st > 0:
         tomo_out = (hold_tomo-mn) / st
     else:
-        print 'WARNING (relion_norm): standard deviation=' + str(st)
+        print('WARNING (relion_norm): standard deviation=' + str(st))
 
     return tomo_out
 
@@ -78,6 +78,8 @@ class RelionCols(object):
                        '_rlnMaxValueProbDistribution',
                        '_rlnNrOfSignificantSamples',
                        '_rlnRandomSubset',
+                       '_rlnDetectorPixelSize',
+                       '_rlnMagnification',
                        # PySeg: Graph analysis
                        '_psGhMCFPickle',
                        # PySeg: Segmentation
@@ -107,6 +109,8 @@ class RelionCols(object):
                        '_suSurfaceVtpSim',
                        # PyOrg: Microtubules
                        '_mtCenterLine',
+                       '_mtParticlesTomo',
+                       '_mtMtubesCsv',
                        '_mtParticlesTomo',
                        # PyOrg: generic fibers or filaments
                        '_fbCurve',
@@ -140,6 +144,8 @@ class RelionCols(object):
                          float,
                          int,
                          int,
+                         float,
+                         float,
                          # PySeg: Graph analysis
                          str,
                          # PySeg: Segmentation
@@ -168,6 +174,8 @@ class RelionCols(object):
                          str,
                          str,
                          # PyOrg: Microtubules
+                         str,
+                         str,
                          str,
                          str,
                          # PyOrg: generic fibers
@@ -484,7 +492,7 @@ class Star(object):
     # all columns, every column key and data pair is introduced via kwargs
     def add_row(self, **kwargs):
         if kwargs is not None:
-            keys, values = kwargs.keys(), kwargs.values()
+            keys, values = list(kwargs.keys()), list(kwargs.values())
             if len(keys) != self.get_ncols():
                 error_msg = 'Number of columns introduced for this row, ' + str(len(keys)) + ' does not ' + \
                     ' fit the current number of columns, ' + str(self.get_ncols())
@@ -707,6 +715,33 @@ class Star(object):
                 hold += (str(self.__data[keys[-1]][i]) + '\n')
         return hold + '\n'
 
+    def header_to_string(self):
+        """
+        :return: an string with the STAR file with the header and columns name
+        """
+        hold = str()
+        for line in self.__header_1:
+            hold += line
+        for i, key in enumerate(self.__cols):
+            hold += (key + ' ' + '#' + str(i + 1) + '\n')
+        return hold
+
+    def row_to_string(self, row=-1):
+        """
+        :param row: row index (default -1, the last one)
+        :return: an string with the STAR file with the specified row
+        """
+        hold = str()
+        if self.get_ncols() > 0:
+            keys = self.get_column_keys()
+            for key in keys[:-1]:
+                hold += (str(self.__data[key][row]) + '\t')
+            hold += (str(self.__data[keys[-1]][row]) + '\n')
+        else:
+            error_msg = 'No rows.'
+            raise PySegInputError(expr='row_to_string (Star)', msg=error_msg)
+        return hold
+
     # Store in a STAR
     # fname: output file name
     # sv: if not None (default), it specified shape (all dimensions must be even) for subvolumes that will be stored in a sub-folder called 'sub'
@@ -786,6 +821,27 @@ class Star(object):
         # STAR file
         with open(fname, 'w') as ffile:
             ffile.write(self.to_string())
+
+    def store_header(self, fname):
+        """
+         Store just the header with column name of in STAR file
+        :param fname: output file name
+        :return:
+        """
+        # STAR file
+        with open(fname, 'w') as ffile:
+            ffile.write(self.header_to_string())
+
+    def append_row_to_file(self, fname, row=-1):
+        """
+        The specified row is appended to input file
+        :param fname: output file name
+        :param row: row index (default -1)
+        :return:
+        """
+        # STAR file
+        with open(fname, 'a') as ffile:
+            ffile.write(self.row_to_string(row))
 
     # Compute alignment against a reference star file
     # ref_star: reference STAR file, with the same (at least partially) particles
@@ -1019,7 +1075,7 @@ class Star(object):
                 try:
                     y, x, z = float(pos.attrib['X']), float(pos.attrib['Y']), float(pos.attrib['Z'])
                 except KeyError:
-                    print 'WARNING: gen_TomoPeaks() (ParticleList), a Particle without Pick position cannot be converted into a Peak'
+                    print('WARNING: gen_TomoPeaks() (ParticleList), a Particle without Pick position cannot be converted into a Peak')
                     continue
                 rot_eu = part.find('Rotation')
                 rot, tilt, psi = 0, 0, 0
@@ -1064,8 +1120,8 @@ class Star(object):
                         try:
                             svol = r3d_a.transformArray(svol_ref, origin=ref_cent, order=3, prefilter=True, mode='reflect')
                         except np.linalg.linalg.LinAlgError:
-                            print('WARNING: particle in row ' + str(i) + ', with angles' + str((rot, tilt, psi)) +
-                                  ' could not be rotated.')
+                            print(('WARNING: particle in row ' + str(i) + ', with angles' + str((rot, tilt, psi)) +
+                                  ' could not be rotated.'))
                             continue
                     # Translation
                     svol = tomo_shift(svol, (-shift_x, -shift_y, -shift_z))
@@ -1163,8 +1219,8 @@ class Star(object):
                     svol = r3d_a.transformArray(svol, origin=svol_cent, order=2, prefilter=True, mode='reflect')
 
                 except np.linalg.linalg.LinAlgError:
-                    print('WARNING: particle in row ' + str(row) + ', with angles' + str((rot, tilt, psi)) +
-                          ' could not be rotated.')
+                    print(('WARNING: particle in row ' + str(row) + ', with angles' + str((rot, tilt, psi)) +
+                          ' could not be rotated.'))
                     continue
             # Average
             avg += svol

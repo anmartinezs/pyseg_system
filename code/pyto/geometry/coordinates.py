@@ -2,10 +2,14 @@
 Contains class Coordinates.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: coordinates.py 1311 2016-06-13 12:41:50Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
 
-__version__ = "$Revision: 1311 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -13,7 +17,7 @@ from copy import copy, deepcopy
 import numpy
 import scipy
 
-from affine import Affine
+from .affine import Affine
 
 
 class Coordinates(object):

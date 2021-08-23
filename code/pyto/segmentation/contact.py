@@ -2,11 +2,16 @@
 Contains class Contact for analysis of contacts between segments (from a 
 segmented image) and boundaries specified on the same image.
 
-# Author: Vladan Lucic
-# $Id: contact.py 1333 2016-09-27 08:01:37Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import range
+from builtins import object
 
-__version__ = "$Revision: 1333 $"
+__version__ = "$Revision$"
 
 
 from copy import copy, deepcopy
@@ -40,7 +45,7 @@ class Contact(object):
       by findContacts
 
     The following example finds all contancts between segments 2,3,5 and 7
-    with boundaries 1,3,4 abd 6, and then returns ids of segments that
+    with boundaries 1,3,4 and 6, and then returns ids of segments that
     contact both boundary 1 and 4 but do not contact any other boundary:
 
       con = Contact()  # instantiation
@@ -510,14 +515,16 @@ class Contact(object):
         Increases all segment ids by shift in both contacts data structure and
         contacts labels.
         """
+        
+        if shift is not None:
 
-        # make old-new ids dictionary
-        old = numpy.array(range(1, self.getMaxSegment()+1))
-        new = old + shift
-        order = dict(zip(old, new))
+            # make old-new ids dictionary
+            old = numpy.array(list(range(1, self.getMaxSegment()+1)))
+            new = old + shift
+            order = dict(list(zip(old, new)))
 
-        # reorder
-        self.reorderSegments(order)
+            # reorder
+            self.reorderSegments(order)
 
     def orderSegmentsByContactedBoundaries(self, argsort=False):
         """
@@ -560,7 +567,7 @@ class Contact(object):
         # segment whose id is given at the same positin in self.segments
         s_ids = self.segments
         b_ids = numpy.zeros(len(s_ids), dtype='object_')
-        for (index, id) in zip(range(len(s_ids)), s_ids):
+        for (index, id) in zip(list(range(len(s_ids))), s_ids):
             b_ids[index] = self.findBoundaries(segmentIds=[id],
                                                update=False).tolist()
 
@@ -573,7 +580,7 @@ class Contact(object):
         else:
 
             # reorder segments in self._n
-            new_order = dict(zip(s_ids[sort_list], s_ids))
+            new_order = dict(list(zip(s_ids[sort_list], s_ids)))
             self.reorderSegments(new_order)            
             return new_order
 
@@ -779,7 +786,7 @@ class Contact(object):
 
         # make Connected instance from contacts
         if saveLabels:
-            from connected import Connected
+            from .connected import Connected
             labels = Connected(data=contacts, copy=False)
             labels.copyPositioning(image=segment, saveFull=True)
             #labels.makeInset()  problem if no contacts
@@ -800,7 +807,7 @@ class Contact(object):
 
         self.counted = True
 
-        raise NotImplementedError, "Sorry, not finished yet"
+        raise NotImplementedError("Sorry, not finished yet")
         
         # count number of contacts for each segment and put in nContacts
         for seg in self.segmentIds:
@@ -867,7 +874,7 @@ class Contact(object):
             self.boundaryIds = ids
 
         # ther might be a better place for this somewhere else
-        from segment import Segment
+        from .segment import Segment
 
         # set self.boundary, self.boundaryIds
         if isinstance(boundary, Segment):
@@ -1014,10 +1021,10 @@ class Contact(object):
                                    & (selected._mask==False))[0]
             
         else:
-            raise ValueError, "Mode argument " + mode + \
+            raise ValueError("Mode argument " + mode + \
                   " is not recognized. Available values are: " + \
                   "'exact' (same as 'eq'), 'at_least' (same as 'ge') " + \
-                  "and 'at_most' (same as 'le')."  
+                  "and 'at_most' (same as 'le').")  
 
         # remove segments that do not satisfy the conditions, if required
         good = numpy.asarray(good, dtype='int')
@@ -1122,10 +1129,10 @@ class Contact(object):
                                    & (selected._mask==False))[0]
             
         else:
-            raise ValueError, "Mode argument " + mode + \
+            raise ValueError("Mode argument " + mode + \
                   " is not recognized. Available values are: " + \
                   "'exact' (same as 'eq'), 'at_least' (same as 'ge'), " +\
-                  "and 'at_most' (same as 'le')."  
+                  "and 'at_most' (same as 'le').")  
 
         # remove boundaries that do not satisfy the conditions, if required
         good = numpy.asarray(good, dtype='int')
@@ -1323,7 +1330,7 @@ class Contact(object):
 
         # keep only indices in arr
         if indices is not None:
-            all_indices = range(1, arr.shape[axis])
+            all_indices = list(range(1, arr.shape[axis]))
             bad_indices = numpy.setdiff1d(all_indices, indices)
             arr = numpy.delete(arr, bad_indices, axis=axis)
 

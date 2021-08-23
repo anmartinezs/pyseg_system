@@ -5,10 +5,14 @@ Tests module grey
 More tests needed
 
 # Author: Vladan Lucic
-# $Id: test_grey.py 809 2011-01-18 15:18:45Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 809 $"
+__version__ = "$Revision$"
+
+import importlib
 
 import numpy
 import scipy
@@ -21,14 +25,14 @@ from pyto.segmentation.grey import Grey
 from pyto.segmentation.segment import Segment
 from pyto.segmentation.morphology import Morphology
 from pyto.segmentation.contact import Contact
-#import pyto.segmentation.test.common as common
-import common
+from pyto.segmentation.test import common
 
 class TestGrey(np_test.TestCase):
     """
     """
 
     def setUp(self):
+        importlib.reload(common) # to avoid problems when running multiple tests
         self.shapes = common.make_shapes()
         self.grey = common.make_grey()
 

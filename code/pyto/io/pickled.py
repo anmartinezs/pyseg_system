@@ -5,17 +5,19 @@ files. Each pickle contains data for one experiment (observation).
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
 # $Id: pickled_data.py 336 2008-12-27 17:10:30Z vladan $
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 __version__ = "$Revision: 336 $"
 
-
+import sys
 import pickle
 import warnings
 import logging
 import numpy
 
 import pyto.util.attributes
-from multi_data import MultiData
+from .multi_data import MultiData
 
 
 class Pickled(MultiData):
@@ -54,7 +56,7 @@ class Pickled(MultiData):
         # set attributes
         self.compact = False 
 
-    def getSingle(self, category, identifier):
+    def getSingle(self, category, identifier, encoding='latin1'):
         """
         Returns object containig data for one experiment (observation), in
         other words reads a pickle file corresponding to the specified 
@@ -62,13 +64,22 @@ class Pickled(MultiData):
 
         If the data file does not exist returns None.
 
+        In order to load a python2 generated pickle file that contains 
+        numpy arrays from python 3, pickle.load() has to have arg
+        encoding='latin1' (here set as the default).
+
         Arguments:
           - category: observation category
           - identifier: onservation identifier
+          - encoding: encoding for pickle.load(), not used for python 2
         """
         try:
-            file_ = open(self.files[category][identifier])
-            obj = pickle.load(file_) 
+            file_ = open(self.files[category][identifier], 'rb')
+            if sys.version_info[0] > 2:
+                obj = pickle.load(file_, encoding=encoding)
+            else:
+                obj = pickle.load(file_)
+
         except IOError:
             logging.warning("File " + self.files[category][identifier] \
                                 + " could not be read")

@@ -2,9 +2,11 @@
 Class Shapes provides methods for crating and manipulating geometrical shapes,
 in addition to methods defined in its base class Segment.
 
-# Author: Vladan Lucic, last modified 29.09.07
-# $Id: shapes.py 1001 2013-12-09 09:41:11Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 import scipy
 import scipy.ndimage as ndimage
@@ -12,7 +14,7 @@ import numpy
 import sys
 import logging
 import inspect
-from segment import Segment
+from .segment import Segment
 
 class Shapes(Segment):
     """

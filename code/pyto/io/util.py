@@ -2,10 +2,10 @@
 Useful io functions.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: util.py 327 2008-12-15 14:50:25Z vladan $
+# $Id$
 """
 
-__version__ = "$Revision: 327 $"
+__version__ = "$Revision$"
 
 
 def arrayFormat(arrays, format, indices, prependIndex=False):

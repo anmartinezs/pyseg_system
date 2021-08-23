@@ -91,10 +91,12 @@ If you use this script, please consider citing:
   correlative microscopy. Biophysical Journal accepted. 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: correlation_3d_2d.py 1258 2015-11-30 09:20:16Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import range
 
-__version__ = "$Revision: 1258 $"
+__version__ = "$Revision$"
 
 
 import os
@@ -279,7 +281,7 @@ def write_results(
                 transformed_3d[0,:], transformed_3d[1,:], transformed_3d[2,:],
                 markers_2d[0,:], markers_2d[1,:]]
     out_format = '  %6.0f %6.0f %6.0f     %7.2f %7.2f %7.2f     %7.2f %7.2f  '
-    ids = range(markers_3d.shape[1])
+    ids = list(range(markers_3d.shape[1]))
     res_tab_markers = pyto.io.util.arrayFormat(
         arrays=out_vars, format=out_format, indices=ids, prependIndex=False)
     table.extend(res_tab_markers)
@@ -294,7 +296,7 @@ def write_results(
     out_vars = [spots_3d[0,:], spots_3d[1,:], spots_3d[2,:], 
                 spots_2d[0,:], spots_2d[1,:], spots_2d[2,:]]
     out_format = '  %6.0f %6.0f %6.0f     %7.2f %7.2f %7.2f '
-    ids = range(spots_3d.shape[1])
+    ids = list(range(spots_3d.shape[1]))
     res_tab_spots = pyto.io.util.arrayFormat(
         arrays=out_vars, format=out_format, indices=ids, prependIndex=False)
     table.extend(res_tab_spots)

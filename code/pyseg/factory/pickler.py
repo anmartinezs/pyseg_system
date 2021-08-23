@@ -8,7 +8,7 @@ Utilities for pickling a unpickling PySeg objects
 __author__ = 'martinez'
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -16,7 +16,7 @@ except:
 def unpickle_obj(fname):
 
     # Load pickable state
-    f_pkl = open(fname)
+    f_pkl = open(fname, 'rb')
     try:
         gen_obj = pickle.load(f_pkl)
     finally:

@@ -2,7 +2,8 @@
 """
 
 Makes layers in a given region starting from one or between two specified 
-boundaries. Also analyzes position of given segments in respect to the layers  
+boundaries. Then it analyzes ovelap of given segments with the layers and
+determines the position of gegment centers in repect to the layers.  
 
 Important notes:
 
@@ -27,10 +28,16 @@ and adjust the value if needed, and comment out the other options.
 because they most likely arise from calculating denisty of a 0-volume segment
 and are also a consequence of the changed behavior of scipy. 
 
-$Id: layers.py 1504 2019-01-28 17:06:59Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1504 $"
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+#from builtins import str
+#from past.utils import old_div
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -49,7 +56,7 @@ import pyto.scripts.common as common
 tomo_info = common.__import__(name='tomo_info', path='../common')
 
 # to debug replace INFO by DEBUG
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%d %b %Y %H:%M:%S')
 
@@ -91,8 +98,8 @@ if tomo_info is not None: image_file_name = tomo_info.image_file_name
 # name of (one or more) file(s) containing boundaries. It can be a pickle file 
 # containing Segment object, or (one or more) files containing boundaries 
 # array(s).
-#boundaries_file = 'boundaries.pkl'   # Segment object pickle file
 if tomo_info is not None: boundaries_file = tomo_info.labels_file_name
+#boundaries_file = 'boundaries.pkl'   # Segment object pickle file
 #boundaries_file = '../viz/reconstruction_and-1-6_int-1-label_vesicles-membrane_2AZ_psd.raw'   # one boundaries file
 #boundaries_file = ("bound_1.dat", "bound_2.dat", "bound_3.dat")  # more boundaries
 
@@ -102,23 +109,23 @@ boundaries_shape = None   # shape given in header of the boundaries file (if em
 #boundaries_shape = (512, 512, 190) # shape given here
 
 # boundaries file data type (e.g. 'int8', 'uint8', 'int16', 'int32', 'float64') 
-if tomo_info is not None: boundaries _data_type = tomo_info.labels_data_type
+if tomo_info is not None: boundaries_data_type = tomo_info.labels_data_type
 #boundaries_data_type = 'uint8'
 
 # boundaries file byteOrder ('<' for little-endian, '>' for big-endian)
 boundaries_byte_order = '<'
 
-# boundaries file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis 
+# boundaries file array order ('F' for x-axis fastest, 'C' for z-axis 
 # fastest)
-boundaries_array_order = 'FORTRAN'
+boundaries_array_order = 'F'
 
 # offset of boundaries in respect to the data 
 boundaries_offset = None             # no offset
 #boundaries_offset = [10, 20, 30]    # offset specified
 
-# ids of all segments in the boundaries file that need to be kept 
-#boundary_ids = 1           # usual from for ma
+# ids of all segments in the boundaries file 
 if tomo_info is not None: boundary_ids = tomo_info.all_ids
+#boundary_ids = 1           # 
 #boundary_ids = [1,66,67,68,69] + range(2,15)
 
 # id shift in each subsequent boundaries file (in case of multiple boundary 
@@ -132,8 +139,9 @@ boundaries_shift = None    # shift is determined automatically
 #
 
 # segment id of a boundary 1 used to make layers
+if tomo_info is not None: boundary_id_1 = tomo_info.distance_id
 #boundary_id_1 = None       # don't make layers at all
-boundary_id_1 = 1           # make layers
+#boundary_id_1 = 1           # make layers
 
 # segment id of a boundary 2 used to make layers
 boundary_id_2 = None       # make layers from boundary_id_1
@@ -173,6 +181,9 @@ extra_layers_mask_id_2 = None
 #
 # Segments file 
 #
+# These segments are used to determine the overlap with the layers and
+# the position of their centers in respect to the layers.
+#
 # Can be either one pickle file containing Segments object (extension pkl), or
 # (one or more) file(s) containing data array.  
 #
@@ -189,9 +200,10 @@ extra_layers_mask_id_2 = None
 # name of (one or more) file(s) containing segments. It can be a pickle file 
 # containing Segment object, or (one or more) files containing segments 
 # array(s).
-segments_file = 'segments.pkl'   # Segment object pickle file
+if tomo_info is not None: segments_file = tomo_info.labels_file_name
+#segments_file = 'segments.pkl'   # Segment object pickle file
 #segments_file = 'segments.em'   # one segments file
-#segments_file = ("segments_1.dat", "segments_2.dat", "segments_3.dat")  # more segments
+#segments_file = ("segments_1.dat", "segments_2.dat", "segments_3.dat")  # more segments (experimental)
 
 # segments file dimensions
 segments_shape = boundaries_shape   # segments same as boundaries file
@@ -200,17 +212,18 @@ segments_shape = boundaries_shape   # segments same as boundaries file
 
 # segments file data type (e.g. 'int8', 'uint8', 'int16', 'int32', 'float16', 
 # 'float64') 
-segments_data_type = None
+if tomo_info is not None: segments_data_type = tomo_info.labels_data_type
+#segments_data_type = None
 #segments_data_type = 'uint8'
 
 # segments file byteOrder ('<' for little-endian, '>' for big-endian)
 segments_byte_order = None
 #segments_byte_order = '<'
 
-# segments file array order ('FORTRAN' for x-axis fastest, 'C' 
+# segments file array order ('F' for x-axis fastest, 'C' 
 # for z-axis fastest)
 segments_array_order = None
-#segments_array_order = 'FORTRAN'
+#segments_array_order = 'F'
 
 # offset of segments in respect to the data 
 segments_offset = boundaries_offset # segments same as boundaries file
@@ -320,9 +333,6 @@ def read_segments(
     else:
 
         # read array (labels) file(s)
-        #segments, multi_ids = read_array_segments(file_name=file_name, 
-        #             ids=ids, byte_order=byte_order, data_type=data_type, 
-        #             array_order=array_order, shape=shape, shift=shift)
         segments, multi_ids = common.read_labels(
             file_name=file_name, ids=ids, shift=shift, shape=shape, 
             suggest_shape=suggest_shape, 
@@ -627,8 +637,8 @@ def main():
     boundaries, nested_boundary_ids = read_segments(
         file_name=boundaries_file, offset=boundaries_offset, ids=boundary_ids, 
         byte_order=boundaries_byte_order, data_type=boundaries_data_type, 
-        array_order=boundaries_array_order, 
-        shape=boundaries_shape, shift=boundaries_shift)
+        array_order=boundaries_array_order, shape=boundaries_shape,
+        suggest_shape=image.data.shape, shift=boundaries_shift)
     boundaries_full_inset = boundaries.inset
 
     # make layers
@@ -649,7 +659,7 @@ def main():
         file_name=segments_file, offset=segments_offset, ids=segment_ids, 
         byte_order=segments_byte_order, data_type=segments_data_type, 
         array_order=segments_array_order, shape=segments_shape, 
-        shift=segments_shift)
+        suggest_shape=image.data.shape, shift=segments_shift)
     segments.useInset(
         inset=boundaries.inset, mode='abs', useFull=True, expand=True)
 

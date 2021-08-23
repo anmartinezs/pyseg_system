@@ -55,10 +55,15 @@ and are also a consequence of the changed behavior of scipy.
   while vesicleIds only ids of vesicles. Attribute ids may be changed in future.
 
 
-$Id: vesicles.py 1527 2019-04-10 13:47:34Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1527 $"
+from __future__ import print_function
+from builtins import zip
+#from builtins import str
+from past.builtins import basestring
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -76,7 +81,7 @@ import pyto.scripts.common as common
 tomo_info = common.__import__(name='tomo_info', path='../common')
 
 # to debug replace INFO by DEBUG
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%d %b %Y %H:%M:%S')
 
@@ -127,8 +132,8 @@ if tomo_info is not None: labels_data_type = tomo_info.labels_data_type
 # labels file byte order ('<' for little-endian, '>' for big-endian)
 labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labels_array_order = 'FORTRAN'
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 # offset of labels in respect to the image (None means 0-offset)
 labels_offset = None
@@ -173,7 +178,8 @@ shift = 256
 # id of a segment to which distances are caluculated. In case of multiple
 # labels files this id is understood after the ids of the labels files are
 # shifted.
-distance_id = None   # distances are not calculated
+if tomo_info is not None: distance_id = tomo_info.distance_id
+#distance_id = None   # distances are not calculated
 #distance_id = 6
 
 # the way distance is calculated 
@@ -374,7 +380,7 @@ def is_multi_boundaries():
 
     Depreciated
     """
-    if isinstance(labels_file_name, str):
+    if isinstance(labels_file_name, basestring):
         return False
     elif isinstance(labels_file_name, (tuple, list)):
         return True
@@ -609,8 +615,8 @@ def write_res(ves, dist, mem, lum, file_name, ids=None, multi_ves_ids=None):
             dist_1 += ' %6s  ' % dist_mode
 
     # write results table head
-    tabHead = ["# Id      Vesicle density              Membrane density            Interior density     Vesicle Membrane " + dist_0 + "     Center               Radius         ",
-               "#     mean    std    min    max    mean   std    min    max    mean   std    min    max                  " + dist_1 + "x     y     z    mean std    min   max  "]
+    tabHead = ["# Id      Vesicle density                  Membrane density              Interior density         Vesicle Membrane   " + dist_0 + "    Center              Radius         ",
+               "#     mean    std    min    max        mean   std    min    max        mean   std    min    max                      " + dist_1 + " x     y     z   mean  std    min   max  "]
     tabHeadExt = ["    X-slice radius          Y-slice radius           Z-slice radius",
                   "mean std    min   max   mean std    min   max   mean std    min   max"]
     if do_slices:

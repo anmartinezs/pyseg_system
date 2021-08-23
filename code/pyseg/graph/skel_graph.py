@@ -7,10 +7,10 @@ Classes for expressing a DisPerSe skeleton as a graph
 __author__ = 'martinez'
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
-from core import *
+from .core import *
 
 #####################################################################################################
 # Class for holding a Graph which describes a DISPERSE skeleton

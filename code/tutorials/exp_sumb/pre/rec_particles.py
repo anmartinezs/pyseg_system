@@ -161,9 +161,9 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
             in_seg = star.get_element('_psSegImage', row)
             seg_svol = ps.disperse_io.load_tomo(in_seg, mmap=False) > 0
             if sv_size != seg_svol.shape:
-                print 'ERROR: CTF model subvolume "' + in_ctf + '" and segmentation "' + \
-                      in_seg + ' sizes does not fit.'
-                print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+                print('ERROR: CTF model subvolume "' + in_ctf + '" and segmentation "' + \
+                      in_seg + ' sizes does not fit.')
+                print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
                 sys.exit(-1)
             noise_mode = 'bg'
             if do_use_fg: noise_mode = 'fg'
@@ -177,11 +177,11 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
         try:
             part_svol = ps.globals.get_sub_copy(rec_tomo, (x_rln, y_rln, z_rln), sv_size).astype(np.float32)
         except ValueError:
-            print '\t\t\tWARNING: This particle was not reconstructed properly, Value Error raised!'
+            print('\t\t\tWARNING: This particle was not reconstructed properly, Value Error raised!')
             continue
         if part_svol.shape != sv_size:
-            print '\t\t\tWARNING: This particle was not reconstructed properly ' + \
-                  '(usually because is close to tomogram border), skipping to next...'
+            print('\t\t\tWARNING: This particle was not reconstructed properly ' + \
+                  '(usually because is close to tomogram border), skipping to next...')
             continue
 
         if seg_svol is not None:
@@ -232,64 +232,64 @@ def pr_worker(pr_id, star, sh_star, rows, settings, qu):
 ########################################################################################
 
 # Print initial message
-print 'Extracting transmembrane features.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
+print('Extracting transmembrane features.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + in_star)
 if in_ctf is not None:
-    print '\tInput CTF file: ' + in_ctf
-print '\tOutput directory for reconstructed particles: ' + out_part_dir
-print '\tOutput STAR file: ' + out_star
-print '\tParticles pre-processing settings: '
+    print('\tInput CTF file: ' + in_ctf)
+print('\tOutput directory for reconstructed particles: ' + out_part_dir)
+print('\tOutput STAR file: ' + out_star)
+print('\tParticles pre-processing settings: ')
 if do_bin > 0:
-    print '\t\t-Particles picked with binning: ' + str(do_bin)
+    print('\t\t-Particles picked with binning: ' + str(do_bin))
 if len(do_ang_prior) > 0:
     for ang_prior in do_ang_prior:
         if ang_prior not in ['Rot', 'Tilt', 'Psi']:
-            print 'ERROR: unrecognized angle: ' + ang_prior
-            print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+            print('ERROR: unrecognized angle: ' + ang_prior)
+            print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
-    print '\t\t-Adding prior for angles: ' + ang_prior
+    print('\t\t-Adding prior for angles: ' + ang_prior)
 if len(do_ang_rnd) > 0:
     for ang_rnd in do_ang_rnd:
         if ang_rnd not in ['Rot', 'Tilt', 'Psi']:
-            print 'ERROR: unrecognized angle: ' + ang_rnd
-            print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+            print('ERROR: unrecognized angle: ' + ang_rnd)
+            print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
-    print '\t\t-Setting random values for angles: ' + ang_rnd
+    print('\t\t-Setting random values for angles: ' + ang_rnd)
 if do_norm:
-    print '\t\t-Applying relion normalization: '
+    print('\t\t-Applying relion normalization: ')
     if in_mask_norm is not None:
-        print '\t\t\t-Tomogram for FG: ' + in_mask_norm
+        print('\t\t\t-Tomogram for FG: ' + in_mask_norm)
         mask_norm = ps.disperse_io.load_tomo(in_mask_norm)
     if do_inv:
-        print '\t\t-Invert density values.'
+        print('\t\t-Invert density values.')
 if do_noise:
-    print '\t\t-Set gray-values in background (BG) randomly.'
+    print('\t\t-Set gray-values in background (BG) randomly.')
     if do_use_fg:
-        print '\t\t\t+Take FG values as reference.'
+        print('\t\t\t+Take FG values as reference.')
     else:
-        print '\t\t\t+Take BG values as reference.'
-print '\tMultiprocessing settings: '
-print '\t\t-Number processes: ' + str(mp_npr)
-print ''
+        print('\t\t\t+Take BG values as reference.')
+print('\tMultiprocessing settings: ')
+print('\t\t-Number processes: ' + str(mp_npr))
+print('')
 
 
-print 'Loading input STAR file...'
+print('Loading input STAR file...')
 star, rln_star = sub.Star(), sub.Star()
 try:
     star.load(in_star)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 if (in_ctf is None) and (not star.has_column('_rlnCtfImage')):
-    print ' ERROR: No CTF specified and the input STAR file does not conta rlnCtfImage column'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print(' ERROR: No CTF specified and the input STAR file does not conta rlnCtfImage column')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tInitializing output relion STAR file: '
+print('\tInitializing output relion STAR file: ')
 rln_star.add_column(key='_rlnMicrographName')
 rln_star.add_column(key='_rlnCtfImage')
 rln_star.add_column(key='_rlnImageName')
@@ -301,24 +301,24 @@ if ANGLE_NAMES[0] in do_ang_prior:
         rln_star.add_column(key='_rlnAngleRot')
         rln_star.add_column(key='_rlnAngleRotPrior')
     else:
-        print 'ERROR: Prior Rot angle cannot be added since not Rot angle in the input tomogram.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Prior Rot angle cannot be added since not Rot angle in the input tomogram.')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 if ANGLE_NAMES[1] in do_ang_prior:
     if star.has_column(key='_rlnAngleTilt'):
         rln_star.add_column(key='_rlnAngleTilt')
         rln_star.add_column(key='_rlnAngleTiltPrior')
     else:
-        print 'ERROR: Prior Tilt angle cannot be added since not Tilt angle in the input tomogram.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Prior Tilt angle cannot be added since not Tilt angle in the input tomogram.')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 if ANGLE_NAMES[2] in do_ang_prior:
     if star.has_column(key='_rlnAnglePsi'):
         rln_star.add_column(key='_rlnAnglePsi')
         rln_star.add_column(key='_rlnAnglePsiPrior')
     else:
-        print 'ERROR: Prior Psi angle cannot be added since not Psi angle in the input tomogram.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Prior Psi angle cannot be added since not Psi angle in the input tomogram.')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 if ANGLE_NAMES[0] in do_ang_rnd:
     if not rln_star.has_column(key='_rlnAngleRot'):
@@ -330,12 +330,12 @@ if ANGLE_NAMES[2] in do_ang_rnd:
     if not rln_star.has_column(key='_rlnAnglePsi'):
         rln_star.add_column(key='_rlnAnglePsi')
 if do_norm and (not star.has_column('_psSegImage')) and (in_mask_norm is None):
-    print 'ERROR: Unable to do gray-value normalization: '
-    print '\tNeither \'_psSegImage\' column in input STAR file nor \'in_mask_norm\' input set.'
-    print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Unable to do gray-value normalization: ')
+    print('\tNeither \'_psSegImage\' column in input STAR file nor \'in_mask_norm\' input set.')
+    print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tInitializing multiprocessing with ' + str(mp_npr) + ' processes: '
+print('\tInitializing multiprocessing with ' + str(mp_npr) + ' processes: ')
 settings = Settings()
 settings.out_part_dir = out_part_dir
 settings.out_star = out_star
@@ -350,7 +350,7 @@ settings.in_mask_norm = in_mask_norm
 settings.in_ctf = in_ctf
 processes = list()
 qu = mp.Queue()
-spl_ids = np.array_split(range(star.get_nrows()), mp_npr)
+spl_ids = np.array_split(list(range(star.get_nrows())), mp_npr)
 # Starting the processes
 for pr_id in range(mp_npr):
     pr = mp.Process(target=pr_worker, args=(pr_id, star, rln_star, spl_ids[pr_id], settings, qu))
@@ -364,8 +364,8 @@ for pr_id, pr in enumerate(processes):
     pr.join()
     pr_results.append(pr.exitcode)
     if pr_id != pr_results[pr_id]:
-        print 'ERROR: Process ' + str(pr_id) + ' ended incorrectly.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Process ' + str(pr_id) + ' ended incorrectly.')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 gc.collect()
 # Merging output STAR files
@@ -380,6 +380,6 @@ for star in stars:
             hold_row[key] = star.get_element(key, row)
         rln_merged_star.add_row(**hold_row)
 
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 rln_merged_star.store(out_star)
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

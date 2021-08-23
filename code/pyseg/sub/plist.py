@@ -9,14 +9,14 @@ __author__ = 'Antonio Martinez-Sanchez'
 
 import csv
 import errno
-from variables import *
+from .variables import *
 from pyseg.globals import *
 import pyseg.disperse_io as disperse_io
 import numpy as np
 from abc import *
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from star import Star
+from .star import Star
 from operator import add
 from sklearn.cluster import MeanShift
 
@@ -222,11 +222,11 @@ class Peak(object):
 
     # Return all property keys a list()
     def get_prop_keys(self):
-        return self.__props.keys()
+        return list(self.__props.keys())
 
     # Return all property values a list()
     def get_prop_vals(self):
-        return self.__props.values()
+        return list(self.__props.values())
 
     def get_prop_val(self, key):
         return self.__props[key]
@@ -279,13 +279,13 @@ class Peak(object):
 
         # Headers row
         if (mode == 'key') or (mode == 'full'):
-            for (prop, val) in zip(self.__props.keys(), self.__props.values()):
+            for (prop, val) in zip(list(self.__props.keys()), list(self.__props.values())):
                 msg += (prop + len(val)*delimiter)
             msg += '\n'
 
         # Values row
         if (mode == 'value') or (mode == 'full'):
-            for val in self.__props.values():
+            for val in list(self.__props.values()):
                 msg += (val + delimiter)
             msg += '\n'
 
@@ -299,7 +299,7 @@ class Peak(object):
 
         # Headers row
         if mode == 'key':
-            for (prop, val) in zip(self.__props.keys(), self.__props.values()):
+            for (prop, val) in zip(list(self.__props.keys()), list(self.__props.values())):
                 if hasattr(val, '__len__'):
                     for i in range(len(val)):
                         msg.append(prop+'_'+str(i))
@@ -308,7 +308,7 @@ class Peak(object):
 
         # Values row
         if mode == 'value':
-            for val in self.__props.values():
+            for val in list(self.__props.values()):
                 if hasattr(val, '__len__'):
                     for s in val:
                         msg.append(str(s))
@@ -323,7 +323,7 @@ class Peak(object):
     def to_dictionary(self, fmt_csv=False):
         if fmt_csv:
             dic = {}
-            for (prop, val) in zip(self.__props.keys(), self.__props.values()):
+            for (prop, val) in zip(list(self.__props.keys()), list(self.__props.values())):
                 if hasattr(val, '__len__'):
                     for i in range(len(val)):
                         dic[prop+'_'+str(i)] = val[i]
@@ -677,7 +677,7 @@ class TomoPeaks(object):
             try:
                 n = v_m / math.sqrt((v_m*v_m).sum())
             except ZeroDivisionError:
-                print 'WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!'
+                print('WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!')
                 peak.set_prop_val(key_r, (0., 0., 0.))
                 continue
             # Computing rotation matrix
@@ -704,7 +704,7 @@ class TomoPeaks(object):
                     hold_e = hold - u
                     err = math.sqrt((hold_e*hold_e).sum())
                     if err > V_EPS:
-                        print 'WARNING (vect_rotation_ref): (1) rotated vector ' + str(hold) + ' does not fit reference vector ' + str(u) + ' (EPS=' + str(err) + ')'
+                        print('WARNING (vect_rotation_ref): (1) rotated vector ' + str(hold) + ' does not fit reference vector ' + str(u) + ' (EPS=' + str(err) + ')')
             # Computing Euler angles from rotation matrix
             if conv == 'relion':
                 alpha, beta, gamma = rot_mat_eu_relion(R, deg=True)
@@ -716,9 +716,9 @@ class TomoPeaks(object):
                 hold_m = (hold_e*hold_e).sum()
                 if hold_m > 0:
                     if math.sqrt(hold_m) > V_EPS:
-                        print 'WARNING (vect_rotation_ref): rotation matrices do not fit:'
-                        print '\tR1= ' + str(R)
-                        print '\tR2= ' + str(R2)
+                        print('WARNING (vect_rotation_ref): rotation matrices do not fit:')
+                        print('\tR1= ' + str(R))
+                        print('\tR2= ' + str(R2))
                     hold = np.asarray(R2*v_m.reshape(3,1), dtype=np.float32).reshape(3)
                     hold_m = math.sqrt((hold*hold).sum())
                     if hold_m > 0:
@@ -727,8 +727,8 @@ class TomoPeaks(object):
                         hold_e = hold - u
                         err = math.sqrt((hold_e*hold_e).sum())
                         if err > V_EPS:
-                            print 'WARNING (vect_rotation_ref): (2) rotated vector ' + str(hold) +' does not fit reference vector ' + str(u) + ' (EPS=' + str(err) + ')'
-                            print '\tRot=' + str(alpha) + ', Tilt=' + str(beta) + ', Psi=' + str(gamma)
+                            print('WARNING (vect_rotation_ref): (2) rotated vector ' + str(hold) +' does not fit reference vector ' + str(u) + ' (EPS=' + str(err) + ')')
+                            print('\tRot=' + str(alpha) + ', Tilt=' + str(beta) + ', Psi=' + str(gamma))
             # peak.set_prop_val(key_r, (alpha, beta, gamma))
             peak.set_prop_val(key_r, (alpha, beta, gamma))
 
@@ -753,7 +753,7 @@ class TomoPeaks(object):
             try:
                 n = v_m / math.sqrt((v_m*v_m).sum())
             except ZeroDivisionError:
-                print 'WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!'
+                print('WARNING (vect_rotation_ref): vector with module 0 cannot be rotated!')
                 peak.set_prop_val(key_r, (0., 0., 0.))
                 continue
             # Computing angles in Extrinsic ZYZ system
@@ -770,8 +770,8 @@ class TomoPeaks(object):
             v_h = np.asarray(M * n.reshape(3, 1), dtype=np.float).reshape(3)
             err = math.sqrt(((v_h - zv)*(v_h - zv)).sum())
             if err > V_EPS:
-                print 'WARNING (vect_rotation_ref): (2) rotated vector ' + str(v_h) +' does not fit reference vector ' + str(zv) + ' (EPS=' + str(err) + ')'
-                print '\tRot=' + str(rot) + ', Tilt=' + str(tilt) + ', Psi=' + str(psi)
+                print('WARNING (vect_rotation_ref): (2) rotated vector ' + str(v_h) +' does not fit reference vector ' + str(zv) + ' (EPS=' + str(err) + ')')
+                print('\tRot=' + str(rot) + ', Tilt=' + str(tilt) + ', Psi=' + str(psi))
             # print 'Ang (' + str(rot) + ', ' + str(tilt) + ', ' + str(psi) + ') error = ' + str(math.sqrt(((v_h - zv)*(v_h - zv)).sum()))
 
     # Returns vector between two 3-tupled properties
@@ -972,13 +972,13 @@ class TomoPeaks(object):
             try:
                 n = v_m / math.sqrt((v_m * v_m).sum())
             except ZeroDivisionError:
-                print 'WARNING (shift_coordinates_along_vector): nullvector cannot be added to coordinates!'
+                print('WARNING (shift_coordinates_along_vector): nullvector cannot be added to coordinates!')
                 continue
 
-            n = map(lambda coord: coord * shift, n)
+            n = [coord * shift for coord in n]
 
             coords = peak.get_prop_val(PK_COORDS)
-            coords = map(add, coords, n)
+            coords = list(map(add, coords, n))
             peak.set_prop_val(PK_COORDS, (coords[0], coords[1], coords[2]))
 
     def seg_ct_intersection(self, curve, key_p):
@@ -1047,7 +1047,7 @@ class TomoPeaks(object):
         for lbl in u_labels:
             cgs[lbl] *= (1. / float(n_points_lut[lbl]))
         cgs_peaks = TomoPeaks(self.get_shape(), name=self.get_name()+'_ms_cgs', mask=self.get_mask())
-        cgs_peaks.add_peaks(np.asarray(cgs.values(), dtype=np.float))
+        cgs_peaks.add_peaks(np.asarray(list(cgs.values()), dtype=np.float))
 
         return cgs_peaks
 
@@ -1302,12 +1302,9 @@ class SetTomoPeaks(object):
 # Abstract parent class for every class which represent and subelement in a XML tree
 ###########################################################################################
 
-class ETsub(object):
+class ETsub(object, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-    #### Functionality area
-
     @abstractmethod
     def add_to_subET(self, elem):
         raise NotImplementedError('ETsub() (sub.plist). '
@@ -1565,7 +1562,7 @@ class ParticleList(object):
             try:
                 x, y, z = float(pos.attrib['X']), float(pos.attrib['Y']), float(pos.attrib['Z'])
             except KeyError:
-                print 'WARNING: get_particles_coords() (ParticleList), a Particle without PickPostion field found!'
+                print('WARNING: get_particles_coords() (ParticleList), a Particle without PickPostion field found!')
                 continue
             if do_shift:
                 shift = part.find('Shift')
@@ -1720,7 +1717,7 @@ class ParticleList(object):
                 try:
                     x, y, z = float(pos.attrib['X']), float(pos.attrib['Y']), float(pos.attrib['Z'])
                 except KeyError:
-                    print 'WARNING: gen_TomoPeaks() (ParticleList), a Particle without Pick position cannot be converted into a Peak'
+                    print('WARNING: gen_TomoPeaks() (ParticleList), a Particle without Pick position cannot be converted into a Peak')
                     continue
                 rot = part.find('Rotation')
                 phi, psi, the = 0, 0, 0
@@ -1960,7 +1957,7 @@ class ParticleList(object):
                     try:
                         x, y, z = float(pos.attrib['X']), float(pos.attrib['Y']), float(pos.attrib['Z'])
                     except KeyError:
-                        print 'WARNING: save_plain_txt() (ParticleList), a Particle without Pick position cannot be converted into a Peak'
+                        print('WARNING: save_plain_txt() (ParticleList), a Particle without Pick position cannot be converted into a Peak')
                         continue
                 rot = elem.find('Rotation')
                 phi, psi, the = 0, 0, 0

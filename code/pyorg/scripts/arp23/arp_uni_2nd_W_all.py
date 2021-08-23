@@ -86,69 +86,69 @@ if ana_shell_thick is not None:
 
 ########## Print initial message
 
-print 'Univariate second order analysis for a ListTomoParticles.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput STAR file: ' + str(in_star)
+print('Univariate second order analysis for a ListTomoParticles.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput STAR file: ' + str(in_star))
 if in_mats_lists is None:
-    print '\tOrganization analysis settings: '
-    print '\t\t-Range of radius: ' + str(ana_rg) + ' nm'
-    print '\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels'
+    print('\tOrganization analysis settings: ')
+    print('\t\t-Range of radius: ' + str(ana_rg) + ' nm')
+    print('\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels')
     if ana_shell_thick is None:
-        print '\t\t-Spherical neighborhood'
+        print('\t\t-Spherical neighborhood')
     else:
-        print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm'
-        print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels'
+        print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm')
+        print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels')
     if ana_keep is not None:
-        print '\t\t-Keep highest populated tomograms per list: ' + str(ana_keep)
-    print '\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter)
-    print '\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter)
+        print('\t\t-Keep highest populated tomograms per list: ' + str(ana_keep))
+    print('\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter))
+    print('\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter))
     if ana_gl:
-        print '\t\t-Global analysis activated.'
+        print('\t\t-Global analysis activated.')
     if ana_npr is None:
-        print '\t\t-Number of processors: Auto'
+        print('\t\t-Number of processors: Auto')
     else:
-        print '\t\t-Number of processors: ' + str(ana_npr)
+        print('\t\t-Number of processors: ' + str(ana_npr))
 else:
     if in_mats_lists is not None:
-        print '\tDensity ratios by list dictionary pickled from file: ' + in_mats_lists
+        print('\tDensity ratios by list dictionary pickled from file: ' + in_mats_lists)
 if do_p_value:
-    print '\tP-Value computation setting:'
-    print '\t\t-Percentile: ' + str(p_per) + ' %'
+    print('\tP-Value computation setting:')
+    print('\t\t-Percentile: ' + str(p_per) + ' %')
     if in_mats_sims is None:
-        print '\t\t-Number of instances for simulations: ' + str(p_nsims)
-        print '\t\t-Particle surface: ' + p_vtp
+        print('\t\t-Number of instances for simulations: ' + str(p_nsims))
+        print('\t\t-Particle surface: ' + p_vtp)
     else:
-        print '\t\t-Using pre-computed matrix for simulations: ' + in_mats_sims
+        print('\t\t-Using pre-computed matrix for simulations: ' + in_mats_sims)
     if p_pwise:
-        print '\t\t-Pointwise analysis activated.'
+        print('\t\t-Pointwise analysis activated.')
     else:
-        print '\t\t-Tomogram analysis activated.'
+        print('\t\t-Tomogram analysis activated.')
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print '\t\t-Colormap: ' + str(pt_cmap)
-print '\t\t-X-axis range: ' + str(pt_xrange)
-print '\t\t-Y-axis range: ' + str(pt_yrange)
-print ''
+    print('\tPlotting settings: ')
+print('\t\t-Colormap: ' + str(pt_cmap))
+print('\t\t-X-axis range: ' + str(pt_xrange))
+print('\t\t-Y-axis range: ' + str(pt_yrange))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = sub.Star()
 try:
     star.load(in_star)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 set_lists = surf.SetListTomoParticles()
 for row in range(star.get_nrows()):
@@ -158,7 +158,7 @@ for row in range(star.get_nrows()):
         ltomos.clean_low_pouplated_tomos(ana_keep)
     set_lists.add_list_tomos(ltomos, ltomos_pkl)
 
-print '\tComputing number of particles by list...'
+print('\tComputing number of particles by list...')
 np_lists = set_lists.particles_by_list()
 np_lists_skeys, np_lists_svalues = sort_dict(np_lists, np_lists, reverse=True)
 color_lists, klass_lbls = dict(), dict()
@@ -171,7 +171,7 @@ for i, key in enumerate(np_lists_skeys):
         pass
     color_lists[key] = pt_cmap(1.*i/len(np_lists))
     klass_lbls[key] = klass_lbl
-    print '\t\t-List ' + str(i+1) + ': ' + str(klass_lbl)
+    print('\t\t-List ' + str(i+1) + ': ' + str(klass_lbl))
 plt.figure()
 plt.title('Num. particles by list')
 plt.ylabel('Num. particles')
@@ -194,7 +194,7 @@ with open(out_dir + '/' + out_stem + '_np_lists.pkl', "wb") as fl:
     pickle.dump(np_lists, fl)
     fl.close()
 
-print '\tComputing number of particles by tomogram...'
+print('\tComputing number of particles by tomogram...')
 np_tomos = set_lists.particles_by_tomos()
 np_tomos_skeys, np_tomos_svalues = sort_dict(np_tomos, np_tomos, reverse=True)
 color_tomos, tomo_lbls = dict(), dict()
@@ -207,7 +207,7 @@ for i, key in enumerate(np_tomos_skeys):
         pass
     color_tomos[key] = pt_cmap(1.*i/len(np_tomos))
     tomo_lbls[key] = tomo_lbl
-    print '\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl)
+    print('\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl))
 plt.figure()
 plt.title('Num. particles by tomograms')
 plt.ylabel('Num. particles')
@@ -230,7 +230,7 @@ with open(out_dir + '/' + out_stem + '_np_tomos.pkl', "wb") as fl:
     pickle.dump(np_tomos, fl)
     fl.close()
 
-print '\tComputing densities by list...'
+print('\tComputing densities by list...')
 gl_lists = set_lists.density_by_list(surface=False)
 gl_lists_skeys, gl_lists_svalues = sort_dict(gl_lists, gl_lists, reverse=True)
 color_lists, klass_lbls = dict(), dict()
@@ -243,7 +243,7 @@ for i, key in enumerate(gl_lists_skeys):
         pass
     color_lists[key] = pt_cmap(1.*i/len(gl_lists))
     klass_lbls[key] = klass_lbl
-    print '\t\t-List ' + str(i+1) + ': ' + str(klass_lbl)
+    print('\t\t-List ' + str(i+1) + ': ' + str(klass_lbl))
 plt.figure()
 plt.title('Density by list')
 den_cte = ana_res**3
@@ -267,7 +267,7 @@ with open(out_dir + '/' + out_stem + '_den_lists.pkl', "wb") as fl:
     pickle.dump(gl_lists, fl)
     fl.close()
 
-print '\tComputing densities by tomogram...'
+print('\tComputing densities by tomogram...')
 gl_tomos = set_lists.density_by_tomos(surface=False)
 gl_tomos_skeys, gl_tomos_svalues = sort_dict(gl_tomos, gl_tomos, reverse=True)
 color_tomos, tomo_lbls = dict(), dict()
@@ -280,7 +280,7 @@ for i, key in enumerate(gl_tomos_skeys):
         pass
     color_tomos[key] = pt_cmap(1.*i/len(gl_tomos))
     tomo_lbls[key] = tomo_lbl
-    print '\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl)
+    print('\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl))
 plt.figure()
 plt.title('Density by tomograms')
 plt.ylabel('Particles/nm**3')
@@ -306,14 +306,14 @@ with open(out_dir + '/' + out_stem + '_den_tomos.pkl', "wb") as fl:
 if in_mats_lists is None:
 
     if ana_keep is None:
-        print '\tComputing densities proportions of particles for every tomogram...'
+        print('\tComputing densities proportions of particles for every tomogram...')
         plt.figure()
         plt.title('Class proportions for tomograms.')
         props_dic = set_lists.proportions_by_list()
         set_tomos_name= set_lists.get_set_tomos()
         set_ntomos = len(set_tomos_name)
         index, offset = np.arange(set_ntomos), np.zeros(shape=set_ntomos, dtype=np.float)
-        for key_1, props in zip(props_dic.iterkeys(), props_dic.itervalues()):
+        for key_1, props in zip(iter(props_dic.keys()), iter(props_dic.values())):
             plt.bar(index+.5*BAR_WIDTH, props, BAR_WIDTH, color=color_lists[key_1], bottom=offset,
                     label=klass_lbls[key_1])
             offset += props
@@ -329,7 +329,7 @@ if in_mats_lists is None:
             plt.savefig(out_dir + '/' + out_stem + '_tomo_prop.png')
         plt.close()
 
-    print '\tComputing organization by list...'
+    print('\tComputing organization by list...')
     mats_lists = set_lists.compute_uni_2nd_order_by_list(distances=ana_rg_v, thick=ana_shell_thick_v, border=ana_border,
                                                          conv_iter=ana_conv_iter, max_iter=ana_max_iter,
                                                          dens_gl=ana_gl, npr=ana_npr, verbose=True)
@@ -337,7 +337,7 @@ if in_mats_lists is None:
         pickle.dump(mats_lists, fl)
         fl.close()
 
-print '\tPickling organization by lists...'
+print('\tPickling organization by lists...')
 if in_mats_lists is not None:
     with open(in_mats_lists, 'r') as pkl:
         mats_lists = pickle.load(pkl)
@@ -371,8 +371,8 @@ if mats_lists is not None:
         plt.savefig(out_dir + '/' + out_stem + '_org_list.png')
     plt.close()
 else:
-    print 'ERROR: organization could not be computed'
-    print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: organization could not be computed')
+    print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if do_p_value:
@@ -382,11 +382,11 @@ if do_p_value:
         try:
             part_vtp = disperse_io.load_poly(p_vtp)
         except pexceptions.PySegInputError as e:
-            print 'ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"'
-            print 'Terminated. (' + time.strftime("%c") + ')'
+            print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
+            print('Terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
 
-        print '\tComputing simulations for p-value by list...'
+        print('\tComputing simulations for p-value by list...')
         mats_sims = set_lists.simulate_uni_2nd_order_matrix(p_nsims, ModelCSRV, part_vtp,
                                                             ana_rg_v, thick=ana_shell_thick_v, border=ana_border,
                                                             conv_iter=ana_conv_iter, max_iter=ana_max_iter,
@@ -428,7 +428,7 @@ if do_p_value:
             plt.savefig(out_dir + '/' + out_stem + '_' + lbl + '_org_list.png')
         plt.close()
 
-    print '\tComputing p-values...'
+    print('\tComputing p-values...')
     p_values = list_tomoparticles_pvalues(ana_rg, mats_lists, mats_sims)
 
     plt.figure()
@@ -440,7 +440,7 @@ if do_p_value:
     # plt.xticks(klass_lbls)
     lines, lbls = list(), list()
     p_values_keys, p_values_values = sort_dict(p_values, gl_lists, reverse=True)
-    for i, key, p_value in zip(range(len(p_values_keys)), p_values_keys, p_values_values):
+    for i, key, p_value in zip(list(range(len(p_values_keys))), p_values_keys, p_values_values):
         lbl = klass_lbls[key]
         line, = plt.bar(i, 1.+.01*p_value[2], color=color_lists[key], label=lbl)
     plt.legend()
@@ -465,7 +465,7 @@ if do_p_value:
     # plt.xticks(klass_lbls)
     lines, lbls = list(), list()
     p_values_keys, p_values_values = sort_dict(p_values, gl_lists, reverse=True)
-    for i, key, p_value in zip(range(len(p_values_keys)), p_values_keys, p_values_values):
+    for i, key, p_value in zip(list(range(len(p_values_keys))), p_values_keys, p_values_values):
         lbl = klass_lbls[key]
         line, = plt.bar(i, p_value[0], color=color_lists[key], label=lbl)
     plt.legend()
@@ -490,7 +490,7 @@ if do_p_value:
     # plt.xticks(klass_lbls)
     lines, lbls = list(), list()
     p_values_keys, p_values_values = sort_dict(p_values, gl_lists, reverse=True)
-    for i, key, p_value in zip(range(len(p_values_keys)), p_values_keys, p_values_values):
+    for i, key, p_value in zip(list(range(len(p_values_keys))), p_values_keys, p_values_values):
         lbl = klass_lbls[key]
         line, = plt.bar(i, 1.-.01*p_value[3], color=color_lists[key], label=lbl)
     plt.legend()
@@ -515,7 +515,7 @@ if do_p_value:
     # plt.xticks(klass_lbls)
     lines, lbls = list(), list()
     p_values_keys, p_values_values = sort_dict(p_values, gl_lists, reverse=True)
-    for i, key, p_value in zip(range(len(p_values_keys)), p_values_keys, p_values_values):
+    for i, key, p_value in zip(list(range(len(p_values_keys))), p_values_keys, p_values_values):
         lbl = klass_lbls[key]
         line, = plt.bar(i, p_value[1], color=color_lists[key], label=lbl)
     plt.legend()
@@ -531,4 +531,4 @@ if do_p_value:
         plt.savefig(out_dir + '/' + out_stem + '_pval_high_rad.png')
     plt.close()
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

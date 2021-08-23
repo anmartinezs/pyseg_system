@@ -161,7 +161,7 @@ class ColumnsFinder(object):
         :return: the number of columns found
         """
         count = 0
-        for col in self.__cols.itervalues():
+        for col in self.__cols.values():
             if col is not None:
                 lyr_1, lyr_2, lyr_3 = col[0], col[1], col[2]
                 if (len(lyr_1) > 0) and (len(lyr_2) > 0) and (len(lyr_3) > 0):
@@ -174,7 +174,7 @@ class ColumnsFinder(object):
         :return: the number of columns found
         """
         count = 0
-        for scol in self.__scols.itervalues():
+        for scol in self.__scols.values():
             if scol is not None:
                 lyr_1, lyr_2, lyr_3 = scol[0], scol[1], scol[2]
                 if (len(lyr_1) > 0) and (len(lyr_2) > 0) and (len(lyr_3) > 0):
@@ -205,7 +205,7 @@ class ColumnsFinder(object):
         lut_p = dict()
         for lyr_id in lyr_p:
             lut = list()
-            for scol in self.__scols.itervalues():
+            for scol in self.__scols.values():
                 for clst in scol[lyr_id-1]:
                     lut += clst.get_ids()
             lut_p[lyr_id] = list(set(lut))
@@ -226,7 +226,7 @@ class ColumnsFinder(object):
 
         # Inserting points in the surroundings of sub-columns for layer 1
         scol_coords, l1_coords = list(), self.__tl1.get_particle_coords()
-        for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+        for key, scol in zip(iter(self.__scols.keys()), iter(self.__scols.values())):
             for clst in scol[0]:
                 for scol_coord in clst.get_coords():
                     scol_coords.append(scol_coord)
@@ -299,7 +299,7 @@ class ColumnsFinder(object):
             raise PySegInputError(expr='get_area_columns (ColumnsFinder)', msg=error_msg)
 
         # Load the coordinates
-        for col_id, col in zip(self.__cols.iterkeys(), self.__cols.itervalues()):
+        for col_id, col in zip(iter(self.__cols.keys()), iter(self.__cols.values())):
             if col is not None:
                 col_coords = list()
                 for lyr_id in layers:
@@ -338,7 +338,7 @@ class ColumnsFinder(object):
                         try:
                             flat_voi[coord[0], coord[1]] = False
                         except IndexError:
-                            print 'WARNING: get_area_columns() point out of flattered VOI!'
+                            print('WARNING: get_area_columns() point out of flattered VOI!')
                     dst_field = sp.ndimage.morphology.distance_transform_edt(flat_voi, return_distances=True,
                                                                                  return_indices=False)
                     areas.append((dst_field <= rad).sum())
@@ -387,7 +387,7 @@ class ColumnsFinder(object):
             hold_cols = self.__cols
 
         # Load the coordinates
-        for col_id, col in zip(hold_cols.iterkeys(), hold_cols.itervalues()):
+        for col_id, col in zip(iter(hold_cols.keys()), iter(hold_cols.values())):
             if col is not None:
                 if mode == 'hull':
                     col_coords = list()
@@ -425,7 +425,7 @@ class ColumnsFinder(object):
                     try:
                         flat_voi[coord[0], coord[1]] = False
                     except IndexError:
-                        print 'WARNING: get_occupancy() point out of flattered VOI!'
+                        print('WARNING: get_occupancy() point out of flattered VOI!')
             else:
                 return .0
 
@@ -483,7 +483,7 @@ class ColumnsFinder(object):
             # Update clusters ids
             self.__cols = hold_col
             self.__cool_clst = (list(), list(), list())
-            for key, col in zip(self.__cols.iterkeys(), self.__cols.itervalues()):
+            for key, col in zip(iter(self.__cols.keys()), iter(self.__cols.values())):
                 for id_lyr, lyr in enumerate(col):
                     for clst in lyr:
                         self.__cool_clst[id_lyr].append(clst)
@@ -525,7 +525,7 @@ class ColumnsFinder(object):
 
         # Getting definintive columnns by removing those which are not aligned for the three layers
         col_id, self.__scols = 0, dict()
-        for hold_col in hold_cols.itervalues():
+        for hold_col in hold_cols.values():
             if (len(hold_col[0]) > 0) and (len(hold_col[1]) > 0) and (len(hold_col[2]) > 0):
                 self.__scols[col_id] = (list(), list(), list())
                 for i in range(len(hold_col[0])):
@@ -632,7 +632,7 @@ class ColumnsFinder(object):
 
         # Getting definintive columnns by removing those which are not aligned for the three layers
         col_id, self.__cols = 0, dict()
-        for hold_col in hold_cols.itervalues():
+        for hold_col in hold_cols.values():
             if (len(hold_col[0]) > 0) and (len(hold_col[1]) > 0) and (len(hold_col[2]) > 0):
                 self.__cols[col_id] = (list(), list(), list())
                 for i in range(len(hold_col[0])):
@@ -656,7 +656,7 @@ class ColumnsFinder(object):
                                           np.ones(shape=np_lyr3, dtype=np.bool)
 
         # Loop for finding the particle to filter
-        for col in self.__cols.itervalues():
+        for col in self.__cols.values():
             if col is not None:
                 lyr_1, lyr_2, lyr_3 = col[0], col[1], col[2]
                 for clst in lyr_1:
@@ -701,7 +701,7 @@ class ColumnsFinder(object):
         # Insterting coordinates
         count = 0
         # for col_id, col in enumerate(self.__cool_coords):
-        for col_id, col in zip(self.__cols.iterkeys(), self.__cols.itervalues()):
+        for col_id, col in zip(iter(self.__cols.keys()), iter(self.__cols.values())):
             if col is not None:
                 lyr_1, lyr_2, lyr_3 = col[0], col[1], col[2]
                 for clst_1 in lyr_1:
@@ -761,7 +761,7 @@ class ColumnsFinder(object):
 
         # Insterting coordinates
         count = 0
-        for scol_id, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+        for scol_id, scol in zip(iter(self.__scols.keys()), iter(self.__scols.values())):
             if scol is not None:
                 lyr_1, lyr_2, lyr_3 = scol[0], scol[1], scol[2]
                 for sclst_1 in lyr_1:
@@ -839,7 +839,7 @@ class ColumnsFinder(object):
         lyr1_coords, lyr2_coords, lyr3_coords = self.__tl1.get_particle_coords(), self.__tl2.get_particle_coords(), \
                                                 self.__tl3.get_particle_coords()
         if mode == 'scols':
-            for hscols in self.__scols.itervalues():
+            for hscols in self.__scols.values():
                 scol_1, scol_2, scol_3 = hscols[0], hscols[1], hscols[2]
                 if (layer != 2) and (layer != 3):
                     for clst in scol_1:
@@ -854,7 +854,7 @@ class ColumnsFinder(object):
                         for idx in clst.get_ids():
                             hold_coords.append(lyr3_coords[idx])
         elif mode == 'cols':
-            for col in self.__cols.itervalues():
+            for col in self.__cols.values():
                 if col is not None:
                     col_1, col_2, col_3 = col[0], col[1], col[2]
                     if (layer != 2) and (layer != 3):
@@ -916,7 +916,7 @@ class ColumnsFinder(object):
         layers_ids, count = np.asarray(layers) - 1, 0
         for coord in coords:
             is_aln = False
-            for col in self.__cols.itervalues():
+            for col in self.__cols.values():
                 for lyr_id in layers_ids:
                     for clst in col[lyr_id]:
                         if clst.find_num_aligned(Cluster([0, ], [coord, ]), dst) > 0:
@@ -940,7 +940,7 @@ class ColumnsFinder(object):
         :param layers: list with the layers to include the overlapping (default [1, ])
         :return: a new binary sub-column property is generated where True mark the overlapped columns
         """
-        for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
+        for key, scol in zip(iter(self.__scols.keys()), iter(self.__scols.values())):
             self.__scols_props[key][prop_key] = False
             ids, coords = list(), list()
             for lyr in layers:
@@ -949,7 +949,7 @@ class ColumnsFinder(object):
                     ids += hold_clst.get_ids()
                     coords += hold_clst.get_coords()
             clst = Cluster(ids, coords)
-            for scol_in in cfinder.__scols.itervalues():
+            for scol_in in cfinder.__scols.values():
                 ids_in, coords_in = list(), list()
                 lyr_id = lyr - 1
                 for hold_clst in scol_in[lyr_id]:
@@ -969,7 +969,7 @@ class ColumnsFinder(object):
         :param layers: list with the layers to include the overlapping (default [1, ])
         :return: a new binary column property is generated where True mark the overlapped columns
         """
-        for key, col in zip(self.__cols.iterkeys(), self.__cols.itervalues()):
+        for key, col in zip(iter(self.__cols.keys()), iter(self.__cols.values())):
             self.__cols_props[key][prop_key] = False
             ids, coords = list(), list()
             for lyr in layers:
@@ -978,7 +978,7 @@ class ColumnsFinder(object):
                     ids += hold_clst.get_ids()
                     coords += hold_clst.get_coords()
             clst = Cluster(ids, coords)
-            for col_in in cfinder.__cols.itervalues():
+            for col_in in cfinder.__cols.values():
                 ids_in, coords_in = list(), list()
                 lyr_id = lyr - 1
                 for hold_clst in col_in[lyr_id]:
@@ -998,7 +998,7 @@ class ColumnsFinder(object):
         :return: The number of sub-columns that fulfill the input condition
         """
         count = 0
-        for scol in self.__scols_props.itervalues():
+        for scol in self.__scols_props.values():
             if oper(scol[prop_key], val):
                 count += 1
         return count
@@ -1012,7 +1012,7 @@ class ColumnsFinder(object):
         :return: The number of columns that fulfill the input condition
         """
         count = 0
-        for scol in self.__cols_props.itervalues():
+        for scol in self.__cols_props.values():
             if oper(scol[prop_key], val):
                 count += 1
         return count
@@ -1093,7 +1093,7 @@ class ColumnsFinder(object):
         # Loop for particles within subcolumns
         X, lut_lyr, lut_cid = list(), list(), list()
         lut1_cid = np.zeros(shape=self.__tl1.get_num_particles(), dtype=np.bool)
-        for scol in self.__scols.itervalues():
+        for scol in self.__scols.values():
             for clst in scol[0]:
                 c_ids, coords = clst.get_ids(), clst.get_coords()
                 for c_id, coord in zip(c_ids, coords):
@@ -1132,7 +1132,7 @@ class ColumnsFinder(object):
                 hold_clsts_1.append(Cluster(c_ids, coords))
         lut2_cid = np.zeros(shape=self.__tl2.get_num_particles(), dtype=np.bool)
         lut3_cid = np.zeros(shape=self.__tl3.get_num_particles(), dtype=np.bool)
-        for scol in self.__scols.itervalues():
+        for scol in self.__scols.values():
             for clst in scol[1]:
                 c_ids, c_coords = clst.get_ids(), clst.get_coords()
                 for c_id, c_coord in zip(c_ids, c_coords):
@@ -1147,7 +1147,7 @@ class ColumnsFinder(object):
                         lut3_cid[c_id] = True
 
         # Loop for finding the closest cluster for each subcolumn cluster in layer 2
-        lut2_cid, hold_cols_lyr2 = dict().fromkeys(self.__scols.keys(), -1), dict()
+        lut2_cid, hold_cols_lyr2 = dict().fromkeys(list(self.__scols.keys()), -1), dict()
         for c2_id, scol_clst in enumerate(hold_cols_2):
             n_algn, c1_id = 0, -1
             for hold_c_id, clsts_1 in enumerate(hold_clsts_1):
@@ -1157,7 +1157,7 @@ class ColumnsFinder(object):
                     n_algn = hold_n_algn
             if c1_id >= 0:
                 lut2_cid[c2_id] = c1_id
-        for c2_id, c1_id in zip(lut2_cid.iterkeys(), lut2_cid.itervalues()):
+        for c2_id, c1_id in zip(iter(lut2_cid.keys()), iter(lut2_cid.values())):
             if c1_id >= 0:
                 try:
                     hold_cols_lyr2[c1_id].append(hold_cols_2[c2_id])
@@ -1166,7 +1166,7 @@ class ColumnsFinder(object):
                     hold_cols_lyr2[c1_id].append(hold_cols_2[c2_id])
 
         # Loop for finding the closest cluster for each subcolumn cluster in layer 3
-        lut3_cid, hold_cols_lyr3 = dict().fromkeys(self.__scols.keys(), -1), dict()
+        lut3_cid, hold_cols_lyr3 = dict().fromkeys(list(self.__scols.keys()), -1), dict()
         for c3_id, scol_clst in enumerate(hold_cols_3):
             n_algn, c1_id = 0, -1
             for hold_c_id, clsts_1 in enumerate(hold_clsts_1):
@@ -1176,7 +1176,7 @@ class ColumnsFinder(object):
                     n_algn = hold_n_algn
             if c1_id >= 0:
                 lut3_cid[c3_id] = c1_id
-        for c3_id, c1_id in zip(lut3_cid.iterkeys(), lut3_cid.itervalues()):
+        for c3_id, c1_id in zip(iter(lut3_cid.keys()), iter(lut3_cid.values())):
             if c1_id >= 0:
                 try:
                     hold_cols_lyr3[c1_id].append(hold_cols_3[c3_id])
@@ -1187,7 +1187,7 @@ class ColumnsFinder(object):
         # Creating the columns
         count_col = 0
         for c1_id, clst_1 in enumerate(hold_clsts_1):
-            if (c1_id in hold_cols_lyr2.keys()) and (c1_id in hold_cols_lyr3.keys()):
+            if (c1_id in list(hold_cols_lyr2.keys())) and (c1_id in list(hold_cols_lyr3.keys())):
                 hold_cols[count_col] = (list(), list(), list())
                 hold_cols[count_col][0].append(clst_1)
                 for clst_2 in hold_cols_lyr2[c1_id]:
@@ -1244,7 +1244,7 @@ class ColumnsFinder(object):
 
         # Getting the ids of all the particles within sub-columns
         scol_ids_1, scol_ids_2, scol_ids_3 = list(), list(), list()
-        for scol in self.__scols.itervalues():
+        for scol in self.__scols.values():
             for clst_1 in scol[0]:
                 scol_ids_1 += clst_1.get_ids()
             for clst_2 in scol[1]:

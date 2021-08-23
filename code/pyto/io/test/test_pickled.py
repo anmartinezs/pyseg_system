@@ -3,10 +3,14 @@
 Tests module pickled and multi_data.
  
 # Author: Vladan Lucic
-# $Id: test_pickled.py 1461 2017-10-12 10:10:49Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+#from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 1461 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import pickle
@@ -39,8 +43,8 @@ class TestPickled(np_test.TestCase):
                       'second' : {'exp_5': 'results_5.pkl'}
                       }
         curr_dir, base = os.path.split(os.path.abspath(__file__))
-        for categ, observs in self.files.items():
-            for exp, file_ in observs.items():
+        for categ, observs in list(self.files.items()):
+            for exp, file_ in list(observs.items()):
                 self.files[categ][exp] = os.path.join(curr_dir, file_)
 
         # keep paths of all files generated here
@@ -64,7 +68,7 @@ class TestPickled(np_test.TestCase):
         
         # instantiate
         pickled = Pickled(files=self.files)
-        exp_2_direct = pickle.load(open(self.files['first']['exp_2']))
+        exp_2_direct = pickle.load(open(self.files['first']['exp_2'], 'rb'))
 
         # test exp 2 pickle 
         exp_2 = pickled.getSingle(category='first', identifier='exp_2')
@@ -109,34 +113,34 @@ class TestPickled(np_test.TestCase):
 
         # test one experiment (exp 2)
         pickled = Pickled(files=self.files)
-        exp_2_direct = pickle.load(open(self.files['first']['exp_2']))
+        exp_2_direct = pickle.load(open(self.files['first']['exp_2'], 'rb'))
         for obj, categ, ident in pickled.data(category='first', 
                                               identifier='exp_2'):
             np_test.assert_equal(categ, 'first')
             np_test.assert_equal(ident, 'exp_2')
-            np_test.assert_equal(obj.regions.ids, range(1,10))
+            np_test.assert_equal(obj.regions.ids, list(range(1,10)))
             np_test.assert_almost_equal(obj.width, scene_cmn.cleft_layers_width)
 
         # test one group
         pickled = Pickled(files=self.files)
-        exp_2_direct = pickle.load(open(self.files['first']['exp_2']))
+        exp_2_direct = pickle.load(open(self.files['first']['exp_2'], 'rb'))
         identifiers = set() 
         for obj, categ, ident in pickled.data(category='first'):
             identifiers.add(ident)
             np_test.assert_equal(categ, 'first')
-            np_test.assert_equal(obj.regions.ids, range(1,10))
+            np_test.assert_equal(obj.regions.ids, list(range(1,10)))
             np_test.assert_almost_equal(obj.width, scene_cmn.cleft_layers_width)
         np_test.assert_equal(identifiers, set(['exp_1', 'exp_2']))
 
         # test all
         pickled = Pickled(files=self.files)
-        exp_2_direct = pickle.load(open(self.files['first']['exp_2']))
+        exp_2_direct = pickle.load(open(self.files['first']['exp_2'], 'rb'))
         groups = set()
         identifiers = set() 
         for obj, categ, ident in pickled.data():
             groups.add(categ)
             identifiers.add(ident)
-            np_test.assert_equal(obj.regions.ids, range(1,10))
+            np_test.assert_equal(obj.regions.ids, list(range(1,10)))
             np_test.assert_almost_equal(obj.width, scene_cmn.cleft_layers_width)
         np_test.assert_equal(groups, set(['first', 'second']))
         np_test.assert_equal(identifiers, set(['exp_1', 'exp_2', 'exp_5']))
@@ -211,31 +215,40 @@ class TestPickled(np_test.TestCase):
                 deep='last', category=['first', 'second'])]
         np_test.assert_equal(categs, ['first', 'first', 'second'])
 
-        categs = [categ for observ, obj, categ, ident 
+        categs_idents = [(categ, ident) for observ, obj, categ, ident 
                   in pickled.readPropertiesGen(
                 properties=properties, index='regions.ids', indexed=indexed, 
                 deep='last', category=['second', 'first'])]
+        categs = [ci[0] for ci in categs_idents]
+        idents = [ci[1] for ci in categs_idents]
         np_test.assert_equal(categs, ['second', 'first', 'first'])
+        np_test.assert_equal(idents, ['exp_5', 'exp_1', 'exp_2'])
 
-        idents = [ident for observ, obj, categ, ident 
+        idents_observs = [(ident, observ) for observ, obj, categ, ident 
                   in pickled.readPropertiesGen(
                 properties=properties, index='regions.ids', indexed=indexed, 
                 deep='last', category='first', identifier=['exp_1', 'exp_2'])]
+        idents = [id_ob[0] for id_ob in idents_observs]
+        observs = [id_ob[1] for id_ob in idents_observs]
         np_test.assert_equal(idents, ['exp_1', 'exp_2'])
-        np_test.assert_equal(observ.identifiers, ['exp_1', 'exp_2'])
-        np_test.assert_equal(observ.mean, 
-                             [scene_cmn.cleft_layers_density_mean,
-                              scene_cmn.cleft_layers_density_mean+1])
+        np_test.assert_equal(observs[1].identifiers, ['exp_1', 'exp_2'])
+        np_test.assert_equal(
+            observs[1].mean, 
+            [scene_cmn.cleft_layers_density_mean,
+                 scene_cmn.cleft_layers_density_mean+1])
 
-        idents = [ident for observ, obj, categ, ident 
+        idents_observs = [(ident, observ) for observ, obj, categ, ident 
                   in pickled.readPropertiesGen(
                 properties=properties, index='regions.ids', indexed=indexed, 
                 deep='last', category='first', identifier=['exp_2', 'exp_1'])]
+        idents = [id_ob[0] for id_ob in idents_observs]
+        observ = idents_observs[1][1]
         np_test.assert_equal(idents, ['exp_2', 'exp_1'])
         np_test.assert_equal(observ.identifiers, ['exp_2', 'exp_1'])
-        np_test.assert_equal(observ.mean, 
-                             [scene_cmn.cleft_layers_density_mean+1,
-                              scene_cmn.cleft_layers_density_mean])
+        np_test.assert_equal(
+            observ.mean, 
+            [scene_cmn.cleft_layers_density_mean+1,
+                 scene_cmn.cleft_layers_density_mean])
 
     def testReadPropertiesGenDict(self):
         """
@@ -290,25 +303,31 @@ class TestPickled(np_test.TestCase):
                 deep='last', category=['second', 'first'])]
         np_test.assert_equal(categs, ['second', 'first', 'first'])
 
-        idents = [ident for observ, obj, categ, ident 
+        idents_observs = [(ident, observ) for observ, obj, categ, ident 
                   in pickled.readPropertiesGen(
                 properties=properties, index='regions.ids', indexed=indexed, 
                 deep='last', category='first', identifier=['exp_1', 'exp_2'])]
+        idents = [id_ob[0] for id_ob in idents_observs]
+        observ_final = idents_observs[1][1]
         np_test.assert_equal(idents, ['exp_1', 'exp_2'])
-        np_test.assert_equal(observ.identifiers, ['exp_1', 'exp_2'])
-        np_test.assert_equal(observ.mean_x, 
-                             [scene_cmn.cleft_layers_density_mean,
-                              scene_cmn.cleft_layers_density_mean+1])
+        np_test.assert_equal(observ_final.identifiers, ['exp_1', 'exp_2'])
+        np_test.assert_equal(
+            observ_final.mean_x, 
+            [scene_cmn.cleft_layers_density_mean,
+                 scene_cmn.cleft_layers_density_mean+1])
 
-        idents = [ident for observ, obj, categ, ident 
+        idents_observs = [(ident, observ) for observ, obj, categ, ident 
                   in pickled.readPropertiesGen(
                 properties=properties, index='regions.ids', indexed=indexed, 
                 deep='last', category='first', identifier=['exp_2', 'exp_1'])]
+        idents = [id_ob[0] for id_ob in idents_observs]
+        observ_final = idents_observs[1][1]
         np_test.assert_equal(idents, ['exp_2', 'exp_1'])
-        np_test.assert_equal(observ.identifiers, ['exp_2', 'exp_1'])
-        np_test.assert_equal(observ.mean_x, 
-                             [scene_cmn.cleft_layers_density_mean+1,
-                              scene_cmn.cleft_layers_density_mean])
+        np_test.assert_equal(observ_final.identifiers, ['exp_2', 'exp_1'])
+        np_test.assert_equal(
+            observ_final.mean_x, 
+            [scene_cmn.cleft_layers_density_mean+1,
+                 scene_cmn.cleft_layers_density_mean])
 
     def tearDown(self):
         """
@@ -318,6 +337,7 @@ class TestPickled(np_test.TestCase):
         for path in self.tmp_paths:
             try:
                 os.remove(path)
+                #pass
             except OSError:
                 print("Tests fine but could not remove " + str(path))
 

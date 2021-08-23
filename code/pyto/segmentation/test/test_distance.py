@@ -3,10 +3,11 @@
 Tests module distance
 
 # Author: Vladan Lucic
-# $Id: test_distance.py 914 2012-10-25 16:15:17Z vladan $
+# $Id$
 """
+from __future__ import absolute_import
 
-__version__ = "$Revision: 914 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -15,7 +16,7 @@ import numpy
 import numpy.testing as np_test 
 import scipy
 
-import common
+#from pyto.segmentation.test import common
 from pyto.segmentation.distance import Distance
 from pyto.segmentation.segment import Segment
 

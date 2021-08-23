@@ -4,12 +4,17 @@ Tests class Segment.
 Only the layers related methods tested in the moment.
 
 # Author: Vladan Lucic
-# $Id: test_segment.py 1301 2016-05-15 22:00:35Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision: 1301 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 
 import numpy
@@ -17,13 +22,19 @@ import numpy.testing as np_test
 import scipy
 
 from pyto.segmentation.segment import Segment
-import common as common
+from pyto.segmentation.test import common
 
 class TestSegment(np_test.TestCase):
     """
     """
 
     def setUp(self):
+        
+        # to avoid problems when running multiple tests
+        try:
+            importlib.reload(common) 
+        except AttributeError:
+            pass # Python2
         
         # make image
         bound_data = numpy.zeros((15,15), dtype=int)

@@ -112,37 +112,37 @@ from pyseg.spatial import GroupClouds
 
 ########## Print initial message
 
-print 'Statistics comparison from different profiles.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file(s): ' + str(groups_pkl)
-print '\tGroup slices: ' + str(groups_slice)
-print '\tGroup names: ' + str(groups_name)
-print '\tOutput directory: ' + str(output_dir)
-print '\tOutput prefix: ' + str(prefix_name)
+print('Statistics comparison from different profiles.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file(s): ' + str(groups_pkl))
+print('\tGroup slices: ' + str(groups_slice))
+print('\tGroup names: ' + str(groups_name))
+print('\tOutput directory: ' + str(output_dir))
+print('\tOutput prefix: ' + str(prefix_name))
 if level_1:
-    print '\tAnalysis level 1 activated.'
+    print('\tAnalysis level 1 activated.')
 if level_2:
-    print '\tAnalysis level 2 activated.'
+    print('\tAnalysis level 2 activated.')
 if (not level_1) and (not level_2):
-    print '\tERROR: no analysis activated.\nFinishing...'
+    print('\tERROR: no analysis activated.\nFinishing...')
     sys.exit()
 if disp_plots:
-    print '\tPlots display activated.'
+    print('\tPlots display activated.')
 if store_plots:
-    print '\tPlots store activated.'
+    print('\tPlots store activated.')
 if store_clouds:
     if level_2:
-        print '\tClouds store activated.'
+        print('\tClouds store activated.')
     else:
-        print '\tERROR: Clouds storing cannot be activated without Level 2 Analysis.\nFinishing...'
+        print('\tERROR: Clouds storing cannot be activated without Level 2 Analysis.\nFinishing...')
         sys.exit()
-print ''
+print('')
 
 ######### Process
 
-print 'Loading clouds from input pickles...'
+print('Loading clouds from input pickles...')
 groups_cloud = list()
 groups_boxes = list()
 for (group_pkl, slice_name) in zip(groups_pkl, groups_slice):
@@ -155,43 +155,43 @@ for (group_pkl, slice_name) in zip(groups_pkl, groups_slice):
     groups_cloud.append(clouds)
     groups_boxes.append(boxes)
 
-print 'Comparator initialization...'
+print('Comparator initialization...')
 comp = GroupClouds(n_samples, n_sim, max_d, per_h)
 for (group_cloud, group_boxes, group_name) in zip(groups_cloud, groups_boxes, groups_name):
     comp.insert_group(group_cloud, group_boxes, group_name)
 
 if level_1:
-    print 'Analysis level 1...'
+    print('Analysis level 1...')
     comp.analyze_1(verbose=True)
 if level_2:
-    print 'Analysis level 2...'
+    print('Analysis level 2...')
     comp.analyze_2(verbose=True)
 
 if disp_plots:
     if level_1:
-        print 'Plotting level 1 results, close all windows to continue...'
+        print('Plotting level 1 results, close all windows to continue...')
         comp.plot_1(block=True)
     if level_2:
-        print 'Plotting level 2 results, close all windows to continue...'
+        print('Plotting level 2 results, close all windows to continue...')
         comp.plot_2(block=True)
 
 if store_plots:
     if level_1:
         fig_dir = output_dir + '/' + prefix_name + '_1'
-        print 'Storing results level 1 in directory: ' + fig_dir
+        print('Storing results level 1 in directory: ' + fig_dir)
         if not os.path.isdir(fig_dir):
             os.makedirs(fig_dir)
         comp.store_figs_1(fig_dir)
     if level_2:
         fig_dir = output_dir + '/' + prefix_name + '_2'
-        print 'Storing results level 2 in directory: ' + fig_dir
+        print('Storing results level 2 in directory: ' + fig_dir)
         if not os.path.isdir(fig_dir):
             os.makedirs(fig_dir)
         comp.store_figs_2(fig_dir, plt_cl=store_clouds)
 
 file_name = output_dir + '/' + prefix_name + '.pkl'
-print 'Picking analyzer in file: '
+print('Picking analyzer in file: ')
 comp.pickle(file_name)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')
 

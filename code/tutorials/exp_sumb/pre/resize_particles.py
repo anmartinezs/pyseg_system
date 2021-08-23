@@ -147,32 +147,32 @@ def pr_worker(pr_id, star, star_seg, sh_star, rows, settings, qu):
 ########################################################################################
 
 # Print initial message
-print 'Extracting transmembrane features.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + in_star
+print('Extracting transmembrane features.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + in_star)
 if in_star_tomos is not None:
-    print '\tInput STAR files with the tomograms with particles to resize: ' + in_star_tomos
-print '\tOutput directory for reconstructed particles: ' + out_part_dir
-print '\tOutput STAR file: ' + out_star
-print '\tParticles pre-processing settings: '
+    print('\tInput STAR files with the tomograms with particles to resize: ' + in_star_tomos)
+print('\tOutput directory for reconstructed particles: ' + out_part_dir)
+print('\tOutput STAR file: ' + out_star)
+print('\tParticles pre-processing settings: ')
 if do_scale < 1:
-    print 'ERROR: scaling must be higher than 1: ' + str(do_scale)
-    print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: scaling must be higher than 1: ' + str(do_scale))
+    print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-print '\tMultiprocessing settings: '
-print '\t\t-Number processes: ' + str(mp_npr)
-print ''
+print('\tMultiprocessing settings: ')
+print('\t\t-Number processes: ' + str(mp_npr))
+print('')
 
 
-print 'Loading input STAR file...'
+print('Loading input STAR file...')
 star, rln_star = sub.Star(), sub.Star()
 try:
     star.load(in_star)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star_seg = None
 if in_star_tomos is not None:
@@ -180,22 +180,22 @@ if in_star_tomos is not None:
     try:
         star_seg.load(in_star_tomos)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 
-print '\tInitializing output relion STAR file: '
+print('\tInitializing output relion STAR file: ')
 for key in star.get_column_keys():
     rln_star.add_column(key=key)
 
-print '\tInitializing multiprocessing with ' + str(mp_npr) + ' processes: '
+print('\tInitializing multiprocessing with ' + str(mp_npr) + ' processes: ')
 settings = Settings()
 settings.out_part_dir = out_part_dir
 settings.out_star = out_star
 settings.do_scale = do_scale
 processes = list()
 qu = mp.Queue()
-spl_ids = np.array_split(range(star.get_nrows()), mp_npr)
+spl_ids = np.array_split(list(range(star.get_nrows())), mp_npr)
 # Starting the processes
 for pr_id in range(mp_npr):
     pr = mp.Process(target=pr_worker, args=(pr_id, star, star_seg, rln_star, spl_ids[pr_id], settings, qu))
@@ -209,8 +209,8 @@ for pr_id, pr in enumerate(processes):
     pr.join()
     pr_results.append(pr.exitcode)
     if pr_id != pr_results[pr_id]:
-        print 'ERROR: Process ' + str(pr_id) + ' ended incorrectly.'
-        print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Process ' + str(pr_id) + ' ended incorrectly.')
+        print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 gc.collect()
 # Merging output STAR files
@@ -225,6 +225,6 @@ for star in stars:
             hold_row[key] = star.get_element(key, row)
         rln_merged_star.add_row(**hold_row)
 
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 rln_merged_star.store(out_star)
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

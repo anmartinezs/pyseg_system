@@ -7,29 +7,39 @@ Contains:
   - class FrameSeries: getting and analysing aligned and original frames
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: frame_series.py 1534 2019-04-10 15:06:28Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from builtins import object
+#from past.utils import old_div
 
-__version__ = "$Revision: 1534 $"
+__version__ = "$Revision$"
 
 import re
 import os
+import subprocess
 import logging
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 
-from serial_em import SerialEM
+import pyto
+from .serial_em import SerialEM
 from pyto.grey.image import Image
 
 
 def analyze_frames(
         serialem_dir, serialem_projection_dir=None, align_program=None, 
         orig_frames_dir=None,  aligned_frames_dir=None, aligned_prefix=None, 
-        ucsf_translations_path=None, apixel=None, counte=None, 
-        gain_corr_acquisition=True, 
+        ucsf_translations_path=None, ucsf_serial=None,
+        apixel=None, counte=None, gain_corr_acquisition=True, 
         print_stats=True,  print_summary_stats=True, plot_frames=True, 
-        plot_projections=True, bins=range(200), names_only=False):
+        plot_projections=True, bins=list(range(200)), names_only=False):
     """
     Calculates basic pixel value stats for all aligned frames (projection)
     belonging to a tomo series, as well as for non-aligned (original)
@@ -41,21 +51,27 @@ def analyze_frames(
     pixel are calculated for the projections of the SerialEM generated stack. 
     If arg counte is specified, counts are converted to electrons.
 
-    If arg aligned_frames_dir is specified, counts per pixel are calculated for
-    aligned frames (requires arg align_prefix). If arg counte is specified, 
+    If arg aligned_frames_dir is specified and arg frames_dir is None, 
+    counts per pixel are calculated for aligned frames (requires arg 
+    align_prefix). Furthermore, if arg counte is specified, 
     counts are converted to electrons. Aligned frames files have to have the 
     same name as the corresponding frame stacks prefixed with arg 
     aligned_prefix, except that the extension can be the same or mrc (useful 
     in case frame stacks are saved as tifs and aligned frames as mrcs.
 
-    If fs.counte != fs.serialem.counte, as it happens when 
-    gain_corr_acquisition is False, counts for serialem projections are 
-    multiplied by  fs.counte / fs.serialem.counte before they are plotted.
-    This brings aligned frames and serialem projection counts to the same 
-    scale.
-    
-    If arg frames_dir is specified, counts per pixel are calculated for
-    (non-aligned) frames and converted to electrons.
+    If gain correction was done during acquision by SerialEM, arg
+    gain_corr_acquisition should be True. If the frames are available 
+    (orig_frames_dir is not None, currently possible for mrc but not
+    tiff frames) arg counte should be None. In that case counts per pixel 
+    (self.counte) is determined from frames and self.serialem.counte 
+    is set to the same value. If frames are not available, arg
+    counte should be set (19.2 for MPI Titan2-K2).
+
+    If gain correction was not done during acquision by SerialEM, arg
+    gain_corr_acquisition should be False. In that case, self.counte
+    will be set to 1. If arg counte is specified (preferred), that value 
+    will be used to set self.serialem.counte. Otherwise the default 
+    value (19.2) will be used.
 
     If arg align_program is specified, frame alignment shifts (translations)
     are shown.
@@ -79,9 +95,14 @@ def analyze_frames(
       frames file names
       - ucsf_translations_path: file path for the ucsf alignment log file
       (sent to stdout by ucsf alignment program)
+      - ucsf_serial: specifies wheteher ucsf alignment (motioncorr
+      was run in the serial mode (True), in the individual mode 
+      (False), or the mode is determined from the log file by
+      split_ucsf_translations() method (None).
       - apixel: pixel size in A
-      - counte: number of counts per electron, None to use the value present
-      in frame stack mrc files 
+      - counte: number of counts per electron; None to use the value present
+      in frame stack mrc files, otherwise should be set to the factor
+      SerialEM uses to multiply pixel values
       - gain_corr_acquisition: flag indicating whether gain correction was 
       done during tomo acquisition
       - print_stats: flag indicating whether stats for individual projections 
@@ -103,7 +124,8 @@ def analyze_frames(
         serialem_projection_dir=serialem_projection_dir,
         aligned_frames_dir=aligned_frames_dir, align=align_program, 
         aligned_prefix=aligned_prefix, 
-        ucsf_translations_path=ucsf_translations_path, counte=counte,
+        ucsf_translations_path=ucsf_translations_path,
+        ucsf_serial=ucsf_serial, counte=counte,
         gain_corr_acquisition=gain_corr_acquisition)
     projection_iter = fs.projections(
         serialem_stack=True, translations=True, names_only=names_only, 
@@ -111,9 +133,13 @@ def analyze_frames(
 
     # print table header
     if (print_stats or print_summary_stats) and not names_only:
-        print
-        print('                                  mean   std   min    max   mean    mean   ')
-        print('                                  c/pix  c/pix c/pix  c/pix e/A^2 e/(pix s)')
+        print()
+        #print('                                  mean   std   min    max   mean    mean   ')
+        #print('                                  c/pix  c/pix c/pix  c/pix e/A^2 e/(pix s)')
+        print(
+            '                                  mean   std   min    max   mean ')
+        print(
+            '                                  c/pix  c/pix c/pix  c/pix e/A^2')
 
     # loop over aligned frames (projections) 
     for proj in projection_iter:
@@ -146,46 +172,48 @@ def analyze_frames(
                 plt.figure()
                 plt.hist(original.data.flatten(), bins=bins, label='frames')
                 plt.yscale('log')
-                plt.xlabel('Counts')
+                plt.xlabel('SerialEM counts')
                 plt.ylabel('N pixels')
                 plt.legend()
                 plt.figure()
 
-            # plot count histogram for this projection
+            # plot count histograms for this projection
+            if fs.counte == fs.serialem.counte:
+                serialem_adjust = 1
+            else:
+                serialem_adjust = fs.counte / fs.serialem.counte
             if plot_projections and (original_flat is not None): 
                 plt.hist(
-                    original_flat.data.flatten(), bins=bins, 
-                    label='flat frames')
+                    original_flat.data.flatten() / serialem_adjust,
+                    bins=bins, label='flat frames')
             if plot_projections and (aligned is not None): 
                 plt.hist(
-                    aligned.data.flatten(), bins=bins, label='aligned frames')
+                    aligned.data.flatten() / serialem_adjust,
+                    bins=bins, label='aligned frames')
             if plot_projections and (serialem is not None): 
-                if fs.counte == fs.serialem.counte:
-                    serialem_adjust = 1
-                else:
-                    serialem_adjust = fs.counte / fs.serialem.counte
-                plt.hist(
-                    serialem_adjust * serialem.data.flatten(), bins=bins, 
+               plt.hist(
+                    serialem.data.flatten(), bins=bins, 
                     label='serialem')
             if plot_frames or plot_projections:
                 #plt.axis([plt.axis()[0], plt.axis()[1], 0, 10**7])
-                plt.xlabel('Counts')
+                plt.xlabel('SerialEM counts')
                 plt.ylabel('N pixels')
                 plt.legend()
                 plt.show()
 
             # check if counts per electron known
-            if (original_flat is not None) or (counte is not None):
-                counte_known = True
-            else:
-                counte_known = False
-
+            #if (original_flat is not None) or (counte is not None):
+            #    counte_known = True
+            #else:
+            #    counte_known = False
+            counte_known = True
+            
             # print basic greyscale stats
             if print_stats and (original is not None): 
                 print(
                     'Frames        %s: %5.1f  %5.1f  %5.1f  %6.1f  %5.3f   %5.2f  ' % 
-                    (proj['original_name'], 
-                     original.mean, original.std, original_min, original_max, 
+                    (proj['original_name'],
+                     original.mean, originl.std, original_min, original_max, 
                      original.mean_ea, original.mean/proj['exposure_time']))
             if print_stats and (original_flat is not None): 
                 print(
@@ -205,12 +233,12 @@ def analyze_frames(
                         (proj['aligned_name'], aligned.mean, aligned.std, 
                          aligned.min, aligned.max))
             if print_stats and (serialem is not None): 
-                if counte_known: 
+                if counte_known:
                     print(
                         'SerialEM      %s: %5.1f  %5.1f  %5.1f %6.1f %5.3f' % 
                         (proj['serialem_name'], serialem.mean, 
-                         serialem.std, serialem.min, serialem.max, 
-                         serialem.mean_ea))
+                         serialem.std, serialem.min,
+                         serialem.max, serialem.mean_ea))
                 else:
                     print(
                         'SerialEM      %s: %5.1f  %5.1f %5.1f %6.1f' % 
@@ -222,7 +250,7 @@ def analyze_frames(
                 print("Frame translations: ")
                 for trans in translations:
                     print("\t %7.3f  %7.3f" % (trans[0], trans[1]))
-            if print_stats: print
+            if print_stats: print()
 
         else:
 
@@ -257,11 +285,15 @@ def analyze_frames(
                       fs.serialem_total_ea))
              else:
                  print('Total serialem:  %6.1f c/pix ' % (fs.serialem_total, ))
-        print
+        print()
         if counte_known:
             print(
-                'Pixel = %5.2f A  Conversion = %5.2f c/e' % (
-                    fs.apixel, fs.counte))
+                ('Pixel = {0:5.2f} A  Conversion (frames) = {1:5.2f} c/e'
+                 + '  Conversion (SerialEM) = {1:5.2f} c/e').format(
+                     fs.apixel, fs.counte, fs.serialem.counte))
+            #print(
+            #    'Pixel = %5.2f A  Conversion = %5.2f c/e' % (
+            #        fs.apixel, fs.counte))
         else:
             print('Pixel = %5.2f A' % (fs.apixel,))
 
@@ -279,7 +311,8 @@ class FrameSeries(object):
     def __init__(
             self, serialem_dir, serialem_projection_dir=None, 
             orig_frames_dir=None, aligned_frames_dir=None, 
-            align=None, aligned_prefix=None, ucsf_translations_path=None, 
+            align=None, aligned_prefix=None, ucsf_translations_path=None,
+            ucsf_serial=None,
             apixel=None, counte=None, gain_corr_acquisition=True):
         """
         Sets attributes from arguments and reads serial em (mdoc) file.
@@ -303,6 +336,10 @@ class FrameSeries(object):
           frames file names
           - ucsf_translations_path: file path for the ucsf alignment 
           (MotionCore) log file (sent to stdout by ucsf alignment program)
+          - ucsf_serial: specifies wheteher ucsf alignment (motioncorr
+          was run in the serial mode (True), in the individual mode 
+          (False), or the mode is determined from the log file by
+          split_ucsf_translations() method (None).
           - apixel: pixel size in A
           - counte: number of counts per electron, or None to set it at a later
           point from the value present in frame stack mrc files (using 
@@ -318,8 +355,11 @@ class FrameSeries(object):
           - self.aligned_path_prefix: self.aligned_frames_dir / 
           self.aligned_prefix
           - self.ucsf_translations_path: motioncorr (ucsf) translations path
+          - self.ucsf_serial: from arg ucsf_serial
           - self.apixel: pixel size in A
-          - self.counte: counts per electrons
+          - counte: number of counts per electron; None to use the value 
+          present in frame stack mrc files, otherwise should be set to 
+          the factor SerialEM uses to multiply pixel values
           - self.gain_corr_acquisition: from gain_corr_acquisition 
           - self.frames_guess_counte: (set to 1.) guess for the multiplication
           factor SerialEM uses to scale projection stack frames when gain 
@@ -369,20 +409,38 @@ class FrameSeries(object):
         # split ucsf translations
         if (((align == 'ucsf') or  (align == 'motioncorr')) 
             and (ucsf_translations_path is not None)):
-            self.split_ucsf_translations(ucsf_translations_path)
+            self.split_ucsf_translations(
+                path=ucsf_translations_path, serial=ucsf_serial)
         self.ucsf_translations_path = ucsf_translations_path
+        self.ucsf_serial = ucsf_serial
 
         # set pixel size and counts per electron
         self.apixel = apixel
         self.gain_corr_acquisition = gain_corr_acquisition
-        if  (counte is None) or gain_corr_acquisition:
-            self.counte = counte
+        if not gain_corr_acquisition:
+
+            # no gain correction at acquisition, so set values here
+            if counte is not None:
+                self.counte = self.frames_guess_counte
+                serialem_counte = counte
+            else:
+                self.counte = counte
+                serialem_counte = self.serialem_guess_counte
+
         else:
-            self.counte = self.frames_guess_counte
+            
+            # gain correction at acquisition so use counte or determine later
+            self.counte = counte
+            serialem_counte = counte
+            
+        #if  (counte is None) or gain_corr_acquisition:
+        #    self.counte = counte
+        #else:
+        #    self.counte = self.frames_guess_counte
             
         # read serieal em (mdoc) files
         self.serialem = SerialEM(
-            dir_=self.serialem_dir, counte=counte,
+            dir_=self.serialem_dir, counte=serialem_counte,
             projection_dir=serialem_projection_dir)
 
     def projections(self, projections=None, serialem_stack=False, stats=True,
@@ -433,15 +491,15 @@ class FrameSeries(object):
         If self.counte and self.serialem.counte are not None, they are not
         modified here (these are used to convert from counts to electrons).
 
-        Alternatively, if self.counte is None, it is set from frame stacks mrc
+        Otherwise, if self.counte is None, it is set from frame stacks mrc
         header. If frames stacks are not specified (self.orig_frames_dir), or 
-        are mot in the mrc format, self.counte is set to 
+        are not in the mrc format, self.counte is set to 
         self.frames_guess_counte (normally set to 1).
 
-        If self.counte is set from the frames stack mrc heared and 
+        If self.counte is set from the frames stack mrc header and 
         self.gain_corr_acquisition is True, self.serialem.counte is set to
         the same value. Otherwise it is set to self.serialem_guess_counte.
-        Note that the default value (19.2) is microscope dependent.
+        Note that the default value (19.2) is not correct for all microscopes.
 
         Arguments:
           - serialem_stack: flag indicating if projections from serial em stack
@@ -493,7 +551,7 @@ class FrameSeries(object):
             self.apixel = self.serialem.apixel
 
         # set projection indices
-        all_projs = range(len(self.serialem.tilt_angles))
+        all_projs = list(range(len(self.serialem.tilt_angles)))
         if projections is not None:
             if isinstance(projections, (list, tuple)):
                 proj_indices = projections
@@ -589,11 +647,13 @@ class FrameSeries(object):
                     serialem_data = serialem_stack.data[:,:,z_value]
                     serialem_proj = Image(data=serialem_data)
 
-                    # set counts per electron if needed
+                    # set counts per electron if it wasn't set already
                     if self.serialem.counte is None:
                         if self.gain_corr_acquisition:
+                            #  gain correction at acquisition
                             self.serialem.counte = self.counte
                         else:
+                            # no gain correction at acquisition
                             self.serialem.counte = self.serialem_guess_counte
  
                     # calculate stats
@@ -670,8 +730,8 @@ class FrameSeries(object):
                 found = True
                 break
         if not found:
-            raise ValueError("Counts per electron could not be read.")
-            #return None
+            #raise ValueError("Counts per electron could not be read.")
+            return None
 
         # read the number
         number = ''
@@ -690,7 +750,7 @@ class FrameSeries(object):
         specified by arg path, which was obtained by Dimi, DM or 
         ucsf (MotionCore) alignement.
 
-        MotionCorr is can run in in both serial (-serial 1) and individual
+        MotionCorr can be run in serial (-serial 1) and individual
         mode (-serial 0). See split_ucsf_translations() for additional info.
 
         For dm and dimi alignment, log files areexpected to reside in the
@@ -751,7 +811,7 @@ class FrameSeries(object):
             log_dir = os.path.split(self.ucsf_translations_path)[0]
             log_path = os.path.join(log_dir, log_name)
             for line in open(log_path):
-                if line.strip().startswith('...... Frame'):
+                if line.strip().startswith('...... Frame ('):
                     number_str = line.rsplit('shift:')[1].strip()
                     data_list.append(
                         np.fromstring(number_str, sep=' ', dtype=float))
@@ -765,7 +825,7 @@ class FrameSeries(object):
             + " and 'motioncorr'")
         return None
 
-    def split_ucsf_translations(self, path):
+    def split_ucsf_translations(self, path, serial=None):
         """
         Extracts translations for multiple frames stacks aligned using UCSF 
         (MotionCorr) saved in a single log file, and writes them separately.
@@ -774,25 +834,44 @@ class FrameSeries(object):
         mode (serial=0). See split_ucsf_translations_serial() and 
         split_ucsf_translations_individual().
 
+        If arg serial is True, assumes that motioncorr was run in the
+        serial, and if it is False in the individual mode.
+
+        If arg serial is None, determines whether motioncorr was run 
+        in serial or individual mode by examining the first line in 
+        the log file (arg path) that starts with '-Serial' and has 
+        exactly two parts (as determined by str.split()). If the 
+        second part 0, motioncorr was run in the individual, or if it 
+        is 1 in the serial mode. 
+
+        Important for compatibility with future versions of motioncorr: 
+        For the reasons given above, if arg serial is None, the first 
+        line in the motioncorr log file that starts with '-Serial' has 
+        to be either '-Serial 0', or '-Serial 1'. Otherwise arg serial has 
+        to be specified.
+
         Arguments:
           - path: path to the UCSF (MotionCorr) log file
+          - serial: 
         """
       
         if path is None: return
 
-        # determine whether serial
-        serial = True
-        for line in open(path):
+        if serial is None:
+            
+            # determine automatically whether serial mode
+            serial = True
+            for line in open(path):
 
-            if line.strip().startswith('-Serial'):
-                split_line = line.split()
-                if len(split_line) == 2:
-                    serial_number = split_line[1]
-                    if serial_number == '0':
-                        serial = False
-                        break
-            # in case -Serial not found, assume it is serial
-        #path.close
+                if line.strip().startswith('-Serial'):
+                    split_line = line.split()
+                    if len(split_line) == 2:
+                        serial_number = split_line[1]
+                        if serial_number == '0':
+                            serial = False
+                            break
+                # in case -Serial not found, assume it is serial
+            #path.close
 
         # call appropriate method do split file
         if serial:
@@ -805,14 +884,19 @@ class FrameSeries(object):
         Extracts translations for multiple frames stacks aligned using UCSF 
         (MotionCorr) saved in a single log file, and writes them separately.
 
-        Only the file names and translations are saved.
-
-        MotionCorr is expected to run in serial mode (-serial 1). Takes care 
+        This method should be used when MotionCorr was run in the 
+        serial mode (-serial 1). Takes care 
         of the fact that a frame stacks file can be opened (and reported in 
         the log file) before shifts of the previous frames stack are 
         calculated (and reported). The only assumption is that the order the
         frame stacks are open is the same as the order of reported shifts.
         This was confirmed by inspection of log files (10.2017). 
+
+        The resulting log files are saved in the same directory where
+        motioncorr saved the aligned frames (given by -OutMrc argument 
+        of motioncorr). 
+
+        Only the file names and translations are saved.
 
         Arguments:
           - path: path to the UCSF (MotionCorr) log file
@@ -883,9 +967,14 @@ class FrameSeries(object):
         Extracts translations for multiple frames stacks aligned using UCSF 
         (MotionCorr) saved in a single log file, and writes them separately.
 
-        MotionCorr is expected to run in individual mode (-serial 0) where
-        the complete log is saved is one log file. This method simply splits the
+        This method should be used when MotionCorr was run in the 
+        individual mode (-serial 0) and the complete log was saved in 
+        a single log file. This method simply splits the
         log file into separate log file (one for each frames stack).
+
+        The resulting log files are saved in the same directory where
+        motioncorr saved the aligned frames (given by -OutMrc argument 
+        of motioncorr). 
 
         Arguments:
           - path: path to the UCSF (MotionCorr) log file
@@ -902,7 +991,8 @@ class FrameSeries(object):
         for line in open(path):
 
             # write file and start a next one
-            if  line.strip().startswith("Usage"):
+            #if  line.strip().startswith("Usage"): not in log 1.2020
+            if  line.strip().startswith("-InMrc"):
                 if one_log_path is not None:
                     #print("writing in " + one_log_path) 
                     log_fd = open(one_log_path, 'w')
@@ -933,3 +1023,100 @@ class FrameSeries(object):
             count += 1
 
         return count
+
+    def make_projection_stack(
+            self, series_path, tilt_angles_file_name,
+            serialem_projection_dir=None, image_size=None, rotation=None,
+            print_cmd=False, test=False):
+        """
+        Makes projection stack (tomo series) from aligned frames.
+
+        If aligned frames are not available, the directory where imod
+        stack is located needs to be specified (arg serialem_projection_dir).
+        Otherwise it should be set to None.
+
+        If arg rotation is not None, projection stack is rotated before 
+        it is saved. 
+
+        Pixel size and tilt axis angle are added to the projection 
+        series header.
+
+        Important: uses Imod commands newstack and alterheader, so they
+        have to be in the $PATH.
+
+        Arguments:
+          - series_path: path to the projection stack
+          - tilt_angles_file_name: file name where tilt angles are saved
+          - serialem_projection_dir: the directory where imod stack is 
+          located, needed if aligned frames are not available, othervise
+          should be set to None
+          - image_size: change image size to this value, None for no change
+          - rotation: rotation angle in degrees, or None for no rotation
+          - print_cmd: prints full Imod commands used
+          - test: if True, imod commands are not executed
+        """
+
+        # make projection stack directory if needed
+        series_dir = os.path.split(series_path)[0]
+        if (not ((series_dir == '') or os.path.exists(series_dir))): 
+            os.makedirs(series_dir)
+
+        # save tilts
+        tilt_angles_path = os.path.join(series_dir, tilt_angles_file_name)
+        tilt_file = open(tilt_angles_path, 'w')
+        for tilt in self.serialem.tilt_angles.round(decimals=2):
+            tilt_file.write('%7.2f\n' % tilt)
+        tilt_file.close()
+
+        # make proection stack 
+        projections = self.aligned_paths_list
+        if ((self.aligned_paths_list is None)
+            or (len(self.aligned_paths_list) == 0)):
+            projections = self.serialem.projection_paths.tolist()
+        cmd_begin =  ['newstack'] + projections
+        cmd_end =  [series_path] 
+        cmd_begin = cmd_begin + ['-TiltAngleFile', tilt_angles_path]
+        if image_size is not None:
+            cmd_begin = (
+                cmd_begin + ['-size', str(image_size)+','+str(image_size)])
+        if rotation is not None:
+            cmd_begin = cmd_begin + ['-rotate', str(rotation)]
+        if print_cmd:
+            print(*(["Executing: "] + cmd_begin + cmd_end))
+        if not test:
+            subprocess.check_call(cmd_begin + cmd_end)
+
+        # adjust header: pixelsize to the correct one and current
+        # rotation to 0,0,0
+        n_projections = len(projections)
+        cell_size = self.serialem.apixel * np.array(
+            [image_size, image_size, n_projections])
+        cmd =  ['alterheader']
+        cmd = cmd + ['-CellSize', str(cell_size[0]) + ',' + str(cell_size[1]) 
+                     + ',' + str(cell_size[2])]
+        cmd = cmd + ['-SampleSize', str(image_size) + ',' + str(image_size) 
+                     + ',' + str(n_projections)]
+        cmd = cmd + ['-TiltCurrent', str(0) + ',' + str(0) + ',' + str(0)]
+        cmd = cmd + [series_path]
+        if print_cmd:
+            print(*(["Executing: "] + cmd))
+        if not test:
+            subprocess.check_call(cmd)
+
+        # adjust Tilt axis angle in header (label)
+        series_path_io = pyto.io.ImageIO(file=self.serialem.stack_paths[0])
+        series_path_io.readHeader(fileFormat='mrc')
+        cmd = ['alterheader']
+        for label in series_path_io.labels:
+            if label.find(b"Tilt axis angle ") > 0:
+                label_str = label.decode()
+                angle_old = label_str.strip().split()[4].rsplit(',')[0]
+                angle_new = str(float(angle_old) - rotation)
+                label_str = label_str.replace(angle_old, angle_new)
+                break
+        cmd += ['-title', label_str]
+        cmd += [series_path]
+        if print_cmd:
+            print(*(["Executing: "] + cmd))
+        if not test:
+            subprocess.check_call(cmd)

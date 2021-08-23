@@ -7,10 +7,13 @@ of images. This class should not be instantiated
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: image.py 1538 2019-04-16 12:05:34Z vladan $
+# $Id$
 """
+from builtins import zip
+from builtins import object
+from past.builtins import basestring
 
-__version__ = "$Revision: 1538 $"
+__version__ = u"$Revision$"
 
 
 from copy import copy, deepcopy
@@ -95,6 +98,9 @@ class Image(object):
         self._fullInset = None
         self._fullData = None
 
+        # file io
+        self.file_io = None
+
 
     #############################################################
     #
@@ -102,7 +108,7 @@ class Image(object):
     #
     ############################################################
 
-    def tile(self, shape, mode='simple'):
+    def tile(self, shape, mode=u'simple'):
         """
         Use the current instance (image) as a tile (pattern) to make a (bigger) 
         image in arbitrary dimensions.
@@ -131,11 +137,11 @@ class Image(object):
         """
 
         # make unit tile for different modes
-        if mode == 'simple':
+        if mode == u'simple':
 
             unit_tile = self.data
 
-        elif mode == 'mirror':
+        elif mode == u'mirror':
 
             # prepare slices for reflection
             identity = slice(None)
@@ -165,8 +171,9 @@ class Image(object):
                 unit_tile[position] = curr_tile
 
         else:
-            raise ValueError('Mode: ' + mode + " not understood. Available " \
-                                 + "modes are 'simple' and 'mirror'.")
+            raise ValueError(
+                u'Mode: ' + mode + u" not understood. Available " 
+                + u"modes are 'simple' and 'mirror'.")
 
         # find number of repeats
         repeat = numpy.true_divide(shape, unit_tile.shape)
@@ -203,7 +210,7 @@ class Image(object):
         """
         self._ndim = ndim
     
-    ndim = property(fget=getNdim, fset=setNdim, doc="Dimensionality of data")
+    ndim = property(fget=getNdim, fset=setNdim, doc=u"Dimensionality of data")
 
     def setOffset(self, offset=None):
         """
@@ -225,13 +232,14 @@ class Image(object):
         """
         try:
             if self._offset is None:
-                self._offset = numpy.zeros(shape=self.ndim, dtype='int_')
+                self._offset = numpy.zeros(shape=self.ndim, dtype=u'int_')
         except AttributeError:
             self._offset = None
         return self._offset
 
-    offset = property(fget=getOffset, fset=setOffset, 
-                      doc="Position of the origin in respect to some reference")
+    offset = property(
+        fget=getOffset, fset=setOffset, 
+        doc=u"Position of the origin in respect to some reference")
 
     def getTotalOffset(self):
         """
@@ -243,11 +251,12 @@ class Image(object):
         else:
             return self.offset + [sl.start for sl in self.inset]
 
-    totalOffset = property(fget=getTotalOffset,
-                      doc="Total offset, that is a sum of self.offset and " \
-                               + "the start positions of self.inset.")
+    totalOffset = property(
+        fget=getTotalOffset,
+        doc=(u"Total offset, that is a sum of self.offset and " 
+             + u"the start positions of self.inset."))
 
-    def setInset(self, inset, mode='absolute'):
+    def setInset(self, inset, mode=u'absolute'):
         """
         Sets inset for self.data (does not modify self.data).
 
@@ -266,10 +275,10 @@ class Image(object):
         if inset is None:
             self._inset = None
             
-        elif (mode == 'absolute') or (mode == 'abs') or (self.inset is None):
+        elif (mode == u'absolute') or (mode == u'abs') or (self.inset is None):
             self._inset = [[sl.start, sl.stop, sl.step] for sl in inset]
 
-        elif (mode == 'relative') or (mode == 'rel'):
+        elif (mode == u'relative') or (mode == u'rel'):
             self._inset = \
                 [[old.start + new.start, old.start + new.stop, new.step] \
                      for old, new in zip(self.inset, inset)]
@@ -298,9 +307,10 @@ class Image(object):
                 
         return slice_list
 
-    inset = property(fget=getInset, fset=setInset, 
-                 doc="(list of slice objects) a current view of self.data "\
-                 + "array in respect to the underlying base reference array.")
+    inset = property(
+        fget=getInset, fset=setInset, 
+        doc=(u"(list of slice objects) a current view of self.data "
+             + u"array in respect to the underlying base reference array."))
 
     def relativeToAbsoluteInset(self, inset):
         """
@@ -323,8 +333,8 @@ class Image(object):
 
         else:
             abs_ins = [slice(rel_ins.start + self_ins.start, 
-                             rel_ins.stop + self_ins.start) \
-                           for rel_ins, self_ins in zip(inset, self.inset)] 
+                             rel_ins.stop + self_ins.start) 
+                       for rel_ins, self_ins in zip(inset, self.inset)] 
             return abs_ins
 
     def absoluteToRelativeInset(self, inset):
@@ -345,8 +355,8 @@ class Image(object):
 
         else:
             rel_ins = [slice(abs_ins.start - self_ins.start, 
-                             abs_ins.stop - self_ins.start) \
-                           for abs_ins, self_ins in zip(inset, self.inset)] 
+                             abs_ins.stop - self_ins.start) 
+                       for abs_ins, self_ins in zip(inset, self.inset)] 
             return rel_ins
 
     def setFullInset(self, inset):
@@ -395,7 +405,7 @@ class Image(object):
         return slice_list
 
     fullInset = property(fget=getFullInset, fset=setFullInset, 
-                         doc="Full inset that underlies current self.data.") 
+                         doc=u"Full inset that underlies current self.data.") 
 
     def getFullData(self):
         """
@@ -422,8 +432,8 @@ class Image(object):
 
         self._fullData = data
 
-    fullData = property(fget=getFullData, fset=setFullData, \
-                        doc='Full size data array')
+    fullData = property(
+        fget=getFullData, fset=setFullData, doc=u'Full size data array')
 
     def getDeepBase(self, data=None):
         """
@@ -444,7 +454,7 @@ class Image(object):
             while (data.base is not None) and (data.base.ndim == ndim):
                 data = data.base
         except AttributeError:
-            if isinstance(data.base, str):
+            if isinstance(data.base, basestring):
                 # data.base is a string, happens after unpickling
                 pass
             else:
@@ -498,7 +508,7 @@ class Image(object):
         self.data = data
         self.inset = inset
 
-    def useInset(self, inset, mode='relative', intersect=False, useFull=False,
+    def useInset(self, inset, mode=u'relative', intersect=False, useFull=False,
                  expand=False, value=0, update=True):
         """
         Finds data inset of the current data that corresponds to the 
@@ -586,28 +596,28 @@ class Image(object):
         #    return
 
         # find absolute inset
-        if (mode == 'relative') or (mode == 'rel'):
+        if (mode == u'relative') or (mode == u'rel'):
 
             # convert to absolute inset
             abs_inset = [slice(rel_in.start + self_in.start,
-                               rel_in.stop + self_in.start) \
+                               rel_in.stop + self_in.start) 
                          for rel_in, self_in in zip(inset, self.inset)]
                 
-        elif (mode == 'absolute') or (mode == 'abs'):
+        elif (mode == u'absolute') or (mode == u'abs'):
 
             # new inset is absolute
             abs_inset = inset
 
         else: 
-            raise ValueError, "Argument mode can be either 'relative' " \
-                + "or 'absolute'."
+            raise ValueError(
+                u"Argument mode can be either u'relative' or u'absolute'.")
 
         # check if requested inset lies withing the inset and the full self.data
-        inside = min((abs_in.start >= self_in.start) \
-                     and (abs_in.stop <= self_in.stop) \
+        inside = min((abs_in.start >= self_in.start) 
+                     and (abs_in.stop <= self_in.stop) 
                      for abs_in, self_in in zip(abs_inset, self.inset))
-        inside_full = min((abs_in.start >= full_in.start) \
-                          and (abs_in.stop <= full_in.stop) \
+        inside_full = min((abs_in.start >= full_in.start) 
+                          and (abs_in.stop <= full_in.stop) 
                           for abs_in, full_in in zip(abs_inset, self.fullInset))
 
         # adjust absolute inset if needed and check if it is inside the 
@@ -617,16 +627,16 @@ class Image(object):
             # if outside inset, intersect with current inset
             if not inside:
                 abs_inset = [slice(max(abs_in.start, self_in.start),
-                                   min(abs_in.stop, self_in.stop)) \
+                                   min(abs_in.stop, self_in.stop)) 
                              for abs_in, self_in in zip(abs_inset, self.inset)] 
 
             # calculate inset relative to self.inset
             rel_inset = [slice(abs_in.start - full_in.start,
-                               abs_in.stop - full_in.start) \
+                               abs_in.stop - full_in.start) 
                          for abs_in, full_in in zip(abs_inset, self.inset)]
 
             # set inset and data
-            new_data = self.data[rel_inset]
+            new_data = self.data[tuple(rel_inset)]
             if update:
                 self.inset = abs_inset
                 self.data = new_data
@@ -641,12 +651,12 @@ class Image(object):
             # recover full and set inset and data
             before_recover_inset = self.inset 
             self.recoverFull()
-            new_data = self.data[rel_inset]
+            new_data = self.data[tuple(rel_inset)]
             if update:
                 self.inset = abs_inset
                 self.data = new_data
             else:
-                self.useInset(inset=before_recover_inset, mode='abs')
+                self.useInset(inset=before_recover_inset, mode=u'abs')
 
         elif expand:
 
@@ -657,7 +667,7 @@ class Image(object):
         else:
 
             # outside, but can't expand or outside full but can't use full
-            raise ValueError("Inset falls outside the full self.data array.")
+            raise ValueError(u"Inset falls outside the full self.data array.")
 
         return new_data
 
@@ -705,7 +715,7 @@ class Image(object):
 
         # get new data
         if self.hasOverlap(inset=inset):
-            new_data[rel_inset_new] = self.data[rel_inset_old]
+            new_data[tuple(rel_inset_new)] = self.data[tuple(rel_inset_old)]
         else:
             pass
 
@@ -780,14 +790,14 @@ class Image(object):
             inst = self
 
         # adjust image.inset for offsets
-        inset_start = [image_sl.start + image_off - self_off \
-                       for image_sl, image_off, self_off \
+        inset_start = [image_sl.start + image_off - self_off 
+                       for image_sl, image_off, self_off 
                        in zip(image.inset, image.offset, self.offset)]  
-        adj_inset = [slice(st, st + ins.stop - ins.start) \
+        adj_inset = [slice(st, st + ins.stop - ins.start) 
                      for st, ins in zip(inset_start, image.inset)]
 
         # use the adjusted inset
-        inst.useInset(inset=adj_inset, mode='abs', intersect=intersect,
+        inst.useInset(inset=adj_inset, mode=u'abs', intersect=intersect,
                       expand=expand, value=value)
 
         # return if new
@@ -912,13 +922,13 @@ class Image(object):
             for self_ins, ins in zip(inset2, inset)]
         return result
 
-    def newFromInset(self, inset, mode='relative', intersect=False, 
+    def newFromInset(self, inset, mode=u'relative', intersect=False, 
                      useFull=False, expand=False, value=0, copyData=True, 
                      deepcp=True, noDeepcp=[]):
         """
         Makes an instance that has values of all attributes the same as this 
-        instance, except that the data array (attribute data) is set to a copy 
-        of the data array inset defined by the arguments, and the inset
+        instance, except that the data array (attribute data) is set to  
+        the data array inset defined by the arguments, and the inset
         attribute is set accordingly.
 
         The current instance is left unchanged (actaully changed and then
@@ -980,7 +990,7 @@ class Image(object):
         if deepcp:
             for attr in no_deepcp:
                 setattr(self, attr, None)
-                new_instance = deepcopy(self)
+            new_instance = deepcopy(self)
         else:
             new_instance = copy(self)
 
@@ -1026,7 +1036,7 @@ class Image(object):
         attribute header. In any case attribute fileFormat is set.
 
         For mrc and em files, array order is determined from arg arrayOrder,
-        from self.arrayOrder, or it is set to the default ("FORTRAN") in 
+        from self.arrayOrder, or it is set to the default ("F") in 
         this order. Data is read according the determined array order.
         That is, array order is not read from the file header.
 
@@ -1059,9 +1069,9 @@ class Image(object):
           - byteOrder: '<' (little-endian), '>' (big-endian)
           - dataType: any of the numpy types, e.g.: 'int8', 'int16', 'int32',
             'float32', 'float64'
-          - arrayOrder: 'C' (z-axis fastest), or 'FORTRAN' (x-axis fastest)
+          - arrayOrder: 'C' (z-axis fastest), or 'F' (x-axis fastest)
           - shape: (x_dim, y_dim, z_dim)
-          - header: flag indicating if file header is saved
+          - header: flag indicating if file header is read and saved
           - memmap: Flag indicating if the data is read to a memory map,
           instead of reading it into a ndarray
 
@@ -1108,6 +1118,11 @@ class Image(object):
         # save memmap
         object.memmap = fi.memmap
 
+        # save file io object
+        # removed because if object.data is changed, object.file_io.data will
+        # still hold a copy of data 
+        #object.file_io = fi
+        
         # save file type
         #try:
         #    object.fileType = fi.fileType
@@ -1118,8 +1133,8 @@ class Image(object):
 
     def write(
         self, file, byteOrder=None, dataType=None, fileFormat=None,
-        arrayOrder=None, shape=None, length=None, pixel=1, casting='unsafe',
-        header=False):
+        arrayOrder=None, shape=None, length=None, pixel=1, casting=u'unsafe',
+            header=False, existing=False):
 
         """
         Writes image to a file in em, mrc or raw format.
@@ -1165,7 +1180,7 @@ class Image(object):
           - byteOrder: '<' (little-endian), '>' (big-endian)
           - dataType: any of the numpy types, e.g.: 'int8', 'int16', 'int32',
             'float32', 'float64'
-          - arrayOrder: 'C' (z-axis fastest), or 'FORTRAN' (x-axis fastest)
+          - arrayOrder: 'C' (z-axis fastest), or 'F' (x-axis fastest)
           - shape: (x_dim, y_dim, z_dim)
           - length: (list aor ndarray) length in each dimension in nm (used 
           only for mrc format)
@@ -1175,12 +1190,16 @@ class Image(object):
           'equiv', 'safe', 'same_kind', 'unsafe'. Identical to numpy.astype()
           method.
           - header: flag indicating if self.header is written as file header
+          - existing: flag indicating whether the already existing file_io
+          attribute is used for writting
 
         Returns file instance.
         """
 
         # write file
         from pyto.io.image_io import ImageIO as ImageIO
+        if existing and (self.file_io is not None):
+            fi = self.file_io
         fi = ImageIO()
 
         # get file format of the file to be written
@@ -1205,4 +1224,96 @@ class Image(object):
             header=header_arg, extended=extended)
 
         return fi.file_
-    
+
+    @classmethod
+    def modify(cls, old, new, fun, fun_kwargs={}, memmap=True):
+        """
+        Reads an image (arg old), modifies old.data using function
+        passed as arg fun and writes an image containing the modified
+        data as a new image (arg new).
+
+        The function passes (arg fun) has to have signature
+          fun(Image, **fun_kwargs)
+        and to return image data (ndarray).
+
+        Meant for mrc files. The new image will have exactly the same 
+        header as the old image, except for the shape, length and 
+        min/max/mean values, which are set according to the new image 
+        data.
+
+        Also works if old is an mrc and new is a raw file.  
+        
+        Arguments:
+          - old: old mrc image file name
+          - new: new (subtomogram) mrc image file name
+          - fun: function that takes old.data as an argument 
+          - memmap: if True, read memory map instead of the whole image
+
+        Returns an instance of this class that holds the new image. This
+        instance contains attribute image_io (pyto.io.ImageIO) that
+        was used to write the new file.
+ 
+        """
+        # read header
+        from pyto.io.image_io import ImageIO as ImageIO
+        image_io = ImageIO()
+        image_io.readHeader(file=old)
+
+        # read image 
+        image = cls.read(file=old, memmap=memmap)
+
+        # modify data
+        data = fun(image, **fun_kwargs)
+
+        # write new (modified data)
+        image_io.setData(data=data)
+        image_io.write(file=new, pixel=image_io.pixel)
+        #image_io.setFileFormat(file_=new)
+        #if image_io.fileFormat == 'mrc':
+        #    image_io.write(file=new, pixel=image_io.pixel)
+        #elif image_io.fileFormat == 'raw':
+        #    image_io.write(file=new, pixel=image_io.pixel)
+            
+        #
+        image.image_io = image_io
+        return image
+             
+    @classmethod
+    def cut(cls, old, new, inset, memmap=True):
+        """
+        Reads an image (arg old), cuts a subtomo defined by arg inset
+        and writes the new image (arg new).
+
+        Meant for mrc files. The new image will have exactly the same 
+        header as the old image, except for the shape, length and 
+        min/max/mean values, which are set according to the new image 
+        data.
+
+        Arguments:
+          - old: old mrc image file name
+          - new: new (subtomogram) mrc image file name
+          - inset: defines the subtomogram
+          - memmap: if True, read memory map instead of the whole image
+
+        Returns an instance of this class that holds the new image. This
+        instance contains attribute image_io (pyto.io.ImageIO) that
+        was used to write the new file.
+        """
+
+        # read header
+        from pyto.io.image_io import ImageIO as ImageIO
+        image_io = ImageIO()
+        image_io.readHeader(file=old)
+
+        # read image and cut inset
+        image = cls.read(file=old, memmap=memmap)
+        image.useInset(inset=inset)
+
+        # write new
+        image_io.setData(data=image.data)
+        image_io.write(file=new, pixel=image_io.pixel)
+
+        #
+        image.image_io = image_io
+        return image
+        

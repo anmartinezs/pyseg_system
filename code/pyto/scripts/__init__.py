@@ -2,12 +2,12 @@
 Directory with scripts for various high-level tasks.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-$Id: __init__.py 668 2010-03-01 17:07:21Z vladan $
+$Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 668 $"
+__version__ = "$Revision$"
 
 
-import common
-import connections
-import classify_connections
+from . import common

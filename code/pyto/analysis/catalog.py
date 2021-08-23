@@ -6,16 +6,30 @@ characterization of the experimental data.
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: catalog.py 1485 2018-10-04 14:35:01Z vladan $
+# $Id$
 """
-__version__ = "$Revision: 1485 $"
+from __future__ import unicode_literals
+from past.builtins import basestring
+from builtins import zip
+from builtins import str
+from builtins import object
+
+__version__ = "$Revision$"
 
 import warnings
 import logging
 from copy import copy, deepcopy
 import re
 import os.path
-import imp
+import sys
+try:
+    # depreciated in Python 3.7
+    import imp
+except ModuleNotFoundError:
+    warnings.warn(
+        "Module imp not loaded, loading importlib instead "
+        + "Run test/test_catalog.py to check the importlib related code.")  
+    import importlib
 
 import numpy
 import scipy
@@ -32,7 +46,7 @@ class Catalog(object):
       cat.property_name ...
 
     Important attributes:
-      - self._db: (ser by read()), holds all meta-data read from catalogs in 
+      - self._db: (set by read()), holds all meta-data read from catalogs in 
       the following form:
         {property_a : {exp_1 : value_a1, exp_2 : value_a2, ...},
          property_b : {exp_1 : value_b1, ... },
@@ -56,7 +70,7 @@ class Catalog(object):
 
     def __init__(self, catalog=None, dir='.', type='distributed',
                  identifiers=None):
-    	"""
+        """
         If arg catalog is specified, reads catalog info (see self.read())
 
         Arguments:
@@ -66,12 +80,12 @@ class Catalog(object):
           - type: catalog type (currently 'distributed')
           - identifiers: list of experiment identifiers to be used, identifiers
           that are listed here but not found in the catalog are ignored
-	"""
+        """
 
         # set db
         if catalog is not None:
-            self.read(catalog=catalog, dir=dir, type=type, 
-                      identifiers=identifiers)
+            self.read(
+                catalog=catalog, dir=dir, type=type, identifiers=identifiers)
         else:
             self._db = {}
 
@@ -164,14 +178,26 @@ class Catalog(object):
                 cat_mod = os.path.join(cat_dir, cat_base_main)
 
                 # read current catalog module
-                try:
-                    mod_file, mod_dir, mod_desc = imp.find_module(cat_mod)
-                except ImportError:
-                    # happens when run from a command line, don't know why
-                    mod_file, mod_dir, mod_desc = imp.find_module(cat_base_main,
-                                                                  [cat_dir])
-                module = imp.load_module(base, mod_file, mod_dir, mod_desc)
+                if 'imp' in sys.modules:
+                    # depreciated in python 3.8
+                    try:
+                        mod_file, mod_dir, mod_desc = imp.find_module(cat_mod)
+                    except ImportError:
+                        # happens when run from a command line, don't know why
+                        mod_file, mod_dir, mod_desc = imp.find_module(
+                            cat_base_main, [cat_dir])
+                    try:
+                        module = imp.load_module(
+                            base, mod_file, mod_dir, mod_desc)
+                    finally:
+                        mod_file.close()
 
+                else:
+                    # python 3
+                    spec = importlib.util.spec_from_file_location(
+                        cat_base_main, cat_mod)
+                    module = spec.loader.load_module(spec.name)
+                    
                 # get identifier and skip non-specified identifiers
                 identifier = module.identifier
                 if ((identifiers is not None) 
@@ -179,14 +205,13 @@ class Catalog(object):
                     continue
 
                 # read other variables and put in the database
-                for name, value in module.__dict__.items():
-
+                for name, value in list(module.__dict__.items()):
                     # skip internal and identifier
                     if (name.startswith('_')) or (name == 'identifier'):
                         continue
 
                     # add (dereferenced, abs) dir to file names
-                    if isinstance(value, str):
+                    if isinstance(value, basestring):
                         other, ext = os.path.splitext(value)
                         if ext in extensions:
                             value = os.path.join(cat_dir, value)
@@ -244,8 +269,8 @@ class Catalog(object):
         # add a property to make only one group
         if feature is None:
             all_identifiers = self.getIdentifiers(property=None)
-            dummy_values = dict(zip(
-                all_identifiers, len(all_identifiers) * [singleGroupName]))
+            dummy_values = dict(list(zip(
+                all_identifiers, len(all_identifiers) * [singleGroupName])))
             self.add(name=singleFeature, values=dummy_values, overwrite=False)
             local_feature = singleFeature
         else:
@@ -313,17 +338,17 @@ class Catalog(object):
         if property is None:
             identifiers = set()
             for property in self._db:
-                identifiers = identifiers.union(self._db[property].keys())
+                identifiers = identifiers.union(list(self._db[property].keys()))
             identifiers = list(identifiers)
         else:
-            identifiers = self._db[property].keys()
+            identifiers = list(self._db[property].keys())
         return identifiers
 
     def getProperties(self):
         """
         Returns a list of all properties (names) existing in the database.
         """
-        props = self._db.keys()
+        props = list(self._db.keys())
         return props
 
     def add(self, name, values, overwrite=False):

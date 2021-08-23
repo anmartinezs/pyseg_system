@@ -6,10 +6,19 @@ Currently only few that allow running ctffind from console or notebook.
 Work in progress.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: ctf.py 1485 2018-10-04 14:35:01Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1485 $"
+__version__ = "$Revision$"
 
 import os
 import subprocess
@@ -216,7 +225,7 @@ class Ctf(object):
             n_digits = int(np.ceil(np.log10(z_dim)))
             if isinstance(flatten, bool):
                 pass
-            elif isinstance(flatten, str) and (flatten == 'auto'):
+            elif isinstance(flatten, basestring) and (flatten == 'auto'):
                 if z_dim > 1: 
                     flatten = True
                 else:
@@ -287,7 +296,7 @@ class Ctf(object):
                         new.b_factor.append(res_one['b_factor'])
                     except AttributeError:
                         new.b_factor = [res_one['b_factor']]
-                    for name, value in res_one.items():
+                    for name, value in list(res_one.items()):
                         if name.startswith(cls.validation_prefix):
                             try:
                                 previous_val = getattr(new, name)
@@ -318,7 +327,7 @@ class Ctf(object):
         # plot phases
         if plot_phases:
             plt.figure()
-            plt.bar(range(index), new.phases)
+            plt.bar(list(range(index)), new.phases)
             plt.plot([0, index], [0.5, 0.5], 'r--')
             plt.ylabel('Phase shift [$\pi$]')
             plt.xlabel('Images')
@@ -327,7 +336,7 @@ class Ctf(object):
         # plot defocus
         if plot_defoci:
             plt.figure()
-            plt.bar(range(index), new.defoci)
+            plt.bar(list(range(index)), new.defoci)
             plt.ylabel('Defocus [$\mu m$]')
             plt.xlabel('Images')
             plt.title("Defocus summary")
@@ -335,7 +344,7 @@ class Ctf(object):
         # plot resolution
         if plot_resolution:
             plt.figure()
-            plt.bar(range(index), new.resolution)
+            plt.bar(list(range(index)), new.resolution)
             plt.ylabel('Resolution [nm]')
             plt.xlabel('Images')
             plt.title("Resolution summary")
@@ -422,7 +431,7 @@ class Ctf(object):
         ctf_txt = np.loadtxt(ctf_txt_path)
         results = {
             "defocus_1":ctf_txt[1]/10000., "defocus_2":ctf_txt[2]/10000., 
-            "angle" : ctf_txt[3], "phase":ctf_txt[4]/np.pi, 
+            "angle" : ctf_txt[3], "phase":old_div(ctf_txt[4],np.pi), 
             "ccc" : ctf_txt[5], "resolution" : ctf_txt[6] / 10., 
             'pixel_a':pixel_a}
         results['defocus'] = (results['defocus_1'] + results['defocus_2']) / 2.
@@ -430,8 +439,8 @@ class Ctf(object):
 
         # prepare header for defoci and phases
         if print_head:
-            left_space = ' ' * ((len(image_name) - 5) / 2)
-            right_space = ' ' * ((len(image_name) - 4) / 2)
+            left_space = ' ' * old_div((len(image_name) - 5), 2)
+            right_space = ' ' *old_div ((len(image_name) - 4), 2)
             head_1 = (
                 left_space + "Image" + right_space + 
                 " Defocus 1 Defocus 2 Phase Resolution")
@@ -536,7 +545,7 @@ class Ctf(object):
         params["pixel_a"] = pixel_a 
         params_list = [
             ["--" + gctf_names.get(key, key), str(val)] 
-            for key, val in params.items()]
+            for key, val in list(params.items())]
         params_list = pyto.util.nested.flatten(params_list)
         params_list = [par for par in params_list if len(par) > 0]
         #print(params_list)
@@ -606,7 +615,7 @@ class Ctf(object):
             "Angle":"angle", "CCC":"ccc", "Phase_shift":"phase"}
         results = dict([
             (key_dict[old_key], value)
-            for old_key, value in results_native.items()])
+            for old_key, value in list(results_native.items())])
         results['defocus'] = (results['defocus_1'] + results['defocus_2']) / 2.
         results['phase'] = results.get('phase', 0) / 180.
         results["resolution"] = resolution / 10.
@@ -621,8 +630,8 @@ class Ctf(object):
 
         # prepare header for defoci and phases
         if print_head:
-            left_space = ' ' * ((len(image_name) - 5) / 2)
-            right_space = ' ' * ((len(image_name) - 4) / 2)
+            left_space = ' ' * (old_div((len(image_name) - 5), 2))
+            right_space = ' ' * (old_div((len(image_name) - 4), 2))
             head_1 = (
                 left_space + "Image" + right_space + 
                 " Defocus 1 Defocus 2 Phase Resolution")
@@ -659,7 +668,7 @@ class Ctf(object):
         # print validation
         if print_validation:
             for val_line in validation_lines:
-                print val_line
+                print(val_line)
 
         # plot ctf
         epa = np.loadtxt(epa_path, skiprows=1)

@@ -2,10 +2,17 @@
 Contains class SegmentationAnalysis
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: segmentation_analysis.py 1485 2018-10-04 14:35:01Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+#from builtins import str
+from builtins import range
+from builtins import object
+#from past.utils import old_div
 
-__version__ = "$Revision: 1485 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -13,12 +20,12 @@ from copy import copy, deepcopy
 import numpy
 import scipy
 
-from pyto.segmentation.morphology import Morphology
-from pyto.segmentation.topology import Topology
-from pyto.segmentation.density import Density
-from pyto.segmentation.distance_to import DistanceTo
-from pyto.segmentation.bound_distance import BoundDistance
-from pyto.segmentation.segment import Segment
+from ..segmentation.morphology import Morphology
+from ..segmentation.topology import Topology
+from ..segmentation.density import Density
+from ..segmentation.distance_to import DistanceTo
+from ..segmentation.bound_distance import BoundDistance
+from ..segmentation.segment import Segment
 from ..segmentation.hierarchy import Hierarchy
 from ..segmentation.thresh_conn import ThreshConn
 
@@ -374,9 +381,9 @@ class SegmentationAnalysis(object):
 
             # make sure that cleft contacts are calculated again if they
             # were already calculated
-            if ('nContacts' in self.resultNames) \
-                    or ('surfaceDensityContacts' in self.resultNames) \
-                    or ('surfaceDensitySegments' in self.resultNames):
+            if (('nContacts' in self.resultNames) 
+                or ('surfaceDensityContacts' in self.resultNames) 
+                or ('surfaceDensitySegments' in self.resultNames)):
                 doCleftContacts = True
             
             # initialize objects to hold final results
@@ -680,7 +687,7 @@ class SegmentationAnalysis(object):
                            expand=True)
 
         # combine all segmentation regions and make an object
-        order = dict(zip(seg_reg_ids, [1] * len(seg_reg_ids)))
+        order = dict(list(zip(seg_reg_ids, [1] * len(seg_reg_ids))))
         seg_reg_data = boundary.reorder(data=boundary.data, order=order,
                                         clean=True)
         seg_reg = Segment(data=seg_reg_data)
@@ -1003,7 +1010,7 @@ class SegmentationAnalysis(object):
             if len(classifications) == 1:
 
                 # last classification
-                #print 'last classification: ' + cur_name 
+                #print('last classification: ' + cur_name) 
                 yield cur_hi, cur_name
 
             else:
@@ -1012,7 +1019,7 @@ class SegmentationAnalysis(object):
                 for hi_2, name_2 in self.classify(hierarchy=cur_hi, 
                                         classifications=classifications[1:], 
                                         name=cur_name):
-                    #print 'not last classification: ' + cur_name 
+                    #print('not last classification: ' + cur_name) 
                     yield hi_2, name_2
 
     def addClassificationParameters(self, type, args={}):

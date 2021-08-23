@@ -3,10 +3,12 @@ Contains (abstract) class MultiData for input of data stored in multiple files.
 Each file contains results (data) of one observation (experiment).
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: multi_data.py 1461 2017-10-12 10:10:49Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import object
 
-__version__ = "$Revision: 1461 $"
+__version__ = "$Revision$"
 
 
 import pickle
@@ -245,8 +247,8 @@ class MultiData(object):
 
         # check properties
         if ('categories' in properties) or ('identifiers' in properties):
-            raise ValueError, "Sorry, 'categories' and 'identifiers' are " \
-                "reserved names and can't be present in properties argument."
+            raise ValueError("Sorry, 'categories' and 'identifiers' are " \
+                "reserved names and can't be present in properties argument.")
 
         # get objects and extract properties
         for obj, category, name in self.data(category=category, 
@@ -301,14 +303,24 @@ class MultiData(object):
 
         return multi
 
-    def readPropertiesGen(self, properties, index='ids', indexed=[], 
-                          category=None, identifier=None, multi=None, 
-                          compactify=True, deep='_'):
+    def readPropertiesGen(
+            self, properties, index='ids', indexed=[], category=None,
+            identifier=None, multi=None, compactify=True, deep='_'):
 
         """
-        Reads data for all observations specified by category and identifier
-        arguments, extracts specified properties and returns an instance of 
-        ..analysis.Observations containig the extracted properties.
+        Reads data for each observation (experiment) separately, extracts 
+        specified properties and yields the results.
+
+        An observation is defined by a category and an identifier (formed
+        by all combinations of values specified by category and identifier 
+        arguments) and is associated with a file, according to self.files.  
+
+        For each observation, this generator yelds the corresponding object,
+        as well as an ..analysis.Observations object that contains the 
+        properties of all observations read up to that point. Note that 
+        after each iteration an updated version od the same object is 
+        yielded (the object id staus the same). The intention is that 
+        this object will be used only after the last iteration.
 
         The same as readProperties() except that this is a generator that
         yields object (..analysis.Observations) holding requested data from all 
@@ -332,7 +344,7 @@ class MultiData(object):
         specified
 
         In case multiple categories or identifiers are specified (as a list of
-        strings) the order of yielded data has to have the same order as
+        strings) the order of yielded data will have the same order as
         the specified list.
 
         The argument properties is a list that holds attribute names of 
@@ -408,12 +420,12 @@ class MultiData(object):
 
         # check properties
         if ('categories' in properties) or ('identifiers' in properties):
-            raise ValueError, "Sorry, 'categories' and 'identifiers' are " \
-                "reserved names and can't be present in properties argument."
+            raise ValueError("Sorry, 'categories' and 'identifiers' are " \
+                "reserved names and can't be present in properties argument.")
 
         # get objects and extract properties
-        for obj, category, name in self.data(category=category, 
-                                             identifier=identifier):
+        for obj, category, name in self.data(
+                category=category, identifier=identifier):
 
             # append current values of category and image name
             multi.categories.append(category)

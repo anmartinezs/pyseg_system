@@ -3,12 +3,14 @@
 Tests module topology
 
 # Author: Vladan Lucic
-# $Id: test_topology.py 1304 2016-06-02 13:12:55Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 1304 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 
 import numpy
@@ -27,6 +29,7 @@ class TestTopology(np_test.TestCase):
     def setUp(self):
         """
         """
+        importlib.reload(common) # to avoid problems when running multiple tests
 
         # trivial flat
         seg_data = numpy.array(
@@ -120,7 +123,7 @@ class TestTopology(np_test.TestCase):
 
     def testCalculate(self):
         """
-        Tests calculate, getEuler, countFaces and getHomologyRank methods.
+        Tests calculate, getEuler, countFaces and calculateHomologyRank methods.
         """
 
         # calculate

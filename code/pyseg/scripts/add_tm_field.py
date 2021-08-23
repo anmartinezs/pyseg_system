@@ -22,7 +22,7 @@ import csv
 import sys
 import numpy as np
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -90,62 +90,62 @@ binn = 1.
 ########################################################################################
 
 # Print initial message
-print 'Inserting template matching output to GraphMCF properties.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Input graphs: ' + str(in_graphs)
-print 'Input scores: ' + str(in_scores)
-print 'Input angles: ' + str(in_angles)
-print 'Output directory: ' + str(output_dir)
-print 'List for the angles: ' + str(in_ang_lut)
-print 'Options for templates:'
-print '\tNeighborhood diameter: ' + str(diam_nhood) + ' nm'
-print '\tStore level: ' + str(store_lvl)
-print ''
+print('Inserting template matching output to GraphMCF properties.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Input graphs: ' + str(in_graphs))
+print('Input scores: ' + str(in_scores))
+print('Input angles: ' + str(in_angles))
+print('Output directory: ' + str(output_dir))
+print('List for the angles: ' + str(in_ang_lut))
+print('Options for templates:')
+print('\tNeighborhood diameter: ' + str(diam_nhood) + ' nm')
+print('\tStore level: ' + str(store_lvl))
+print('')
 
 if in_ang_lut is not None:
-    print 'Loading angles list...'
+    print('Loading angles list...')
     ang_lut = ps.disperse_io.load_tomo(in_ang_lut)
 
-print 'Main loop:'
+print('Main loop:')
 for in_graph in in_graphs:
 
-    print '\tProcessing the input graph: ' + in_graph
+    print('\tProcessing the input graph: ' + in_graph)
 
-    print '\tUnpicking graph...'
+    print('\tUnpicking graph...')
     path, fname = os.path.split(in_graph)
     stem_name, _ = os.path.splitext(fname)
     graph = ps.factory.unpickle_obj(in_graph)
 
-    print 'Template matching loop:'
+    print('Template matching loop:')
     for (in_score, in_angle, t_name, t_normal) in zip(in_scores, in_angles, t_names, t_normals):
 
         if in_angle is None:
-            print '\t\tAdding cross-correlation map without angles ' + t_name + ': ' + str(in_score)
+            print('\t\tAdding cross-correlation map without angles ' + t_name + ': ' + str(in_score))
 
-            print '\t\tLoading input tomogram...'
+            print('\t\tLoading input tomogram...')
             scores = ps.disperse_io.load_tomo(in_score)
 
-            print '\t\tAdding scores in angles (as rotated template normal)...'
+            print('\t\tAdding scores in angles (as rotated template normal)...')
             graph.add_scalar_field(scores, t_name, neigh=diam_nhood, mode='max', offset=off_set, bin=binn)
 
         else:
-            print '\t\tAdding cross-correlation map with name ' + t_name + ': ' + str((in_score, in_angle))
-            print '\t\t\t-Normal: ' + str(t_normal)
+            print('\t\tAdding cross-correlation map with name ' + t_name + ': ' + str((in_score, in_angle)))
+            print('\t\t\t-Normal: ' + str(t_normal))
 
-            print '\t\tLoading input tomograms...'
+            print('\t\tLoading input tomograms...')
             scores = ps.disperse_io.load_tomo(in_score)
             angles = ps.disperse_io.load_tomo(in_angle).astype(np.int)
             ang_lut = ps.disperse_io.load_tomo(in_ang_lut)
 
-            print '\t\tAdding scores in angles (as rotated template normal)...'
+            print('\t\tAdding scores in angles (as rotated template normal)...')
             graph.add_tm_field(t_name, scores, angles, ang_lut, t_normal, diam_nhood, off_set, binn)
 
     out_pkl = output_dir +  '/' + fname
-    print '\t\tPickling the graph as: ' + out_pkl
+    print('\t\tPickling the graph as: ' + out_pkl)
     graph.pickle(out_pkl)
 
-    print '\tSaving graphs at level ' + str(store_lvl) + '...'
+    print('\tSaving graphs at level ' + str(store_lvl) + '...')
     if store_lvl > 0:
         ps.disperse_io.save_vtp(graph.get_vtp(av_mode=True, edges=True),
                                 output_dir + '/' + stem_name + '_edges.vtp')
@@ -156,4 +156,4 @@ for in_graph in in_graphs:
         ps.disperse_io.save_vtp(graph.get_scheme_vtp(nodes=True, edges=True),
                                 output_dir + '/' + stem_name + '_sch.vtp')
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

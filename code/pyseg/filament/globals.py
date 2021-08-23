@@ -384,8 +384,8 @@ class Filament(object):
             try:
                 s_id = ids.index(start_id)
             except ValueError:
-                print 'WARNING (Filament.get_path_coords): starting id ' + start_id \
-                      + ' is not found.'
+                print('WARNING (Filament.get_path_coords): starting id ' + start_id \
+                      + ' is not found.')
             coords = np.zeros(shape=(len(ids)-s_id, 3), dtype=np.float)
             skel = self.__graph.get_skel()
             for i, idx in enumerate(ids[s_id::]):
@@ -417,8 +417,8 @@ class Filament(object):
             try:
                 s_id = ids.index(start_id)
             except ValueError:
-                print 'WARNING (Filament.get_length): starting id ' + start_id \
-                      + ' is not found.'
+                print('WARNING (Filament.get_length): starting id ' + start_id \
+                      + ' is not found.')
             length = 0
             skel = self.__graph.get_skel()
             for i in range(s_id, len(ids)-1):
@@ -438,11 +438,11 @@ class Filament(object):
         try:
             s_id = ids.index(cont_id)
         except ValueError:
-            print 'WARNING (Filament.get_cont_length): id ' + cont_id + ' is not found.'
+            print('WARNING (Filament.get_cont_length): id ' + cont_id + ' is not found.')
         try:
             t_id = ids.index(v_id)
         except ValueError:
-            print 'WARNING (Filament.get_cont_length): id ' + cont_id + ' is not found.'
+            print('WARNING (Filament.get_cont_length): id ' + cont_id + ' is not found.')
         length = 0
         skel = self.__graph.get_skel()
         for i in range(s_id, t_id):
@@ -495,8 +495,8 @@ class Filament(object):
                 try:
                     s_id = ids.index(start_id)
                 except ValueError:
-                    print 'WARNING (Filament.get_dness): starting id ' + start_id \
-                          + ' is not found.'
+                    print('WARNING (Filament.get_dness): starting id ' + start_id \
+                          + ' is not found.')
             return np.percentile(1. - self.__dens[s_id::], 5)
 
     # Computes total curvature
@@ -750,8 +750,8 @@ class FilamentU(object):
                 try:
                     s_id = ids.index(start_id)
                 except ValueError:
-                    print 'WARNING (FilamentU.get_length): starting id ' + start_id \
-                          + ' is not found.'
+                    print('WARNING (FilamentU.get_length): starting id ' + start_id \
+                          + ' is not found.')
                 length = 0
                 skel = self.__graph.get_skel()
                 for i in range(s_id, len(ids)-1):

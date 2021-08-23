@@ -208,13 +208,13 @@ class TestListTomoParticles(TestCase):
         ltomos_sprv = gen_tlist(N_TOMOS, N_PART_TOMO, model_sprv, voi, PARTICLE_SURF, mode_emb='center',
                                 npr=N_PROCESSORS, tmp_folder=out_temp)
         sprv_den = ltomos_sprv.get_tomo_list()[0].compute_global_density()
-        print 'Time to generate the tomos: ' + str(time.time() - hold_time)
+        print('Time to generate the tomos: ' + str(time.time() - hold_time))
 
         # Storing tomograms list
         ltomos_csrv.pickle(OUT_DIR + '/tomos_csrv_mcs_tpl.pkl')
         ltomos_sprv.pickle(OUT_DIR + '/tomos_srpv_mcs_tpl.pkl')
-        ltomos_csrv.store_appended_tomos(OUT_DIR, out_stem='csrv_mcs_', mode='point')
-        ltomos_sprv.store_appended_tomos(OUT_DIR, out_stem='srpv_mcs_', mode='point')
+        ltomos_csrv.store_appended_tomos(OUT_DIR, out_stem='csrv_mcs_', mode='surface')
+        ltomos_sprv.store_appended_tomos(OUT_DIR, out_stem='srpv_mcs_', mode='surface')
 
         # Compute the matrices
         hold_time = time.time()
@@ -323,7 +323,7 @@ class TestListTomoParticles(TestCase):
         plt.close()
         plt.close()
         # plt.figure()
-        fig, (ax, ax2) = plt.subplots(2, 1, sharex=True)
+        fig, (ax, ax2) = plt.subplots(2, 1) # plt.subplots(2, 1, sharex=True)
         # plt.title('Model SRPV')
         # plt.ylabel('Ripley\'s O')
         # plt.xlabel('Scale')
@@ -340,7 +340,8 @@ class TestListTomoParticles(TestCase):
         ax.spines['bottom'].set_visible(False)
         ax2.spines['top'].set_visible(False)
         ax.xaxis.tick_top()
-        ax.tick_params(labeltop='off')  # don't put tick labels at the top
+        ax.set_xticklabels([])
+        # ax.tick_params(labeltop='off')  # don't put tick labels at the top
         ax2.xaxis.tick_bottom()
         d = .015  # how big to make the diagonal lines in axes coordinates
         # arguments to pass to plot, just so we don't keep repeating them
@@ -406,7 +407,7 @@ class TestListTomoParticles(TestCase):
         disperse_io.save_numpy(voi, OUT_DIR + '/voi_mca.mrc')
 
         # Generate models
-        model_csrv, model_sprv = ModelCSRV(), ModelSRPV(n_cycles=N_CYCLES_TOMO, max_shift=MAX_SHIFT_SPRV)
+        model_csrv, model_sprv = ModelCSRV(), ModelSRPV(n_cycles=N_CYCLES_TOMO, sin_t=SIN_T)
 
         # Generate instances
         hold_time = time.time()
@@ -414,7 +415,7 @@ class TestListTomoParticles(TestCase):
                                 npr=N_PROCESSORS)
         ltomos_sprv = gen_tlist(N_TOMOS, N_PART_TOMO, model_sprv, voi, PARTICLE_SURF, mode_emb='center',
                                 npr=N_PROCESSORS)
-        print 'Time to generate the tomos: ' + str(time.time() - hold_time)
+        print('Time to generate the tomos: ' + str(time.time() - hold_time))
 
         # Storing tomograms list
         ltomos_csrv.pickle(OUT_DIR + '/tomos_csrv_mca_tpl.pkl')
@@ -571,7 +572,7 @@ class TestListTomoParticles(TestCase):
         ltomos_sprv = gen_tlist(N_TOMOS, N_PART_TOMO, model_sprv, voi, PARTICLE_SURF, mode_emb='center',
                                 npr=N_PROCESSORS)
         sprv_den = ltomos_sprv.get_tomo_list()[0].compute_global_density()
-        print 'Time to generate the tomos: ' + str(time.time() - hold_time)
+        print('Time to generate the tomos: ' + str(time.time() - hold_time))
 
         # Storing tomograms list
         ltomos_csrv.pickle(OUT_DIR + '/tomos_csrv_dsa_tpl.pkl')
@@ -683,7 +684,7 @@ class TestListTomoParticles(TestCase):
                     str(N_PROCESSORS) + '.png')
         plt.close()
         # plt.figure()
-        fig, (ax, ax2) = plt.subplots(2, 1, sharex=True)
+        fig, (ax, ax2) = plt.subplots(2, 1) # plt.subplots(2, 1, sharex=True)
         # plt.title('Model SRPV')
         # plt.ylabel('Ripley\'s O')
         # plt.xlabel('Scale')
@@ -700,7 +701,8 @@ class TestListTomoParticles(TestCase):
         ax.spines['bottom'].set_visible(False)
         ax2.spines['top'].set_visible(False)
         ax.xaxis.tick_top()
-        ax.tick_params(labeltop='off')  # don't put tick labels at the top
+        ax.set_xticklabels([])
+        # ax.tick_params(labeltop='off')  # don't put tick labels at the top
         ax2.xaxis.tick_bottom()
         d = .015  # how big to make the diagonal lines in axes coordinates
         # arguments to pass to plot, just so we don't keep repeating them
@@ -772,7 +774,7 @@ class TestListTomoParticles(TestCase):
         # Generate instances
         hold_time = time.time()
         ltomos_csrv, ltomos_c2rv = gen_tlist2(N_TOMOS, N_PART_TOMO, model_c2rv, mode_emb='center', npr=1)
-        print 'Time to generate the tomos: ' + str(time.time() - hold_time)
+        print('Time to generate the tomos: ' + str(time.time() - hold_time))
 
         # Storing tomograms list
         ltomos_csrv.pickle(OUT_DIR + '/tomos_csrv_bi_tpl.pkl')
@@ -912,7 +914,7 @@ class TestListTomoParticles(TestCase):
         model_csrv = ModelCSRV()
         hold_time = time.time()
         ltomos_shell = self.gen_tlist_coords(exps_coords, voi, part, mode_emb='center')
-        print 'Time to generate the tomos: ' + str(time.time() - hold_time)
+        print('Time to generate the tomos: ' + str(time.time() - hold_time))
 
         # Storing tomograms list
         ltomos_shell.pickle(OUT_DIR + '/tomos_shell_tpl.pkl')
@@ -924,7 +926,7 @@ class TestListTomoParticles(TestCase):
         for i, tkey in enumerate(ltomos_shell.get_tomo_fname_list()):
             hold_tomo = ltomos_shell.get_tomo_by_key(tkey)
             hold_n_parts = hold_tomo.get_num_particles()
-            print 'N particles tomo ' + str(i) + ': ' + str(hold_n_parts)
+            print('N particles tomo ' + str(i) + ': ' + str(hold_n_parts))
             hold_exp = hold_tomo.compute_uni_2nd_order(rad_rg, thick=None, border=BORDER,
                                                        conv_iter=None, max_iter=None,
                                                        npr=N_PROCESSORS)

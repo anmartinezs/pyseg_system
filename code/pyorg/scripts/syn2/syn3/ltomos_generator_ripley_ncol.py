@@ -66,41 +66,41 @@ in_tomo_res = ROOT_PATH + '/rec/syn_scale_tomos.star'
 
 ########## Print initial message
 
-print 'Generation of Surface objects from and input STAR file or tomogram.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tInput STAR file of particles: ' + str(in_star)
-print '\t\t-Input STAR file for segmentations: ' + str(in_seg)
-print '\tSegmentation pre-processing: '
-print '\t\t-Segmentation label: ' + str(sg_lbl)
-print '\t\t-Segmentation Gaussian smoothing sigma: ' + str(sg_sg)
+print('Generation of Surface objects from and input STAR file or tomogram.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tInput STAR file of particles: ' + str(in_star))
+print('\t\t-Input STAR file for segmentations: ' + str(in_seg))
+print('\tSegmentation pre-processing: ')
+print('\t\t-Segmentation label: ' + str(sg_lbl))
+print('\t\t-Segmentation Gaussian smoothing sigma: ' + str(sg_sg))
 if sg_dec is not None:
-    print '\t\t-Triangle decimation factor: ' + str(sg_dec)
+    print('\t\t-Triangle decimation factor: ' + str(sg_dec))
 if sg_bc:
-    print '\t\t-Checking particles VOI boundary with mode: ' + str(sg_bm)
+    print('\t\t-Checking particles VOI boundary with mode: ' + str(sg_bm))
 if sg_pj:
-    print '\t\t-Activated particles projecting on surface VOI.'
+    print('\t\t-Activated particles projecting on surface VOI.')
 if sg_voi_mask:
-    print '\t\t-Mask VOI mode activated!'
-print '\tPost-processing: '
-print '\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of particles.'
-print '\t\t-Minimum number of particles: ' + str(pt_min_parts)
-print '\t\t-Scale suppression: ' + str(pt_ssup) + ' voxels'
-print ''
+    print('\t\t-Mask VOI mode activated!')
+print('\tPost-processing: ')
+print('\t\t-Keep tomograms the ' + str(pt_keep) + 'th with the highest number of particles.')
+print('\t\t-Minimum number of particles: ' + str(pt_min_parts))
+print('\t\t-Scale suppression: ' + str(pt_ssup) + ' voxels')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tGenerating Micrograph-segmentations dictionary...'
+print('\tGenerating Micrograph-segmentations dictionary...')
 star_seg = sub.Star()
 try:
     star_seg.load(in_seg)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 seg_dic = dict()
 for seg_row in range(star_seg.get_nrows()):
@@ -108,17 +108,17 @@ for seg_row in range(star_seg.get_nrows()):
                        star_seg.get_element('_psSegImage', seg_row)
     seg_dic[os.path.split(mic_str)[1]] = seg_row
 
-print '\tProcessing STAR file rows: '
+print('\tProcessing STAR file rows: ')
 
 surfs = list()
-print '\tLoading input STAR file(s)...'
+print('\tLoading input STAR file(s)...')
 star, star_out = sub.Star(), sub.Star()
 try:
     star.load(in_star)
     star_out.add_column('_psPickleFile')
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 tomos_to_resize = None
@@ -129,8 +129,8 @@ if in_tomo_res is not None:
         try:
             star_res.load(in_tomo_res)
         except pexceptions.PySegInputError as e:
-            print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-            print 'Terminated. (' + time.strftime("%c") + ')'
+            print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+            print('Terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
     hold_set = star_res.get_column_data_set('_rlnMicrographName')
     tomos_to_resize = list()
@@ -139,12 +139,12 @@ if in_tomo_res is not None:
         tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
         tomos_to_resize.append(tkey_stem)
 
-print '\tLoop for generating tomograms VOIs: '
+print('\tLoop for generating tomograms VOIs: ')
 vois = dict()
 for tomo_row in range(star_seg.get_nrows()):
     mic_str, seg_str = star_seg.get_element('_rlnMicrographName', tomo_row), \
                        star_seg.get_element('_psSegImage', tomo_row)
-    print '\t\t-Generating VOI from segmentation: ' + str(mic_str)
+    print('\t\t-Generating VOI from segmentation: ' + str(mic_str))
     tomo = disperse_io.load_tomo(seg_str, mmap=False)
     if tomos_to_resize is not None:
         tkey_hold = os.path.split(tomo_path)[1].split('_')
@@ -169,28 +169,28 @@ for tomo_row in range(star_seg.get_nrows()):
 appender = vtk.vtkAppendPolyData()
 flt_stem = 'syn_11_2_bin2'
 
-print '\tLoop for tomograms in the list: '
+print('\tLoop for tomograms in the list: ')
 set_lists = surf.SetListTomoParticles()
 for star_row in range(star.get_nrows()):
 
-    print '\t\tNow list of tomograms initialization...'
+    print('\t\tNow list of tomograms initialization...')
     list_tomos = surf.ListTomoParticles()
     part_star_str, part_surf_str = star.get_element('_psStarFile', star_row), \
                                    star.get_element('_suSurfaceVtp', star_row)
-    for tomo_fname, voi in zip(vois.iterkeys(), vois.itervalues()):
+    for tomo_fname, voi in zip(iter(vois.keys()), iter(vois.values())):
         list_tomos.add_tomo(surf.TomoParticles(tomo_fname, sg_lbl, voi=voi))
 
-    print '\t\tLoading particles STAR file(s):'
+    print('\t\tLoading particles STAR file(s):')
     star_part = sub.Star()
     try:
         star_part.load(part_star_str)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     part_vtp = disperse_io.load_poly(part_surf_str)
 
-    print '\t\tParticles loop..'
+    print('\t\tParticles loop..')
     for part_row in range(star_part.get_nrows()):
 
         # Initialization
@@ -199,7 +199,7 @@ for star_row in range(star.get_nrows()):
             seg_row = seg_dic[os.path.split(mic_str)[1]]
         except KeyError:
             if not mic_str.endswith('.fits'):
-                print 'WARNING: particle in micrograph ' + mic_str + ' not considered!'
+                print('WARNING: particle in micrograph ' + mic_str + ' not considered!')
                 continue
         if mic_str.endswith('.fits'):
             seg_str = mic_str
@@ -264,8 +264,8 @@ for star_row in range(star.get_nrows()):
         try:
             list_tomos.insert_particle(part, seg_str, check_bounds=sg_bc, mode=sg_bm, voi_pj=sg_pj, meta=meta_info)
         except pexceptions.PySegInputError as e:
-            print 'WARNING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
-                  ' because of "' + e.get_message() + '"'
+            print('WARNING: particle in row ' + str(part_row) + ' could not be inserted in tomogram ' + tomo_fname + \
+                  ' because of "' + e.get_message() + '"')
             pass
 
         # TODEBUG
@@ -273,11 +273,11 @@ for star_row in range(star.get_nrows()):
             appender.AddInputData(part.get_vtp())
 
     if pt_keep is not None:
-        print '\t\tFiltering to keep the ' + str(pt_keep) + 'th more highly populated'
+        print('\t\tFiltering to keep the ' + str(pt_keep) + 'th more highly populated')
         list_tomos.clean_low_pouplated_tomos(pt_keep)
     if not isinstance(pt_min_parts, dict):
         if pt_min_parts >= 0:
-            print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+            print('\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts))
             list_tomos.filter_by_particles_num(pt_min_parts)
     if pt_ssup is not None:
         list_tomos.scale_suppression(pt_ssup)
@@ -285,20 +285,20 @@ for star_row in range(star.get_nrows()):
     star_stem = os.path.splitext(os.path.split(part_star_str)[1])[0]
     star_stem = star_stem.split('_')[0]
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
-    print '\t\tPickling the list of tomograms in the file: ' + out_pkl
+    print('\t\tPickling the list of tomograms in the file: ' + out_pkl)
     try:
         list_tomos.pickle(out_pkl)
         kwargs = {'_psPickleFile': out_pkl}
         star_out.add_row(**kwargs)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 
     out_app = out_dir + '/' + star_stem + '_app'
     if not os.path.exists(out_app):
         os.makedirs(out_app)
-    print '\tStoring particles grouped by tomograms: ' + out_app
+    print('\tStoring particles grouped by tomograms: ' + out_app)
     for tomo in list_tomos.get_tomo_list():
         if tomo.get_num_particles() > 0:
             tomo_fname = os.path.splitext(os.path.split(tomo.get_tomo_fname())[1])[0]
@@ -308,7 +308,7 @@ for star_row in range(star.get_nrows()):
     set_lists.add_list_tomos(list_tomos, star_stem)
 
 if isinstance(pt_min_parts, dict):
-    print '\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts)
+    print('\t\tFiltering tomograms with less particles than: ' + str(pt_min_parts))
     set_lists.filter_by_particles_num_tomos(pt_min_parts)
 
 for star_row in range(star.get_nrows()):
@@ -319,20 +319,20 @@ for star_row in range(star.get_nrows()):
     star_stem = star_stem.split('_')[0]
     list_tomos = set_lists.get_lists_by_key(star_stem)
     out_pkl = out_dir + '/' + star_stem + '_tpl.pkl'
-    print '\t\tPickling the list of tomograms in the file: ' + out_pkl
+    print('\t\tPickling the list of tomograms in the file: ' + out_pkl)
     try:
         list_tomos.pickle(out_pkl)
         kwargs = {'_psPickleFile': out_pkl}
         star_out.add_row(**kwargs)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 
     out_app = out_dir + '/' + star_stem + '_app'
     if not os.path.exists(out_app):
         os.makedirs(out_app)
-    print '\tStoring particles grouped by tomograms: ' + out_app
+    print('\tStoring particles grouped by tomograms: ' + out_app)
     for tomo in list_tomos.get_tomo_list():
         if tomo.get_num_particles() > 0:
             tomo_fname = tomo.get_tomo_fname().replace('/', '_')
@@ -341,12 +341,12 @@ for star_row in range(star.get_nrows()):
             disperse_io.save_vtp(tomo_vtp, out_app+'/'+tomo_fname+'.vtp')
 
 out_parts = out_dir + '/' + out_stem + '_parts.star'
-print '\tStoring the particles STAR file: ' + out_parts
+print('\tStoring the particles STAR file: ' + out_parts)
 set_lists.to_particles_star().store(out_parts)
 
-print '\tStoring list appended by tomograms in: ' + out_dir
+print('\tStoring list appended by tomograms in: ' + out_dir)
 tomos_vtp = set_lists.tomos_to_vtp(mode='surface')
-for key, poly in zip(tomos_vtp.iterkeys(), tomos_vtp.itervalues()):
+for key, poly in zip(iter(tomos_vtp.keys()), iter(tomos_vtp.values())):
     stem_tomo = os.path.splitext(os.path.split(key)[1])[0]
     disperse_io.save_vtp(poly, out_dir+'/'+stem_tomo+'_lists_app.vtp')
 
@@ -365,7 +365,7 @@ for key, poly in zip(tomos_vtp.iterkeys(), tomos_vtp.itervalues()):
 #     disperse_io.save_vtp(poly, out_dir+'/'+stem_tomo+'_lists_app.vtp')
 
 out_star = out_dir + '/' + out_stem + '_ltomos.star'
-print '\tOutput STAR file: ' + out_star
+print('\tOutput STAR file: ' + out_star)
 star_out.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

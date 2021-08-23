@@ -1,11 +1,19 @@
 """
-Contains class Cluster for analysis of clustering of segments.
+Contains class Cluster for analysis of clustering / classifications.
 
-# Author: Vladan Lucic
-# $Id: cluster.py 1447 2017-04-27 14:11:17Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 
-__version__ = "$Revision: 1447 $"
+__version__ = "$Revision$"
 
 
 from copy import copy, deepcopy
@@ -22,41 +30,77 @@ import scipy.ndimage as ndimage
 import scipy.cluster
 
 import pyto.util.nested as util_nested
-from segment import Segment
+from .segment import Segment
 
 
 class Cluster(object):
     """
+    Holds data about a clustering or a classification.
+
+    Contains methods to generate connectivity based clustering for segments.
+
+    It also contains more general clustering methods (hierarchical and 
+    k-means) and methods for comparing different clusterings.   
+
     Internally clusters are represented by a list (self.clusters), where 
     each element of that list defines a cluster. A cluster is represented 
     by a set containing ids of data that belong to that cluster. Clusters 
     are numbered from 1 up, so the i-th element of the clusters 
-    list represents a cluster i+1.
+    list represents a cluster i+1. For example:
+
+      clusters = [{1,3,4,6}, {2,5}]
+
+    means that there are two clusters, number 1 contains elements (items)
+    1, 3, 4 and 6 and cluster number 2 contains elements 2 and 5.
 
     Alternatively, clusters can be shown in the data representation
     (self.clustersData), as an ndarray containing cluster ids and indexed by 
     item (data) ids. Item (data) ids are positive integers listed in 
     self.dataIds. They can have gaps and the element 0  of self.clustersData
-    has no meaning. Cluster ids are also positive integrs.
+    has no meaning. Cluster ids are also positive integers. For example:
+    
+      clustersData = [-1, 1, 2, 1, 1, 2, 1]
+
+    defines the same clusters as above.
     
     The data representation (self.clustersData) is determineded on the 
     fly from the cluster representation (self.clusters). 
 
-    In order to interface with scipy.cluster.hierarchy which uses data
-    representation and where the data ids start at 0 and have no gaps
-    the following attributes are used:
+    Hierarchical clusterings are described by code book, in the same format 
+    as the one returned by scipy.cluster.hierarchy.linkage().
+
+    Attributes that hold the data are:
+      - self.clusters: (ndarray) where element i contains a set of data ids
+      belonging to cluster i (i>0, self/clusters[0] is not used)
       - self.clustersData: clusters in the data representation where data ids
-      are positive 
+      are positive (>0)
+      - self.codeBook: code book (array) where data (leaf node) ids are
+      positive
+
+    In order to interface with scipy.cluster.hierarchy, where data
+    representation is used and the data ids start at 0 and have no gaps,
+    the following attributes are used:
       - self.clustersData0: (property derived from self.clustersData and 
       self.dataIds) clusters in the data representation where data ids 
       start at 0 and have no gaps
-      - self.codeBook: code book (array) where data (leaf node) ids are
-      positive
       - self.codeBook0: (property derived from self.codeBook and self.ids) code 
       book (array) where data ids start at 0 and have no gaps
 
+    For example, for the same cluster defined above:
+    
+      clustersData0 = [1, 2, 1, 1, 2, 1]
+
+    Cluster ids have to start from 1 and it is strongly recomended that 
+    they are consecutive (when clusters are defined using the data
+    representation). Methods defined here will work even if there are gaps
+    in the cluster ids, but this is still an experimental feature.
+
     Other attributes:
       - self.similarity: last calculated similarity index 
+
+    ToDo:
+      - Move pure clustering stuff (segmentation independent) to 
+      pyto.clustering.Cluster and make it an ancestor of this class
     """
 
     ##################################################################
@@ -71,10 +115,13 @@ class Cluster(object):
 
         If arg form is 'cluster', clusters are specified in the form used 
         (internaly) by this class, that is by a list of sets, where each set 
-        contains item ids that belong to a same cluster. Alternatively, if form
-        is 'scipy', clusters is an array of cluster ids indexed by data (item) 
-        ids. This form is used in scipy.cluster.hierarchy (returned by 
-        fcluster(), for example).
+        contains item ids that belong to a same cluster. Item ids have to
+        be positive integers (>0)
+
+        Alternatively, if form is 'scipy', arg clusters is an array of  
+        cluster ids indexed by data (item) ids. Cluster ids have to be 
+        positive integers (>0). This form is used in 
+        scipy.cluster.hierarchy (returned by fcluster(), for example).
 
         Arguments:
           - clusters: clusters
@@ -84,7 +131,7 @@ class Cluster(object):
         # set or initialize clusters
         if form == 'cluster':
             self._clusters = clusters
-        elif form is 'scipy':
+        elif form == 'scipy':
             clusters = numpy.array([0] + list(clusters))
             clust_rep = self.clusterRepresentation(clusters)
             self._clusters = clust_rep
@@ -178,8 +225,8 @@ class Cluster(object):
         elif isinstance(cluster, list):
             self.clusters[clusterId-1] = set(cluster)
         else:
-            raise TypeError, "Argument cluster has to be a set, list or "\
-                + "numarray, but not " + type(set) + "."
+            raise TypeError("Argument cluster has to be a set, list or "\
+                + "numarray, but not " + type(set) + ".")
 
     def getNClusters(self):
         """
@@ -291,7 +338,7 @@ class Cluster(object):
 
         # make cluster array indexed by ids 
         res = numpy.zeros(max(data_ids)+1, dtype='int') - 1
-        for id_, one_cluster in zip(range(1,len(clusters)+1), clusters):
+        for id_, one_cluster in zip(list(range(1,len(clusters)+1)), clusters):
             res[list(one_cluster)] = id_
 
         return res
@@ -309,11 +356,11 @@ class Cluster(object):
         """
 
         # initialize clusters in the cluster representation
-        clusters = [None] * clustersData.max()
+        clusters = [{}] * clustersData.max()
 
         # assign data ids to clusters
         for (item_id, clust_id) \
-                in zip(range(1, clustersData.shape[0]), clustersData[1:]):
+                in zip(list(range(1, clustersData.shape[0])), clustersData[1:]):
             if clust_id > 0:
                 try:
                     clusters[clust_id-1].add(item_id)
@@ -577,10 +624,11 @@ class Cluster(object):
 
         #  calculate for each cluster
         n_link = numpy.zeros(self.nClusters+1, dtype='int')
-        for clust, clust_ind in zip(self.clusters, range(1, self.nClusters+1)):
+        for clust, clust_ind in zip(
+                self.clusters, list(range(1, self.nClusters+1))):
 
             linked = contacts.findLinkedBoundaries(list(clust))
-            n_link[clust_ind] = int(sum(len(x) for x in linked) / 2)
+            n_link[clust_ind] = int(old_div(sum(len(x) for x in linked), 2))
 
         # for all clusters together
         n_link[0] = n_link[1:].sum()
@@ -606,7 +654,8 @@ class Cluster(object):
 
         #  calculate for each cluster
         n_conn = numpy.zeros(self.nClusters+1, dtype='int')
-        for clust, clust_ind in zip(self.clusters, range(1, self.nClusters+1)):
+        for clust, clust_ind in zip(
+                self.clusters, list(range(1, self.nClusters+1))):
 
             conn_ids = contacts.findSegments(boundaryIds=list(clust), 
                                              nBoundary=1)
@@ -773,11 +822,11 @@ class Cluster(object):
                 if (mode == 'conn') or (mode == 'connections'):
                     cont = contacts.findSegments(boundaryIds=bound_id, 
                                                    mode='at_least')
-                    print 'contacted conn: ', cont
+                    #print 'contacted conn: ', cont
                 elif (mode == 'lin') or (mode == 'links'):
                     cont = contacts.findLinkedBoundaries(
                         ids=bound_id, distance=1, mode='exact')
-                    print 'contacted links: ', cont
+                    #print 'contacted links: ', cont
 
                 # add 
                 new_branches = len(cont) - 2
@@ -824,8 +873,9 @@ class Cluster(object):
         # convert leaf node ids
         for (flat_index, data_id) in enumerate(codeBook0[:, slice(0,2)].flat):
             if data_id < len(self.dataIds):
+                data_id_int = int(numpy.round(data_id))
                 self.codeBook[:, slice(0,2)].flat[flat_index] = \
-                    self.dataIds[data_id]
+                    self.dataIds[data_id_int]
 
     def getCodeBook0(self):
         """
@@ -841,7 +891,7 @@ class Cluster(object):
         code_book_0[:, slice(0,2)] = code_book_0[:, slice(0,2)] - id_difference
 
         # adjust data ids only
-        from_0 = dict(zip(self.dataIds, range(len(self.dataIds))))
+        from_0 = dict(list(zip(self.dataIds, list(range(len(self.dataIds))))))
         for (flat_index, data_id) in enumerate(
             self.codeBook[:, slice(0,2)].flat):
             if data_id in self.dataIds:
@@ -924,8 +974,8 @@ class Cluster(object):
             if method == 'single':
                 mode = 'min'
             else:
-                raise ValueError, \
-                    "Only 'single' mode is currently implemented for segments."
+                raise ValueError(
+                    "Only 'single' mode is currently implemented for segments.")
             dist_or_data = segments.pairwiseDistance(ids=ids, mode=mode)
 
         elif data is not None:
@@ -938,13 +988,13 @@ class Cluster(object):
             dist_or_data = data[ids]
 
         else:
-            raise ValueError, \
-                'Either distances, data or segments argument has to be given.'
+            raise ValueError(
+                'Either distances, data or segments argument has to be given.')
 
         # cluster data having indices starting at 0
         code_book_0 = scipy.cluster.hierarchy.linkage(y=dist_or_data, 
                                                method=method, metric=metric)
-
+        
         # make instance and adjust data indices from 1 up
         cluster = cls()
         cluster.dataIds = numpy.asarray(ids)
@@ -1189,7 +1239,7 @@ class Cluster(object):
         else:
             n_data = data.shape[0]
             compact = True
-            ids = range(1, n_data+1)
+            ids = list(range(1, n_data+1))
 
         # cluster
         centroids, clusters_data = scipy.cluster.vq.kmeans2(
@@ -1197,7 +1247,7 @@ class Cluster(object):
 
         # remove empty clusters
         old = numpy.unique(clusters_data)
-        new = range(len(old))
+        new = list(range(len(old)))
         clean_clusters_data = copy(clusters_data)
         for old_id, new_id in zip(old, new):
             if old_id != new_id:
@@ -1368,7 +1418,7 @@ class Cluster(object):
 
         # adjust indices:
         if ids is not None:
-            com_exp = dict(zip(range(len(ids)), ids))
+            com_exp = dict(list(zip(list(range(len(ids))), ids)))
             closest_ind = numpy.asarray([com_exp[co] for co in closest_ind])
 
         # expand indices
@@ -1429,24 +1479,37 @@ class Cluster(object):
         as for the 'rand' method, except that only the pairs where both items
         belogn to a same cluster in reference clusters are considered.
 
-        If method is None similarity is calculated using both 'rand' and 
-        'b-flat' methods.
+        If method is 'vi', the Variation of information method is used. This 
+        method is based on entropy  (Meila, M., 2007. Comparing clusterings 
+        - an information based distance. J. Multivariate Anal. 98, 873-895.).
+
+        If method is None similarity is calculated using 'rand', 'b-flat' 
+        and 'vi' methods.
 
         If argument single is True all data (item) ids are used. Otherwise, only
         the items that belong to clusters of size 2 or larger are considered.
 
         This instance and reference have to have same dataIds.
 
+        While b-flat and Rand based similarity indices increase with the 
+        similarity between clusters, vi index decreases.         
+
         Arguments:
           - reference: (Clusters) reference clusters
-          - method: 'b-flat', 'rand' or 'rand_same_cluster'
-          - single: ignore single-item slusters, only for 'rand' method
+          - method: 'b-flat', 'rand', 'rand_same_cluster', or 'vi'; if None
+          the similarity is calcuated for 'b-flat', 'rand', and 'vi'
+          - single: ignore single-item clusters, only for 'rand' method
 
         Sets:
           - self.similarity: similarity index
           - self.similarityMethod: similarity method
           - self.rand: (if mode is None): rand similarity
           - self.bflat: (if mode is None): b-flat similarity
+          - self.vi: (if mode is None): vi similarity
+
+        Returns:
+          - simil_index: similarity index for the method requested (only
+          if mode is not None)
         """
 
         if method is None:
@@ -1465,8 +1528,8 @@ class Cluster(object):
         elif (method == 'rand') or (method == 'rand_same_cluster'):        
 
             # Rand method
-            simil_index = self.findSimilarityRand(reference=reference, 
-                                                  method=method, single=single)
+            simil_index = self.findSimilarityRand(
+                reference=reference, method=method, single=single)
 
         elif method == 'vi':
 
@@ -1552,7 +1615,7 @@ class Cluster(object):
             n_pairs = (numpy.array(same_ref) == 1).sum()
 
         # get similarity index 
-        simil_index = same / float(n_pairs)
+        simil_index = old_div(same, float(n_pairs))
 
         self.rand = simil_index
         return simil_index
@@ -1670,7 +1733,14 @@ class Cluster(object):
     def findSimilarityVI(self, reference):
         """
         Finds variation of information (VI) similarity index between flat 
-        clusters of this instance and those of reference.
+        clusters of this instance and those of reference (Meila, M., 2007. 
+        Comparing clusterings - an information based distance. 
+        J. Multivariate Anal. 98, 873-895.).
+
+        Argument:
+          - reference: (Clusters) reference clusters
+
+        Returns VI coefficient, lower values indicate higher similarity.
         """
 
         # calculate entropy
@@ -1731,6 +1801,12 @@ class Cluster(object):
         """
         Calculates contingency matrix between flat clusters of this instance 
         and those of the reference.
+
+        Argument:
+          - reference: (Cluster) reference clusters
+
+        Return: Contingency table, 2d array where element i, j shows the
+        number of elements of cluster i that belong to reference class j. 
         """
 
         cont = numpy.zeros((self.nClusters, reference.nClusters), dtype='int') 

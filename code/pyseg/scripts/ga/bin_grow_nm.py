@@ -40,20 +40,20 @@ def do_bin_grow_nm(in_tomo, out_tomo, dst, res, verbose):
 
     # Initialization
     if verbose:
-        print '\tLoading input tomogram...'
+        print('\tLoading input tomogram...')
     tomo = ps.disperse_io.load_tomo(in_tomo)
 
 
     if verbose:
-        print '\tDistance transform...'
+        print('\tDistance transform...')
     tomo_dst = sp.ndimage.morphology.distance_transform_edt(tomo==0) * res
 
     if verbose:
-        print '\tThresholding...'
+        print('\tThresholding...')
     tomo_dst = tomo_dst <= dst
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     ps.disperse_io.save_numpy(tomo_dst, out_tomo)
 
 ################# Main call
@@ -62,7 +62,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvi:o:d:r:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     in_tomo = None
@@ -72,8 +72,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             in_tomo = str(arg)
@@ -86,33 +86,33 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (in_tomo is None) or (out_tomo is None) or (dst is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for growing a binary segmentation.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + in_tomo
-            print '\tOutput file: ' + out_tomo
-            print '\tResolution: ' + str(res) + ' nm/voxel'
-            print '\tDistance: ' + str(dst) + ' nm'
-            print ''
+            print('Running tool for growing a binary segmentation.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + in_tomo)
+            print('\tOutput file: ' + out_tomo)
+            print('\tResolution: ' + str(res) + ' nm/voxel')
+            print('\tDistance: ' + str(dst) + ' nm')
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_bin_grow_nm(in_tomo, out_tomo, dst, res, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

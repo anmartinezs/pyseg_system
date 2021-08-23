@@ -2,10 +2,11 @@
 Core classes
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 526 2009-09-05 15:06:09Z vladan $
+# $Id$
 """
+from __future__ import absolute_import
 
-__version__ = "$Revision: 526 $"
+__version__ = "$Revision$"
 
-from image import Image
-import test
+from .image import Image
+from . import test

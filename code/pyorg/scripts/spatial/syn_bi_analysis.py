@@ -88,73 +88,73 @@ if ana_shell_thick is not None:
 
 ########## Print initial message
 
-print 'Bivariate second order analysis for a ListTomoParticles.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput STAR file 1: ' + str(in_star_1)
-print '\tInput STAR file 2: ' + str(in_star_2)
+print('Bivariate second order analysis for a ListTomoParticles.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput STAR file 1: ' + str(in_star_1))
+print('\tInput STAR file 2: ' + str(in_star_2))
 if in_mats_lists is None:
-    print '\tOrganization analysis settings: '
-    print '\t\t-Range of radius: ' + str(ana_rg) + ' nm'
-    print '\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels'
+    print('\tOrganization analysis settings: ')
+    print('\t\t-Range of radius: ' + str(ana_rg) + ' nm')
+    print('\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels')
     if ana_shell_thick is None:
-        print '\t\t-Spherical neighborhood'
+        print('\t\t-Spherical neighborhood')
     else:
-        print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm'
-        print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels'
-    print '\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter)
-    print '\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter)
+        print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm')
+        print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels')
+    print('\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter))
+    print('\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter))
     if ana_keep is not None:
-        print '\t\t-Keep highest populated tomograms per list 1: ' + str(ana_keep)
+        print('\t\t-Keep highest populated tomograms per list 1: ' + str(ana_keep))
     if ana_gl:
-        print '\t\t-Global analysis activated.'
+        print('\t\t-Global analysis activated.')
     if ana_npr is None:
-        print '\t\t-Number of processors: Auto'
+        print('\t\t-Number of processors: Auto')
     else:
-        print '\t\t-Number of processors: ' + str(ana_npr)
-        print '\t\t-Number of processors for simulations: ' + str(ana_npr_sim)
+        print('\t\t-Number of processors: ' + str(ana_npr))
+        print('\t\t-Number of processors for simulations: ' + str(ana_npr_sim))
 else:
     if in_mats_lists is not None:
-        print '\tOrganization by list pickled from file: ' + in_mats_lists
+        print('\tOrganization by list pickled from file: ' + in_mats_lists)
 if do_p_value:
-    print '\tP-Value computation setting:'
-    print '\t\t-Percentile: ' + str(p_per) + ' %'
+    print('\tP-Value computation setting:')
+    print('\t\t-Percentile: ' + str(p_per) + ' %')
     if in_mats_sims is None:
-        print '\t\t-Number of instances for simulations: ' + str(p_nsims)
-        print '\t\t-Particle surface: ' + p_vtp
+        print('\t\t-Number of instances for simulations: ' + str(p_nsims))
+        print('\t\t-Particle surface: ' + p_vtp)
     else:
-        print '\t\t-Using pre-computed matrix for simulations: ' + in_mats_sims
+        print('\t\t-Using pre-computed matrix for simulations: ' + in_mats_sims)
     if p_pwise:
-        print '\t\t-Pointwise analysis activated.'
+        print('\t\t-Pointwise analysis activated.')
     else:
-        print '\t\t-Tomogram analysis activated.'
+        print('\t\t-Tomogram analysis activated.')
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print '\t\t-Colocalizations matrix high p-values reange: [' + str(pt_co_vmin) + ', ' + str(pt_co_vmax) + ']'
-print '\t\t-Colormap: ' + str(pt_cmap)
+    print('\tPlotting settings: ')
+print('\t\t-Colocalizations matrix high p-values reange: [' + str(pt_co_vmin) + ', ' + str(pt_co_vmax) + ']')
+print('\t\t-Colormap: ' + str(pt_cmap))
 if pt_no_eq:
-    print '\t\t-List of tomograms with equal name are not compared each other.'
-print ''
+    print('\t\t-List of tomograms with equal name are not compared each other.')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists = None
 
-print '\tLoading input STAR files...'
+print('\tLoading input STAR files...')
 star_1, star_2 = sub.Star(), sub.Star()
 try:
     star_1.load(in_star_1)
     star_2.load(in_star_2)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 set_lists_1, set_lists_2 = surf.SetListTomoParticles(), surf.SetListTomoParticles()
 for row in range(star_1.get_nrows()):
@@ -166,20 +166,20 @@ for row in range(star_2.get_nrows()):
     ltomos = unpickle_obj(ltomos_pkl)
     set_lists_2.add_list_tomos(ltomos, ltomos_pkl)
 
-print '\tComputing number of particles by list...'
+print('\tComputing number of particles by list...')
 np_lists_1, np_lists_2 = set_lists_1.particles_by_list(), set_lists_2.particles_by_list()
 color_dict = dict()
 for i, key in enumerate(np_lists_2.keys()):
     color_dict[key] = pt_cmap(1.*i/len(np_lists_2))
-    print '\t\t-List ' + str(i+1) + ': ' + str(key)
-for key_1, val in zip(np_lists_1.iterkeys(), np_lists_1.itervalues()):
+    print('\t\t-List ' + str(i+1) + ': ' + str(key))
+for key_1, val in zip(iter(np_lists_1.keys()), iter(np_lists_1.values())):
     l_name = os.path.splitext(os.path.split(key_1)[1])[0]
     plt.figure()
     plt.title('Num. particles for list ' + l_name)
     plt.ylabel('Num. particles')
     plt.xlabel('List')
-    x_bars = np.arange(len(np_lists_2.keys()))+1
-    for x, y, key_2 in zip(x_bars, np_lists_2.itervalues(), np_lists_2.iterkeys()):
+    x_bars = np.arange(len(list(np_lists_2.keys())))+1
+    for x, y, key_2 in zip(x_bars, iter(np_lists_2.values()), iter(np_lists_2.keys())):
         plt.bar(x-.2, val, width=.3, color='k')
         plt.bar(x+.2, y, width=.3, color=color_dict[key_2])
     if fig_fmt is None:
@@ -195,7 +195,7 @@ for key_1, val in zip(np_lists_1.iterkeys(), np_lists_1.itervalues()):
         fl.close()
 
 if in_mats_lists is None:
-    print '\tComputing organization by list...'
+    print('\tComputing organization by list...')
     mats_lists = set_lists_1.compute_bi_2nd_order_by_list(set_lists_2, distances=ana_rg_v,
                                                           thick=ana_shell_thick_v, border=ana_border,
                                                           conv_iter=ana_conv_iter, max_iter=ana_max_iter,
@@ -205,11 +205,11 @@ if in_mats_lists is None:
         pickle.dump(mats_lists, fl)
         fl.close()
 else:
-    print '\tPickling organization by lists...'
+    print('\tPickling organization by lists...')
     if in_mats_lists is not None:
         with open(in_mats_lists, 'r') as pkl:
             mats_lists = pickle.load(pkl)
-for key_1, mats in zip(mats_lists.iterkeys(), mats_lists.itervalues()):
+for key_1, mats in zip(iter(mats_lists.keys()), iter(mats_lists.values())):
     l_name = os.path.splitext(os.path.split(key_1)[1])[0]
     plt.figure()
     plt.title('Bivariate 2nd for list ' + l_name)
@@ -218,7 +218,7 @@ for key_1, mats in zip(mats_lists.iterkeys(), mats_lists.itervalues()):
     else:
         plt.ylabel('Ripley\'s O')
     plt.xlabel('Radius')
-    for key_2, mat in zip(mats.iterkeys(), mats.itervalues()):
+    for key_2, mat in zip(iter(mats.keys()), iter(mats.values())):
         plt.plot(ana_rg, mat, color=color_dict[key_2])
     if fig_fmt is None:
         plt.show(block=True)
@@ -232,11 +232,11 @@ if do_p_value:
         try:
             part_vtp = disperse_io.load_poly(p_vtp)
         except pexceptions.PySegInputError as e:
-            print 'ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"'
-            print 'Terminated. (' + time.strftime("%c") + ')'
+            print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
+            print('Terminated. (' + time.strftime("%c") + ')')
             sys.exit(-1)
 
-        print '\tComputing bivariate simulations matrix...'
+        print('\tComputing bivariate simulations matrix...')
         mats_sims = set_lists_1.simulate_bi_2nd_order_matrix_plist(set_lists_2, p_nsims, in_model, part_vtp,
                                                              distances=ana_rg_v,
                                                              thick=ana_shell_thick_v, border=ana_border,
@@ -248,18 +248,18 @@ if do_p_value:
             pickle.dump(mats_sims, fl)
             fl.close()
     else:
-        print '\tPickling simulations by lists...'
+        print('\tPickling simulations by lists...')
         if in_mats_sims is not None:
             with open(in_mats_sims, 'r') as pkl:
                 mats_sims = pickle.load(pkl)
 
-    print '\tComputing p-values matrix...'
+    print('\tComputing p-values matrix...')
     c_pvals = dict()
-    for key_1, mats in zip(mats_lists.iterkeys(), mats_lists.itervalues()):
+    for key_1, mats in zip(iter(mats_lists.keys()), iter(mats_lists.values())):
         c_pvals[key_1] = list_tomoparticles_pvalues(ana_rg, mats, mats_sims[key_1])
 
 if do_p_value:
-    print '\tComputing co-localizations matrices (p-values)...'
+    print('\tComputing co-localizations matrices (p-values)...')
     nlists_1, nlists_2 = len(set_lists_1.get_lists()), len(set_lists_2.get_lists())
     count_1, count_2 = 0, 0
     lbls_1, lbls_2 = ['' for i in range(nlists_1)], ['' for i in range(nlists_2)]
@@ -267,14 +267,14 @@ if do_p_value:
     co_mat_h = np.zeros(shape=(nlists_1, nlists_2), dtype=float)
     dsts_mat_l = np.zeros(shape=(nlists_1, nlists_2), dtype=float)
     dsts_mat_h = np.zeros(shape=(nlists_1, nlists_2), dtype=float)
-    for key_1, d_pvals in zip(c_pvals.iterkeys(), c_pvals.itervalues()):
+    for key_1, d_pvals in zip(iter(c_pvals.keys()), iter(c_pvals.values())):
         l_name_1 = os.path.splitext(os.path.split(key_1)[1])[0]
         try:
             k_idx = l_name_1.index('_')
             l_name_1 = l_name_1[:k_idx]
         except IndexError:
             pass
-        for key_2, pvals in zip(d_pvals.iterkeys(), d_pvals.itervalues()):
+        for key_2, pvals in zip(iter(d_pvals.keys()), iter(d_pvals.values())):
             l_name_2 = os.path.splitext(os.path.split(key_2)[1])[0]
             try:
                 k_idx = l_name_2.index('_')
@@ -305,24 +305,24 @@ if do_p_value:
                     co_mat_h[int(l_name_1), int(l_name_2)] = 0.01 * pvals[3]
                     dsts_mat_l[int(l_name_1), int(l_name_2)] = pvals[0]
                     dsts_mat_h[int(l_name_1), int(l_name_2)] = pvals[1]
-    print '\t\t-Co-localization indices:'
-    print '\t\t\t-Y-axis (list 1): ' + str(zip(range(len(lbls_1)), lbls_1))
-    print '\t\t\t-X-axis (list 2): ' + str(zip(range(len(lbls_2)), lbls_2))
+    print('\t\t-Co-localization indices:')
+    print('\t\t\t-Y-axis (list 1): ' + str(list(zip(list(range(len(lbls_1))), lbls_1))))
+    print('\t\t\t-X-axis (list 2): ' + str(list(zip(list(range(len(lbls_2))), lbls_2))))
 
-    print '\t\tPlotting co-localization matrices (p-value)...'
+    print('\t\tPlotting co-localization matrices (p-value)...')
     plt.figure()
     plt.title('Co-localization matrix (p-value low)')
     if nlists_1 == 1:
         bars = list()
-        for i, key_2, d_pvals in zip(np.arange(nlists_2), c_pvals.values()[0].iterkeys(), c_pvals.values()[0].itervalues()):
+        for i, key_2, d_pvals in zip(np.arange(nlists_2), list(c_pvals.values())[0].iterkeys(), list(c_pvals.values())[0].itervalues()):
             bar, = plt.bar(i+.35, -0.01*d_pvals[2], width=.3, color=color_dict[key_2])
             bars.append(bar)
         plt.xticks(.5+np.arange(nlists_2), lbls_2)
         plt.legend(bars, lbls_2, loc=1)
         plt.tight_layout()
     elif nlists_2 == 1:
-        for key_1, d_pvals in zip(c_pvals.values().iterkeys(), c_pvals.values().itervalues()):
-            plt.bar(np.arange(nlists_1)+.2, -0.01*d_pvals.values()[0][2], width=.3, color=color_dict[key_1])
+        for key_1, d_pvals in zip(list(c_pvals.values()).iterkeys(), list(c_pvals.values()).itervalues()):
+            plt.bar(np.arange(nlists_1)+.2, -0.01*list(d_pvals.values())[0][2], width=.3, color=color_dict[key_1])
     else:
         plt.pcolor(co_mat_l)
         plt.colorbar()
@@ -340,16 +340,16 @@ if do_p_value:
     plt.title('Co-localization distances matrix (p-value low)')
     if nlists_1 == 1:
         bars = list()
-        for i, key_2, d_pvals in zip(np.arange(nlists_2), c_pvals.values()[0].iterkeys(),
-                                     c_pvals.values()[0].itervalues()):
+        for i, key_2, d_pvals in zip(np.arange(nlists_2), list(c_pvals.values())[0].iterkeys(),
+                                     list(c_pvals.values())[0].itervalues()):
             bar, = plt.bar(i+.35, d_pvals[0], width=.3, color=color_dict[key_2])
             bars.append(bar)
         plt.xticks(.5+np.arange(nlists_2), lbls_2)
         plt.legend(bars, lbls_2, loc=1)
         plt.tight_layout()
     elif nlists_2 == 1:
-        for key_1, d_pvals in zip(c_pvals.values().iterkeys(), c_pvals.values().itervalues()):
-            plt.bar(np.arange(nlists_1)+.2, d_pvals.values()[0][0], width=.3, color=color_dict[key_1])
+        for key_1, d_pvals in zip(list(c_pvals.values()).iterkeys(), list(c_pvals.values()).itervalues()):
+            plt.bar(np.arange(nlists_1)+.2, list(d_pvals.values())[0][0], width=.3, color=color_dict[key_1])
     else:
         plt.pcolor(dsts_mat_l)
         plt.colorbar()
@@ -364,11 +364,11 @@ if do_p_value:
         pickle.dump(dsts_mat_l, fl)
         fl.close()
 
-    print '\t\tPlotting co-localization matrices (p-value)...'
+    print('\t\tPlotting co-localization matrices (p-value)...')
     plt.figure()
     plt.title('Co-localization matrix (p-value)')
     if nlists_1 == 1:
-        for key_2, d_pvals in zip(c_pvals.values()[0].iterkeys(), c_pvals.values()[0].itervalues()):
+        for key_2, d_pvals in zip(list(c_pvals.values())[0].iterkeys(), list(c_pvals.values())[0].itervalues()):
             key_2_stem = os.path.split(key_2)[1]
             id_str = key_2_stem[:key_2_stem.index('_')]
             idx = int(id_str)
@@ -379,8 +379,8 @@ if do_p_value:
         # plt.legend(bars, lbls_2, loc=1)
         # plt.tight_layout()
     elif nlists_2 == 1:
-        for key_1, d_pvals in zip(c_pvals.values().iterkeys(), c_pvals.values().itervalues()):
-            plt.bar(np.arange(nlists_1)+.2, 0.01*d_pvals.values()[0][4], width=.3, color=color_dict[key_1])
+        for key_1, d_pvals in zip(list(c_pvals.values()).iterkeys(), list(c_pvals.values()).itervalues()):
+            plt.bar(np.arange(nlists_1)+.2, 0.01*list(d_pvals.values())[0][4], width=.3, color=color_dict[key_1])
     else:
         plt.pcolor(1.-co_mat_h, vmin=pt_co_vmin, vmax=pt_co_vmax, cmap=plt.get_cmap('RdBu'))
         plt.colorbar()
@@ -402,7 +402,7 @@ if do_p_value:
     plt.title('Co-localization distances matrix (p-value high)')
     if nlists_1 == 1:
         bars = list()
-        for key_2, d_pvals in zip(c_pvals.values()[0].iterkeys(), c_pvals.values()[0].itervalues()):
+        for key_2, d_pvals in zip(list(c_pvals.values())[0].iterkeys(), list(c_pvals.values())[0].itervalues()):
             key_2_stem = os.path.split(key_2)[1]
             id_str = key_2_stem[:key_2_stem.index('_')]
             idx = int(id_str)
@@ -412,8 +412,8 @@ if do_p_value:
         # plt.legend(bars, lbls_2, loc=1)
         plt.tight_layout()
     elif nlists_2 == 1:
-        for key_1, d_pvals in zip(c_pvals.values().iterkeys(), c_pvals.values().itervalues()):
-            plt.bar(np.arange(nlists_1)+.2, d_pvals.values()[0][3], width=.3, color=color_dict[key_1])
+        for key_1, d_pvals in zip(list(c_pvals.values()).iterkeys(), list(c_pvals.values()).itervalues()):
+            plt.bar(np.arange(nlists_1)+.2, list(d_pvals.values())[0][3], width=.3, color=color_dict[key_1])
     else:
         plt.pcolor(dsts_mat_h)
         plt.colorbar()
@@ -427,20 +427,20 @@ if do_p_value:
         fl.close()
 
 
-print '\tComputing co-localizations matrix...'
+print('\tComputing co-localizations matrix...')
 nlists_1, nlists_2 = len(set_lists_1.get_lists()), len(set_lists_2.get_lists())
 count_1, count_2 = 0, 0
 lbls_1, lbls_2 = ['' for i in range(nlists_1)], ['' for i in range(nlists_2)]
 co_mat = np.zeros(shape=(nlists_1, nlists_2), dtype=float)
 dsts_mat = np.zeros(shape=(nlists_1, nlists_2), dtype=float)
-for key_1, mats in zip(mats_lists.iterkeys(), mats_lists.itervalues()):
+for key_1, mats in zip(iter(mats_lists.keys()), iter(mats_lists.values())):
     l_name_1 = os.path.splitext(os.path.split(key_1)[1])[0]
     try:
         k_idx = l_name_1.index('_')
         l_name_1 = l_name_1[:k_idx]
     except IndexError:
         pass
-    for key_2, mat in zip(mats.iterkeys(), mats.itervalues()):
+    for key_2, mat in zip(iter(mats.keys()), iter(mats.values())):
         l_name_2 = os.path.splitext(os.path.split(key_2)[1])[0]
         try:
             k_idx = l_name_2.index('_')
@@ -464,11 +464,11 @@ for key_1, mats in zip(mats_lists.iterkeys(), mats_lists.itervalues()):
         if key_1 != key_2:
             co_mat[idx_1, idx_2] = mat[mx_id]
             dsts_mat[idx_1, idx_2] = ana_rg[mx_id]
-print '\t\t-Co-localization indices:'
-print '\t\t\t-Y-axis (list 1): ' + str(zip(range(len(lbls_1)), lbls_1))
-print '\t\t\t-X-axis (list 2): ' + str(zip(range(len(lbls_2)), lbls_2))
+print('\t\t-Co-localization indices:')
+print('\t\t\t-Y-axis (list 1): ' + str(list(zip(list(range(len(lbls_1))), lbls_1))))
+print('\t\t\t-X-axis (list 2): ' + str(list(zip(list(range(len(lbls_2))), lbls_2))))
 
-print '\t\tPlotting co-localization matrix...'
+print('\t\tPlotting co-localization matrix...')
 plt.figure()
 plt.title('Co-localization matrix')
 plt.pcolor(co_mat)
@@ -486,7 +486,7 @@ with open(out_dir + '/' + out_stem + '_co_mat.pkl', "wb") as fl:
     pickle.dump(co_mat, fl)
     fl.close()
 
-print '\t\tPlotting co-localization distances matrix...'
+print('\t\tPlotting co-localization distances matrix...')
 plt.figure()
 plt.title('Co-localization distances matrix')
 plt.pcolor(dsts_mat)
@@ -504,4 +504,4 @@ with open(out_dir + '/' + out_stem + '_co_dst_mat.pkl', "wb") as fl:
     pickle.dump(dsts_mat, fl)
     fl.close()
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

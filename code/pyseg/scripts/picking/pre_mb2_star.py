@@ -55,20 +55,20 @@ sp_off_voxels = 5 # vox
 
 ########## Print initial message
 
-print 'Pre-processing for SEG analysis of un-oriented membranes from TomoSegMemTV output.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tInput STAR file: ' + str(in_star)
-print '\tSub-volume splitting settings: '
-print '\t\t-Number of splits (X, Y, Z): ' + str(sp_split)
-print '\t\t-Offset voxels: ' + str(sp_off_voxels)
-print ''
+print('Pre-processing for SEG analysis of un-oriented membranes from TomoSegMemTV output.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tInput STAR file: ' + str(in_star))
+print('\tSub-volume splitting settings: ')
+print('\t\t-Number of splits (X, Y, Z): ' + str(sp_split))
+print('\t\t-Offset voxels: ' + str(sp_off_voxels))
+print('')
 
 ######### Process
 
-print 'Parsing input parameters...'
+print('Parsing input parameters...')
 sp_off_voxels = int(sp_off_voxels)
 out_stem = os.path.splitext(os.path.split(in_star)[1])[0]
 conn_mask = np.ones(shape=(3,3,3))
@@ -76,13 +76,13 @@ out_seg_dir = out_dir + '/segs'
 if not os.path.isdir(out_seg_dir):
     os.makedirs(out_seg_dir)
 
-print 'Loading input STAR file...'
+print('Loading input STAR file...')
 gl_star = ps.sub.Star()
 try:
     gl_star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star = ps.sub.Star()
 star.add_column(key='_rlnMicrographName')
@@ -95,12 +95,12 @@ star.add_column(key='_psSegOffX')
 star.add_column(key='_psSegOffY')
 star.add_column(key='_psSegOffZ')
 
-print 'Main Routine: tomograms loop'
+print('Main Routine: tomograms loop')
 tomo_id = 0
 for row in range(gl_star.get_nrows()):
 
     in_ref = gl_star.get_element('_rlnMicrographName', row)
-    print '\tProcessing tomogram: ' + in_ref
+    print('\tProcessing tomogram: ' + in_ref)
     out_ref_stem = os.path.splitext(os.path.split(in_ref)[1])[0]
     tomo_ref = ps.disperse_io.load_tomo(in_ref, mmap=True)
     off_mask_min_x, off_mask_max_x = 0, tomo_ref.shape[0]
@@ -109,7 +109,7 @@ for row in range(gl_star.get_nrows()):
 
     if gl_star.has_column('_psSegImage'):
         seg_file = gl_star.get_element('_psSegImage', row)
-        print '\t\t-Loading segmantion file: ' + seg_file
+        print('\t\t-Loading segmantion file: ' + seg_file)
         tomo_seg = ps.disperse_io.load_tomo(seg_file).astype(np.int8)
         ids_mask = np.where(tomo_seg)
         off_mask_min_x, off_mask_max_x = ids_mask[0].min()-sp_off_voxels, ids_mask[0].max()+sp_off_voxels
@@ -128,11 +128,11 @@ for row in range(gl_star.get_nrows()):
         if off_mask_max_z > tomo_seg.shape[2]:
             off_mask_max_z = tomo_seg.shape[2]
     else:
-        print 'ERROR: input star file ' + str(in_star) + ' does not contain _psSegImage column!'
+        print('ERROR: input star file ' + str(in_star) + ' does not contain _psSegImage column!')
         sys.exit(-1)
 
     if sp_split is None:
-        print '\t\t-Cropping to fit the segmentation...'
+        print('\t\t-Cropping to fit the segmentation...')
         svol_seg = tomo_seg[off_mask_min_x:off_mask_max_x, off_mask_min_y:off_mask_max_y, off_mask_min_z:off_mask_max_z]
         svol = tomo_ref[off_mask_min_x:off_mask_max_x, off_mask_min_y:off_mask_max_y, off_mask_min_z:off_mask_max_z]
         out_svol = out_seg_dir + '/' + out_ref_stem + '_tid_' + str(tomo_id) + '_split_' + str(split_id) + '.mrc'
@@ -153,7 +153,7 @@ for row in range(gl_star.get_nrows()):
         row_dic['_psSegOffZ'] = off_mask_min_z
         star.add_row(**row_dic)
     else:
-        print '\t\t-Splitting into subvolumes:'
+        print('\t\t-Splitting into subvolumes:')
         if sp_split[0] > 1:
             offs_x = list()
             pad_x = int(math.ceil((off_mask_max_x-off_mask_min_x) / sp_split[0]))
@@ -200,7 +200,7 @@ for row in range(gl_star.get_nrows()):
         for off_x in offs_x:
             for off_y in offs_y:
                 for off_z in offs_z:
-                    print '\t\t\t+Splitting subvolume: [' + str(off_x) + ', ' + str(off_y) + ', ' + str(off_z) +']'
+                    print('\t\t\t+Splitting subvolume: [' + str(off_x) + ', ' + str(off_y) + ', ' + str(off_z) +']')
                     svol_seg = tomo_seg[off_x[0]:off_x[1], off_y[0]:off_y[1], off_z[0]:off_z[1]]
                     svol = tomo_ref[off_x[0]:off_x[1], off_y[0]:off_y[1], off_z[0]:off_z[1]]
                     out_svol = out_seg_dir + '/' + out_ref_stem + '_id_' + str(tomo_id) + '_split_' + str(split_id) + '.mrc'
@@ -226,7 +226,7 @@ for row in range(gl_star.get_nrows()):
     tomo_id += 1
 
 out_star = out_dir + '/' + out_stem + '_pre.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

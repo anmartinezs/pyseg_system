@@ -3,10 +3,15 @@ Contains class Affine2D for preforming affine transformation (general linear
 transformation followed by translation) on points (vectors) in 2D.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: affine_2d.py 1367 2016-12-14 15:51:56Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1367 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -14,8 +19,8 @@ import numpy
 import scipy
 import scipy.linalg as linalg
 
-from points import Points
-from affine import Affine
+from .points import Points
+from .affine import Affine
 
 class Affine2D(Affine):
     """
@@ -93,7 +98,7 @@ class Affine2D(Affine):
             
             if not isinstance(scale, (numpy.ndarray, list)):
                 scale = self.makeS(scale)
-            elif isinstance(scale, numpy.adarray) and (len(scale.shape) == 1):
+            elif isinstance(scale, numpy.ndarray) and (len(scale.shape) == 1):
                 scale = self.makeS(scale)
             elif isinstance(scale, list) and not isinstance(scale[0], list):
                 scale = self.makeS(scale)
@@ -540,7 +545,7 @@ class Affine2D(Affine):
                 + "'point_dim' and 'dim_point'.")
 
         # bring x to reference frame
-        if isinstance(x_ref, str) and (x_ref == 'cm'):
+        if isinstance(x_ref, basestring) and (x_ref == 'cm'):
             x_ref = numpy.mean(x, axis=0)
         elif isinstance(x_ref, (list, tuple, numpy.ndarray)):
             pass
@@ -551,7 +556,7 @@ class Affine2D(Affine):
         x_prime = x - x_ref
 
         # bring y to reference frame
-        if isinstance(y_ref, str) and (y_ref == 'cm'):
+        if isinstance(y_ref, basestring) and (y_ref == 'cm'):
             y_ref = numpy.mean(y, axis=0)
         elif isinstance(y_ref, (list, tuple, numpy.ndarray)):
             pass

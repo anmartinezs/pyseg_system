@@ -2,11 +2,12 @@
 
 Tests module pyto.util.scipy_plus.
 
-# Author: Vladan Lucic
-# $Id: test_scipy_plus.py 1062 2014-10-10 15:31:02Z vladan $
+# Author: Vladan Lucic (Max Planck Institute for Biochemistry)
+# $Id$
 """
+from __future__ import unicode_literals
 
-__version__ = "$Revision: 1062 $"
+__version__ = "$Revision$"
 
 import unittest
 
@@ -15,6 +16,7 @@ import numpy.testing as np_test
 import scipy
 
 from pyto.util.scipy_plus import *
+#from ..scipy_plus import *  # no relative import when this file run directly
 
 
 class TestScipyPlus(np_test.TestCase):

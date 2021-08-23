@@ -3,10 +3,18 @@ Defines class Groups that can hold data form one or more observations
 (experiments) divided (classified) in groups. 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: groups.py 1517 2019-02-20 11:33:20Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+#from builtins import str
+from builtins import range
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1517 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -16,12 +24,14 @@ import logging
 from copy import copy, deepcopy
 import re
 import imp
+import functools
 
 import numpy
 import scipy
 
-from observations import Observations
-import pyto.util.nested
+import pyto
+from .observations import Observations
+from ..util import nested
 
 class Groups(dict):
     """
@@ -92,7 +102,7 @@ class Groups(dict):
         new = self.__class__()
 
         # set Observations
-        for categ in self.keys():
+        for categ in list(self.keys()):
             new[categ] = self[categ].recast()
 
         return new
@@ -128,7 +138,129 @@ class Groups(dict):
         else:
             self.__delitem__(key)
 
+    def _get_data(
+            self, type, categories=None, identifiers=None,
+            group_column='group', names=None, additional=[]):
+        """
+        Returns pandas.DataFrame that contains indexed or scalar data, 
+        depending on arg type. 
 
+        See docs for get_scalar_data() and get_indexed_data(). 
+
+        Arguments:
+          - type: 'indexed' to return indexed and 'scalar for scalar data
+          - categories: list of categories (groups), if None all groups
+          of the current object are used
+          - identifiers: list of identifiers, if None all identifiers of
+          all groups are used 
+          - group_column: name of the column that contains group names
+          - names: list of indexed properties, if None self.indexed is used
+          - additional: list of other properties (not used if type is 'scalar')
+
+        Returns DataFrame
+        """
+
+        # sort out categories
+        if categories is None:
+            categories = list(self.keys())
+        if (categories is None) or (len(categories) == 0):
+            return None
+            
+        for group_name in categories:
+
+            # get observations data
+            if type == 'indexed':
+                one_data = self[group_name].get_indexed_data(
+                    identifiers=identifiers, names=names, additional=additional)
+            elif type == 'scalar':
+                one_data = self[group_name].get_scalar_data(
+                    identifiers=identifiers, names=names)
+            if one_data is None: continue
+            
+            # add group column
+            if group_column in one_data.columns:
+                raise ValueError(
+                    group_name + " already exists as the name of one of "
+                    + "the properties. Please specify another name "
+                    + "(argument group_name).")
+            one_data.insert(0, group_column, group_name)
+                
+            # add to data 
+            try:
+                data = data.append(one_data, ignore_index=True)
+            except (NameError, AttributeError):
+                data = one_data
+
+        return data
+
+    def get_indexed_data(
+            self, categories=None, identifiers=None,
+            group_column='group', names=None, additional=[]):
+        """
+        Returns pandas.DataFrame that contains all indexed data.
+
+        Columns correspond to properties. A row corresponds to a single element
+        of one experiment and it is uniquely specified by identifier, index
+        pair. Column containing group names is added.
+
+        If the current object does not contain any groups, None is returned.
+
+        Arguments:
+          - categories: list of categories (groups), if None all groups
+          of the current object are used
+          - identifiers: list of identifiers, if None all identifiers of
+          all groups are used 
+          - group_column: name of the column that contains group names
+          - names: list of indexed properties, if None self.indexed is used
+          - additional: list of other properties
+
+        Returns DataFrame, the columns are:
+          - group
+          - identifiers
+          - self.index (usually ids)
+          - indexed properties, elements of self.indexed (sorted) or names, 
+          except self.index 
+          - all properties listed in arg additional
+        """
+        return self._get_data(
+            type='indexed', categories=categories, identifiers=identifiers,
+            group_column=group_column, names=names, additional=additional)
+    
+    indexed_data = property(
+        get_indexed_data, doc="Indexed data in pandas.DataFrame")
+                
+    def get_scalar_data(
+            self, categories=None, identifiers=None,
+            group_column='group', names=None):
+        """
+        Returns pandas.DataFrame that contains the specified scalar data.
+
+        Columns correspond to properties. Rows correspond to individual 
+        experiments (observations). 
+
+        If the current object does not contain any groups, None is returned.
+
+        Arguments:
+          - categories: list of categories (groups), if None all groups
+          of the current object are used
+          - identifiers: list of identifiers, if None all identifiers of
+          all groups are used 
+          - group_column: name of the column that contains group names
+          - names: list of indexed properties, if None self.indexed is used
+
+        Returns DataFrame, the columns are:
+          - group
+          - identifiers
+          - other properties sorted by name, except identifiers
+        """
+        return self._get_data(
+            type='scalar', categories=categories, identifiers=identifiers,
+            group_column=group_column, names=names)
+
+    scalar_data = property(
+         get_scalar_data, doc="Scalar data in pandas.DataFrame")
+
+    
     #######################################################
     #
     # Methods that unite, separate or rearrange observations
@@ -212,7 +344,7 @@ class Groups(dict):
             raise ValueError("The following groups overlap: " + str(overlap)) 
 
         # add groups
-        for name, one_group in groups.items():
+        for name, one_group in list(groups.items()):
             if copy:
                 one_group = deepcopy(one_group)
             self[name] = one_group 
@@ -237,7 +369,7 @@ class Groups(dict):
         # get all identifiers and the corresponding group names, but keep
         # only those specified by arguments
         ident_group = {}
-        for group_name, group in self.items():
+        for group_name, group in list(self.items()):
             if (categories is not None) and (group_name not in categories):
                 continue
             for ident in group.identifiers:
@@ -249,7 +381,7 @@ class Groups(dict):
 
         # make identifiers list unles specified already
         if identifiers is None:
-            identifiers = ident_group.keys()
+            identifiers = list(ident_group.keys())
 
         # yield in the order specified by identifiers
         for ident in identifiers:
@@ -300,7 +432,7 @@ class Groups(dict):
 
         # set groups
         if groups is None:
-            groups = source.keys()
+            groups = list(source.keys())
 
         # add data to each group
         for group_name in groups:
@@ -320,7 +452,7 @@ class Groups(dict):
         """
         
         # repeat for each group 
-        for group_name, group in self.items():
+        for group_name, group in list(self.items()):
 
             # skip if current group in specified groups
             if groups is not None:
@@ -354,7 +486,7 @@ class Groups(dict):
          """
         
         # repeat for each group 
-        for group_name, group in self.items():
+        for group_name, group in list(self.items()):
 
             # skip if current group in specified groups
             if groups is not None:
@@ -476,7 +608,7 @@ class Groups(dict):
 
         # get categories
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # check if one value or value bins
         if not isinstance(value, (list, numpy.ndarray)): 
@@ -600,25 +732,29 @@ class Groups(dict):
                 raise ValueError(
                     "Arguments bins and fraction have to be specified when "
                     + "arg mode is 'mean_bin'.")
-        else:
+        elif (mode == 'join') or (mode == 'mean'):
             if ((bins is not None) or (fraction is not None)): 
                 raise ValueError(
                     "Arguments bins and fraction should not be specified when "
                     + "arg mode (" + mode + ") is different from 'mean_bin'.")
-        
+        else:
+            raise ValueError(
+                "Argument mode ({}) can be 'join', 'mean'".format(mode)
+                + " or 'mean_bin'.")
+            
         # initialize new Observations
         obs = Observations()
         obs.properties.add('identifiers')
 
         # check name
         # probably not needed (not in doc string but in test_groups) 01.2019
-        if isinstance(name, str):
+        if isinstance(name, basestring):
             name_list = [name]
         else:
             name_list = name
 
         # set data, ids and id_names
-        for categ, group in self.items():
+        for categ, group in list(self.items()):
 
             # skip groups that are not listed 
             if (groups is not None) and (categ not in groups):
@@ -715,7 +851,7 @@ class Groups(dict):
                                == (name_list[0] in group.indexed))
 
                 # add to the new group data
-                if mode is not 'mean_bin':
+                if mode != 'mean_bin':
                     obs.setValue(property=name, identifier=categ, 
                                  value=numpy.array(data), indexed=indexed)
                 else:
@@ -726,12 +862,12 @@ class Groups(dict):
                         property=fraction_name, identifier=categ, 
                         value=numpy.array(data), indexed=indexed)
             # set ids
-            if mode is not 'mean_bin':
+            if mode != 'mean_bin':
                 tmp_name = name_list[0]
             else:
                 tmp_name = fraction_name
             data_0 = obs.getValue(property=tmp_name, identifier=categ)
-            ids = range(1, len(data_0)+1)
+            ids = list(range(1, len(data_0)+1))
             obs.setValue(property='ids', identifier=categ, value=ids, 
                          indexed=True)
 
@@ -838,7 +974,7 @@ class Groups(dict):
 
         # get old identifiers and check that they're the same for all groups
         old_identifiers = None
-        for name, group in self.items():
+        for name, group in list(self.items()):
 
             # get identifiers, properties and indexed
             if old_identifiers is None:
@@ -865,7 +1001,7 @@ class Groups(dict):
             new_group.indexed = copy(indexed)
 
             # make a new group
-            for new_identifier, old_group in self.items():
+            for new_identifier, old_group in list(self.items()):
 
                 # pick an experiment
                 exp = old_group.getExperiment(new_group_name)
@@ -898,7 +1034,7 @@ class Groups(dict):
         """
 
         first_group = True
-        for name, group in self.items():
+        for name, group in list(self.items()):
             
             # first time around
             if first_group:
@@ -1037,10 +1173,10 @@ class Groups(dict):
           used.
           - title: string that's printed first
         """
-        
+
         # keep group order if given
-        if groups == None:
-            group_names = self.keys()
+        if groups is None:
+            group_names = list(self.keys())
         else:
             group_names = groups
 
@@ -1068,7 +1204,7 @@ class Groups(dict):
                                          identifiers=identifiers)
             stats = obser.doStats(name=name, bins=bins, fraction=fraction, 
                                   identifiers=groups, new=True, ddof=ddof)
-
+            
             # add fraction-like data properties for each observation separately
             if bins is not None:
                 for g_name in group_names:
@@ -1081,7 +1217,7 @@ class Groups(dict):
                     # was added to __init__
                     try:
                         for (not_data, yes_data) in \
-                            self._fract_data_names.items():
+                            list(self._fract_data_names.items()):
                             try:
                                 current_value = getattr(stats_data, not_data)
                             except AttributeError:
@@ -1332,7 +1468,7 @@ class Groups(dict):
 
         if between == 'experiments':
 
-            for g_name, group in self.items():
+            for g_name, group in list(self.items()):
 
                 # skip non-specified groups
                 if (groups is not None) and (g_name not in groups):
@@ -1359,7 +1495,7 @@ class Groups(dict):
                 if test is not None:
 
                     # make reference and do inference
-                    if isinstance(reference, str):
+                    if isinstance(reference, basestring):
                         obs_ref = reference
                     elif isinstance(reference, dict):
                         obs_ref = reference[g_name]
@@ -1469,7 +1605,7 @@ class Groups(dict):
         total_n = {}
         
         # set data and count data point for each identifier (across groups)  
-        for g_name, group in self.items():
+        for g_name, group in list(self.items()):
 
             # skip non-specified groups
             if (groups is not None) and (g_name not in groups):
@@ -1493,7 +1629,7 @@ class Groups(dict):
 
         # set fraction and  number of data points for each identifier (across 
         # groups)  
-        for g_name, group in stats.items():
+        for g_name, group in list(stats.items()):
 
             # skip non-specified groups
             if (groups is not None) and (g_name not in groups):
@@ -1538,7 +1674,7 @@ class Groups(dict):
                          default=g_name)
 
         # copy inference values to stats object
-        for g_name, group in stats.items():
+        for g_name, group in list(stats.items()):
 
             # skip non-specified groups
             if (groups is not None) and (g_name not in groups):
@@ -1617,7 +1753,7 @@ class Groups(dict):
 
         # set groups
         if groups is None:
-            group_names = self.keys()
+            group_names = list(self.keys())
         else:
             group_names = groups
 
@@ -1630,7 +1766,7 @@ class Groups(dict):
             for group_nam in group_names:
 
                 # discard non-existing groups
-                if group_nam not in self.keys():
+                if group_nam not in list(self.keys()):
                     continue
 
                 # do correlation
@@ -1650,7 +1786,7 @@ class Groups(dict):
             for group_nam in group_names:
                 
                 # discard non-existing groups
-                if group_nam not in self.keys():
+                if group_nam not in list(self.keys()):
                     continue
 
                 # do correlation
@@ -1767,7 +1903,7 @@ class Groups(dict):
         # set output 
         if out is None:
             return
-        elif isinstance(out, str):
+        elif isinstance(out, basestring):
             out = open(out)
 
         # print title
@@ -1776,7 +1912,7 @@ class Groups(dict):
 
         # set groups
         if groups is None:
-            group_names = self.keys()
+            group_names = list(self.keys())
         else:
             group_names = groups
 
@@ -1902,7 +2038,7 @@ class Groups(dict):
         """
  
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # loop over groups and observations
         for categ in categories:
@@ -1959,7 +2095,7 @@ class Groups(dict):
 
         # set categories
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # calculate and set as a new property
         for categ in categories:
@@ -2050,7 +2186,7 @@ class Groups(dict):
 
         # get categories
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # apply to each category
         for categ in categories:
@@ -2085,7 +2221,7 @@ class Groups(dict):
 
         # get categories
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # put all variables together
         all_ = [getattr(self[categ], name) for categ in categories]
@@ -2116,7 +2252,7 @@ class Groups(dict):
 
         # get categories
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # put all variables together
         all_ = [getattr(self[categ], name) for categ in categories]

@@ -23,7 +23,7 @@ import operator
 import pyseg as ps
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -61,20 +61,20 @@ def do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, in
 
     # Initialization
     if verbose:
-        print '\tLoading graph...'
+        print('\tLoading graph...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf = unpickle_obj(input_file)
 
     if verbose:
-        print '\tPre-processing the graph...'
+        print('\tPre-processing the graph...')
     graph_mcf.filter_self_edges()
     for v in graph_mcf.get_vertices_list():
         if len(graph_mcf.get_vertex_neighbours(v.get_id())[1]) <= 0:
             graph_mcf.remove_vertex(v)
     if not usual:
         if verbose:
-            print '\t\tGetting boundary sources...'
+            print('\t\tGetting boundary sources...')
         seg_prop_id = graph_mcf.get_prop_id(seg_key)
         for v in graph_mcf.get_vertices_list():
             v_id = v.get_id()
@@ -95,7 +95,7 @@ def do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, in
                     graph_mcf.remove_vertex(v)
 
     if inv or inv_v:
-        print '\tInverting some properties...'
+        print('\tInverting some properties...')
     if inv:
         graph_mcf.invert_prop(weight, weight + '_inv')
         weight += '_inv'
@@ -104,19 +104,19 @@ def do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, in
         weight_v += '_inv'
 
     if verbose:
-        print '\tGetting the GT graph...'
+        print('\tGetting the GT graph...')
     graph = GraphGT(graph_mcf)
     graph_gt = graph.get_gt()
 
     if mst:
         if verbose:
-            print '\tCompute minimum spanning tree...'
+            print('\tCompute minimum spanning tree...')
         graph.min_spanning_tree(SGT_MIN_SP_TREE, weight)
         graph.add_prop_to_GraphMCF(graph_mcf, SGT_MIN_SP_TREE, up_index=False)
         graph_mcf.threshold_edges(SGT_MIN_SP_TREE, 0, operator.eq)
 
     if verbose:
-        print '\tGetting the sources list...'
+        print('\tGetting the sources list...')
     sources = list()
     if seg_key is not None:
         prop_s = graph_gt.vertex_properties[seg_key]
@@ -134,18 +134,18 @@ def do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, in
             sources.append(v)
 
     if verbose:
-        print '\tRWR...'
+        print('\tRWR...')
     graph.multi_rwr(sources, prop_key, c, weight, weight_v, mode=2)
 
     if verbose:
-        print '\tUpdating GraphMCF...'
+        print('\tUpdating GraphMCF...')
     graph.add_prop_to_GraphMCF(graph_mcf, prop_key, up_index=True)
 
-    print '\tUpdate subgraph relevance...'
+    print('\tUpdate subgraph relevance...')
     graph_mcf.compute_sgraph_relevance()
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(output_dir + '/' + stem + '_rwr.pkl')
@@ -161,7 +161,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvmxzbi:o:s:d:w:p:c:a:t:y:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -181,8 +181,8 @@ def main(argv):
     mst = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -215,54 +215,54 @@ def main(argv):
         elif opt == "-b":
             mst = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (output_dir is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for getting the graph mcf of a tomogram.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput file: ' + output_dir
-            print '\tProperty name: ' + prop_key
+            print('Running tool for getting the graph mcf of a tomogram.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput file: ' + output_dir)
+            print('\tProperty name: ' + prop_key)
             if mst:
-                print '\tMinimum spanning tree activated.'
+                print('\tMinimum spanning tree activated.')
             if seg_key is not None:
-                print '\tProperty for sources: ' + seg_key
-                print '\tValue for sources: ' + str(seg_val)
+                print('\tProperty for sources: ' + seg_key)
+                print('\tValue for sources: ' + str(seg_val))
                 if usual:
-                    print '\tStandard RWR.'
+                    print('\tStandard RWR.')
                 else:
-                    print '\tBoundary sources mode activated (option ''m'')'
+                    print('\tBoundary sources mode activated (option ''m'')')
             if seg_a_key is not None:
-                print '\tProperty for additional sources: ' + seg_a_key
-                print '\t\tThreshold: ' + str(th_a)
+                print('\tProperty for additional sources: ' + seg_a_key)
+                print('\t\tThreshold: ' + str(th_a))
             if weight is not None:
-                print '\tEdge weighting property: ' + weight
+                print('\tEdge weighting property: ' + weight)
                 if inv:
-                    print '\t\tInverted weighting property.'
+                    print('\t\tInverted weighting property.')
             if weight_v is not None:
-                print '\tVertex weighting property: ' + weight_v
+                print('\tVertex weighting property: ' + weight_v)
                 if inv_v:
-                    print '\t\tInverted weighting property.'
-            print '\tRestart probability: ' + str(c)
-            print ''
+                    print('\t\tInverted weighting property.')
+            print('\tRestart probability: ' + str(c))
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, inv,
                c, seg_a_key, th_a, weight_v, inv_v, mst, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

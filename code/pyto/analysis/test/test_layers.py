@@ -3,10 +3,12 @@
 Tests module analysis.layers.
 
 # Author: Vladan Lucic
-# $Id: test_layers.py 1151 2015-05-26 08:52:30Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import range
 
-__version__ = "$Revision: 1151 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import pickle
@@ -37,7 +39,7 @@ class TestLayers(np_test.TestCase):
                         '78_3': 'segmentations/layers_78-3.dat'},
             'rim_altered' : {'75_4' : 'segmentations/layers_75-4.dat'}}
         for categ in layer_files:
-            for ident, name in layer_files[categ].items():
+            for ident, name in list(layer_files[categ].items()):
                layer_files[categ][ident] = os.path.join(dir_, name)
         self.layer_files = layer_files
 
@@ -58,7 +60,7 @@ class TestLayers(np_test.TestCase):
             'operator' : {'77_4' : 'emerson', '78_3' : 'lake', 
                           '75_4' : 'palmer'}
             }
-        for ident, name in catalog._db['tether_files'].items():
+        for ident, name in list(catalog._db['tether_files'].items()):
                catalog._db['tether_files'][ident] = os.path.join(dir_, name)
         catalog.makeGroups()
         self.catalog = catalog
@@ -80,7 +82,7 @@ class TestLayers(np_test.TestCase):
         # test 77_4
         np_test.assert_equal(
             layer.rim_wt.getValue(identifier='77_4', property='ids'), 
-            range(1, 171))
+            list(range(1, 171)))
         np_test.assert_almost_equal(
             layer.rim_wt.getValue(identifier='77_4', property='volume', ids=17),
             11371, decimal=2)
@@ -96,7 +98,7 @@ class TestLayers(np_test.TestCase):
         # test 78_3
         np_test.assert_equal(
             layer.rim_wt.getValue(identifier='78_3', property='ids'), 
-            range(1,161))
+            list(range(1,161)))
         np_test.assert_almost_equal(
             layer.rim_wt.getValue(identifier='78_3', property='occupancy', 
                                ids=17), 
@@ -109,7 +111,7 @@ class TestLayers(np_test.TestCase):
         # test 75_4
         np_test.assert_equal(
             layer.rim_altered.getValue(identifier='75_4', property='ids'), 
-            range(1, 151))
+            list(range(1, 151)))
         np_test.assert_almost_equal(
             layer.rim_altered.getValue(identifier='75_4', property='distance', 
                                     ids=27),
@@ -135,7 +137,7 @@ class TestLayers(np_test.TestCase):
         # test 77_4
         np_test.assert_equal(
             layer.rim_wt.getValue(identifier='77_4', property='ids'), 
-            range(1, 171))
+            list(range(1, 171)))
         np_test.assert_almost_equal(
             layer.rim_wt.getValue(identifier='77_4', property='volume', ids=17),
             11371, decimal=2)
@@ -151,7 +153,7 @@ class TestLayers(np_test.TestCase):
         # test 78_3
         np_test.assert_equal(
             layer.rim_wt.getValue(identifier='78_3', property='ids'), 
-            range(1,161))
+            list(range(1,161)))
         np_test.assert_almost_equal(
             layer.rim_wt.getValue(identifier='78_3', property='occupancy', 
                                ids=17), 
@@ -164,7 +166,7 @@ class TestLayers(np_test.TestCase):
         # test 75_4
         np_test.assert_equal(
             layer.rim_altered.getValue(identifier='75_4', property='ids'), 
-            range(1, 151))
+            list(range(1, 151)))
         np_test.assert_almost_equal(
             layer.rim_altered.getValue(identifier='75_4', property='distance', 
                                     ids=27),

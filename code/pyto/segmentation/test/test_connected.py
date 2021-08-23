@@ -3,12 +3,15 @@
 Tests module connected. 
 
 # Author: Vladan Lucic
-# $Id: test_connected.py 1302 2016-05-16 10:36:10Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1302 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 
 import numpy
@@ -18,14 +21,14 @@ import scipy
 from pyto.segmentation.grey import Grey
 from pyto.segmentation.segment import Segment
 from pyto.segmentation.connected import Connected
-import common as common
+from pyto.segmentation.test import common
 
 class TestConnected(np_test.TestCase):
     """
     """
 
     def setUp(self):
-        pass
+        importlib.reload(common) # to avoid problems when running multiple tests
 
     def testMake(self):
         """

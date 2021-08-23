@@ -1,12 +1,20 @@
 """
 Class Plane provides methods for crating and manipulating n-1 dimensional planes
-in n dimentional space, in addition to methods defined in its base class Segment.
+in n dimentional space, in addition to methods defined in its base class 
+Segment.
+
+Note: This class is depreciated.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: plane.py 21 2007-12-23 11:38:03Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+#from past.utils import old_div
 
-__version__ = "$Revision: 21 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -16,7 +24,7 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from segment import Segment
+from .segment import Segment
 
 class Plane(Segment):
     """
@@ -79,7 +87,8 @@ class Plane(Segment):
         vectors = numpy.asarray(vectors, dtype='float_')
         vectors = vectors / numpy.sqrt(numpy.inner(vectors, vectors))
         if (vectors.ndim == 1) and (points.ndim) > 1:
-            vectors = vectors[numpy.newaxis, ...].repeat(points.shape[0], axis=0)
+            vectors = vectors[numpy.newaxis, ...].repeat(
+                points.shape[0], axis=0)
 
         # genereate subarrays with planes
         for slice_, vector, point in zip(slices, vectors, points):
@@ -93,8 +102,8 @@ class Plane(Segment):
                        for point_1d, sl_1d in zip(point, slice_)]
             dist = numpy.tensordot(indices, vector, axes=(0,0)) \
                    - numpy.vdot(point_0, vector)
-            plane = numpy.where(dist > thick/2, 1, 0)
-            plane = numpy.where(dist > -thick/2, plane, -1)
+            plane = numpy.where(dist > thick / 2, 1, 0)
+            plane = numpy.where(dist > -thick / 2, plane, -1)
             if thick == 0:
                 plane = numpy.where(dist == 0, 0, plane) 
 

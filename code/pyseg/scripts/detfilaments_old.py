@@ -29,7 +29,7 @@ from factory import ArcGraphFactory
 from vtk_ext import vtkFilterRedundacyAlgorithm
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -62,7 +62,7 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
 
     # Initialization
     if verbose:
-        print '\tInitializing...'
+        print('\tInitializing...')
     work_dir = output_dir + '/disperse'
     disperse = disperse_io.DisPerSe(input_file, work_dir)
     # Down skeleton
@@ -75,7 +75,7 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
 
     # Disperse
     if verbose:
-        print '\tRunning DisPerSe...'
+        print('\tRunning DisPerSe...')
     if f_update:
         disperse.clean_work_dir()
         disperse.mse(no_cut=False, inv=True)
@@ -85,7 +85,7 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
     manifolds = disperse.get_manifolds(no_cut=False, inv=False)
 
     # Filtering the redundancy of the skeleton
-    print '\tFiltering redundancy on DiSPerSe skeleton...'
+    print('\tFiltering redundancy on DiSPerSe skeleton...')
     red_filt = vtkFilterRedundacyAlgorithm()
     red_filt.SetInputData(skel)
     red_filt.Execute()
@@ -95,17 +95,17 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
     pkl_sgraph = work_dir + '/skel_graph.pkl'
     if f_update or (not os.path.exists(pkl_sgraph)):
         if verbose:
-            print '\tBuilding skeleton graph...'
+            print('\tBuilding skeleton graph...')
         skel_graph = SkelGraph(skel)
         skel_graph.update()
         skel_graph.pickle(pkl_sgraph)
     else:
         if verbose:
-            print '\tUnpickling PDS graphs...'
+            print('\tUnpickling PDS graphs...')
         skel_graph = unpickle_obj(pkl_sgraph)
 
     if verbose:
-        print '\tThresholding the skeleton graph...'
+        print('\tThresholding the skeleton graph...')
     skel_graph.add_geometry(manifolds, density)
     if (low_t is not None) or (high_t is not None):
         skel_graph.find_critical_points()
@@ -116,34 +116,34 @@ def do_det_filament(input_file, output_dir, fmt, mask_file=None, res=1, cut_t=No
         skel_graph.threshold_minima(STR_DENSITY_VERTEX, low_t, operator.lt)
 
     if verbose:
-        print '\tBuilding skeleton graph...'
+        print('\tBuilding skeleton graph...')
     arc_graph = factory.build_arcgraph(skel_graph)
 
     disperse_io.save_vtp(arc_graph.get_vtp(), output_dir + '/hold.vtp')
     if verbose:
-        print '\tThresholding the arcs graph...'
+        print('\tThresholding the arcs graph...')
     if rel_t is not None:
         arc_graph.update_geometry(manifolds, density)
         arc_graph.compute_arc_relevance()
         arc_graph.threshold_arc(STR_ARC_RELEVANCE, rel_t, operator.gt)
 
     if verbose:
-        print '\tBuilding the subgraphs network...'
+        print('\tBuilding the subgraphs network...')
     factor = ArcGraphFactory(arc_graph)
     network = factor.gen_netarcgraphs()
 
     if verbose:
-        print '\tThresholding the network...'
+        print('\tThresholding the network...')
     if len_t is not None:
         network.compute_diameters(resolution=res)
         network.threshold_subgraph(STR_GRAPH_DIAM, len_t, operator.gt)
 
     if verbose:
-        print '\tSegmentation...'
+        print('\tSegmentation...')
     seg = arc_graph.print_arcs()
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     disperse_io.save_numpy(density, output_dir + '/' + stem + '.vti')
@@ -159,7 +159,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvdi:o:m:r:C:L:H:R:S:f")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -176,8 +176,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -205,47 +205,47 @@ def main(argv):
             verbose = True
 
     if (input_file == '') or (output_dir == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool for detecting filaments in a tomogram.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tOutput directory: ' + output_dir
+            print('Running tool for detecting filaments in a tomogram.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tOutput directory: ' + output_dir)
             if mask_file == '':
-                print '\tMask not used.'
+                print('\tMask not used.')
             else:
-                print '\tMask file: ' + mask_file
+                print('\tMask file: ' + mask_file)
             if f_update:
-                print '\tUpdate disperse: yes'
+                print('\tUpdate disperse: yes')
             else:
-                print '\tUpdate disperse: no'
-            print '\tResolution: ' + str(res) + ' nm'
+                print('\tUpdate disperse: no')
+            print('\tResolution: ' + str(res) + ' nm')
             if cut_t is not None:
-                print '\tPersistence threshold: ' + str(cut_t)
+                print('\tPersistence threshold: ' + str(cut_t))
             if low_t is not None:
-                print '\tLow density maxima threshold: ' + str(low_t)
+                print('\tLow density maxima threshold: ' + str(low_t))
             if high_t is not None:
-                print '\tHigh density minima threshold: ' + str(high_t)
+                print('\tHigh density minima threshold: ' + str(high_t))
             if rel_t is not None:
-                print '\tRelevance threshold: ' + str(rel_t)
+                print('\tRelevance threshold: ' + str(rel_t))
             if len_t is not None:
-                print '\tLength threshold: ' + str(len_t)
-            print '\tOutput segmentation format ' + fmt
-            print '\n'
+                print('\tLength threshold: ' + str(len_t))
+            print('\tOutput segmentation format ' + fmt)
+            print('\n')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_det_filament(input_file, output_dir, fmt, mask_file,  res, cut_t, low_t, high_t, rel_t,
                         len_t, f_update, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed.'
+            print(cmd_name + ' successfully executed.')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

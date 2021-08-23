@@ -3,10 +3,15 @@ Contains class Image for manipulations of grey-scale images.
 
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: image.py 1103 2014-12-29 11:36:27Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+from builtins import str
+from past.utils import old_div
 
-__version__ = "$Revision: 1103 $"
+__version__ = "$Revision$"
 
 import logging
 import numpy
@@ -116,7 +121,7 @@ class Image(BaseImage):
             # find index limits so they don't extend outside data
             aind = numpy.array(ind)
             shape = numpy.array(self.data.shape)
-            low_ind = numpy.maximum(aind - (size - 1) / 2, 0)
+            low_ind = numpy.maximum(aind - old_div((size - 1), 2), 0)
             high_ind = numpy.minimum(low_ind + size, shape)
 
             # enlarge limits on edges (needed?)
@@ -130,12 +135,13 @@ class Image(BaseImage):
             sl = [slice(l, h) for (l, h) in zip(low_ind, high_ind)]
 
             # correct data
-            if numpy.logical_not(bad[sl]).sum() <= 0:
+            if numpy.logical_not(bad[tuple(sl)]).sum() <= 0:
                 logging.debug("Element " + str(ind) + 
                               " could not be corrected.")
                 n_uncorr += 1
             else:
-                mean = ndimage.mean(self.data[sl], bad[sl], index=0)
+                mean = ndimage.mean(
+                    self.data[tuple(sl)], bad[tuple(sl)], index=0)
                 new[ind] = mean
                 n_corr += 1
 

@@ -4,21 +4,26 @@ Provides class ThreshConn for the analysis of multiple threshold and
 connectivity based segementations, obtained at different thresholds.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: thresh_conn.py 989 2013-09-27 12:42:00Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 989 $"
+__version__ = "$Revision$"
 
 
-from copy import copy, deepcopy
+#from copy import copy, deepcopy
 import logging
 import numpy
 import scipy
 
-from segment import Segment
-from connected import Connected
-from hierarchy import Hierarchy
-from morphology import Morphology
+from .segment import Segment
+from .connected import Connected
+from .hierarchy import Hierarchy
+from .morphology import Morphology
 import pyto.util.nested as nested
 
 class ThreshConn(Hierarchy):
@@ -89,14 +94,16 @@ class ThreshConn(Hierarchy):
         good = numpy.abs(diff) <= precision
         level = good.nonzero()[0]
         if len(level) == 0:
-            raise ValueError("No level found for threshold " + str(threshold) \
-                                 + " with precision " + str(precision) + ".")
+            raise ValueError(
+                "No level found for threshold " + str(threshold) 
+                + " with precision " + str(precision) + ".")
         elif len(level) == 1:
             return level[0]
         else:
-            raise ValueError("More than one level (" + str(level) + ")"\
-                                 + " found for threshold " + str(threshold) \
-                                 + " with precision " + str(precision) + ".")
+            raise ValueError(
+                "More than one level (" + str(level) + ")"\
+                + " found for threshold " + str(threshold) \
+                + " with precision " + str(precision) + ".")
             
 
     ###############################################################

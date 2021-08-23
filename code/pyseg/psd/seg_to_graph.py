@@ -19,7 +19,7 @@ import os
 import sys
 import numpy as np
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -59,81 +59,81 @@ sg_close = 1
 ########################################################################################
 
 # Print initial message
-print 'Adding segmentation to GraphMCF objects.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
+print('Adding segmentation to GraphMCF objects.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
 # print '\tDisPerSe persistence threshold (nsig): ' + str(nsig)
-print '\tSTAR file with the GraphMCF and segmentation pairs: ' + in_star
-print '\tSTAR file with the GraphMCF info: ' + in_g_star
-print '\tOutput directory: ' + out_dir
-print '\t\t-Files sufix: ' + out_sufix
-print '\tGraph settings: '
-print '\t\t-Property name: ' + gh_pname
+print('\tSTAR file with the GraphMCF and segmentation pairs: ' + in_star)
+print('\tSTAR file with the GraphMCF info: ' + in_g_star)
+print('\tOutput directory: ' + out_dir)
+print('\t\t-Files sufix: ' + out_sufix)
+print('\tGraph settings: ')
+print('\t\t-Property name: ' + gh_pname)
 if gh_clean:
-    print '\t\t-Clean old values for the selected property.'
-print '\tSegmentation processing: '
+    print('\t\t-Clean old values for the selected property.')
+print('\tSegmentation processing: ')
 if sg_th is None:
-    print '\t\t-Using segmentation labels.'
+    print('\t\t-Using segmentation labels.')
 else:
-    print '\t\t-Segmentation threshold: ' + str(sg_th)
-    print '\t\t-Segmentation label: ' + str(sg_lbl)
+    print('\t\t-Segmentation threshold: ' + str(sg_th))
+    print('\t\t-Segmentation label: ' + str(sg_lbl))
 if sg_ref:
-    print '\t\t-Reference space \'rlnMicrographName\''
+    print('\t\t-Reference space \'rlnMicrographName\'')
 else:
-    print '\t\t-Reference space \'psSegImage\''
-print '\t\t-Iterations for post closing: ' + str(sg_close)
-print ''
+    print('\t\t-Reference space \'psSegImage\'')
+print('\t\t-Iterations for post closing: ' + str(sg_close))
+print('')
 
-print 'Loading the input star file...'
+print('Loading the input star file...')
 star, graph_star = ps.sub.Star(), ps.sub.Star()
 star.load(in_star)
 graph_star.load(in_g_star)
 if not star.has_column('_psGhMCFPickle'):
-    print 'ERROR: input pairs STAR file has no \'psGhMCFPickle\' column.'
-    print 'Un-successfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input pairs STAR file has no \'psGhMCFPickle\' column.')
+    print('Un-successfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 if not star.has_column('_psSegImage'):
-    print 'ERROR: input pairs STAR file has no \'psSegImage\' column.'
-    print 'Un-successfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input pairs STAR file has no \'psSegImage\' column.')
+    print('Un-successfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 if not graph_star.has_column('_rlnMicrographName'):
-    print 'ERROR: input graph STAR file has no \'rlnMicrographName\' column.'
-    print 'Un-successfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input graph STAR file has no \'rlnMicrographName\' column.')
+    print('Un-successfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 if not graph_star.has_column('_psGhMCFPickle'):
-    print 'ERROR: input graph STAR file has no \'psGhMCFPickle\' column.'
-    print 'Un-successfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input graph STAR file has no \'psGhMCFPickle\' column.')
+    print('Un-successfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 graph_list = graph_star.get_column_data('_psGhMCFPickle')
 
 # Loop for processing the input data
-print 'Running main loop: '
+print('Running main loop: ')
 for row in range(star.get_nrows()):
 
     seg_file, graph_file = star.get_element('_psSegImage', row), star.get_element('_psGhMCFPickle', row)
-    print '\tPre-processing segmentation tomogram: ' + seg_file
+    print('\tPre-processing segmentation tomogram: ' + seg_file)
     mic_file = graph_star.get_element('_rlnMicrographName', row)
     try:
         seg = ps.disperse_io.load_tomo(seg_file).astype(np.uint16)
     except IOError:
-        print 'WARNING: input tomograms ' + seg_file + ' could not be read!'
+        print('WARNING: input tomograms ' + seg_file + ' could not be read!')
         continue
     try:
         mic = ps.disperse_io.load_tomo(mic_file, mmap=True)
     except IOError:
-        print 'WARNING: input tomograms ' + mic_file + ' could not be read!'
+        print('WARNING: input tomograms ' + mic_file + ' could not be read!')
         continue
 
     try:
         segg_row = graph_list.index(graph_file)
     except ValueError:
-        print 'WARNING: graph ' + graph_file + ' where not found on graphs STAR file!'
+        print('WARNING: graph ' + graph_file + ' where not found on graphs STAR file!')
         continue
     segg_fname = graph_star.get_element('_psSegImage', segg_row)
 
     if sg_ref:
-        print '\tApplying rigid body transformation to fit segmentation...'
+        print('\tApplying rigid body transformation to fit segmentation...')
         if sg_th is None:
             p_ids = (np.arange(seg.shape[0]), np.arange(seg.shape[1]), np.arange(seg.shape[2]))
         else:
@@ -173,7 +173,7 @@ for row in range(star.get_nrows()):
             if (x >= 0) and (x < seg.shape[0]) and (y >= 0) and (y < seg.shape[1]) and (z >= 0) and (z < seg.shape[2]):
                 seg[x, y, z] = sg_lbl
         if sg_close > 0:
-            print '\t\t-Closing...'
+            print('\t\t-Closing...')
             hold_seg = sp.ndimage.morphology.binary_closing(seg==sg_lbl, structure=None, iterations=sg_close)
             seg = np.zeros(shape=hold_seg.shape, dtype=np.uint16)
             seg[hold_seg > 0] = sg_lbl
@@ -181,18 +181,18 @@ for row in range(star.get_nrows()):
             seg = seg.swapaxes(0, 1)
         in_seg_file = os.path.splitext(os.path.split(seg_file)[1])[0]
         out_seg_file = out_dir + '/' + in_seg_file + '_' + out_sufix + '_seg.vti'
-        print '\t\t-Storing transformed segmentation in: ' + out_seg_file
+        print('\t\t-Storing transformed segmentation in: ' + out_seg_file)
         ps.disperse_io.save_numpy(seg, out_seg_file)
 
-    print '\tLoading the graph...'
+    print('\tLoading the graph...')
     graph = ps.factory.unpickle_obj(graph_file)
 
-    print '\tAdding segmentation to graph...'
+    print('\tAdding segmentation to graph...')
     graph.add_scalar_field_nn(seg, name=gh_pname, clean=gh_clean, bg=0)
 
     in_graph_stem = os.path.splitext(os.path.split(graph_file)[1])[0]
     out_graph_file = out_dir + '/' + in_graph_stem + '_' + out_sufix + '.pkl'
-    print '\tPickling updated graph in: ' + out_graph_file
+    print('\tPickling updated graph in: ' + out_graph_file)
     graph.pickle(out_graph_file)
     graph_star.set_element('_psGhMCFPickle', segg_row, out_graph_file)
     ps.disperse_io.save_vtp(graph.get_vtp(av_mode=True, edges=True),
@@ -200,7 +200,7 @@ for row in range(star.get_nrows()):
 
 in_star_stem = os.path.splitext(os.path.split(in_star)[1])[0]
 out_star = out_dir + '/' + in_star_stem + '_' + out_sufix + '.star'
-print '\tStoring output STAR file in: ' + out_star
+print('\tStoring output STAR file in: ' + out_star)
 graph_star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

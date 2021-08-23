@@ -7,10 +7,15 @@ connectors.py, connections.py (depreciated) or classify_connections.py
 (depreciated).  
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: connections.py 1275 2015-12-23 14:31:51Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import range
 
-__version__ = "$Revision: 1275 $"
+__version__ = "$Revision$"
 
 
 import warnings
@@ -20,9 +25,10 @@ from copy import copy, deepcopy
 import numpy
 import scipy
 
-import pyto.util.nested
-from observations import Observations
-from groups import Groups
+import pyto
+from ..util import nested
+from .observations import Observations
+from .groups import Groups
 
 
 class Connections(Groups):
@@ -247,8 +253,9 @@ class Connections(Groups):
         elif mode == 'connectors':
 
             conn = cls(mode=mode, single=single)
-            conn._readConnectors(files=files, catalog=catalog, 
-                                 categories=categories, order=order)
+            conn._readConnectors(
+                files=files, catalog=catalog,
+                categories=categories, order=order)
  
         else:
             raise ValueError("Mode ", mode, " is not understood. Acceptable ",
@@ -720,7 +727,7 @@ class Connections(Groups):
         """
 
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         for categ in categories:
             pixel = catalog.pixel_size
@@ -762,7 +769,7 @@ class Connections(Groups):
         """
 
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         for categ in categories:
             pixel = catalog.pixel_size
@@ -844,7 +851,7 @@ class Connections(Groups):
         """
 
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         # surface to ratio
         self.apply(funct=numpy.divide, args=['surface', 'volume'], 
@@ -936,7 +943,7 @@ class Connections(Groups):
         """
 
         # remove boundary ids
-        for categ in boundary.keys():
+        for categ in list(boundary.keys()):
 
             # get boundary ids for all observations in this category
             b_ids = getattr(boundary[categ], name)
@@ -979,7 +986,7 @@ class Connections(Groups):
 
         # get categories
         if categories is None:
-            categories = self.keys()
+            categories = list(self.keys())
 
         ves_conn = self.__class__()
         ves_non_conn = self.__class__()

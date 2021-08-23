@@ -12,6 +12,13 @@ ToDo:
 # Author: Vladan Lucic
 # $Id: test_cleft_layers.py 823 2011-01-27 16:46:40Z vladan $
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+#from builtins import str
+from builtins import range
+#from past.utils import old_div
 
 __version__ = "$Revision: 823 $"
 
@@ -29,7 +36,7 @@ from pyto.scene.cleft_regions import CleftRegions as SceneCleftRegions
 import pyto.scene.test.common as scene_cmn
 from pyto.analysis.catalog import Catalog
 from pyto.analysis.cleft_regions import CleftRegions
-import common
+from pyto.analysis.test import common
 #from pyto.core.image import Image
 #from pyto.segmentation.segment import Segment
 #from pyto.segmentation.cleft import Cleft
@@ -119,7 +126,7 @@ class TestCleftRegions(np_test.TestCase):
         # make catalog
         curr_dir, base = os.path.split(os.path.abspath(__file__))
         cat_dir = os.path.join(curr_dir, common.rel_catalogs_dir)
-        catal = Catalog() 
+        catal = Catalog()
         catal.read(dir=cat_dir, catalog=r'catalog_[0-9]*\.', 
                    type='distributed')
         catal.makeGroups(feature='category')
@@ -127,7 +134,7 @@ class TestCleftRegions(np_test.TestCase):
         # read all
         cleft_lay = CleftRegions.read(files=catal.results_obj, catalog=catal,
                                      mode='layers')
-
+        
         # test meta-properties
         for category in ['first', 'second']:
             np_test.assert_equal(cleft_lay[category].indexed, self.indexed)
@@ -227,7 +234,7 @@ class TestCleftRegions(np_test.TestCase):
 
         # make order and read 
         order = {'first' : ['exp_3', 'exp_5'], 'second' : ['exp_4', 'exp_1']}
-        print "Now a warning should appear:"
+        print("Now a warning should appear:")
         cleft_lay = CleftRegions.read(
             files=catal.results_obj, catalog=catal, mode='layers', order=order)
 
@@ -292,7 +299,7 @@ class TestCleftRegions(np_test.TestCase):
 
         # ids
         np_test.assert_equal(cleft_lay.first.cleftIds, 
-                             [range(3,8), range(3,8)])
+                             [list(range(3,8)), list(range(3,8))])
         np_test.assert_equal(cleft_lay.first.bound1Ids, [[1,2], [1,2]])
         np_test.assert_equal(cleft_lay.first.bound2Ids, [[8,9], [8,9]])
         np_test.assert_equal(cleft_lay.first.boundIds, [[1,2,8,9], [1,2,8,9]])
@@ -430,7 +437,7 @@ class TestCleftRegions(np_test.TestCase):
 
         # ids
         np_test.assert_equal(cleft_layoncol.first.cleftIds, 
-                             [range(3,8), range(3,8)])
+                             [list(range(3,8)), list(range(3,8))])
 
         # data
         np_test.assert_equal(
@@ -551,8 +558,8 @@ class TestCleftRegions(np_test.TestCase):
                                   ids=[[1,2,8,9], [3,4,5,6,7]], mode='0to1')
         np_test.assert_equal('normal0to1' in cleft_lay.first.properties, True)
         np_test.assert_almost_equal(
-            cleft_lay.second.getValue(identifier='exp_1', 
-                                      property='normal0to1'),
+            cleft_lay.second.getValue(
+                identifier='exp_1', property='normal0to1'),
             (common.cleft_layers_density_mean - 33/4.) / (5 - 33/4.))
 
         # 0to1 layers on columns, simple
@@ -740,6 +747,7 @@ class TestCleftRegions(np_test.TestCase):
         for path in self.tmp_paths:
             try:
                 os.remove(path)
+                #pass
             except OSError:
                 print("Tests fine but could not remove " + str(path))
 

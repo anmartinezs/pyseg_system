@@ -37,9 +37,15 @@ Specifiying another value for the same parameter (here labels_file_name)
 overrides the value from tomo_info.
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: cluster.py 1430 2017-03-24 13:18:43Z vladan $
+# $Id$
 """
-__version__ = "$Revision: 1430 $"
+from __future__ import unicode_literals
+from builtins import zip
+#from builtins import str
+from builtins import range
+from past.builtins import basestring
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -108,7 +114,7 @@ hi_bound_depth = 2
 # Alternatively, if multiple values are given, a flat cluster is calculated for
 # each value and the one that is the most similar to the connectivity cluster
 # (according to the similarity calculation method) is selected.
-hi_bound_thresh = range(6,15)    # find best threshold
+hi_bound_thresh = list(range(6,15))    # find best threshold
 
 # Similarity calculation method used to select the best threshold value. The
 # possible values are: 'vi', 'b-flat', 'rand' or 'rand_same_cluster'
@@ -145,7 +151,7 @@ hi_conn_depth = 2
 # Alternatively, if multiple values are given, a flat cluster is calculated for
 # each value and the one that is the most similar to the connectivity cluster
 # (according to the similarity calculation method) is selected.
-hi_conn_thresh = range(10,30,2)    # find best threshold
+hi_conn_thresh = list(range(10,30,2))    # find best threshold
 
 # similarity calculation method: 'b-flat', 'rand' or 'rand_same_cluster'
 hi_conn_similarity = 'rand'
@@ -186,8 +192,8 @@ if tomo_info is not None: boundary_data_type = tomo_info.labels_data_type
 # boundary file byteOrder ('<' for little-endian, '>' for big-endian)
 boundary_byte_order = '<'
 
-# boundary file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis)
-boundary_array_order = 'FORTRAN'
+# boundary file array order ('F' for x-axis fastest, 'C' for z-axis)
+boundary_array_order = 'F'
 
 # offset of boundary in respect to the data (None means 0-offset) (experimental)
 boundary_offset = None
@@ -199,7 +205,7 @@ boundary_offset = None
 # Note: These ids can be all or a subset of boundary ids in the hierarchy 
 # pickle, but there shouldn't be any id that's not in the hierarchy pickle
 #in_boundary_ids = [2,3,5]       # individual ids, single file
-in_boundary_ids = range(2,64)  # range of ids, single file
+in_boundary_ids = list(range(2,64))  # range of ids, single file
 #in_boundary_ids = None         # all segments are to be used, single file
 #in_boundary_ids = [[2,3], 4, 5, 6]  #  2 and 3 taken together, single file
 
@@ -406,14 +412,14 @@ def is_multi_boundaries():
     """
     Returns True if maultiple boundaries files are given.
     """
-    if isinstance(boundary_file_name, str):
+    if isinstance(boundary_file_name, basestring):
         return False
     elif isinstance(boundary_file_name, tuple) \
             or isinstance(boundary_file_name, list):
         return True
     else:
-        raise ValueError, "boundary_file_name has to be aither a string (one " \
-              + "boundary file) or a tuple (multiple boundary files)."    
+        raise ValueError("boundary_file_name has to be aither a string (one " \
+              + "boundary file) or a tuple (multiple boundary files).")    
 
 def read_single_boundaries(boundary_ids):
     """
@@ -650,7 +656,7 @@ def write_cluster_results(multi_cluster, multi_cluster_name, segments, bound,
 
     # distance file names and times
     header.append("# Distance files:")
-    for file_name in distance_files.values():
+    for file_name in list(distance_files.values()):
         try:
             file_time = time.asctime(
                 time.localtime(os.path.getmtime(file_name)))
@@ -842,7 +848,7 @@ def write_boundary_cluster_table(file_, multi_cluster, bound, contacts):
     # append connection ids
     table_head[0] += ' Connection ids'
     table_head[1] += '              '
-    for (id_, line_index) in zip(bound.ids, range(len(results_tab))):
+    for (id_, line_index) in zip(bound.ids, list(range(len(results_tab)))):
         conn_ids = numpy.array2string(contacts.findSegments(boundaryIds=id_,
                                                             nBoundary=1))
         results_tab[line_index] = results_tab[line_index] + '   ' + conn_ids
@@ -895,7 +901,7 @@ def write_connection_cluster_table(file_, multi_cluster, conn, contacts):
     # append boundary ids
     table_head[0] += ' Boundary ids'
     table_head[1] += '            '
-    for (id_, line_index) in zip(conn.ids, range(len(results_tab))):
+    for (id_, line_index) in zip(conn.ids, list(range(len(results_tab)))):
         conn_ids = numpy.array2string(contacts.findBoundaries(segmentIds=id_,
                                                               nSegment=1))
         results_tab[line_index] = results_tab[line_index] + '   ' + conn_ids

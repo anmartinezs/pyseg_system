@@ -86,70 +86,70 @@ if ana_shell_thick is not None:
 
 ########## Print initial message
 
-print 'Bivariate second order analysis for a ListTomoParticles.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput Pickle file 1: ' + str(in_pkl_1)
-print '\tInput Pickle file 1: ' + str(in_pkl_2)
-print '\tParticle referece surface file: ' + str(in_vtp)
-print '\tOrganization analysis settings: '
+print('Bivariate second order analysis for a ListTomoParticles.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput Pickle file 1: ' + str(in_pkl_1))
+print('\tInput Pickle file 1: ' + str(in_pkl_2))
+print('\tParticle referece surface file: ' + str(in_vtp))
+print('\tOrganization analysis settings: ')
 if in_mat_tomos is None:
-    print '\t\t-Range of radius: ' + str(ana_rg) + ' nm'
-    print '\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels'
+    print('\t\t-Range of radius: ' + str(ana_rg) + ' nm')
+    print('\t\t-Range of radius: ' + str(ana_rg_v) + ' voxels')
     if ana_shell_thick is None:
-        print '\t\t-Spherical neighborhood'
+        print('\t\t-Spherical neighborhood')
     else:
-        print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm'
-        print '\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels'
-    print '\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter)
-    print '\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter)
+        print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick) + ' nm')
+        print('\t\t-Shell neighborhood with thickness: ' + str(ana_shell_thick_v) + ' voxels')
+    print('\t\t-Convergence number of samples for stochastic volume estimations: ' + str(ana_conv_iter))
+    print('\t\t-Maximum number of samples for stochastic volume estimations: ' + str(ana_max_iter))
     if ana_npr is None:
-        print '\t\t-Number of processors: Auto'
+        print('\t\t-Number of processors: Auto')
     else:
-        print '\t\t-Number of processors: ' + str(ana_npr)
+        print('\t\t-Number of processors: ' + str(ana_npr))
 else:
-    print '\tDensity ratio by tomograms dictionary pickled from file: ' + in_mat_tomos
-print '\tRandom model settings (CSRV):'
+    print('\tDensity ratio by tomograms dictionary pickled from file: ' + in_mat_tomos)
+print('\tRandom model settings (CSRV):')
 if rnd_bi:
-    print '\t\t-Double patterns random.'
+    print('\t\t-Double patterns random.')
 else:
-    print '\t\t-Single patterns random.'
+    print('\t\t-Single patterns random.')
 if in_mat_sims is None:
-    print '\t\t-Number of instances: ' + str(rnd_n)
+    print('\t\t-Number of instances: ' + str(rnd_n))
 else:
-    print '\tSimulation instances for density ratio pickled from file: ' + in_mat_sims
+    print('\tSimulation instances for density ratio pickled from file: ' + in_mat_sims)
 if rnd_conf_mean:
-    print '\t\t-N sigmas for Gaussian confidence interval: ' + str(rnd_conf_val)
+    print('\t\t-N sigmas for Gaussian confidence interval: ' + str(rnd_conf_val))
 else:
-    print '\t\t-Percentile for the generic confidence interval: ' + str(rnd_conf_val) + ' %'
+    print('\t\t-Percentile for the generic confidence interval: ' + str(rnd_conf_val) + ' %')
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print '\t\t-Colormap: ' + str(pt_cmap)
-print '\t\t-X-axis range: ' + str(pt_xrange)
-print '\t\t-Y-axis range: ' + str(pt_yrange)
-print ''
+    print('\tPlotting settings: ')
+print('\t\t-Colormap: ' + str(pt_cmap))
+print('\t\t-X-axis range: ' + str(pt_xrange))
+print('\t\t-Y-axis range: ' + str(pt_yrange))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mat_tomos, mat_sims = None, None
 den_cte = 1e6
 
-print '\tUnpickling input list of tomograms...'
+print('\tUnpickling input list of tomograms...')
 try:
     tomos_list_1, tomos_list_2 = unpickle_obj(in_pkl_1), unpickle_obj(in_pkl_2)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input Pickle file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input Pickle file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tComputing densities by tomogram for list 1...'
+print('\tComputing densities by tomogram for list 1...')
 gl_tomos_1 = tomos_list_1.densities_by_tomos()
 gl_tomos_skeys_1, gl_tomos_svalues_1 = sort_dict(gl_tomos_1, gl_tomos_1, reverse=True)
 color_tomos_1, tomo_lbls_1 = dict(), dict()
@@ -162,7 +162,7 @@ for i, key in enumerate(gl_tomos_skeys_1):
         pass
     color_tomos_1[key] = pt_cmap(1.*i/len(gl_tomos_1))
     tomo_lbls_1[key] = tomo_lbl
-    print '\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl)
+    print('\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl))
 plt.figure()
 plt.title('Density by tomograms for list 1')
 plt.ylabel('Density (x' + str(den_cte) + ')')
@@ -184,7 +184,7 @@ with open(out_dir + '/' + out_stem + '_den_tomos_1.pkl', "wb") as fl:
     pickle.dump(gl_tomos_1, fl)
     fl.close()
 
-print '\tComputing densities by tomogram for list 2...'
+print('\tComputing densities by tomogram for list 2...')
 gl_tomos_2 = tomos_list_2.densities_by_tomos()
 gl_tomos_skeys_2, gl_tomos_svalues_2 = sort_dict(gl_tomos_2, gl_tomos_2, reverse=True)
 color_tomos_2, tomo_lbls_2 = dict(), dict()
@@ -197,7 +197,7 @@ for i, key in enumerate(gl_tomos_skeys_2):
         pass
     color_tomos_2[key] = pt_cmap(1.*i/len(gl_tomos_2))
     tomo_lbls_2[key] = tomo_lbl
-    print '\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl)
+    print('\t\t-Tomogram ' + str(i+1) + ': ' + str(tomo_lbl))
 plt.figure()
 plt.title('Density by tomograms')
 plt.ylabel('Density (x' + str(den_cte) + ')')
@@ -220,7 +220,7 @@ with open(out_dir + '/' + out_stem + '_den_tomos_2.pkl', "wb") as fl:
     fl.close()
 
 if in_mat_tomos is None:
-    print '\tComputing organization by list...'
+    print('\tComputing organization by list...')
     mat_tomos = tomos_list_1.compute_bi_2nd_order_by_tomos(tomos_list_2, distances=ana_rg_v,
                                                            thick=ana_shell_thick_v, border=ana_border,
                                                            conv_iter=ana_conv_iter, max_iter=ana_max_iter,
@@ -232,19 +232,19 @@ if in_mat_tomos is None:
 if in_mat_sims is None:
     in_model = ModelCSRV
     out_model = out_dir + '/' + out_stem + '_model_tomo.pkl'
-    print '\tPickling an instance of the mode in:' + out_model
+    print('\tPickling an instance of the mode in:' + out_model)
     try:
         part_vtp = disperse_io.load_poly(in_vtp)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     hold_tomo = tomos_list_2.get_tomo_by_key(gl_tomos_skeys_2[0])
     ex_model = in_model(hold_tomo.get_voi(), part_vtp)
     model_tomo = ex_model.gen_instance(hold_tomo.get_num_particles(), 'example_model', mode='center')
     model_tomo.pickle(out_model)
 
-    print '\tComputing simulations with model: ' + str(type(in_model))
+    print('\tComputing simulations with model: ' + str(type(in_model)))
     if rnd_bi:
         n_tomos = len(tomos_list_1.get_tomo_list())
         n_parts_tomo = int(math.ceil(tomos_list_1.get_num_particles() / n_tomos))
@@ -264,11 +264,11 @@ if in_mat_sims is None:
         pickle.dump(mat_sims, fl)
         fl.close()
 
-print '\tPickling organization by lists...'
+print('\tPickling organization by lists...')
 if in_mat_tomos is not None:
     with open(in_mat_tomos, 'r') as pkl:
         mat_tomos = pickle.load(pkl)
-print '\tPickling organization simulations...'
+print('\tPickling organization simulations...')
 if in_mat_sims is not None:
     with open(in_mat_sims, 'r') as pkl:
         mat_sims = pickle.load(pkl)
@@ -276,8 +276,8 @@ if in_mat_sims is not None:
 if (mat_tomos is not None) and (mat_sims is not None):
     gl_den = tomos_list_2.compute_global_density()
     if gl_den <= 0:
-        print 'ERROR: global density for the list is lower or equal to zero so no further statistics can be displayed!'
-        print 'Unsuccesfully terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: global density for the list is lower or equal to zero so no further statistics can be displayed!')
+        print('Unsuccesfully terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     plt.figure()
     plt.title('Univariate 2nd Order')
@@ -317,8 +317,8 @@ if (mat_tomos is not None) and (mat_sims is not None):
         plt.savefig(out_dir + '/' + out_stem + '_org_sim.png')
     plt.close()
 else:
-    print 'ERROR: organization could not be computed'
-    print 'Unsuccessfully terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: organization could not be computed')
+    print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('Successfully terminated. (' + time.strftime("%c") + ')')

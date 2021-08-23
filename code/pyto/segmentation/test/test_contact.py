@@ -3,12 +3,15 @@
 Tests module contact. Need to add more tests.
 
 # Author: Vladan Lucic
-# $Id: test_contact.py 1082 2014-11-17 15:43:11Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1082 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 
 import numpy
@@ -16,7 +19,7 @@ import numpy.testing as np_test
 import scipy
 
 from pyto.segmentation.contact import Contact
-import common as common
+from pyto.segmentation.test import common 
 
 
 class TestContact(np_test.TestCase):
@@ -26,7 +29,7 @@ class TestContact(np_test.TestCase):
     def setUp(self):
         """
         """
-        pass
+        importlib.reload(common) # to avoid problems when running multiple tests
 
     def testGetSetN(self):
         """

@@ -2,10 +2,14 @@
 Test Core classes
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 536 2009-09-12 14:57:31Z vladan $
+# $Id$
 """
 
-__version__ = "$Revision: 536 $"
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-from test_image import TestImage
+__version__ = "$Revision$"
+
+
+from .test_image import TestImage
 

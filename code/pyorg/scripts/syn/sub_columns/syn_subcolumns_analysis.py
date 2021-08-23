@@ -27,7 +27,7 @@ from pyorg.surf.model import ModelCSRV
 from pyorg.surf import ColumnsFinder, gen_layer_model
 from matplotlib import pyplot as plt, rcParams
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -136,61 +136,61 @@ ana_col_rad_v, ana_aln_dst_v = ana_col_rad / ana_res, ana_aln_dst / ana_res
 
 ########## Print initial message
 
-print 'Second order analysis for colocalization to  ListTomoParticles by tomograms.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput analysis STAR file 1: ' + str(in_star_1)
-print '\t\t-Key: ' + key_1
-print '\t\t-List ID: ' + str(l_id1)
-print '\tInput analysis STAR file 2: ' + str(in_star_2)
-print '\t\t-Key: ' + key_2
-print '\t\t-List ID: ' + str(l_id2)
-print '\tInput analysis STAR file 3: ' + str(in_star_3)
-print '\t\t-Key: ' + key_3
-print '\t\t-List ID: ' + str(l_id3)
-print '\tInput analysis STAR file sv: ' + str(in_star_4)
-print '\t\t-Key: ' + key_4
-print '\t\t-List ID: ' + str(l_id4)
-print '\tInput particle shape for simulations: ' + str(in_part)
+print('Second order analysis for colocalization to  ListTomoParticles by tomograms.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput analysis STAR file 1: ' + str(in_star_1))
+print('\t\t-Key: ' + key_1)
+print('\t\t-List ID: ' + str(l_id1))
+print('\tInput analysis STAR file 2: ' + str(in_star_2))
+print('\t\t-Key: ' + key_2)
+print('\t\t-List ID: ' + str(l_id2))
+print('\tInput analysis STAR file 3: ' + str(in_star_3))
+print('\t\t-Key: ' + key_3)
+print('\t\t-List ID: ' + str(l_id3))
+print('\tInput analysis STAR file sv: ' + str(in_star_4))
+print('\t\t-Key: ' + key_4)
+print('\t\t-List ID: ' + str(l_id4))
+print('\tInput particle shape for simulations: ' + str(in_part))
 if in_wspace is not None:
-    print '\tLoad workspace from: ' + in_wspace
+    print('\tLoad workspace from: ' + in_wspace)
 else:
-    print '\tPre-processing: '
+    print('\tPre-processing: ')
     if pre_ssup is not None:
-        print '\t\t-Scale supression: ' + str(pre_ssup) + ' nm'
-print '\tOrganization analysis settings: '
-print '\t\t-Data resolution: ' + str(ana_res) + ' nm/vx '
-print '\t\t-Column radius: ' + str(ana_col_rad) + ' nm / ' + str(ana_col_rad_v) + ' vx'
-print '\t\t-Tether->alignment radii range: ' + str(ana_aln_dst) + ' nm / ' + str(ana_aln_dst_v) + ' vx'
-print '\t\t-Number of neighbors for sub-column in layer 1: ' + str(ana_nn_1)
-print '\t\t-Number of neighbors for sub-column in layer 2: ' + str(ana_nn_2)
-print '\t\t-Number of neighbors for sub-column in layer 3: ' + str(ana_nn_3)
-print '\tP-Value computation setting:'
-print '\t\t-Percentile: ' + str(p_per) + ' %'
-print '\t\t-Number of instances for simulations: ' + str(p_nsims)
+        print('\t\t-Scale supression: ' + str(pre_ssup) + ' nm')
+print('\tOrganization analysis settings: ')
+print('\t\t-Data resolution: ' + str(ana_res) + ' nm/vx ')
+print('\t\t-Column radius: ' + str(ana_col_rad) + ' nm / ' + str(ana_col_rad_v) + ' vx')
+print('\t\t-Tether->alignment radii range: ' + str(ana_aln_dst) + ' nm / ' + str(ana_aln_dst_v) + ' vx')
+print('\t\t-Number of neighbors for sub-column in layer 1: ' + str(ana_nn_1))
+print('\t\t-Number of neighbors for sub-column in layer 2: ' + str(ana_nn_2))
+print('\t\t-Number of neighbors for sub-column in layer 3: ' + str(ana_nn_3))
+print('\tP-Value computation setting:')
+print('\t\t-Percentile: ' + str(p_per) + ' %')
+print('\t\t-Number of instances for simulations: ' + str(p_nsims))
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print ''
+    print('\tPlotting settings: ')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
 out_stem_dir = out_dir + '/' + out_stem
-print '\tCleaning the output dir: ' + out_stem
+print('\tCleaning the output dir: ' + out_stem)
 if os.path.exists(out_stem_dir):
     clean_dir(out_stem_dir)
 else:
     os.makedirs(out_stem_dir)
 
-print '\tLoading input data (only the first entry is loaded)...'
+print('\tLoading input data (only the first entry is loaded)...')
 star_1, star_2, star_3, star_4 = sub.Star(), sub.Star(), sub.Star(), sub.Star()
 try:
     star_1.load(in_star_1)
@@ -198,8 +198,8 @@ try:
     star_3.load(in_star_3)
     star_4.load(in_star_4)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 ltomos_pkl = star_1.get_element('_psPickleFile', l_id1)
 list_1 = unpickle_obj(ltomos_pkl)
@@ -215,17 +215,17 @@ if hasattr(l_id3, '__len__'):
     if not os.path.exists(out_mrg_dir):
         os.makedirs(out_mrg_dir)
     out_mrg = out_mrg_dir + '/list_merged_3.pkl'
-    print '\t\tStoring the merged list in directory: ' + out_mrg
+    print('\t\tStoring the merged list in directory: ' + out_mrg)
     try:
         list_3.pickle(out_mrg)
     except pexceptions.PySegInputError as e:
-        print 'ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: list of tomograms container pickling failed because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     out_app = out_mrg_dir + '_app'
     if not os.path.exists(out_app):
         os.makedirs(out_app)
-    print '\tStoring particles grouped by tomograms in directory: ' + out_app
+    print('\tStoring particles grouped by tomograms in directory: ' + out_app)
     for tomo in list_3.get_tomo_list():
         if tomo.get_num_particles() > 0:
             tomo_fname = os.path.splitext(os.path.split(tomo.get_tomo_fname())[1])[0]
@@ -241,7 +241,7 @@ set_lists.add_list_tomos(list_2, key_2)
 set_lists.add_list_tomos(list_3, key_3)
 set_lists.add_list_tomos(list_4, key_4)
 
-print '\tSet pre-processing...'
+print('\tSet pre-processing...')
 if pre_ssup is not None:
     pre_ssup_v = pre_ssup / ana_res
     set_lists.scale_suppression(pre_ssup_v)
@@ -253,7 +253,7 @@ if pre_min_parts > 0:
     list_4 = set_lists.get_lists_by_key(key_4)
 part_vtp = disperse_io.load_poly(in_part)
 
-print '\tBuilding the dictionaries...'
+print('\tBuilding the dictionaries...')
 short_tkeys_dic = dict()
 tomos_ntet = dict()
 tomos_nc, tomos_den, tomos_denv, tomos_dent = dict(), dict(), dict(), dict()
@@ -264,11 +264,11 @@ tomos_np_l4, tomos_nc_a12, tomos_nc_a12_sim, tomos_nc_a12r, tomos_nc_a12r_sim = 
 tomos_nc_l0, tomos_nc_l1, tomos_nc_l2, tomos_nc_l3 = dict(), dict(), dict(), dict()
 tomos_nc_l10, tomos_nc_l11, tomos_nc_l12, tomos_nc_l13 = dict(), dict(), dict(), dict()
 tomos_nc_sims2, tomos_den_sims2, tomos_occ_sims2, tomos_area_sims2, tomos_acol_sims2 = dict(), dict(), dict(), dict(), dict()
-for tkey, ltomo in zip(list_1.get_tomos().iterkeys(), list_1.get_tomos().itervalues()):
+for tkey, ltomo in zip(iter(list_1.get_tomos().keys()), iter(list_1.get_tomos().values())):
     try:
         ltomo_1, ltomo_2 = list_2.get_tomo_by_key(tkey), list_2.get_tomo_by_key(tkey)
     except KeyError:
-        print 'WARNING: tomogram in layer 1 not in lists for layers 2 or 3!'
+        print('WARNING: tomogram in layer 1 not in lists for layers 2 or 3!')
         continue
     tomos_ntet[tkey] = 0
     tomos_nc[tkey], tomos_den[tkey], tomos_denv[tkey], tot_dent = 0, 0, 0, 0
@@ -285,7 +285,7 @@ for tkey, ltomo in zip(list_1.get_tomos().iterkeys(), list_1.get_tomos().iterval
     tomos_nc_sims2[tkey], tomos_den_sims2[tkey], tomos_occ_sims2[tkey] = list(), list(), list()
     tomos_area_sims2[tkey], tomos_acol_sims2[tkey] = list(), list()
 
-print '\tComputing reference properties...'
+print('\tComputing reference properties...')
 vols = list_1.get_volumes_dict()
 with open(in_tethers_csv, mode='r') as infile:
     reader = csv.reader(infile, delimiter='\t')
@@ -302,36 +302,36 @@ if in_wspace is None:
 
     tomo_count = 0
     part_star_0, part_star_1, part_star_2, part_star_3 = sub.Star(), sub.Star(), sub.Star(), sub.Star()
-    print '\t\t-Tomograms computing loop:'
-    for tkey, ltomo_1 in zip(list_1.get_tomos().iterkeys(), list_1.get_tomos().itervalues()):
+    print('\t\t-Tomograms computing loop:')
+    for tkey, ltomo_1 in zip(iter(list_1.get_tomos().keys()), iter(list_1.get_tomos().values())):
 
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
-        print '\t\t\t+Processing tomogram (' + str(tomo_count + 1) + \
-                  ' of ' + str(len(tomos_nc.keys())) + ') : ' + os.path.split(tkey)[1]
+        print('\t\t\t+Processing tomogram (' + str(tomo_count + 1) + \
+                  ' of ' + str(len(list(tomos_nc.keys()))) + ') : ' + os.path.split(tkey)[1])
         # if os.path.split(tkey)[1] == 'syn_14_24_bin2_rot_crop2_seg.fits':
         #     print 'jol'
         tomo_count += 1
         ltomo_2, ltomo_3 = list_2.get_tomo_by_key(tkey), list_3.get_tomo_by_key(tkey)
         ltomo_4 = list_4.get_tomo_by_key(tkey)
         if (ltomo_1.get_num_particles() <= 0) or (ltomo_2.get_num_particles() <= 0) or (ltomo_3.get_num_particles() <= 0):
-            print 'WARNING: tomogram with an empty layer, skipping...'
+            print('WARNING: tomogram with an empty layer, skipping...')
             continue
 
-        print '\t\t\t\t-Computing columns...'
+        print('\t\t\t\t-Computing columns...')
         cfinder = ColumnsFinder(ltomo_1, ltomo_2, ltomo_3, ana_col_rad_v, ana_aln_dst_v,
                                     nn_1=ana_nn_1, nn_2=ana_nn_2, nn_3=ana_nn_3)
 
-        print '\tUpdating column particles STAR files...'
+        print('\tUpdating column particles STAR files...')
         cfinder.add_columns_to_star(part_star_0, tkey, layer=None)
         cfinder.add_columns_to_star(part_star_1, tkey, layer=1)
         cfinder.add_columns_to_star(part_star_2, tkey, layer=2)
         cfinder.add_columns_to_star(part_star_3, tkey, layer=3)
 
         out_col_vtp = out_tomos_dir + '/' + tkey_short + '_col.vtp'
-        print '\t\t\t\t-Storing the columns built in: ' + out_col_vtp
+        print('\t\t\t\t-Storing the columns built in: ' + out_col_vtp)
         disperse_io.save_vtp(cfinder.gen_columns_vtp(), out_col_vtp)
 
-        print '\t\t\t\t-Count the number of particles...'
+        print('\t\t\t\t-Count the number of particles...')
         tomos_ntet[tkey] = ltomo_4.get_num_particles()
         tomos_nc[tkey] = cfinder.get_num_columns()
         tomos_den[tkey] = cfinder.get_den_columns()
@@ -346,9 +346,9 @@ if in_wspace is None:
         else:
             tomos_occ[tkey] = .0
 
-        print '\t\t\t\t-Simulating columns:'
+        print('\t\t\t\t-Simulating columns:')
         for i in range(p_nsims):
-            print '\t\t\t\t\t+Simulating instance ' + str(i) + ' of ' + str(p_nsims) + '...'
+            print('\t\t\t\t\t+Simulating instance ' + str(i) + ' of ' + str(p_nsims) + '...')
             sim_lyr_2 = gen_layer_model(ltomo_2, part_vtp, ModelCSRV, mode_emb='center')
             sim_lyr_3 = gen_layer_model(ltomo_3, part_vtp, ModelCSRV, mode_emb='center')
             cfinder2 = ColumnsFinder(ltomo_1, sim_lyr_2, sim_lyr_3, ana_col_rad_v, ana_aln_dst_v,
@@ -381,22 +381,22 @@ if in_wspace is None:
             else:
                 tomos_occ_sims2[tkey].append(.0)
 
-    print '\tStoring the particles STAR files for the column layers:'
+    print('\tStoring the particles STAR files for the column layers:')
     hold_out_star = out_tomos_dir + '/' + out_stem + '_col.star'
-    print '\t\t-File: ' + hold_out_star
+    print('\t\t-File: ' + hold_out_star)
     part_star_0.store(hold_out_star)
     hold_out_star = out_tomos_dir + '/' + out_stem + '_lyr1.star'
-    print '\t\t-File: ' + hold_out_star
+    print('\t\t-File: ' + hold_out_star)
     part_star_1.store(hold_out_star)
     hold_out_star = out_tomos_dir + '/' + out_stem + '_lyr2.star'
-    print '\t\t-File: ' + hold_out_star
+    print('\t\t-File: ' + hold_out_star)
     part_star_2.store(hold_out_star)
     hold_out_star = out_tomos_dir + '/' + out_stem + '_lyr3.star'
-    print '\t\t-File: ' + hold_out_star
+    print('\t\t-File: ' + hold_out_star)
     part_star_3.store(hold_out_star)
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
-    print '\tPickling computation workspace in: ' + out_wspace
+    print('\tPickling computation workspace in: ' + out_wspace)
     wspace = (tomos_nc, tomos_den, tomos_denv, tomos_dent,
               tomos_nc_sims, tomos_den_sims, tomos_denv_sims, tomos_dent_sims,
               tomos_np_l4, tomos_nc_a12, tomos_nc_a12_sim, tomos_nc_a12r, tomos_nc_a12r_sim,
@@ -413,7 +413,7 @@ if in_wspace is None:
 
 else:
 
-    print '\tLoading the workspace: ' + in_wspace
+    print('\tLoading the workspace: ' + in_wspace)
     with open(in_wspace, 'r') as pkl:
         wspace = pickle.load(pkl)
     tomos_nc, tomos_den, tomos_denv, tomos_dent = wspace[0], wspace[1], wspace[2], wspace[3]
@@ -430,10 +430,10 @@ else:
                                                                                            wspace[32], wspace[33], \
                                                                                            wspace[34]
 
-print '\tTOMOGRAMS PLOTTING LOOP: '
+print('\tTOMOGRAMS PLOTTING LOOP: ')
 
-print '\t\t-Plotting the number of columns...'
-for tkey, nc in zip(tomos_nc.iterkeys(), tomos_nc.itervalues()):
+print('\t\t-Plotting the number of columns...')
+for tkey, nc in zip(iter(tomos_nc.keys()), iter(tomos_nc.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Number of sub-columns')
@@ -462,8 +462,8 @@ for tkey, nc in zip(tomos_nc.iterkeys(), tomos_nc.itervalues()):
         plt.savefig(hold_dir + '/nc.png')
     plt.close()
 
-print '\t\t-Plotting columns occupancy...'
-for tkey, den in zip(tomos_occ.iterkeys(), tomos_occ.itervalues()):
+print('\t\t-Plotting columns occupancy...')
+for tkey, den in zip(iter(tomos_occ.keys()), iter(tomos_occ.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('% of columns surface occupancy')
@@ -495,8 +495,8 @@ for tkey, den in zip(tomos_occ.iterkeys(), tomos_occ.itervalues()):
         plt.savefig(hold_dir + '/occ.png')
     plt.close()
 
-print '\t\t-Plotting columns density per synaptic vesicle...'
-for tkey, denv in zip(tomos_denv.iterkeys(), tomos_denv.itervalues()):
+print('\t\t-Plotting columns density per synaptic vesicle...')
+for tkey, denv in zip(iter(tomos_denv.keys()), iter(tomos_denv.values())):
     if len(tomos_denv_sims[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -522,13 +522,13 @@ for tkey, denv in zip(tomos_denv.iterkeys(), tomos_denv.itervalues()):
             plt.savefig(hold_dir + '/denv.png')
         plt.close()
 
-print '\t\t-Plotting box-plots for occupancy...'
+print('\t\t-Plotting box-plots for occupancy...')
 lst = dict().fromkeys(('CTRL', 'STIM'))
-for key in lst.iterkeys():
+for key in lst.keys():
     lst[key] = list()
 plt.figure()
 pd_pvals = None
-for i, tkey in enumerate(tomos_occ.iterkeys()):
+for i, tkey in enumerate(tomos_occ.keys()):
     hold_val = 100. * tomos_occ[tkey]
     tkey_hold = os.path.split(tkey)[1].split('_')
     tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
@@ -537,7 +537,7 @@ for i, tkey in enumerate(tomos_occ.iterkeys()):
             lst['CTRL'].append(hold_val)
         else:
             lst['STIM'].append(hold_val)
-plt.boxplot(lst.values(), showfliers=False, notch=False)
+plt.boxplot(list(lst.values()), showfliers=False, notch=False)
 # plt.grid(True, alpha=0.5)
 plt.ylabel('% of sub-columns surface occupancy')
 plt.xlabel('')
@@ -549,14 +549,14 @@ else:
     plt.savefig(out_tomos_dir + '/occ_ctrl_vs_stim.png', dpi=300)
 plt.close()
 
-print '\t\t-Plotting box-plots for columns surface area...'
+print('\t\t-Plotting box-plots for columns surface area...')
 lst, lst_sim = dict(), dict()
 plt.figure()
 pd_pvals = None
 all_occ = list()
-sort_ids = np.argsort(tomos_area.values())
+sort_ids = np.argsort(list(tomos_area.values()))
 for i, idx in enumerate(sort_ids):
-    tkey = tomos_area.keys()[idx]
+    tkey = list(tomos_area.keys())[idx]
     hold_val = np.asarray(tomos_occ[tkey], dtype=float)
     tkey_hold = os.path.split(tkey)[1].split('_')
     tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
@@ -565,10 +565,10 @@ for i, idx in enumerate(sort_ids):
     lst_sim[i] = list()
     for hold_val_sim in tomos_occ_sims[tkey]:
         lst_sim[i].append(100. * hold_val_sim)
-plt.boxplot(lst_sim.values(), showfliers=False, notch=True, whis=[5, 95])
-plt.plot(np.arange(1, len(lst.values())+1), lst.values(), color='k', marker='*', linestyle='')
+plt.boxplot(list(lst_sim.values()), showfliers=False, notch=True, whis=[5, 95])
+plt.plot(np.arange(1, len(list(lst.values()))+1), list(lst.values()), color='k', marker='*', linestyle='')
 plt.ylim((0, 100))
-x_line = np.linspace(-0.5, len(tomos_occ.keys())+.5, 2)
+x_line = np.linspace(-0.5, len(list(tomos_occ.keys()))+.5, 2)
 plt.plot(x_line, np.asarray(all_occ).mean()*np.ones(shape=len(x_line)), 'k--', linewidth=1)
 # plt.grid(True, alpha=0.5)
 plt.ylabel('% of sub-column surface occupancy')
@@ -580,16 +580,16 @@ else:
     plt.savefig(out_tomos_dir + '/col_area.png', dpi=300)
 plt.close()
 
-print '\t\t-Plotting box-plots for number of sub-columns...'
+print('\t\t-Plotting box-plots for number of sub-columns...')
 lst, lst_sim, count = dict(), dict(), 0
 plt.figure()
 pd_pvals = None
 all_occ = list()
 # sort_ids = np.argsort(tomos_np_l4.values())
-sort_ids = np.argsort(tomos_area.values())
+sort_ids = np.argsort(list(tomos_area.values()))
 for idx in sort_ids:
     # tkey = tomos_np_l4.keys()[idx]
-    tkey = tomos_area.keys()[idx]
+    tkey = list(tomos_area.keys())[idx]
     if True: # tomos_np_l4[tkey] > 0:
         hold_val = np.asarray(tomos_nc[tkey], dtype=float)
         tkey_hold = os.path.split(tkey)[1].split('_')
@@ -599,8 +599,8 @@ for idx in sort_ids:
         for hold_val_sim in tomos_nc_sims[tkey]:
             lst_sim[count].append(hold_val_sim)
         count += 1
-plt.boxplot(lst_sim.values(), showfliers=False, notch=True, whis=[5, 95])
-plt.plot(np.arange(1, len(lst.values())+1), lst.values(), color='k', marker='*', linestyle='')
+plt.boxplot(list(lst_sim.values()), showfliers=False, notch=True, whis=[5, 95])
+plt.plot(np.arange(1, len(list(lst.values()))+1), list(lst.values()), color='k', marker='*', linestyle='')
 plt.grid(True, alpha=0.5, axis='y')
 plt.ylabel('Number of sub-columns')
 plt.xlabel('')
@@ -611,16 +611,16 @@ else:
     plt.savefig(out_tomos_dir + '/box_scol.png', dpi=300)
 plt.close()
 
-print '\t\t-Plotting box-plots for number of sub-columns (v2)...'
+print('\t\t-Plotting box-plots for number of sub-columns (v2)...')
 lst, lst_sim, count = dict(), dict(), 0
 plt.figure()
 pd_pvals = None
 all_occ = list()
 # sort_ids = np.argsort(tomos_np_l4.values())
-sort_ids = np.argsort(tomos_area.values())
+sort_ids = np.argsort(list(tomos_area.values()))
 for idx in sort_ids:
     # tkey = tomos_np_l4.keys()[idx]
-    tkey = tomos_area.keys()[idx]
+    tkey = list(tomos_area.keys())[idx]
     if True: # tomos_np_l4[tkey] > 0:
         hold_val = np.asarray(tomos_nc[tkey], dtype=float)
         tkey_hold = os.path.split(tkey)[1].split('_')
@@ -630,8 +630,8 @@ for idx in sort_ids:
         for hold_val_sim in tomos_nc_sims2[tkey]:
             lst_sim[count].append(hold_val_sim)
         count += 1
-plt.boxplot(lst_sim.values(), showfliers=False, notch=True, whis=[5, 95])
-plt.plot(np.arange(1, len(lst.values())+1), lst.values(), color='k', marker='*', linestyle='')
+plt.boxplot(list(lst_sim.values()), showfliers=False, notch=True, whis=[5, 95])
+plt.plot(np.arange(1, len(list(lst.values()))+1), list(lst.values()), color='k', marker='*', linestyle='')
 plt.grid(True, alpha=0.5, axis='y')
 plt.ylabel('Number of sub-columns')
 plt.xlabel('')
@@ -642,12 +642,12 @@ else:
     plt.savefig(out_tomos_dir + '/box_scol_v2.png', dpi=300)
 plt.close()
 
-print '\tTOTAL PLOTTING: '
+print('\tTOTAL PLOTTING: ')
 
 out_lists_dir = out_stem_dir + '/lists'
 os.makedirs(out_lists_dir)
 
-print '\t\t-Gathering tomogram simulations: '
+print('\t\t-Gathering tomogram simulations: ')
 tot_nc, tot_nc12, tot_nc13, tot_vol, tot_ves, tot_teth = 0, 0, 0, 0, 0, 0
 tot_occ, tot_nc_a12, tot_areas = 0, 0, 0
 ncs_sims = np.zeros(shape=p_nsims, dtype=np.float)
@@ -655,7 +655,7 @@ den_sims = np.zeros(shape=p_nsims, dtype=np.float)
 denv_sims = np.zeros(shape=p_nsims, dtype=np.float)
 dent_sims = np.zeros(shape=p_nsims, dtype=np.float)
 occ_sims = np.zeros(shape=p_nsims, dtype=np.float)
-for tkey, nc_sim in zip(tomos_nc_sims.iterkeys(), tomos_nc_sims.itervalues()):
+for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     for i in range(p_nsims):
         ncs_sims[i] += nc_sim[i]
         occ_sims[i] += (tomos_occ_sims[tkey][i] * tomos_area[tkey])
@@ -680,7 +680,7 @@ for i in range(p_nsims):
     if tot_areas > 0:
         occ_sims[i] = (100. * occ_sims[i]) / tot_areas
 
-print '\t\t-Plotting the number of columns...'
+print('\t\t-Plotting the number of columns...')
 plt.figure()
 plt.ylabel('Number of sub-columns')
 # plt.xlabel('Total columns in the dataset')
@@ -703,7 +703,7 @@ else:
     plt.savefig(hold_dir + '/nc.png')
 plt.close()
 
-print '\t\t-Plotting columns density by synaptic vesicles..'
+print('\t\t-Plotting columns density by synaptic vesicles..')
 tot_denv = tot_nc / tot_ves
 plt.figure()
 plt.ylabel('Sub-column density [Scol/SV]')
@@ -727,7 +727,7 @@ else:
     plt.savefig(hold_dir + '/denv.png')
 plt.close()
 
-print '\t\t-Plotting area occupancy...'
+print('\t\t-Plotting area occupancy...')
 plt.figure()
 plt.ylabel('% of sub-columns surface occupancy')
 # plt.xlabel('Column probability per tether')
@@ -750,12 +750,12 @@ else:
     plt.savefig(hold_dir + '/occ.png')
 plt.close()
 
-print '\tCTRL vs STIM PLOTTING: '
+print('\tCTRL vs STIM PLOTTING: ')
 
 out_cs_dir = out_stem_dir + '/ctrl_vs_stim'
 os.makedirs(out_cs_dir)
 
-print '\t\t-Gathering tomogram simulations: '
+print('\t\t-Gathering tomogram simulations: ')
 tot_ctrl_nc, tot_ctrl_nc12, tot_ctrl_nc13, tot_ctrl_vol, tot_ctrl_ves, tot_ctrl_teth = 0, 0, 0, 0, 0, 0
 tot_stim_nc, tot_stim_nc12, tot_stim_nc13, tot_stim_vol, tot_stim_ves, tot_stim_teth = 0, 0, 0, 0, 0, 0
 tot_ctrl_occ, tot_stim_occ, nc_a12_ctrl, nc_a12_stim, tot_ctrl_areas, tot_stim_areas = 0, 0, 0, 0, 0, 0
@@ -764,7 +764,7 @@ den_ctrl_sims, den_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros
 denv_ctrl_sims, denv_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 dent_ctrl_sims, dent_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 occ_ctrl_sims, occ_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-for tkey, nc_sim in zip(tomos_nc_sims.iterkeys(), tomos_nc_sims.itervalues()):
+for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     tkey_hold = os.path.split(tkey)[1].split('_')
     tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
     if tkey_stem in ctrl_stems:
@@ -815,7 +815,7 @@ for i in range(p_nsims):
     if tot_stim_occ > 0:
         occ_stim_sims[i] = (100. * occ_stim_sims[i]) / tot_stim_areas
 
-print '\t\t-Plotting the number of columns...'
+print('\t\t-Plotting the number of columns...')
 plt.figure()
 plt.ylabel('Number of sub-columns')
 plt.bar(1, tot_ctrl_nc, BAR_WIDTH, color='blue', linewidth=2)
@@ -844,7 +844,7 @@ else:
     plt.savefig(hold_dir + '/nc.png')
 plt.close()
 
-print '\t\t-Plotting columns density..'
+print('\t\t-Plotting columns density..')
 tot_ctrl_den, tot_stim_den = float(tot_ctrl_nc)/tot_ctrl_vol, float(tot_stim_nc)/tot_stim_vol
 plt.figure()
 plt.ylabel('Sub-column density [Scol/nm$^3$]')
@@ -875,7 +875,7 @@ else:
     plt.savefig(hold_dir + '/den.png')
 plt.close()
 
-print '\t\t-Plotting columns density by synaptic vesicles..'
+print('\t\t-Plotting columns density by synaptic vesicles..')
 tot_ctrl_denv, tot_stim_denv = float(tot_ctrl_nc)/tot_ctrl_ves, float(tot_stim_nc)/tot_stim_ves
 plt.figure()
 plt.ylabel('Sub-column density [Scol/SV]')
@@ -905,7 +905,7 @@ else:
     plt.savefig(hold_dir + '/denv.png')
 plt.close()
 
-print '\t\t-Plotting columns density by tethers..'
+print('\t\t-Plotting columns density by tethers..')
 tot_ctrl_dent, tot_stim_dent = float(tot_ctrl_nc)/tot_ctrl_teth, float(tot_stim_nc)/tot_stim_teth
 plt.figure()
 plt.ylabel('Sub-column density [Scol/Tether]')
@@ -935,7 +935,7 @@ else:
     plt.savefig(hold_dir + '/dent.png')
 plt.close()
 
-print '\t\t-Plotting columns density by tethers..'
+print('\t\t-Plotting columns density by tethers..')
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax2 = ax.twinx()
@@ -957,7 +957,7 @@ else:
     plt.savefig(hold_dir + '/denv_vs_dent_ctrl_vs_stim.png')
 plt.close()
 
-print '\t\t-Plotting % of surface occupancy..'
+print('\t\t-Plotting % of surface occupancy..')
 plt.figure()
 plt.ylabel('% of sub-columns surface occupancy')
 plt.bar(1, tot_ctrl_occ, BAR_WIDTH, color='blue', linewidth=2)

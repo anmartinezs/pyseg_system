@@ -4,20 +4,15 @@ Contains class DistanceTo for calculations of distance between segments of
 a segmented images and given region(s)
 
 
-Basic usage:
-
-# caclulate
-dist = DistanceTo(segments=segment_object)
-dist.getDistance(regionIds, regions)
-
-# show results
-dist.distance
-
 # Author: Vladan Lucic (MPI for Biochemistry)
-# $Id: distance_to.py 914 2012-10-25 16:15:17Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from builtins import zip
+from builtins import range
 
-__version__ = "$Revision: 914 $"
+__version__ = "$Revision$"
 
 
 import sys
@@ -27,11 +22,27 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from features import Features
+from .features import Features
 
 
 class DistanceTo(Features):
     """
+    Distance from segments to specified region(s)
+
+    Important attributes:
+
+      - distance: distance for each segment
+      - closestRegion: id of the closest region, for each segment
+
+    Basic usage:
+
+      # caclulate
+      dist = DistanceTo(segments=segment_object)
+      dist.getDistance(regionIds, regions)
+    
+      # show results
+      dist.distance
+      dist.closestRegion
 
     Note: unlike other classes that inherit from Features, the data of this
     class is internally storred in a compact form. That is, elements of 
@@ -39,7 +50,10 @@ class DistanceTo(Features):
     are compact. On the other hand, self.distance is dynamically generated 
     (from self._distance) and is indexed by ids (self.distance[i] is the 
     distance for the i-th segment). Important consequence is that changing 
-    self.ids effectively changes data (self.distance). 
+    self.ids effectively changes data (self.distance). The same is true for 
+    self.closestRegion and self._closestRegion.
+
+    
     """
     
     #############################################################
@@ -267,8 +281,9 @@ class DistanceTo(Features):
                 self._closestRegion = numpy.asarray(regionIds)[id_pos]
             else:
                 self._distance = all_dist
-                self._closestRegion = \
-                    numpy.zeros(segments.maxId+1, dtype=int) + regionIds
+                self._closestRegion = (
+#                    numpy.zeros(segments.maxId+1, dtype=int) + regionIds
+                    numpy.zeros(len(self.ids), dtype=int) + regionIds)
         else:
             self._distance = None
             self._closestRegion = None
@@ -323,7 +338,7 @@ class DistanceTo(Features):
 
         # extract surfaces if required
         if (surface is not None) and (surface > 0):
-            from segment import Segment
+            from .segment import Segment
             tmp_seg = Segment()
             segments = tmp_seg.makeSurfaces(data=segments, 
                                             size=surface, ids=segmentIds)
@@ -334,7 +349,7 @@ class DistanceTo(Features):
             distances = \
                 numpy.zeros(shape=(len(regionIds), len(segmentIds)), 
                             dtype='float')
-            for reg_id, reg_id_index in zip(regionIds, range(len(regionIds))):
+            for reg_id, reg_id_index in zip(regionIds, list(range(len(regionIds)))):
                 distances[reg_id_index,:] = \
                     cls.getDistanceToRegions(regions=regions, regionIds=reg_id,
                                    segments=segments, segmentIds=segmentIds, 
@@ -355,7 +370,7 @@ class DistanceTo(Features):
         if mode == 'center':
 
             # distances to the segment centers
-            from morphology import Morphology
+            from .morphology import Morphology
             mor = Morphology(segments=segments, ids=segmentIds)
             centers = mor.getCenter(real=False)            
             distances = [dist_array[tuple(centers[id_])] for id_ in segmentIds]

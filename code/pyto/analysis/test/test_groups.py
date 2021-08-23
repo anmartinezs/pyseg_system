@@ -3,10 +3,16 @@
 Tests module analysis.groups.
 
 # Author: Vladan Lucic
-# $Id: test_groups.py 1511 2019-02-01 15:54:40Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision: 1511 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import pickle
@@ -23,7 +29,7 @@ from pyto.analysis.catalog import Catalog
 from pyto.analysis.groups import Groups
 from pyto.analysis.observations import Observations
 import pyto.scene.test.common as scene_cmn
-import common
+from pyto.analysis.test import common
 
 
 # set output
@@ -60,7 +66,7 @@ class TestGroups(np_test.TestCase):
         np_test.assert_equal(groups._c, 3)
         np_test.assert_equal(groups.get('_c', None) is None, True)
 
-        np_test.assert_equal(groups.keys(), ['a', 'b'])
+        np_test.assert_equal(list(groups.keys()), ['a', 'b'])
 
         delattr(groups, 'b')
         np_test.assert_equal(groups.get('b') is None, True)
@@ -225,6 +231,42 @@ class TestGroups(np_test.TestCase):
 
         return groups
 
+    def test_get_indexed_data(self):
+        """
+        Tests get_indexed_data()
+        """
+
+        grs_1 = self.makeInstance()        
+        data = grs_1.indexed_data
+        np_test.assert_equal(
+            data.columns.tolist(), ['group', 'identifiers', 'ids', 'vector'])
+        np_test.assert_equal(
+            data.group.tolist(),
+            8 * ['ga'] + 6 * ['gb'] + 5 * ['gd'])
+        np_test.assert_equal(
+            data.identifiers.unique().tolist(),
+            ['ia1', 'ia3', 'ib1', 'ib3', 'id6'])
+        np_test.assert_equal(
+            data.ids.tolist(),
+            ([0, 2] + list(range(6)) + [0, 2] + list(range(4))
+             + list(range(1,6))) )
+        np_test.assert_equal(
+            data.vector.tolist(),
+            ([1,3] + list(range(1,7)) + [1,3] + list(range(1,5))
+             + list(range(2,7))))
+             
+    def test_get_scalar_data(self):
+        """
+        Tests get_scalar_data()
+        """
+
+        grs_1 = self.makeInstance()        
+        data = grs_1.scalar_data
+        np_test.assert_equal(
+            data.columns.tolist(), ['group', 'identifiers', 'scalar'])
+        np_test.assert_equal(
+            data.scalar.tolist(), [2, 6, 10] +  [2, 4, 6] +  [12])
+            
     def testAddGroups(self):
         """
         Tests addGroups()
@@ -323,7 +365,7 @@ class TestGroups(np_test.TestCase):
         desired.remove('gc')
         np_test.assert_equal(group_names, desired)
         all_idents = set([])
-        for group in groups_obj.values():
+        for group in list(groups_obj.values()):
             all_idents.update(set(group.identifiers))
         np_test.assert_equal(identifiers, all_idents)
 
@@ -455,7 +497,7 @@ class TestGroups(np_test.TestCase):
                        name='vector_2')
 
         groups.addData(source=groups_2, names=['vector_2'])
-        for g_name in groups.keys():
+        for g_name in list(groups.keys()):
             np_test.assert_equal('vector_2' in groups[g_name].properties, True)
             np_test.assert_equal('vector_2' in groups[g_name].indexed, True)
             for ident in groups[g_name].identifiers:
@@ -467,7 +509,7 @@ class TestGroups(np_test.TestCase):
 
         # change names
         groups.addData(source=groups_2, names={'vector_2' : 'vector_3'})
-        for g_name in groups.keys():
+        for g_name in list(groups.keys()):
             np_test.assert_equal('vector_3' in groups[g_name].properties, True)
             np_test.assert_equal('vector_3' in groups[g_name].indexed, True)
             for ident in groups[g_name].identifiers:
@@ -627,9 +669,10 @@ class TestGroups(np_test.TestCase):
         np_test.assert_equal(obs.getValue('gb', 'ids'), numpy.arange(1,7)) 
         np_test.assert_equal(obs.getValue('gc', 'ids'), numpy.array([])) 
         np_test.assert_equal(obs.getValue('gd', 'ids'), numpy.arange(1,6)) 
-        np_test.assert_equal(obs.getValue('ga', 'idNames'), 
-                              ['ia1_0', 'ia1_2',
-                        'ia3_0', 'ia3_1', 'ia3_2', 'ia3_3', 'ia3_4', 'ia3_5']) 
+        np_test.assert_equal(
+            obs.getValue('ga', 'idNames'), 
+            ['ia1_0', 'ia1_2',
+             'ia3_0', 'ia3_1', 'ia3_2', 'ia3_3', 'ia3_4', 'ia3_5']) 
         np_test.assert_equal(obs.getValue('gb', 'idNames'), 
                        ['ib1_0', 'ib1_2', 'ib3_0', 'ib3_1', 'ib3_2', 'ib3_3'])
         np_test.assert_equal(obs.getValue('gc', 'idNames'), [])        
@@ -853,9 +896,9 @@ class TestGroups(np_test.TestCase):
         except AssertionError:
             np_test.assert_almost_equal(stats.getValue('gc', 'std'), numpy.nan)
         np_test.assert_equal(stats.getValue('gc', 'n'), 0)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.getValue('gc', 'testValue')), True)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.getValue('gc', 'confidence')), True)
         np_test.assert_equal(stats.getValue('gd', 'data'), [12])
         np_test.assert_equal(stats.getValue('gd', 'mean'), 12)
@@ -1035,11 +1078,11 @@ class TestGroups(np_test.TestCase):
         np_test.assert_almost_equal(
             stats.getValue(identifier='ga', name='histogram'), [1, 1, 1])
         np_test.assert_almost_equal(
-            stats.getValue(identifier='ga', name='fraction'), 1 / 3.)
+            stats.getValue(identifier='ga', name='fraction'), 1/3.)
         np_test.assert_almost_equal(
             stats.getValue(identifier='gb', name='histogram'), [0, 1, 2])
         np_test.assert_almost_equal(
-            stats.getValue(identifier='gb', name='fraction'), 2 / 3.)
+            stats.getValue(identifier='gb', name='fraction'), 2/3.)
         np_test.assert_almost_equal(
             stats.getValue(identifier='gb', name='probability'), 
             [0., 1/3., 2/3.])
@@ -1057,11 +1100,11 @@ class TestGroups(np_test.TestCase):
         np_test.assert_almost_equal(
             stats.getValue(identifier='ga', name='data'), desired_ga)
         np_test.assert_almost_equal(
-            stats.getValue(identifier='ga', name='mean'), 13 / 45.)
+            stats.getValue(identifier='ga', name='mean'), 13/45.)
         np_test.assert_almost_equal(
             stats.getValue(identifier='gb', name='data'), desired_gb)
         np_test.assert_almost_equal(
-            stats.getValue(identifier='gb', name='mean'), 0.2 / 3.) 
+            stats.getValue(identifier='gb', name='mean'), 0.2/3.)
         np_test.assert_almost_equal(
             stats.getValue(identifier='ga', name='n'), 3)
         np_test.assert_almost_equal(
@@ -1084,11 +1127,11 @@ class TestGroups(np_test.TestCase):
         np_test.assert_almost_equal(
             stats.getValue(identifier='ga', name='data'), [0.4, 1/3., 0.2])
         np_test.assert_almost_equal(
-            stats.getValue(identifier='ga', name='mean'), 14 / 45.)
+            stats.getValue(identifier='ga', name='mean'), 14/45.)
         np_test.assert_almost_equal(
             stats.getValue(identifier='gb', name='data'), [0.4, 0.2, 0])
         np_test.assert_almost_equal(
-            stats.getValue(identifier='gb', name='mean'), 0.6 / 3.) 
+            stats.getValue(identifier='gb', name='mean'), 0.6/3.) 
            
     def testIsTransposable(self):
         """
@@ -1110,7 +1153,7 @@ class TestGroups(np_test.TestCase):
 
         # make instance and add references
         sym = self.makeSymmetricalInstance()
-        for group_name, group in sym.items():
+        for group_name, group in list(sym.items()):
             ref_g_a = ['gb', 'ga', 'ga']
             ref_g_b = ['gb', 'gb', 'ga']
             if group_name == 'ga':
@@ -1129,12 +1172,12 @@ class TestGroups(np_test.TestCase):
 
         # check group names, identifiers, properties and indexed
         np_test.assert_equal(set(transp.keys()), set(sym['gb'].identifiers))
-        for t_name, t_group in transp.items():
+        for t_name, t_group in list(transp.items()):
             np_test.assert_equal(t_group.properties, 
                               set(['scalar', 'ids', 'vector', 'identifiers', 
                                    'reference', 'referenceGroup']))
             np_test.assert_equal(t_group.indexed, set(['ids', 'vector']))
-            np_test.assert_equal(t_group.identifiers, sym.keys())
+            np_test.assert_equal(t_group.identifiers, list(sym.keys()))
 
         # check scalar
         np_test.assert_equal(
@@ -1205,7 +1248,7 @@ class TestGroups(np_test.TestCase):
         transp = sym.transpose()
         tt = transp.transpose()
         np_test.assert_equal(set(tt.keys()), set(sym.keys()))
-        for tt_name, tt_group in tt.items():
+        for tt_name, tt_group in list(tt.items()):
             np_test.assert_equal(tt_group.properties, sym[tt_name].properties)
             np_test.assert_equal(tt_group.indexed, sym[tt_name].indexed)
             np_test.assert_equal(tt_group.identifiers, sym[tt_name].identifiers)
@@ -1224,7 +1267,7 @@ class TestGroups(np_test.TestCase):
         # between 'experiments', string reference
         stats = sym.doStats(name='vector', test='t', between='experiments',
                             reference='i3', out=out)
-        for g_name, groups in stats.items():
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['identifiers', 'data', 'mean', 'std', 'n',  'sem', 
@@ -1273,10 +1316,10 @@ class TestGroups(np_test.TestCase):
             stats.ga.getValue(identifier='i5', property='referenceGroup'), 'ga')
         np_test.assert_almost_equal(
             stats.gb.getValue(identifier='i1', property='data'), [1,3])
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.gb.getValue(identifier='i1', 
                                           property='testValue')), True)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.gb.getValue(identifier='i1', 
                                           property='confidence')), True)
         np_test.assert_equal(
@@ -1297,10 +1340,10 @@ class TestGroups(np_test.TestCase):
             stats.gb.getValue(identifier='i3', property='referenceGroup'), 'gb')
         np_test.assert_almost_equal(
             stats.gb.getValue(identifier='i5', property='data'), [1,2,3,4])
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.gb.getValue(identifier='i5', 
                                           property='testValue')), True)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(stats.gb.getValue(identifier='i5', 
                                           property='confidence')), True)
         np_test.assert_equal(
@@ -1321,7 +1364,7 @@ class TestGroups(np_test.TestCase):
         stats = sym.doStats(name='vector', test='t', between='experiments',
                             reference='i3', out=out, 
                             groups=['ga'], identifiers=['i3', 'i5'])
-        np_test.assert_equal(stats.keys(), ['ga'])
+        np_test.assert_equal(list(stats.keys()), ['ga'])
         np_test.assert_equal(stats.ga.identifiers, ['i3', 'i5'])
         np_test.assert_almost_equal(
             stats.ga.getValue(identifier='i3', property='data'), [1,2,3,4,5,6]) 
@@ -1333,7 +1376,7 @@ class TestGroups(np_test.TestCase):
                             reference='i3', out=out, 
                             groups=['ga', 'gb'], identifiers=['i3', 'i5'])
         np_test.assert_equal(set(stats.keys()), set(['ga', 'gb']))
-        for stats_group in stats.values():
+        for stats_group in list(stats.values()):
             np_test.assert_equal(stats_group.identifiers, ['i3', 'i5'])
         np_test.assert_almost_equal(
             stats.ga.getValue(identifier='i3', property='data'), [1,2,3,4,5,6]) 
@@ -1347,8 +1390,8 @@ class TestGroups(np_test.TestCase):
         # between 'experiments', string reference
         stats = sym.doStats(name='vector', test='t', between='experiments',
                             reference='i3', groups=['ga'], out=out)
-        np_test.assert_equal(stats.keys(), ['ga'])
-        for g_name, groups in stats.items():
+        np_test.assert_equal(list(stats.keys()), ['ga'])
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['identifiers', 'data', 'mean', 'std', 'n',  'sem', 
@@ -1557,7 +1600,7 @@ class TestGroups(np_test.TestCase):
         # between 'groups', string reference
         stats = sym.doStats(name='vector', test='kruskal', between='groups',
                             reference='ga', out=out)
-        for g_name, groups in stats.items():
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['identifiers', 'data', 'mean', 'std', 'n',  'sem', 
@@ -1649,7 +1692,7 @@ class TestGroups(np_test.TestCase):
         stats = sym.doStats(name='vector', test='t', between='groups',
                             reference='ga', out=out, 
                             groups=['ga'], identifiers=['i3', 'i5'])
-        np_test.assert_equal(stats.keys(), ['ga'])
+        np_test.assert_equal(list(stats.keys()), ['ga'])
         np_test.assert_equal(stats.ga.identifiers, ['i3', 'i5'])
         np_test.assert_almost_equal(
             stats.ga.getValue(identifier='i3', property='data'), [1,2,3,4,5,6]) 
@@ -1661,7 +1704,7 @@ class TestGroups(np_test.TestCase):
                             reference='ga', out=out, 
                             groups=['ga', 'gb'], identifiers=['i3', 'i5'])
         np_test.assert_equal(set(stats.keys()), set(['ga', 'gb']))
-        for stats_group in stats.values():
+        for stats_group in list(stats.values()):
             np_test.assert_equal(stats_group.identifiers, ['i3', 'i5'])
         np_test.assert_almost_equal(
             stats.ga.getValue(identifier='i3', property='data'), [1,2,3,4,5,6]) 
@@ -1805,7 +1848,7 @@ class TestGroups(np_test.TestCase):
         stats = sym.doStats(name='vector', test='chi2', bins=[0,2,10], 
                             fraction=1, between='experiments', 
                             reference='i3', out=out)
-        for g_name, groups in stats.items():
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['identifiers', 'data', 'histogram', 'probability', 'ids',
@@ -1849,7 +1892,7 @@ class TestGroups(np_test.TestCase):
 
         # string reference
         stats = sym.countHistogram(test='chi2', reference='i3', out=out)
-        for g_name, group in stats.items():
+        for g_name, group in list(stats.items()):
             np_test.assert_equal(
                 stats[g_name].properties,
                 set(['identifiers', 'count',
@@ -1984,7 +2027,7 @@ class TestGroups(np_test.TestCase):
 
         # test metadata
         np_test.assert_equal(set(joined.keys()), set(['orig', 'orig_p']))
-        for g_name, groups in joined.items():
+        for g_name, groups in list(joined.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['idNames', 'ids', 'vector', 'identifiers']))
@@ -2032,7 +2075,7 @@ class TestGroups(np_test.TestCase):
 
         # test metadata
         np_test.assert_equal(set(stats.keys()), set(['orig', 'orig_p']))
-        for g_name, groups in stats.items():
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['identifiers', 'data', 'mean', 'std', 'n',  'sem', 
@@ -2067,7 +2110,7 @@ class TestGroups(np_test.TestCase):
             list=g_list, listNames=['orig', 'orig_p'], name='vector', 
             groups=['gb'], mode='join', test='t', between='groups', 
             reference={'orig':'gb', 'orig_p':'gb'})
-        for g_name, groups in stats.items():
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(groups.testSymbol, ['t']) 
             np_test.assert_equal(
                 set(groups.identifiers), set(['gb']))
@@ -2089,7 +2132,7 @@ class TestGroups(np_test.TestCase):
             
         # test metadata
         np_test.assert_equal(set(stats.keys()), set(['orig', 'orig_p']))
-        for g_name, groups in stats.items():
+        for g_name, groups in list(stats.items()):
             np_test.assert_equal(
                 groups.properties,
                 set(['identifiers', 'data', 'mean', 'std', 'n',  'sem', 
@@ -2165,7 +2208,7 @@ class TestGroups(np_test.TestCase):
         
         corr = gs.doCorrelation(xName='vector', yName='vector_2', 
                                 test='r', mode=None, out=out)
-        for g_name, group in gs.items():
+        for g_name, group in list(gs.items()):
             co = corr[g_name]
             new_props = set(['testValue', 'testSymbol', 'confidence'])
             np_test.assert_equal(co.properties.issuperset(new_props), True)
@@ -2183,13 +2226,13 @@ class TestGroups(np_test.TestCase):
         for ident in ['ia1', 'ia3']:
             np_test.assert_almost_equal(
                 corr.ga.getValue(identifier=ident, property='testValue'), 1)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(corr.ga.getValue(identifier='ia5', 
                                          property='testValue')), True)
         for ident in ['ib1', 'ib3']:
             np_test.assert_almost_equal(
                 corr.gb.getValue(identifier=ident, property='testValue'), 1)
-        np_test.assert_almost_equal(
+        np_test.assert_equal(
             numpy.isnan(corr.gb.getValue(identifier='ib2', 
                                          property='testValue')), True)
         np_test.assert_almost_equal(corr.gc.identifiers, numpy.array([]))
@@ -2255,7 +2298,7 @@ class TestGroups(np_test.TestCase):
         gs = self.makeInstance()
         gs.ge = Observations()
         gs.ge.identifiers = ['ie1', 'ie2']
-        gs.ge.ids = [range(4), range(3)]
+        gs.ge.ids = [list(range(4)), list(range(3))]
         gs.ge.vector = [numpy.array([1, 0, 0, 1]), numpy.array([0, 0, 1])]
 
         gs.getNPositive(name='vector', n_name='n_positive')

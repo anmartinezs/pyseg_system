@@ -30,7 +30,7 @@ class RadialAvg3D(object):
 
         # Input parsing
         if (not hasattr(shape, '__len__')) or (len(shape) != 3):
-            print 'ERROR msg'
+            print('ERROR msg')
         if axis == 'x':
             self.__axis_i = 0
         elif axis == 'y':
@@ -38,7 +38,7 @@ class RadialAvg3D(object):
         elif axis == 'z':
             self.__axis_i = 2
         else:
-            print 'ERROR msg'
+            print('ERROR msg')
 
         # Precompute kernels for the radial averaging
         img_c = np.round(.5 * np.asarray(shape)).astype(np.int)
@@ -90,11 +90,11 @@ class RadialAvg3D(object):
 
         # Input parsing
         if not isinstance(vol, np.ndarray):
-            print 'ERROR msg'
+            print('ERROR msg')
         if mask is None:
             mask = np.ones(shape=vol.shape, dtype=vol.dtype)
         elif (vol.shape[0] != mask.shape[0]) or (vol.shape[1] != mask.shape[1]) or (vol.shape[2] != mask.shape[2]):
-            print 'ERROR msg'
+            print('ERROR msg')
         if rg_h is None:
             if self.__axis_i == 0:
                 ids_h = np.arange(vol.shape[0])

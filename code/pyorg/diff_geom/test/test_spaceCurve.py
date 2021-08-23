@@ -84,26 +84,26 @@ class TestSpaceCurve(TestCase):
             e_t_uk = curve.get_total_uk()
             p_t_uk = (k*curve.get_ds()).sum()
             diff_uk = math.fabs(e_t_uk - p_t_uk)
-            print '\tEstimated total unsigned curvature: ' + str(e_t_uk) + ' rad'
-            print '\tParametric total unsigned curvature: ' + str(p_t_uk) + ' rad'
+            print('\tEstimated total unsigned curvature: ' + str(e_t_uk) + ' rad')
+            print('\tParametric total unsigned curvature: ' + str(p_t_uk) + ' rad')
             self.assertLess(diff_uk, EPS, 'Total unsigned curvature error bigger than ' + str(EPS))
             e_t_k = curve.get_total_k()
             p_t_k = (ks*curve.get_ds()).sum()
             diff_k = math.fabs(e_t_k - p_t_k)
-            print '\tEstimated total signed curvature: ' + str(e_t_k) + ' rad'
-            print '\tParametric total signed curvature: ' + str(p_t_k) + ' rad'
+            print('\tEstimated total signed curvature: ' + str(e_t_k) + ' rad')
+            print('\tParametric total signed curvature: ' + str(p_t_k) + ' rad')
             self.assertLess(diff_k, EPS, 'Total signed curvature error bigger than ' + str(EPS))
             e_t_ut = curve.get_total_ut()
             p_t_ut = (tau*curve.get_ds()).sum()
             diff_ut = math.fabs(e_t_ut - p_t_ut)
-            print '\tEstimated total unsigned torsion: ' + str(e_t_ut) + ' rad'
-            print '\tParametric total unsigned torsion: ' + str(p_t_ut) + ' rad'
+            print('\tEstimated total unsigned torsion: ' + str(e_t_ut) + ' rad')
+            print('\tParametric total unsigned torsion: ' + str(p_t_ut) + ' rad')
             self.assertLess(diff_ut, EPS, 'Total unsigned torsion error bigger than ' + str(EPS))
             e_t_t = curve.get_total_t()
             p_t_t = (taus*curve.get_ds()).sum()
             diff_t = math.fabs(e_t_t - p_t_t)
-            print '\tEstimated total signed torsion: ' + str(e_t_t) + ' rad'
-            print '\tParametric total signed torsion: ' + str(p_t_t) + ' rad'
+            print('\tEstimated total signed torsion: ' + str(e_t_t) + ' rad')
+            print('\tParametric total signed torsion: ' + str(p_t_t) + ' rad')
             self.assertLess(diff_t, EPS, 'Total signed torsion error bigger than ' + str(EPS))
 
         else:
@@ -132,13 +132,13 @@ class TestSpaceCurve(TestCase):
 
             plt.show(block=True)
 
-            print '\tEstimated total unsigned curvature: ' + str(curve.get_total_uk()) + ' rad'
-            print '\tEstimated total ks: ' + str(curve.get_total_k()) + ' rad'
-            print '\tEstimated total unsigned torsion: ' + str(curve.get_total_ut()) + ' rad'
-            print '\tEstimated total ts: ' + str(curve.get_total_t()) + ' rad'
-            print '\tEstimated normal symmetry: ' + str(curve.get_normal_symmetry())
-            print '\tEstimated binormal symmetry: ' + str(curve.get_binormal_symmetry())
-            print '\tEstimated apex length: ' + str(curve.get_apex_length())
-            print '\tEstimated sinuosity: ' + str(curve.get_sinuosity())
+            print('\tEstimated total unsigned curvature: ' + str(curve.get_total_uk()) + ' rad')
+            print('\tEstimated total ks: ' + str(curve.get_total_k()) + ' rad')
+            print('\tEstimated total unsigned torsion: ' + str(curve.get_total_ut()) + ' rad')
+            print('\tEstimated total ts: ' + str(curve.get_total_t()) + ' rad')
+            print('\tEstimated normal symmetry: ' + str(curve.get_normal_symmetry()))
+            print('\tEstimated binormal symmetry: ' + str(curve.get_binormal_symmetry()))
+            print('\tEstimated apex length: ' + str(curve.get_apex_length()))
+            print('\tEstimated sinuosity: ' + str(curve.get_sinuosity()))
 
 

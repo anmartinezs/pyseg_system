@@ -7,4 +7,4 @@ Clustering
 
 __version__ = "$Revision: 914 $"
 
-from contingency import Contingency
+from .contingency import Contingency

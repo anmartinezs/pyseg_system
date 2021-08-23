@@ -9,7 +9,7 @@ __author__ = 'martinez'
 
 import gc
 import operator
-from core import *
+from .core import *
 import warnings
 from scipy import sparse
 try:
@@ -33,7 +33,7 @@ from pyseg import diff_geom
 import multiprocessing as mp
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -172,7 +172,7 @@ def pr_graph_rdf(pr_id, max_r, bin_s, ids, coords, dsts_vec, mask, res, verts_rd
             verts_rdf_mpa[idx] = hold_num[j] / hold_dem[j]
 
         # print 'Thread ' + str(pr_id) + ': processing state vertex ' + str(idx) + ' of ' + str(len(ids))
-    print 'Thread ' + str(pr_id) + ': finished!'
+    print('Thread ' + str(pr_id) + ': finished!')
     return
 
 # ####################################################################################################
@@ -1360,7 +1360,7 @@ class GraphMCF(object):
                     hold_v_prop = graph.new_vertex_property(p_type)
                     hold_e_prop = graph.new_edge_property(p_type)
                 except ValueError:
-                    print 'WARNING get_gt (GraphMCF): property ' + prop_key + ' could not be added.'
+                    print('WARNING get_gt (GraphMCF): property ' + prop_key + ' could not be added.')
                 props_v.append(hold_v_prop)
                 props_e.append(hold_e_prop)
                 keys.append(prop_key)
@@ -2218,7 +2218,7 @@ class GraphMCF(object):
                                 break
                     if not found:
                         error_msg = 'Unexpected event.'
-                        print 'WARNING (GraphMCF:get_cont_seg) :' + error_msg
+                        print('WARNING (GraphMCF:get_cont_seg) :' + error_msg)
 
         return np.asarray(coords, dtype=np.float)
 
@@ -2301,7 +2301,7 @@ class GraphMCF(object):
             v_id = v.get_id()
             # print v_id, len(lcoords), len(ldensities)
             if v_id >= len(lcoords):
-                print 'Jol'
+                print('Jol')
             if (len(lcoords[v_id]) == 0) or (len(ldensities[v_id]) == 0):
                 # Vertices without geometry are removed
                 self.remove_vertex(self.get_vertex(v_id))
@@ -2750,7 +2750,7 @@ class GraphMCF(object):
         # Dump pickable objects and store the file names of the unpickable objects
         stem, ext = os.path.splitext(fname)
         self.__skel_fname = stem + '_skel.vtp'
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:
@@ -3990,7 +3990,7 @@ class GraphMCF(object):
             array = np.zeros(shape=len(vertices)+len(edges), dtype=d_type)
             for i in range(len(vertices)):
                 array[i] = self.get_prop_entry_fast(key_id, vertices[i].get_id(), 1, d_type)[0]
-            for i, j in zip(range(len(vertices), len(vertices)+len(edges)), range(len(edges))):
+            for i, j in zip(list(range(len(vertices), len(vertices)+len(edges))), list(range(len(edges)))):
                 array[i] = self.get_prop_entry_fast(key_id, edges[j].get_id(), 1, d_type)[0]
         else:
             vertices = self.get_vertices_list()
@@ -4005,7 +4005,7 @@ class GraphMCF(object):
         if edg:
             for i in range(len(vertices)):
                 self.set_prop_entry_fast(key_id_inv, (array_in[i],), vertices[i].get_id(), 1)
-            for i, j in zip(range(len(vertices), len(vertices)+len(edges)), range(len(edges))):
+            for i, j in zip(list(range(len(vertices), len(vertices)+len(edges))), list(range(len(edges)))):
                 self.set_prop_entry_fast(key_id_inv, (array_in[i],), edges[j].get_id(), 1)
         else:
             for i, v in enumerate(vertices):
@@ -4642,7 +4642,7 @@ class GraphMCF(object):
                     prop_e_eq[e] = trans[hold_val]
 
                 count += 1
-                print 'CLAHE skel: progress ' + str(round((count/mx_count)*100., 2)) + ' %'
+                print('CLAHE skel: progress ' + str(round((count/mx_count)*100., 2)) + ' %')
 
         # Normalization
         prop_v_eq.get_array()[:] = N_inv * prop_v_eq.get_array()
@@ -5058,7 +5058,7 @@ class GraphMCF(object):
         gc.collect()
 
         # Join the filaments
-        print 'Threads finished!'
+        print('Threads finished!')
         if gen_fils:
             # print fils_mpa[0]
             set_fils = SetSpaceCurve(fils_mpa[0])
@@ -5187,8 +5187,8 @@ class GraphMCF(object):
         # Static number of vertices division
         v_ids = np.arange(nv)
         spl_ids = np.array_split(np.arange(nv), npr)
-        print str(nv), str(nr)
-        print str(nv*nr)
+        print(str(nv), str(nr))
+        print(str(nv*nr))
         verts_rdf_mpa = mp.Array('f', nv*nr)
 
         # Computing distances matrix
@@ -5214,7 +5214,7 @@ class GraphMCF(object):
             processes.append(pr)
         for pr in processes:
             pr.join()
-        print 'Time for ' + str(npr) + ' process: ' + str(time.time() - hold_time)
+        print('Time for ' + str(npr) + ' process: ' + str(time.time() - hold_time))
         gc.collect()
 
         # Computing final results
@@ -5224,8 +5224,8 @@ class GraphMCF(object):
         # if norm:
         #     rdf /= vol
         rdf_mat = np.frombuffer(verts_rdf_mpa.get_obj(), dtype=np.float32).reshape(nv, nr)
-        print str(nv), str(nr)
-        print str(rdf_mat.shape)
+        print(str(nv), str(nr))
+        print(str(rdf_mat.shape))
 
         # Adding the properties to the graph
         ss_f = int(math.floor(n_samp2 * nr))
@@ -5243,7 +5243,7 @@ class GraphMCF(object):
                     val = rdf_mat[v_gt_id, i_rd]
                     self.set_prop_entry_fast(key_id, (val,), v_id, 1)
 
-        print 'RDF successfully computed!'
+        print('RDF successfully computed!')
 
         return rads, rdf_mat.sum(axis=0)
 

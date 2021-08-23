@@ -21,11 +21,11 @@ from pyorg import pexceptions
 from pyorg import disperse_io
 from pyorg.globals import unpickle_obj, clean_dir, add_mw, vect_to_zrelion, rot_mat_relion, trilin3d, lin_map, \
                         rot_mat_2_vectors, rot_mat_eu_relion, relion_norm
-from surface import ListTomoParticles, TomoParticles, Particle, ParticleL
-from filaments import TomoFilaments, Filament
+from .surface import ListTomoParticles, TomoParticles, Particle, ParticleL
+from .filaments import TomoFilaments, Filament
 from pyorg import globals as gl
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -130,7 +130,7 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
         voi_shape = voi.shape
         voi_len = np.array(voi_shape).prod()
         # voi_shared = mp.RawArray(ctypes.c_bool, voi.reshape(np.array(voi_shape).prod()))
-        voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, voi_len)
+        voi_shared_raw = mp.RawArray(np.ctypeslib.ctypes.c_uint8, int(voi_len))
         voi_shared = np.ctypeslib.as_array(voi_shared_raw)
         voi_shared[:] = voi.reshape(voi_len).astype(np.uint8)
     else:
@@ -171,8 +171,8 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
 
     # Loop for gathering the results
     t_count = 0
-    part_vtp = disperse_io.load_poly(part_fname)
-    ref_surf_fname = model_obj.get_surf_fname()
+    # part_vtp = disperse_io.load_poly(part_fname)
+    # ref_surf_fname = model_obj.get_surf_fname()
     while t_count < n_tomos:
         hold_coords = q_coords.get()
         hold_angs = q_angs.get()
@@ -196,7 +196,7 @@ def gen_tlist(n_tomos, n_part_tomo, model_obj, voi, part_fname, mode_emb='full',
                                   eu_angs=(float(angs[0]), float(angs[1]), float(angs[2])))
             if norm_v is not None:
                 hold_part.add_prop('normal_v', vtk.vtkFloatArray, norm_v)
-            hold_tomo.insert_particle(hold_part, check_bounds=False, check_inter=False)
+            hold_tomo.insert_particle(hold_part, check_bounds=False, check_inter=-1)
         t_count += 1
         ltomos.add_tomo(hold_tomo)
 
@@ -262,7 +262,7 @@ def gen_tlist_from_tlist(ltomos, part_vtp, model_class, mode_emb='full', npr=Non
 
         # Parallel instance generation
         # npr = 1
-        spl_ids = np.array_split(range(n_tomos), math.ceil(float(n_tomos) / npr))
+        spl_ids = np.array_split(list(range(n_tomos)), math.ceil(float(n_tomos) / npr))
         processes = list()
         for bunch in spl_ids:
             for pr_id in bunch:
@@ -338,7 +338,7 @@ def gen_tlist2(n_tomos, n_part_tomo, model_class, mode_emb='full', npr=None, tmp
 
         # Parallel instance generation
         # npr = 1
-        spl_ids = np.array_split(range(n_tomos), math.ceil(float(n_tomos)/npr))
+        spl_ids = np.array_split(list(range(n_tomos)), math.ceil(float(n_tomos)/npr))
         processes = list()
         for bunch in spl_ids:
             for pr_id in bunch:
@@ -376,15 +376,14 @@ def gen_tlist2(n_tomos, n_part_tomo, model_class, mode_emb='full', npr=None, tmp
 ############################################################################
 # Abstract class for particles generator within a VOI
 #
-class Model(object):
+class Model(object, metaclass=abc.ABCMeta):
 
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, voi, part, vect=(0, 0, 1)):
+    def __init__(self, voi, part, vect=(0, 0, 1), check_inter=0):
         self.__part, self.__vect, self.__voi = None, None, None
         self.set_voi(voi)
         self.set_part(part, vect)
         self.__type_name = None
+        self.__check_inter = float(check_inter)
         # Pickling variables
         self.__part_fname = None
         self.__voi_fname = None
@@ -550,10 +549,15 @@ class Model(object):
 #
 class ModelCSRV(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    def __init__(self, voi=None, part=None, vect=(0., 0., 1.)):
-        super(ModelCSRV, self).__init__(voi, part, vect)
+    def __init__(self, voi=None, part=None, vect=(0., 0., 1.), check_inter=0):
+        """
+        Constructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param vect: orientation vector for the particle
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        """
+        super(ModelCSRV, self).__init__(voi, part, vect, check_inter)
         self._Model__type_name = 'CSRV'
 
     def gen_instance(self, n_parts, tomo_fname, mode='full', coords=False, max_ntries_factor=10):
@@ -631,7 +635,7 @@ class ModelCSRV(Model):
 
             # Checking embedding and no overlapping
             try:
-                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=True)
+                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
             except pexceptions.PySegInputError:
                 if count_it > MAX_ITER_CONV:
                     break
@@ -648,8 +652,8 @@ class ModelCSRV(Model):
 
         # Check all particles has been placed
         if count < n_parts:
-            print 'WARNING (ModelCSRV:gen_instance): TomoParticles generated with less particles, ' + \
-                  str(count) + ', than demanded, ' + str(n_parts) + ' (' + str(100.*count/float(n_parts)) + '%).'
+            print('WARNING (ModelCSRV:gen_instance): TomoParticles generated with less particles, ' + \
+                  str(count) + ', than demanded, ' + str(n_parts) + ' (' + str(100.*count/float(n_parts)) + '%).')
 
         if coords:
             return out_coords, out_rots
@@ -662,14 +666,19 @@ class ModelCSRV(Model):
 #
 class ModelSRPV(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    # n_cycles: 3-tuple with the number of cycles for the sinusoidal in each dimension (X, Y, Z)
-    #           (default (1,1,1))
-    # sin_t: sinus threshold (default 0.5)
-    # phase: 3-Tuple for phase shifting (default (0, 0, 0)) in radians
-    def __init__(self, voi=None, part=None, vect=(0,0,1), n_cycles=(1,1,1), sin_t=0.5, phase=(0,0,0)):
-        super(ModelSRPV, self).__init__(voi, part, vect)
+    def __init__(self, voi=None, part=None, vect=(0,0,1), check_inter=0, n_cycles=(1,1,1), sin_t=0.5, phase=(0,0,0)):
+        """
+        Constructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param vect: orientation vector for the particle
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        :param n_cycles: 3-tuple with the number of cycles for the sinusoidal in each dimension (X, Y, Z)
+                        (default (1,1,1))
+        :param sin_t: sinus threshold (default 0.5)
+        :param phase: 3-Tuple for phase shifting (default (0, 0, 0)) in radians
+        """
+        super(ModelSRPV, self).__init__(voi, part, vect, check_inter)
         if (not hasattr(n_cycles, '__len__')) or (len(n_cycles) != 3):
             error_msg = 'Invalid vector must be 3-tuple!'
             raise pexceptions.PySegInputError(expr='__init__ (ModelSRPV)', msg=error_msg)
@@ -758,7 +767,7 @@ class ModelSRPV(Model):
 
             # Checking embedding and no overlapping
             try:
-                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=True)
+                tomo.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
             except pexceptions.PySegInputError:
                 continue
             out_coords.append((coord_rnd[0], coord_rnd[1], coord_rnd[2]))
@@ -771,8 +780,8 @@ class ModelSRPV(Model):
 
         # Check all particles has been placed
         if count < n_parts:
-            print 'WARNING (ModelSRPV:gen_instance): TomoParticles generated with less particles, ' + \
-                  str(count) + ', than demanded, ' + str(n_parts) + '.'
+            print('WARNING (ModelSRPV:gen_instance): TomoParticles generated with less particles, ' + \
+                  str(count) + ', than demanded, ' + str(n_parts) + '.')
 
         if coords:
             return out_coords, out_rots
@@ -785,13 +794,17 @@ class ModelSRPV(Model):
 #
 class Model2CCSRV(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    # dst: characteristic interparticle averaged distance (default 0)
-    # std: standard deviation for modeling Gaussian co-localization, if sg is None (default)
-    #     two output patterns are un-correlated
-    def __init__(self, voi=None, part=None, dst=0, std=None):
-        super(Model2CCSRV, self).__init__(voi, part)
+    def __init__(self, voi=None, part=None, dst=0, std=None, check_inter=0):
+        """
+        Contructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param dst: characteristic interparticle averaged distance (default 0)
+        :param std: standard deviation for modeling Gaussian co-localicacion, if sg is None (default)
+                    the two output patterns are un-correlated
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        """
+        super(Model2CCSRV, self).__init__(voi, part, check_inter=check_inter)
         self._Model__type_name = '2CCSRV'
         self.__dst = float(dst)
         self.__std = std
@@ -900,8 +913,8 @@ class Model2CCSRV(Model):
 
             # Checking embedding and no overlapping for the pair of pair particles
             try:
-                tomo1.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=True)
-                tomo2.insert_particle(hold_part2, check_bounds=True, mode=mode, check_inter=True)
+                tomo1.insert_particle(hold_part, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
+                tomo2.insert_particle(hold_part2, check_bounds=True, mode=mode, check_inter=self._Model__check_inter)
             except pexceptions.PySegInputError:
                 continue
 
@@ -912,8 +925,8 @@ class Model2CCSRV(Model):
 
         # Check all particles has been placed
         if count < n_parts:
-            print 'WARNING (Model2CCSRV:gen_instance): TomoParticles generated with less particles, ' + \
-                  str(count) + ', than demanded, ' + str(n_parts) + '.'
+            print('WARNING (Model2CCSRV:gen_instance): TomoParticles generated with less particles, ' + \
+                  str(count) + ', than demanded, ' + str(n_parts) + '.')
 
         return tomo1, tomo2
 
@@ -922,10 +935,14 @@ class Model2CCSRV(Model):
 #
 class ModelRR(Model):
 
-    # voi: VOI surface
-    # part: particle surface
-    def __init__(self, voi=None, part=None):
-        super(ModelRR, self).__init__(voi, part)
+    def __init__(self, voi=None, part=None, check_inter=0):
+        """
+        Constructor
+        :param voi: VOI surface
+        :param part: particle surface
+        :param check_inter: maximum instersection fraction for particles (default 0)
+        """
+        super(ModelRR, self).__init__(voi, part, check_inter=check_inter)
         self._Model__type_name = 'RR'
 
     def gen_instance(self, in_coords, tomo_fname, mode='center', coords=False, nrot_tries=10):
@@ -979,7 +996,7 @@ class ModelRR(Model):
 
                 # Checking embedding and no overlapping
                 try:
-                    tomo.insert_particle(hold_part, check_bounds=False, mode=mode, check_inter=False)
+                    tomo.insert_particle(hold_part, check_bounds=False, mode=mode, check_inter=self._Model__check_inter)
                     out_coords.append((in_coord[0], in_coord[1], in_coord[2]))
                     out_rots.append((rot_rnd, tilt_rnd, psi_rnd))
                     count += 1
@@ -990,8 +1007,8 @@ class ModelRR(Model):
 
         # Check all particles has been placed
         if count < n_parts:
-            print 'WARNING (ModelRR:gen_instance): TomoParticles generated with less particles, ' + \
-                    str(count) + ', than demanded, ' + str(n_parts) + ' (' + str(100. * count / float(n_parts)) + '%).'
+            print('WARNING (ModelRR:gen_instance): TomoParticles generated with less particles, ' + \
+                    str(count) + ', than demanded, ' + str(n_parts) + ' (' + str(100. * count / float(n_parts)) + '%).')
 
         if coords:
             return out_coords, out_rots
@@ -1002,9 +1019,7 @@ class ModelRR(Model):
 ############################################################################
 # Abstract class for filaments generator within a VOI
 #
-class ModelFils(object):
-
-    __metaclass__ = abc.ABCMeta
+class ModelFils(object, metaclass=abc.ABCMeta):
 
     def __init__(self, voi, res=1, rad=1, density_2d=None):
         """
@@ -1092,7 +1107,7 @@ class ModelFils(object):
         # Loop for filament
         for i, fil in enumerate(ref_fils):
 
-            print 'DEBUG: Processing filament ' + str(i)
+            print('DEBUG: Processing filament ' + str(i))
 
             # Create the straight filament density model aligned with X-axis
             coords = fil.get_coords()
@@ -1359,8 +1374,8 @@ class ModelFilsRSR(ModelFils):
 
         # Check all filamensts has been placed
         if count_added < n_fils:
-            print 'WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
-                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).'
+            print('WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
+                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).')
 
         return tomo
 
@@ -1446,8 +1461,8 @@ class ModelFilsRSR(ModelFils):
 
         # Check all filamensts has been placed
         if count_added < n_fils:
-            print 'WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
-                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).'
+            print('WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
+                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).')
 
         return tomo
 
@@ -1537,7 +1552,7 @@ class ModelFilsRSR(ModelFils):
 
         # Check all filamensts has been placed
         if count_added < n_fils:
-            print 'WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
-                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).'
+            print('WARNING (ModelFilsRSR:gen_instance): TomoFilaments generated with less particles, ' + \
+                  str(count_added) + ', than demanded, ' + str(n_fils) + ' (' + str(100.*count_added/float(n_fils)) + '%).')
 
         return tomo

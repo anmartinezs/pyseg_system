@@ -2,11 +2,19 @@
 
 Tests module analysis.vesicles.
 
-# Author: Vladan Lucic
-# $Id: test_vesicles.py 1275 2015-12-23 14:31:51Z vladan $
-"""
+Note: The pickles used here (segmentations/*.pkl) are real, except that
+large (image) arrays that are not needed in tests were removed in
+order to fit the GutHub size limit. 
 
-__version__ = "$Revision: 1275 $"
+# Author: Vladan Lucic
+# $Id$
+"""
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import range
+#from past.utils import old_div
+
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import pickle
@@ -39,7 +47,7 @@ class TestVesicles(np_test.TestCase):
                         '78_3': 'segmentations/sv_78-3_vesicles.pkl'},
             'rim_altered' : {'75_4' : 'segmentations/sv_75-4_vesicles.pkl'}}
         for categ in sv_files:
-            for ident, name in sv_files[categ].items():
+            for ident, name in list(sv_files[categ].items()):
                sv_files[categ][ident] = os.path.join(dir_, name)
         self.sv_files = sv_files
 
@@ -49,7 +57,7 @@ class TestVesicles(np_test.TestCase):
                         '78_3': 'segmentations/sv_78-3_mem.pkl'},
             'rim_altered' : {'75_4' : 'segmentations/sv_75-4_mem.pkl'}}
         for categ in mem_files:
-            for ident, name in mem_files[categ].items():
+            for ident, name in list(mem_files[categ].items()):
                mem_files[categ][ident] = os.path.join(dir_, name)
         self.mem_files = mem_files
 
@@ -59,7 +67,7 @@ class TestVesicles(np_test.TestCase):
                         '78_3': 'segmentations/sv_78-3_lum.pkl'},
             'rim_altered' : {'75_4' : 'segmentations/sv_75-4_lum.pkl'}}
         for categ in lum_files:
-            for ident, name in lum_files[categ].items():
+            for ident, name in list(lum_files[categ].items()):
                lum_files[categ][ident] = os.path.join(dir_, name)
         self.lum_files = lum_files
 
@@ -82,11 +90,11 @@ class TestVesicles(np_test.TestCase):
             'operator' : {'77_4' : 'emerson', '78_3' : 'lake', 
                           '75_4' : 'palmer'}
             }
-        for ident, name in catalog._db['tether_files'].items():
+        for ident, name in list(catalog._db['tether_files'].items()):
                catalog._db['tether_files'][ident] = os.path.join(dir_, name)
-        for ident, name in catalog._db['connector_files'].items():
+        for ident, name in list(catalog._db['connector_files'].items()):
                catalog._db['connector_files'][ident] = os.path.join(dir_, name)
-        for ident, name in catalog._db['layer_files'].items():
+        for ident, name in list(catalog._db['layer_files'].items()):
                catalog._db['layer_files'][ident] = os.path.join(dir_, name)
         catalog.makeGroups()
         self.catalog = catalog
@@ -124,7 +132,7 @@ class TestVesicles(np_test.TestCase):
         # test 77_4
         np_test.assert_equal(
             sv.rim_wt.getValue(identifier='77_4', property='ids'), 
-            range(2, 144))
+            list(range(2, 144)))
         np_test.assert_almost_equal(
             sv.rim_wt.getValue(identifier='77_4', property='density', ids=7),
             -0.02, decimal=2)
@@ -140,7 +148,7 @@ class TestVesicles(np_test.TestCase):
         # test 78_3
         np_test.assert_equal(
             sv.rim_wt.getValue(identifier='78_3', property='ids'), 
-            range(2,81))
+            list(range(2,81)))
         np_test.assert_almost_equal(
             sv.rim_wt.getValue(identifier='78_3', property='meanDistance', 
                                ids=7), 
@@ -153,7 +161,7 @@ class TestVesicles(np_test.TestCase):
         # test 75_4
         np_test.assert_equal(
             sv.rim_altered.getValue(identifier='75_4', property='ids'), 
-            range(2, 133))
+            list(range(2, 133)))
         np_test.assert_almost_equal(
             sv.rim_altered.getValue(identifier='75_4', property='radius', 
                                     ids=7),
@@ -179,7 +187,7 @@ class TestVesicles(np_test.TestCase):
         # test 77_4
         np_test.assert_equal(
             sv.rim_wt.getValue(identifier='77_4', property='ids'), 
-            range(2, 144))
+            list(range(2, 144)))
         np_test.assert_almost_equal(
             sv.rim_wt.getValue(identifier='77_4', property='density', ids=7),
             -0.02, decimal=2)
@@ -195,7 +203,7 @@ class TestVesicles(np_test.TestCase):
         # test 78_3
         np_test.assert_equal(
             sv.rim_wt.getValue(identifier='78_3', property='ids'), 
-            range(2,81))
+            list(range(2,81)))
         np_test.assert_almost_equal(
             sv.rim_wt.getValue(identifier='78_3', property='meanDistance', 
                                ids=7), 
@@ -208,7 +216,7 @@ class TestVesicles(np_test.TestCase):
         # test 75_4
         np_test.assert_equal(
             sv.rim_altered.getValue(identifier='75_4', property='ids'), 
-            range(2, 133))
+            list(range(2, 133)))
         np_test.assert_almost_equal(
             sv.rim_altered.getValue(identifier='75_4', property='radius', 
                                     ids=7),
@@ -580,7 +588,7 @@ class TestVesicles(np_test.TestCase):
             [8])
         np_test.assert_equal(
             max(self.sv.rim_wt.getValue(identifier='77_4', name='conn_distance',
-                                    ids=range(2,144))), 
+                                    ids=list(range(2,144)))), 
             8)
         np_test.assert_equal(
             self.sv.rim_wt.getValue(identifier='77_4', name='conn_distance',
@@ -608,7 +616,7 @@ class TestVesicles(np_test.TestCase):
             [4])
         np_test.assert_equal(
             max(self.sv.rim_altered.getValue(
-                identifier='75_4', name='conn_distance', ids=range(2,133))), 
+                identifier='75_4', name='conn_distance', ids=list(range(2,133)))), 
             10)
         np_test.assert_equal(
             self.sv.rim_altered.getValue(

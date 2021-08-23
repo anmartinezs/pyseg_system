@@ -3,10 +3,10 @@
 Help with tests for module util.bulk .
 
 # Author: Vladan Lucic
-# $Id: script.py 765 2010-10-05 17:15:02Z vladan $
+# $Id$
 """
 
-__version__ = "$Revision: 765 $"
+__version__ = "$Revision$"
 
 
 import pyto

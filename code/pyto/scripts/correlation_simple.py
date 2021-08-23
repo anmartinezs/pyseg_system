@@ -65,6 +65,8 @@ If you use this script, please consider citing:
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
 # $Id: correlation_simple.py 1237 2015-10-14 12:18:37Z vladan $
 """
+from __future__ import unicode_literals
+from __future__ import print_function
 
 __version__ = "$Revision: 1237 $"
 
@@ -123,25 +125,25 @@ def main():
         type_=transform_type)
 
     # print transformation parameters
-    print "Transformation parameters: "
-    print "Rotation angle: ", corr.transf_1_to_2.phiDeg
-    print "Scales: ", corr.transf_1_to_2.scale
-    print "Parity: ", corr.transf_1_to_2.parity
-    print "Shear: ", corr.transf_1_to_2.shear
-    print "Translation: ", corr.transf_1_to_2.d
-    print "RME error: ", corr.transf_1_to_2.rmsError
-    print "Individual marker errors: "
-    print corr.transf_1_to_2.error
+    print("Transformation parameters: ")
+    print("Rotation angle: ", corr.transf_1_to_2.phiDeg)
+    print("Scales: ", corr.transf_1_to_2.scale)
+    print("Parity: ", corr.transf_1_to_2.parity)
+    print("Shear: ", corr.transf_1_to_2.shear)
+    print("Translation: ", corr.transf_1_to_2.d)
+    print("RME error: ", corr.transf_1_to_2.rmsError)
+    print("Individual marker errors: ")
+    print(corr.transf_1_to_2.error)
 
     corr.correlate(targets_1=target_initial)
-    print " "
-    print "System 1 targets correlated to system 2: "
-    print corr.correlated_1_to_2
+    print(" ")
+    print("System 1 targets correlated to system 2: ")
+    print(corr.correlated_1_to_2)
 
     corr.correlate(targets_2=target_final)
-    print " "
-    print "System 2 targets correlated to system 1: "
-    print corr.correlated_2_to_1
+    print(" ")
+    print("System 2 targets correlated to system 1: ")
+    print(corr.correlated_2_to_1)
 
 
 

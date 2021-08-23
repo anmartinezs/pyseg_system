@@ -30,7 +30,7 @@ from factory import unpickle_obj
 from pyseg.filament.variables import *
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -83,9 +83,9 @@ def get_filaments(graph, seed_ids, prop_e_key, min_len, max_len):
     for i, idx in enumerate(seed_ids):
         hold = gt.find_vertex(graph_gt, prop_id, idx)
         if len(hold) <= 0:
-            print 'WARNING: thresholded vertex with id ' + str(idx) + ' not found in parent GraphMCF!'
+            print('WARNING: thresholded vertex with id ' + str(idx) + ' not found in parent GraphMCF!')
         elif len(hold) > 1:
-            print 'WARNING: thresholded vertex with id ' + str(idx) + ' is not unique in parent GraphMCF!'
+            print('WARNING: thresholded vertex with id ' + str(idx) + ' is not unique in parent GraphMCF!')
         else:
             vertices.append(hold[0])
             coords.append(graph.get_vertex_coords(graph.get_vertex(idx)))
@@ -96,7 +96,7 @@ def get_filaments(graph, seed_ids, prop_e_key, min_len, max_len):
         # Main loop
         nv = len(vertices)
         for i in range(nv):
-            print 'Processed ' + str(i+1) + ' of ' + str(nv)
+            print('Processed ' + str(i+1) + ' of ' + str(nv))
             v_s = vertices[i]
             dists = dists_map[v_s].get_array()[i:]
             ids = i + np.where((dists > min_len) & (dists < max_len))[0]
@@ -114,7 +114,7 @@ def get_filaments(graph, seed_ids, prop_e_key, min_len, max_len):
         # Main loop
         nv = len(vertices)
         for i in range(nv):
-            print 'Processed ' + str(i+1) + ' of ' + str(nv)
+            print('Processed ' + str(i+1) + ' of ' + str(nv))
             for j in range(i+1, nv):
                 c_s, c_t = np.asarray(coords[i], dtype=np.float), np.asarray(coords[j], dtype=np.float)
                 hold = c_s - c_t
@@ -241,7 +241,7 @@ def do_find_inter_filaments(parent_file, thres_file, output_dir, prop_e_key, min
 
     # Initialization
     if verbose:
-        print '\tLoading graphs...'
+        print('\tLoading graphs...')
     path, stem = os.path.split(parent_file)
     pstem, _ = os.path.splitext(stem)
     path, stem = os.path.split(thres_file)
@@ -251,38 +251,38 @@ def do_find_inter_filaments(parent_file, thres_file, output_dir, prop_e_key, min
 
     if min_len <= 0:
         if verbose:
-            print '\tDelete isolated vertices...'
+            print('\tDelete isolated vertices...')
         for v in graph.get_vertices_list():
             if len(graph.get_vertex_neighbours(v.get_id())[1]) <= 0:
                 graph.remove_vertex(v)
 
     if mst:
         if verbose:
-            print '\tCompute minimum spanning tree...'
+            print('\tCompute minimum spanning tree...')
         graph_gt = ps.graph.GraphGT(graph)
         graph_gt.min_spanning_tree(ps.globals.SGT_MIN_SP_TREE, prop_e_key)
         graph_gt.add_prop_to_GraphMCF(graph, ps.globals.SGT_MIN_SP_TREE, up_index=False)
         graph.threshold_edges(ps.globals.SGT_MIN_SP_TREE, 0, operator.eq)
 
     if verbose:
-        print '\tGetting the ids of seed nodes from the thresholded graph...'
+        print('\tGetting the ids of seed nodes from the thresholded graph...')
     seed_ids = get_seed_ids(tgraph)
 
     if verbose:
-        print '\tFinding filaments in parent graph...'
+        print('\tFinding filaments in parent graph...')
     net = get_filaments(graph, seed_ids, prop_e_key, min_len, max_len)
 
     if verbose:
-        print '\tThresholding parent tomogram...'
+        print('\tThresholding parent tomogram...')
     thres_no_filaments(graph, net)
 
     if verbose:
-        print '\tWriting network poly data...'
+        print('\tWriting network poly data...')
     netv_vtp = write_net_vtp(net, vertex=True)
     netp_vtp = write_net_vtp(net, vertex=False)
 
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     graph.pickle(output_dir + '/' + pstem + '_' + prop_v_key + '.pkl')
     seg = graph.print_vertices(img=None, property=prop_v_key, th_den=nsig)
     ps.disperse_io.save_numpy(seg, output_dir + '/' + tstem + '_' + prop_v_key + '_seg.vti')
@@ -293,7 +293,7 @@ def do_find_inter_filaments(parent_file, thres_file, output_dir, prop_e_key, min
     ps.disperse_io.save_vtp(netv_vtp, output_dir + '/' + tstem + '_net_v.vtp')
     ps.disperse_io.save_vtp(netp_vtp, output_dir + '/' + tstem + '_net_p.vtp')
     if verbose:
-        print '\tResults stored in ' + output_dir
+        print('\tResults stored in ' + output_dir)
 
 
 ################# Main call
@@ -302,7 +302,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvbp:t:o:e:l:L:n:c:")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     parent_file = None
@@ -317,8 +317,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-p":
             parent_file = arg
@@ -341,49 +341,49 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (parent_file is None) or (output_dir is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         if thres_file is None:
             thres_file = parent_file
         # Print init message
         if verbose:
-            print 'Running tool for finding internode filaments.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
+            print('Running tool for finding internode filaments.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
             if parent_file == thres_file:
-                print '\tSelf mode in GraphMCF file: ' + parent_file
+                print('\tSelf mode in GraphMCF file: ' + parent_file)
             else:
-                print '\tParent GraphMCF file: ' + parent_file
-                print '\tThresholded GraphMCF file: ' + thres_file
-            print '\tOutput directory: ' + output_dir
-            print '\tEdge weighting property key: ' + prop_e_key
-            print '\tMinimum filament length: ' + str(min_len) + ' nm'
-            print '\tMaximum filament length: ' + str(max_len) + ' nm'
+                print('\tParent GraphMCF file: ' + parent_file)
+                print('\tThresholded GraphMCF file: ' + thres_file)
+            print('\tOutput directory: ' + output_dir)
+            print('\tEdge weighting property key: ' + prop_e_key)
+            print('\tMinimum filament length: ' + str(min_len) + ' nm')
+            print('\tMaximum filament length: ' + str(max_len) + ' nm')
             if nsig is not None:
-                print '\tNumber of sigmas for segmantation: ' + str(nsig)
+                print('\tNumber of sigmas for segmantation: ' + str(nsig))
             if mst:
-                print '\tMaximum spanning tree filtration.'
+                print('\tMaximum spanning tree filtration.')
             if mc == 1:
-                print '\tVertex mode for curvature computation.'
+                print('\tVertex mode for curvature computation.')
             else:
-                print '\tPath mode for curvature computation.'
-            print ''
+                print('\tPath mode for curvature computation.')
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_find_inter_filaments(parent_file, thres_file, output_dir, prop_e_key, min_len, max_len, nsig,
                                 mst, mc, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

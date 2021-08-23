@@ -10,9 +10,9 @@ __author__ = 'martinez'
 
 import gc
 from pyorg.globals import *
-import Queue
+import queue
 import random
-from variables import *
+from .variables import *
 import multiprocessing as mp
 import threading as mt
 from scipy.signal import butter, lfilter
@@ -20,12 +20,13 @@ from scipy.signal import butter, lfilter
 from matplotlib.pyplot import cm
 from matplotlib import pyplot as plt
 from abc import *
-from plane import make_plane
+from .plane import make_plane
 from pyorg import pexceptions, disperse_io
+import collections
 # import skfmm
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -346,10 +347,13 @@ def coords_to_dense_mask(coords, mask, rots=None):
             pass
 
         return dense, np.asarray(out_coords, dtype=np.float), np.asarray(out_rots, dtype=np.float)
-
-# Computes Nearest Neighbour Distance of a cloud of points in a Euclidean space
-# cloud: array with point coordinates
+0
 def nnde(cloud):
+    """
+    Computes Nearest Neighbour Distance of a cloud of points in a Euclidean space
+    :param cloud: array with point coordinates
+    :return: a numpy array with the computed distances
+    """
     dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
     for i in range(len(dists)):
         hold = cloud[i] - cloud
@@ -369,6 +373,16 @@ def cnnde(cloud, cloud_ref):
         hold = np.sum(hold*hold, axis=1)
         dists[i] = math.sqrt(np.min(hold))
     return dists
+
+def distances_to_point(point, cloud):
+    """
+    Computes all Euclidean distances of a point with respect a cloud of points
+    :param point: input point coordinates
+    :param cloud: array with points coordinates
+    :return: an array with the distance to each point
+    """
+    hold = point - cloud
+    return np.sqrt(np.sum(hold * hold, axis=1))
 
 # Compute Histogram Function from a one-dimensional array of random samples
 # var: array of stochastic samples
@@ -509,8 +523,8 @@ def gen_rand_in_mask(n, mask, temp=None):
         # pyseg.disperse_io.save_numpy(hold_mask, '/home/martinez/pool/pool-lucic2/antonio/workspace/stat/pyrenoid/3d_uni_temp/hold_'+str(cont)+'.mrc')
 
         if npts < n:
-            print 'WARNING (gen_rand_in_mask): number of points simulated less than demanded: (' + \
-                  str(npts) + ' of ' + str(n) + ')'
+            print('WARNING (gen_rand_in_mask): number of points simulated less than demanded: (' + \
+                  str(npts) + ' of ' + str(n) + ')')
 
         return coords, quats
 
@@ -750,19 +764,9 @@ class ChoiceCoordsMask(object):
 ##############################################################################################
 # Abstract class for simulators
 #
-class Simulator(object):
+class Simulator(object, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    #### Set/Get methods
-
-    #### External functionality area
-
-    # Generates a set of simulated points within a mask
-    # n: number of points
-    # mask: binary mask
-    # Returns: and array with size [n, 3] with coordinates within the mask
     @abstractmethod
     def gen_rand_in_mask(self, n, mask):
         raise NotImplementedError('gen_rand_in_mask() (Simulator). '
@@ -936,8 +940,8 @@ class CSRTSimulator(Simulator):
         # pyseg.disperse_io.save_numpy(hold_mask, '/home/martinez/workspace/stat/pyrenoid/test_linker/hold.mrc')
 
         if npts < n:
-            print 'WARNING (gen_rand_in_mask): number of points simulated less than demanded: (' + \
-                  str(npts) + ' of ' + str(n) + ')'
+            print('WARNING (gen_rand_in_mask): number of points simulated less than demanded: (' + \
+                  str(npts) + ' of ' + str(n) + ')')
 
         return coords
 
@@ -1002,8 +1006,8 @@ class CSRTSimulator(Simulator):
             ntries += 1
 
         if npts < n:
-            print 'WARNING (gen_rand_in_mask): number of points simulated less than demanded: (' + \
-                  str(npts) + ' of ' + str(n) + ')'
+            print('WARNING (gen_rand_in_mask): number of points simulated less than demanded: (' + \
+                  str(npts) + ' of ' + str(n) + ')')
 
         return hold_mask
 
@@ -1139,8 +1143,8 @@ class LinkerSimulator(Simulator):
         # pyseg.disperse_io.save_numpy(hold_mask, '/home/martinez/workspace/stat/pyrenoid/test_linker/hold.mrc')
 
         if npts < n:
-            print 'WARNING (gen_rand_in_mask_tomo): number of points simulated less than demanded: (' + \
-                  str(npts) + ' of ' + str(n) + ')'
+            print('WARNING (gen_rand_in_mask_tomo): number of points simulated less than demanded: (' + \
+                  str(npts) + ' of ' + str(n) + ')')
 
         return coords
 
@@ -1207,8 +1211,8 @@ class LinkerSimulator(Simulator):
         # pyseg.disperse_io.save_numpy(hold_mask, '/home/martinez/pool/pool-lucic2/antonio/workspace/stat/pyrenoid/3d_uni_temp/hold_'+str(cont)+'.mrc')
 
         if npts < n:
-            print 'WARNING (gen_rand_in_mask_tomo): number of points simulated less than demanded: (' + \
-                  str(npts) + ' of ' + str(n) + ')'
+            print('WARNING (gen_rand_in_mask_tomo): number of points simulated less than demanded: (' + \
+                  str(npts) + ' of ' + str(n) + ')')
 
         return hold_mask
 
@@ -1298,7 +1302,7 @@ class LinkerSimulator(Simulator):
             if self.__l_temp is not None:
                 break
         if n >= ntries:
-            print 'WARNING: overlapping templates after ' + str(n) + ' tries!!!'
+            print('WARNING: overlapping templates after ' + str(n) + ' tries!!!')
             raise Exception
         nx, ny, nz = self.__l_temp.shape
         self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=np.bool)
@@ -1788,7 +1792,7 @@ class AggSimulator(object):
             hold_coords, hold_tries = self.__gen_aggregate(hold_np, max_tries-curr_try, hold_mask, hold_mask_pot,
                                                            global_gen)
             # disperse_io.save_numpy(hold_mask, '/home/martinez/workspace/stat/pyrenoid/net_high_res/hold.mrc')
-            print 'AGGREGATE INSERTED WITH ' + str(len(hold_coords)) + ' PARTICLES. Left: ' + str(npart-len(coords))
+            print('AGGREGATE INSERTED WITH ' + str(len(hold_coords)) + ' PARTICLES. Left: ' + str(npart-len(coords)))
             coords += hold_coords
             curr_try += hold_tries
 
@@ -1797,8 +1801,8 @@ class AggSimulator(object):
 
         # Check all demanded particles are placed
         if len(coords) < npart:
-            print 'WARNING (NetSimulator): only ' + str(len(coords)) + ' of ' + str(npart) + ' has been placed after ' \
-                  + str(max_tries) + ' tries.'
+            print('WARNING (NetSimulator): only ' + str(len(coords)) + ' of ' + str(npart) + ' has been placed after ' \
+                  + str(max_tries) + ' tries.')
 
         return coords, hold_mask
 
@@ -2109,7 +2113,7 @@ class AggSimulator2(object):
             hold_coords, hold_tries = self.__gen_aggregate(hold_np, max_tries-curr_try, hold_mask, hold_mask_pot,
                                                            global_gen)
             # disperse_io.save_numpy(hold_mask, '/home/martinez/workspace/stat/pyrenoid/net_high_res/hold.mrc')
-            print 'AGGREGATE INSERTED WITH ' + str(len(hold_coords)) + ' PARTICLES. Left: ' + str(npart-len(coords))
+            print('AGGREGATE INSERTED WITH ' + str(len(hold_coords)) + ' PARTICLES. Left: ' + str(npart-len(coords)))
             coords += hold_coords
             curr_try += hold_tries
 
@@ -2118,8 +2122,8 @@ class AggSimulator2(object):
 
         # Check all demanded particles are placed
         if len(coords) < npart:
-            print 'WARNING (NetSimulator): only ' + str(len(coords)) + ' of ' + str(npart) + ' has been placed after ' \
-                  + str(max_tries) + ' tries.'
+            print('WARNING (NetSimulator): only ' + str(len(coords)) + ' of ' + str(npart) + ' has been placed after ' \
+                  + str(max_tries) + ' tries.')
 
         return coords, hold_mask
 
@@ -2492,7 +2496,7 @@ class UniStat(object):
                     hold_sv[hold_rot] = 1
                     hold_mask[off_l_x:off_h_x, off_l_y:off_h_y, off_l_z:off_h_z] = hold_sv
                 except IndexError:
-                    print 'Jol'
+                    print('Jol')
                 # hold_mask[off_l_x:off_h_x, off_l_y:off_h_y, off_l_z:off_h_z] = \
                 #     rot_temp[dif_l_x:dif_h_x, dif_l_y:dif_h_y, dif_l_z:dif_h_z]
 
@@ -2555,7 +2559,7 @@ class UniStat(object):
             s_sig = sg / self.__res
 
         # Averaging
-        if callable(getattr(self.__simulator.__class__, 'get_rnd_rots_array')):
+        if isinstance(getattr(self.__simulator.__class__, 'get_rnd_rots_array'), collections.Callable):
             temp_rots = self.__simulator.get_rnd_rots_array()
         else:
             return None
@@ -3170,7 +3174,7 @@ class UniStat(object):
             threads = list()
             queues = list()
             for rad in rads:
-                q = Queue.Queue()
+                q = queue.Queue()
                 th = mt.Thread(target=self.__compute_W_q, args=(q, rad, bins))
                 th.start()
                 threads.append(th)
@@ -3405,7 +3409,7 @@ class UniStat(object):
 
             # Intermediate subvolumes
             if not sub_dense[int(pt_s[0]), int(pt_s[1]), int(pt_s[2])]:
-                print 'WARNING (__th_function_K) : unexepected event in point ' + str(pt_s)
+                print('WARNING (__th_function_K) : unexepected event in point ' + str(pt_s))
             sub_dense[int(pt_s[0]), int(pt_s[1]), int(pt_s[2])] = False
             dense_ids = sub_dense * sub_mask
 
@@ -3435,7 +3439,7 @@ class UniStat(object):
 
             # Intermediate subvolumes
             if not sub_dense[pt_s[0], pt_s[1], pt_s[2]]:
-                print 'WARNING (__th_function_NSD) : unexepected event in point ' + str(pt_s)
+                print('WARNING (__th_function_NSD) : unexepected event in point ' + str(pt_s))
             sub_dense[pt_s[0], pt_s[1], pt_s[2]] = False
             dense_ids = sub_dense * sub_mask
 
@@ -4361,8 +4365,8 @@ class PlotUni(object):
         colors = cm.rainbow(np.linspace(0, 1, len(self.__unis)))
 
         if self.not_eq_intensities():
-            print 'WARNING: Function G is not a proper metric for comparing patterns with different ' \
-                  'intensities'
+            print('WARNING: Function G is not a proper metric for comparing patterns with different ' \
+                  'intensities')
 
         # Plotting
         fig = plt.figure()
@@ -4425,8 +4429,8 @@ class PlotUni(object):
         colors = cm.rainbow(np.linspace(0, 1, len(self.__unis)))
 
         if self.not_eq_intensities():
-            print 'WARNING: Function F is not a proper metric for comparing patterns with different ' \
-                  'intensities'
+            print('WARNING: Function F is not a proper metric for comparing patterns with different ' \
+                  'intensities')
 
         # Plotting
         fig = plt.figure()
@@ -5197,7 +5201,7 @@ class PlotUni(object):
                 dsts.append(dst)
                 Gs.append(g)
             except pexceptions.PySegInputWarning as e:
-                print e.get_message()
+                print(e.get_message())
                 raise pexceptions.PySegInputError('__compute_Gs (PlotUni)', e.get_message())
         else:
             for uni in self.__unis:
@@ -5206,7 +5210,7 @@ class PlotUni(object):
                     dsts.append(dst)
                     Gs.append(g)
                 except pexceptions.PySegInputWarning as e:
-                    print e.get_message()
+                    print(e.get_message())
                     raise pexceptions.PySegInputError('__compute_Gs (PlotUni)', e.get_message())
 
         # Updating class variable
@@ -5233,7 +5237,7 @@ class PlotUni(object):
                 dsts.append(dst)
                 Fs.append(f)
             except pexceptions.PySegInputWarning as e:
-                print e.get_message()
+                print(e.get_message())
                 raise pexceptions.PySegInputError('__compute_Gs (PlotUni)', e.get_message())
         else:
             for uni in self.__unis:
@@ -5697,8 +5701,8 @@ class PlotBi(object):
         colors = cm.rainbow(np.linspace(0, 1, len(self.__bis)))
 
         if self.not_eq_intensities():
-            print 'WARNING: Function G is not a proper metric for comparing patterns with different ' \
-                  'intensities'
+            print('WARNING: Function G is not a proper metric for comparing patterns with different ' \
+                  'intensities')
 
         # Plotting
         fig = plt.figure()
@@ -6004,7 +6008,7 @@ class PlotBi(object):
                 dsts.append(dst)
                 Gs.append(g)
             except pexceptions.PySegInputWarning as e:
-                print e.get_message()
+                print(e.get_message())
                 raise pexceptions.PySegInputError('__compute_Gs (PlotBi)', e.get_message())
         else:
             for bi in self.__bis:
@@ -6013,7 +6017,7 @@ class PlotBi(object):
                     dsts.append(dst)
                     Gs.append(g)
                 except pexceptions.PySegInputWarning as e:
-                    print e.get_message()
+                    print(e.get_message())
                     raise pexceptions.PySegInputError('__compute_Gs (PlotBi)', e.get_message())
 
         # Updating class variable

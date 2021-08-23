@@ -39,10 +39,15 @@ and adjust the value if needed, and comment out the other options.
 because they most likely arise from calculating denisty of a 0-volume segment
 and are also a consequence of the changed behavior of scipy. 
 
-$Id: regions.py 1493 2018-11-08 16:23:38Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1493 $"
+from __future__ import unicode_literals
+from builtins import zip
+#from builtins import str
+from past.builtins import basestring
+
+__version__ = "$Revision$"
 
 import sys
 import os
@@ -110,8 +115,8 @@ if tomo_info is not None: labels_data_type = tomo_info.labels_data_type
 # labels file byte order ('<' for little-endian, '>' for big-endian)
 labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labels_array_order = 'FORTRAN'
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 # offset of labels in respect to the image (None means 0-offset)
 labels_offset = None
@@ -341,13 +346,13 @@ def is_multi_boundaries():
     """
     Returns True if maultiple boundaries (labels) files are given.
     """
-    if isinstance(labels_file_name, str):
+    if isinstance(labels_file_name, basestring):
         return False
     elif isinstance(labels_file_name, (tuple, list)):
         return True
     else:
-        raise ValueError, "labels_file_name has to be aither a string (one " \
-              + "labels file) or a tuple (multiple labels files)."    
+        raise ValueError("labels_file_name has to be aither a string (one " \
+              + "labels file) or a tuple (multiple labels files).")    
 
 def read_single_boundaries(suggest_shape=None):
     """

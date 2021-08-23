@@ -3,10 +3,12 @@
 Tests module catalog
 
 # Author: Vladan Lucic
-# $Id: test_catalog.py 1485 2018-10-04 14:35:01Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 1485 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest
@@ -17,7 +19,7 @@ import numpy.testing as np_test
 import scipy
 
 from pyto.analysis.catalog import Catalog
-import common
+from pyto.analysis.test import common
 
 
 class TestCatalog(np_test.TestCase):

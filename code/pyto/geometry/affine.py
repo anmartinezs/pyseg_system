@@ -3,14 +3,24 @@ Contains class Affine for preforming affine transformation (general linear
 transformation followed by translation) on points (vectors).
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: affine.py 1430 2017-03-24 13:18:43Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from builtins import object
+#from past.utils import old_div
+from functools import reduce
+from past.builtins import basestring
 
-__version__ = "$Revision: 1430 $"
+__version__ = "$Revision$"
 
 
 import warnings
 import logging
+from copy import copy, deepcopy
 
 import numpy
 import scipy
@@ -420,7 +430,7 @@ class Affine(object):
 
         # remove masked points
         #[x, y], mask = cls.removeMasked([x,y], [x_mask,y_mask])
-        #if (x_mask != None) or (y_mask != None):
+        #if (x_mask is not None) or (y_mask is not None):
         #    logging.warn("Arguments x_mask and y_mask are ignored.")
 
         # bring x and y to n_points x n_dim shape 
@@ -435,7 +445,7 @@ class Affine(object):
                 + "'point_dim' and 'dim_point'.")
 
         # bring x to reference frame
-        if isinstance(x_ref, str) and (x_ref == 'cm'):
+        if isinstance(x_ref, basestring) and (x_ref == 'cm'):
             x_ref = numpy.mean(x, axis=0)
         elif isinstance(x_ref, (list, tuple, numpy.ndarray)):
             pass
@@ -446,7 +456,7 @@ class Affine(object):
         x_prime = x - x_ref
 
         # bring y to reference frame
-        if isinstance(y_ref, str) and (y_ref == 'cm'):
+        if isinstance(y_ref, basestring) and (y_ref == 'cm'):
             y_ref = numpy.mean(y, axis=0)
         elif isinstance(y_ref, (list, tuple, numpy.ndarray)):
             pass
@@ -568,10 +578,10 @@ class Affine(object):
 
         return inst
 
-    def transform(self, x, gl=None, d=None, origin=None, xy_axes=None):
+    def transform(self, x, gl=None, d=None, center=None, xy_axes=None):
         """
         Applies transformation defined by gl and d to points x. The gl
-        transformation is performed around arg origin.
+        transformation is performed around arg center.
 
         If args gl or d are None self.gl and self.d are used.
 
@@ -586,13 +596,22 @@ class Affine(object):
         In all cases the returned points have the same form as the input 
         points (arg x).
 
+        If the arg center is specified, the transformation is applied
+        in respect to the arg center, and not in respect to 0 (coordinate
+        system origin). In other words, the gl (includes rotation and
+        scaling) part transforms the point at the arg center to the
+        same point. Therefore, this method is consistent with 
+        shiftCenter() and resetCenter() methods, but not with 
+        Rigid3D.recalculate_translation() where the rotation center is
+        shifted, but the scaling center remains at 0.
+
         Arguments:
           - x: coordinates of one or more points
           - gl: matrix representation of general linear transformation
           - d: translation vector (0 means 0 in each coordinate)
-          - origin: coordinates of the origin for the gl transformation, 
-          None or 0 for origin at the coordinate system origin, otherwise
-          list, ndarray or tuple
+          - center: coordinates of the center for the gl transformation, 
+          None or 0 for center at the coordinate system origin, otherwise
+          list, ndarray or tuple containing center coordinates
           - xy_axes: order of axes in matrices representing points
 
         Returns:
@@ -608,14 +627,19 @@ class Affine(object):
             d = self.d
         d = Affine.makeD(d, ndim=gl.shape[0])
 
-        # odjust for origin if needed
-        if ((origin is not None) 
-            and isinstance(origin, (list, numpy.ndarray, tuple))):
-            gl_origin = numpy.identity(self.ndim) - gl
-            d_origin = self.transform(
-                x=origin, gl=gl_origin, d=0, xy_axes='point_dim')
-            d = d + d_origin
+        # odjust for center if needed
+        #if ((center is not None) 
+        #    and isinstance(center, (list, numpy.ndarray, tuple))):
+        #    gl_center = numpy.identity(self.ndim) - gl
+        #    d_center = self.transform(
+        #        x=center, gl=gl_center, d=0, xy_axes='point_dim')
+        #    d = d + d_center
 
+        if center is not None:
+            tmp = Affine(gl=gl, d=d)
+            aff_reset = tmp.resetCenter(center=center)
+            d = aff_reset.d
+            
         if (x is not None) and (len(x) > 0):
  
             if xy_axes == 'point_dim':
@@ -639,34 +663,65 @@ class Affine(object):
                     d_exp = numpy.expand_dims(d_exp, -1)
                 res = res + d_exp
 
+            else:
+                raise ValueError(
+                    "Argument xy_axes has to be: 'point_dim', 'dim_point', "+
+                    "or 'mgrid'. Currently specified {}".format(xy_axes))
+
         else:
             res = None
 
         return res
 
     def transformArray(
-            self, array, origin, return_grid=False, output=None, 
-            order=1, mode='constant', cval=0.0, prefilter=False):
+            self, array, center=None, shape=None, return_grid=False,
+            output=None, order=1, mode='constant', cval=0.0, prefilter=False):
         """
         Transformes the given array, typically an image (arg array) 
         according to the transformation of this instance. Rotation 
-        center is given by arg origin.
+        center is given by arg center.
+
+        If arg shape is None, the transformed array will have the same 
+        shape as arg array. Consequently, after the transformation, some 
+        parts of the original array may be removed because they are 
+        located outside of the returned array (for example when
+        the transformation scale >1). To solve this, arg shape can be 
+        specifid to set the shape or the output (transformed) array.
 
         Uses transform() method to (inversly) transform the complete index 
-        (coordinate) grid corresponding to the given array to make the
-        transformed grid.
+        (coordinate) grid corresponding to the given array, or an array
+        having the specified shape, to make the transformed grid.
 
         Then it calls scipy.ndimage.map_coordinates() to transform the
         image according to the transformed grid. This step includes 
         (n-linear or higer spline) interpolation.
 
-        Note that in the default case (mode='constant') transformed values 
-        at coordinates that are even tiny bit outside the original grid are 
-        set to cval.
+        Note that the values from the boundary (edges) of the input array, 
+        may suffer artefacts during the transformation. In the default case
+        (mode='constant') some border values might be removed. Setting
+        mode='nearest' generally avoids removing those values but may
+        add other values. A safe procedure is to make sure that the region 
+        of interest of the input array is not on the image borders
+        (by padding, for example) and that the transformed region of 
+        interest is not on the edge of the resulting array (by setting 
+        arg shape and adjusting translation).
+
+        If the arg center is specified, the transformation is applied
+        in respect to the arg center, and not in respect to 0 (coordinate
+        system origin). In other words, the gl (includes rotation and
+        scaling) part transforms the point at the arg center to the
+        same point. Therefore, this method is consistent with 
+        shiftCenter() and resetCenter() methods, but not with 
+        Rigid3D.recalculate_translation() where the rotation center is
+        shifted, but the scaling center remains at 0.
 
         Arguments:
           - array: array (image) to be transformed
-          - origin: (1d ndarray) coordinates of the rotation origin
+          - center: coordinates of the center for the gl transformation, 
+          None or 0 for center at the coordinate system origin, otherwise
+          list, ndarray or tuple containing center coordinates
+          - shape: shape of the output (transformed) array, None to keep the
+          same shape as arg array
           - return_grid: flag indicating if the grid that was used to make
           this transformation is also returned
           - output, order, mode, cval, prefilter: arguments of
@@ -685,8 +740,13 @@ class Affine(object):
         
         # inverse transform original grid
         inverse = self.inverse()
-        ori_grid = numpy.mgrid[tuple([slice(0,sha) for sha in array.shape])]
-        new_grid = inverse.transform(ori_grid, origin=origin, xy_axes='mgrid')
+        if shape is None:
+            shape = array.shape
+        ori_grid = numpy.mgrid[tuple([slice(0,sha) for sha in shape])]
+        new_grid = inverse.transform(ori_grid, center=center, xy_axes='mgrid')
+        # Note: new_grid should not be just rounded to a nearest int because
+        # this may interfeer with interpolation. Better avoid array
+        # boundaries, as explained in docstring.
 
         # transform image
         new_image = scipy.ndimage.map_coordinates(
@@ -700,12 +760,12 @@ class Affine(object):
             return new_image
 
     def _transformArray_old(
-            self, array, origin, return_grid=False, output=None, 
+            self, array, center, return_grid=False, output=None, 
             order=1, mode='constant', cval=0.0, prefilter=False):
         """
         Transformes the given array, typically an image (arg array) 
         according to the transformation of this instance. Rotation 
-        center is given by arg origin.
+        center is given by arg center.
 
         Uses transform() method to (inversly) transform the complete index 
         (coordinate) grid corresponding to the given array to make the
@@ -716,12 +776,12 @@ class Affine(object):
         (n-linear or higer spline) interpolation.
 
         Note that in the default case (mode='constant') transformed values 
-        at coordinates that are even tiny bit outside the original grid are 
+        at coordinates that are even tiny bit outside the centeral grid are 
         set to cval.
 
         Arguments:
           - array: array (image) to be transformed
-          - origin: (1d ndarray) coordinates of the rotation origin
+          - center: (1d ndarray) coordinates of the rotation center
           - return_grid: flag indicating if the grid that was used to make
           this transformation is also returned
           - output, order, mode, cval, prefilter: arguments of
@@ -744,17 +804,17 @@ class Affine(object):
         ori_grid = numpy.mgrid[tuple([slice(0,sha) for sha in array.shape])]
  
         # center original grid
-        origin_expanded = origin
-        for ax in range(len(origin)):
-            origin_expanded = numpy.expand_dims(origin_expanded, -1)
-        centered_grid = ori_grid - origin_expanded
+        center_expanded = center
+        for ax in range(len(center)):
+            center_expanded = numpy.expand_dims(center_expanded, -1)
+        centered_grid = ori_grid - center_expanded
 
         # grid transformation is inverse of intended image transform
         grid_t = self.inverse()
 
-        # add translation that moves origin back
+        # add translation that moves center back
         ori_trans = self.identity(ndim=self.ndim)
-        ori_trans.d = origin
+        ori_trans.d = center
         grid_t = self.compose(ori_trans, grid_t)
 
         # inverse transform centered grid
@@ -1139,8 +1199,13 @@ class Affine(object):
 
         If gl is None self.gl and self.d are used (argument d is ignored).
 
-        Arg subgl == 'q', should be used for the inverse of Rigid3D.
-
+        Arg subgl == 'q', should be used for the inverse of Rigid3D. In
+        this case, gl of the inverted transformation is decomposed to yield
+        rotation, parity, scale and shear matrices. Scale matrix is 
+        converted to a scalar scale. To make the final inverted transform, 
+        the rotation matrix and scalar scale are used, while parity and 
+        shear are ignored. 
+        
          Arguments:
           - gl: general linear transformation matrix
           - d: translation vector
@@ -1231,7 +1296,7 @@ class Affine(object):
         elif subgl == 'q':
             aff = Affine(gl)
             q, p, s, m = aff.decomposeQR(order='qr')
-            from rigid_3d import Rigid3D
+            from .rigid_3d import Rigid3D
             s_scalar = Rigid3D.makeScalar(s, check=False)
             tr = Rigid3D(q=q, scale=s_scalar, d=d)
         else:
@@ -1272,12 +1337,131 @@ class Affine(object):
             scale = s.diagonal()
 
             # estimate rms error
-            mean_s1 = numpy.multiply.reduce(scale) ** (1./len(scale))
+            mean_s1 = numpy.multiply.reduce(scale) ** (1. / len(scale))
             ms_error = t_1_rmsError ** 2 + (mean_s1 * t_2_rmsError) ** 2
             tr.rmsErrorEst = numpy.sqrt(ms_error)
 
         return tr        
 
+    def shiftCenter(self, center):
+        """
+        Makes a new object of this class where rotation and the other 
+        components of the general linear transformation are taken to be in 
+        respect to a arg center, that is a point other than the standard 
+        coordinate system origin (all coordinates 0). The new transformation 
+        is equivalent to the current one and all other attributes are
+        deepcopied to the new object.
+
+        Specifically, the general linear transformation of the new object
+        remains the same, but the translation is changed:
+
+          new_translation = old_translation - (1 - Gl) center
+ 
+        This method can be applied only on objects that have 0 center,
+        that is attribute center is either not set, it is None, 0 or
+        [0, 0, ...].
+       
+        This method is different from Rigid3D.recalculate_translation()
+        in that the latter keeps the scaling center at 0 (coordinate
+        origin), while here both rotation and scaling (thus also gl) 
+        centers are shifted to arg center.
+
+        Note that attribute self.center that is set here is used only in 
+        resetCenter() method and not in any other method (including
+        transform() and transformArray()).
+
+        Sets attributes
+          - center: coordinates of the new center
+
+        Argument:
+          - center: coordinates of the new center
+
+        Returns: the new instance
+        """
+
+        # check if no center in current object
+        try:
+            if (self.center is None): pass
+            elif isinstance(self.center, (int, float)) and (self.center == 0):
+                pass
+            elif (isinstance(self.center, (numpy.ndarray, list, tuple)) and
+                (numpy.array(self.center) == 0).all()):
+                pass
+            else:
+                raise ValueError(
+                    "This method can only be applied on objects that "
+                    + "have 0 center")
+        except AttributeError: pass
+        
+        # initialize new object
+        new = deepcopy(self)
+        new.center = numpy.asarray(center)
+
+        # calculate new translation
+        gl_tmp = numpy.identity(self.ndim) - self.gl
+        aff_tmp = Affine()
+        d_center = aff_tmp.transform(
+            x=center, gl=gl_tmp, d=0, xy_axes='point_dim')
+        new.d = self.d - d_center
+
+        return new
+
+    def resetCenter(self, center=None):
+        """
+        Makes a new object of this class where rotation and the other 
+        components of the general linear transformation are taken to be in 
+        respect to the standard coordinate system origin (all coordinates 0),
+        instead of at another point (center).
+
+        The current transformation has to be defined in respect to a
+        point given by arg center, or if arg center is None by attribute
+        self.center.
+
+        The new transformation is equivalent to the current one and all 
+        other attributes are deepcopied to the new object.
+
+        Specifically, the general linear transformation of the new object
+        remains the same, but the translation is changed:
+
+          new_translation = old_translation + (1 - Gl) center
+        
+        Sets attributes
+          - center: 0
+
+        Argument:
+          - center: coordinates of the current center
+
+        Returns: the new instance
+        """
+
+        # initialize new object
+        if center is None:
+            try:
+                center = self.center
+            except AttributeError:
+                print(
+                    "Arg center has to be specified because self.center "
+                    + "was not defined.")
+        if center is None:
+            raise ValueError(
+                "Arg center has to be specified because self.center is None")
+        new = deepcopy(self)
+        new.center = 0 # None or numpy.zeros(self.ndim)?
+
+        # set 0-center properly
+        if isinstance(center, int) and (center == 0):
+            center = numpy.zeros(self.ndim)
+        
+        # calculate new translation
+        gl_tmp = numpy.identity(self.ndim) - self.gl
+        aff_tmp = Affine()
+        d_center = aff_tmp.transform(
+            x=center, gl=gl_tmp, d=0, xy_axes='point_dim')
+        new.d = self.d + d_center
+        
+        return new
+ 
+    
     ##############################################################
     #
     # Other methods

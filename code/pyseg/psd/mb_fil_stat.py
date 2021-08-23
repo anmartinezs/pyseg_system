@@ -152,88 +152,88 @@ if (cr_l is not None) or (cr_h is not None):
 
 ########## Print initial message
 
-print 'Spatial analysis on membrane attached filaments.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput file(s): '
+print('Spatial analysis on membrane attached filaments.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput file(s): ')
 for fname in input_pkls:
-    print '\t\t' + fname
-print '\tDimensions to delete: ' + str(del_coord)
-print '\tOutput directory: ' + str(output_dir)
-print '\tFilament thresholds: '
+    print('\t\t' + fname)
+print('\tDimensions to delete: ' + str(del_coord))
+print('\tOutput directory: ' + str(output_dir))
+print('\tFilament thresholds: ')
 if len_th is not None:
-    print '\t\t- Length: ' + len_th.tostring() + ', ' + len_mode
+    print('\t\t- Length: ' + len_th.tostring() + ', ' + len_mode)
 if pen_th is not None:
-    print '\t\t- Penetration: ' + pen_th.tostring() + ', ' + pen_mode
+    print('\t\t- Penetration: ' + pen_th.tostring() + ', ' + pen_mode)
 if pent_th is not None:
-    print '\t\t- Tail penetration: ' + pent_th.tostring() + ', ' + pent_mode
+    print('\t\t- Tail penetration: ' + pent_th.tostring() + ', ' + pent_mode)
 if dst_th is not None:
-    print '\t\t- Head-tail distance: ' + dst_th.tostring() + ', ' + dst_mode
+    print('\t\t- Head-tail distance: ' + dst_th.tostring() + ', ' + dst_mode)
 if fild_th is not None:
-    print '\t\t- Denseness: ' + fild_th.tostring() + ', ' + fild_mode
+    print('\t\t- Denseness: ' + fild_th.tostring() + ', ' + fild_mode)
 if ct_th is not None:
-    print '\t\t- Curvature total: ' + ct_th.tostring() + ', ' + ct_mode
+    print('\t\t- Curvature total: ' + ct_th.tostring() + ', ' + ct_mode)
 if mc_th is not None:
-    print '\t\t- Maximum curvature: ' + mc_th.tostring() + ', ' + mc_mode
+    print('\t\t- Maximum curvature: ' + mc_th.tostring() + ', ' + mc_mode)
 if sin_th is not None:
-    print '\t\t- Sinuosity distance: ' + sin_th.tostring() + ', ' + sin_mode
+    print('\t\t- Sinuosity distance: ' + sin_th.tostring() + ', ' + sin_mode)
 if smo_th is not None:
-    print '\t\t- Denseness: ' + smo_th.tostring() + ', ' + smo_mode
+    print('\t\t- Denseness: ' + smo_th.tostring() + ', ' + smo_mode)
 if car_th is not None:
-    print '\t\t- Cardinality: ' + car_th.tostring() + ', ' + car_mode
+    print('\t\t- Cardinality: ' + car_th.tostring() + ', ' + car_mode)
 if cross_th is not None:
-    print '\t\t- Crossness: ' + str(cross_th) + ' nm'
-print '\tCloud features: '
+    print('\t\t- Crossness: ' + str(cross_th) + ' nm')
+print('\tCloud features: ')
 if side == 2:
-    print '\t\t- Side A'
+    print('\t\t- Side A')
 elif side == 3:
-    print '\t\t- Side B'
+    print('\t\t- Side B')
 else:
     sys.exit('Non valid side: ' + str(side))
 if struc == 1:
-    print '\t\t- Heads'
+    print('\t\t- Heads')
 elif struc == 2:
-    print '\t\t- Tails'
+    print('\t\t- Tails')
 elif struc == 3:
-    print '\t\t- Contacts'
+    print('\t\t- Contacts')
 else:
     sys.exit('Non valid side: ' + str(side))
-print '\tClustering mode:'
+print('\tClustering mode:')
 if clst_mode == 0:
-    print '\t\t-Affinity propagation with geodesic metric.'
+    print('\t\t-Affinity propagation with geodesic metric.')
 elif clst_mode == 1:
-    print '\t\t-Affinity propagation with euclidean metric.'
+    print('\t\t-Affinity propagation with euclidean metric.')
 else:
-    print '\t\t-Connectivity simple.'
-print '\tCluster thresholds: '
+    print('\t\t-Connectivity simple.')
+print('\tCluster thresholds: ')
 if cnp_th is not None:
-    print '\t\t- Number of Points: ' + cnp_th.tostring()
+    print('\t\t- Number of Points: ' + cnp_th.tostring())
 if ca_th is not None:
-    print '\t\t- Number of Points: ' + ca_th.tostring()
+    print('\t\t- Number of Points: ' + ca_th.tostring())
 if cd_th is not None:
-    print '\t\t- Number of Points: ' + cd_th.tostring()
+    print('\t\t- Number of Points: ' + cd_th.tostring())
 if cr_th is not None:
-    print '\t\t- Number of Points: ' + cr_th.tostring()
-print '\tAnalysis parameters: '
-print '\t\t- Number of samples: ' + str(n_samples)
-print '\t\t- F-function number of simulations: ' + str(rand_sim)
-print '\t\t- Ripley''s H: '
-print '\t\t\t-Number of simulations: ' + str(rand_sim_k)
-print '\t\t\t-Maximum distance : ' + str(max_dist) + ' nm'
+    print('\t\t- Number of Points: ' + cr_th.tostring())
+print('\tAnalysis parameters: ')
+print('\t\t- Number of samples: ' + str(n_samples))
+print('\t\t- F-function number of simulations: ' + str(rand_sim))
+print('\t\t- Ripley''s H: ')
+print('\t\t\t-Number of simulations: ' + str(rand_sim_k))
+print('\t\t\t-Maximum distance : ' + str(max_dist) + ' nm')
 if b_mode == 0:
-    print '\t\t\t-Border compensation not active'
+    print('\t\t\t-Border compensation not active')
 elif b_mode == 1:
-    print '\t\t\t-Border compensation by cloud inflation'
+    print('\t\t\t-Border compensation by cloud inflation')
 elif b_mode == 2:
-    print '\t\t\t-Border compensation by Goreaud'
+    print('\t\t\t-Border compensation by Goreaud')
 else:
     sys.exit('Non valid border compensation: ' + str(b_mode))
-print ''
+print('')
 
 ######### Process
 
-print '\tLoading the input clouds: '
+print('\tLoading the input clouds: ')
 if clstring:
     set_clouds = ps.spatial.SetClusters(n_samples, rand_sim, per_f, rand_sim_k, max_dist,
                                         b_mode, per_h)
@@ -244,13 +244,13 @@ den = list()
 clouds = list()
 for (pkl, d_coord) in zip(input_pkls, del_coord):
     path, fname = os.path.split(pkl)
-    print '\t\tUnpicking network: ' + fname
+    print('\t\tUnpicking network: ' + fname)
     net = ps.factory.unpickle_obj(pkl)
     if side == MB_IN_LBL:
         box = make_plane_box(net.get_graph_in().compute_bbox(), coord=d_coord) * net.get_resolution()
     else:
         box = make_plane_box(net.get_graph_out().compute_bbox(), coord=d_coord) * net.get_resolution()
-    print '\t\tApplying thresholds to ' + fname
+    print('\t\tApplying thresholds to ' + fname)
     if len_th is not None:
         net.threshold_len(len_th, len_mode)
     if pen_th is not None:
@@ -275,13 +275,13 @@ for (pkl, d_coord) in zip(input_pkls, del_coord):
         net.threshold_cdst_conts(cross_th)
     if clstring:
         if clst_mode == 0:
-            print '\t\tClustering (AF geodesic) ' + fname
+            print('\t\tClustering (AF geodesic) ' + fname)
             net.cont_clusters(side, approx=approx)
         elif clst_mode == 1:
-            print '\t\tClustering (AF euclidean) ' + fname
+            print('\t\tClustering (AF euclidean) ' + fname)
             net.cont_clusters_eu(side)
         else:
-            print '\t\tClustering (Connectivity simple) ' + fname
+            print('\t\tClustering (Connectivity simple) ' + fname)
             net.cont_clusters_conn(side)
 
     # print '\t\tStoring VTP for ' + fname
@@ -292,27 +292,27 @@ for (pkl, d_coord) in zip(input_pkls, del_coord):
         if struc == 1:
             sys.stdout.write('of heads ')
             if side == 2:
-                print 'of side A...'
+                print('of side A...')
             else:
-                print 'of side B...'
+                print('of side B...')
         if struc == 2:
             sys.stdout.write('of tails ')
             if side == 2:
-                print 'of side A...'
+                print('of side A...')
             else:
-                print 'of side B...'
+                print('of side B...')
         if struc == 3:
             sys.stdout.write('of contacts ')
             if side == 2:
-                print 'of side A...'
+                print('of side A...')
             else:
-                print 'of side B...'
+                print('of side B...')
         cloud, cloud_cids = net.get_cloud_clst_id(side, struc, eps)
         cloud = make_plane(cloud, coord=d_coord) * net.get_resolution()
         clst = ConnDom(cloud, cloud_cids, np.asarray(box, dtype=np.float))
-        print '\t\t\tApplying threshold to clusters...'
+        print('\t\t\tApplying threshold to clusters...')
         clst.threshold(th_npoints=cnp_th, th_areas=ca_th, th_den=cd_th, th_round=cr_th)
-        print '\t\t\tGetting clusters centers of gravity...'
+        print('\t\t\tGetting clusters centers of gravity...')
         cloud = clst.get_clst_cg()
         if plt_clst:
             clst.plot_clusters(prop='npoints', centers=plt_cgs)
@@ -323,24 +323,24 @@ for (pkl, d_coord) in zip(input_pkls, del_coord):
         if struc == 1:
             sys.stdout.write('of heads ')
             if side == 2:
-                print 'of side A...'
+                print('of side A...')
             else:
-                print 'of side B...'
+                print('of side B...')
         if struc == 2:
             sys.stdout.write('of tails ')
             if side == 2:
-                print 'of side A...'
+                print('of side A...')
             else:
-                print 'of side B...'
+                print('of side B...')
         if struc == 3:
             sys.stdout.write('of contacts ')
             if side == 2:
-                print 'of side A...'
+                print('of side A...')
             else:
-                print 'of side B...'
+                print('of side B...')
         cloud, cards = net.get_cloud_points(side, struc, eps, card=True)
         cloud = make_plane(cloud, coord=d_coord) * net.get_resolution()
-    print '\t\tInserting cloud in analyzer'
+    print('\t\tInserting cloud in analyzer')
     if clstring:
         mask = clst.get_del_mask()
         if not del_mask:
@@ -349,15 +349,15 @@ for (pkl, d_coord) in zip(input_pkls, del_coord):
     else:
         set_clouds.insert_cloud(cloud, box, cards)
 
-print '\tAnalyzing...'
+print('\tAnalyzing...')
 set_clouds.analyze(h_sim=comp_k, verbose=True, r_acc=r_acc)
 
-print '\tPlotting the results (close all windows to end)...'
+print('\tPlotting the results (close all windows to end)...')
 set_clouds.plot(block=True)
 
 output_pkl = output_dir + '/' + stem_name + '.pkl'
-print '\tStoring the result in file ' + output_pkl
+print('\tStoring the result in file ' + output_pkl)
 set_clouds.pickle(output_pkl)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')
 

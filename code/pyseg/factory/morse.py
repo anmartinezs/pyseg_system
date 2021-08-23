@@ -11,7 +11,7 @@ import operator
 import copy as pcopy
 # import pyseg.graph as gp
 # import pyseg.vtk_ext
-import visitor
+from . import visitor
 from pyseg.globals import *
 # import pyseg.disperse_io
 

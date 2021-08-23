@@ -49,24 +49,24 @@ def do_mcf_clustering(input_file, prop_key, ainv, pref, pinv, damp, conv_iter, m
                      grow, seg_file, alg, eps, verbose):
 
     if verbose:
-        print '\tLoading the graph...'
+        print('\tLoading the graph...')
     path, stem = os.path.split(input_file)
     stem, ext = os.path.splitext(stem)
     if ext == '.pkl':
         graph_mcf = unpickle_obj(input_file)
     else:
-        print '\tERROR: ' + ext + ' is a non valid format.'
+        print('\tERROR: ' + ext + ' is a non valid format.')
         sys.exit(4)
 
     if seg_file is not None:
         if verbose:
-            print '\tThresholding graph arcs in mask...'
+            print('\tThresholding graph arcs in mask...')
         mask = ps.disperse_io.load_tomo(seg_file)
         graph_mcf.threshold_edges_in_mask(mask)
 
     if alg == 'dbscan':
         if verbose:
-            print '\tClustering by DBSCAN...'
+            print('\tClustering by DBSCAN...')
         import operator
         graph_mcf.threshold_vertices(STR_GRAPH_RELEVANCE, 1, operator.ne)
         graph_gt = GraphGT(graph_mcf)
@@ -77,7 +77,7 @@ def do_mcf_clustering(input_file, prop_key, ainv, pref, pinv, damp, conv_iter, m
                         rand=True)
     elif alg == 'bm':
         if verbose:
-            print '\tClutering by community blockmodel...'
+            print('\tClutering by community blockmodel...')
         graph_gt = GraphGT(graph_mcf)
         graph_gt.community_bm(affinity=prop_key,
                               ainv=ainv,
@@ -85,7 +85,7 @@ def do_mcf_clustering(input_file, prop_key, ainv, pref, pinv, damp, conv_iter, m
                               rand=True)
     else:
         if verbose:
-            print '\tClustering by affinity propagation...'
+            print('\tClustering by affinity propagation...')
         graph_gt = GraphGT(graph_mcf)
         graph_gt.aff_propagation(damp=damp,
                                  conv_iter=conv_iter,
@@ -97,7 +97,7 @@ def do_mcf_clustering(input_file, prop_key, ainv, pref, pinv, damp, conv_iter, m
                                  rand=True)
 
     if verbose:
-        print '\tAssign the clusters to the graph...'
+        print('\tAssign the clusters to the graph...')
     if alg == 'dbscan':
         graph_gt.add_prop_to_GraphMCF(graph_mcf, STR_DBSCAN_CLUST, up_index=True)
     elif alg == 'bm':
@@ -107,7 +107,7 @@ def do_mcf_clustering(input_file, prop_key, ainv, pref, pinv, damp, conv_iter, m
         graph_gt.add_prop_to_GraphMCF(graph_mcf, STR_AFF_CENTER, up_index=True)
 
     if verbose:
-        print '\tStoring the result in ' + input_file
+        print('\tStoring the result in ' + input_file)
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
     graph_mcf.pickle(input_file)
@@ -124,7 +124,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvxqi:w:p:d:c:m:b:s:a:e")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = None
@@ -142,8 +142,8 @@ def main(argv):
     verbose = False
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-i":
             input_file = arg
@@ -151,8 +151,8 @@ def main(argv):
             if (arg == 'af') or (arg == 'dbscan') or (arg == 'bm'):
                 alg = arg
             else:
-                print 'Unknown argument for -a ' + arg
-                print usage_msg
+                print('Unknown argument for -a ' + arg)
+                print(usage_msg)
                 sys.exit(3)
         elif opt == "-e":
             eps = float(arg)
@@ -177,51 +177,51 @@ def main(argv):
         elif opt == "-v":
             verbose = True
         else:
-            print 'Unknown option ' + opt
-            print usage_msg
+            print('Unknown option ' + opt)
+            print(usage_msg)
             sys.exit(3)
 
     if (input_file is None) or (prop_key is None):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running tool drawing a graph.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
+            print('Running tool drawing a graph.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
             if ainv:
-                print '\tEdge weighting property (inverted): ' + prop_key
+                print('\tEdge weighting property (inverted): ' + prop_key)
             else:
-                print '\tEdge weighting property: ' + prop_key
+                print('\tEdge weighting property: ' + prop_key)
             if pref is not None:
-                print '\tPreference value: ' + str(pref)
+                print('\tPreference value: ' + str(pref))
             if grow is not None:
-                print '\tRemap input weights logistic growing factor: ' + str(grow)
+                print('\tRemap input weights logistic growing factor: ' + str(grow))
             if seg_file is not None:
-                print '\tDelete edges in mask: ' + seg_file
+                print('\tDelete edges in mask: ' + seg_file)
             if alg == 'af':
-                print '\tAlgorithm: Affinity Propagation'
-                print '\t\tDamping factor: ' + str(damp)
-                print '\t\tConvergence iterations: ' + str(conv_iter)
-                print '\t\tMaximum iterations: ' + str(max_iter)
+                print('\tAlgorithm: Affinity Propagation')
+                print('\t\tDamping factor: ' + str(damp))
+                print('\t\tConvergence iterations: ' + str(conv_iter))
+                print('\t\tMaximum iterations: ' + str(max_iter))
             elif alg == 'bm':
-                print '\tAlgorithm: Community blockmodel'
+                print('\tAlgorithm: Community blockmodel')
             else:
-                print '\tAlgorithm: DBSCAN'
-                print '\t\tEps: ' + str(eps)
-            print ''
+                print('\tAlgorithm: DBSCAN')
+                print('\t\tEps: ' + str(eps))
+            print('')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_mcf_clustering(input_file, prop_key, ainv, pref, pinv, damp, conv_iter, max_iter,
                           grow, seg_file, alg, eps, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed. (' + time.strftime("%c") + ')'
+            print(cmd_name + ' successfully executed. (' + time.strftime("%c") + ')')
 
 
 if __name__ == "__main__":

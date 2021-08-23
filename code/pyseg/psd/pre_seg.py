@@ -263,88 +263,88 @@ def store_vtp(pre_graph, pre_cl, pre_ids, pre_ids2, cont_cl, cont_ids, cont_ids2
 
 ########## Print initial message
 
-print 'Spatial analysis for PSD segmentation.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tPre-synaptic pickle file(s): ' + pre_in_pkl
-print '\tPre-synaptic segmentation file(s): ' + pre_in_seg
-print '\tDimensions to delete: ' + str(del_coord)
-print '\tOutput directory: ' + str(output_dir)
-print '\tSlices files: ' + slices_file + ', ' + cont_file
-print ''
+print('Spatial analysis for PSD segmentation.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tPre-synaptic pickle file(s): ' + pre_in_pkl)
+print('\tPre-synaptic segmentation file(s): ' + pre_in_seg)
+print('\tDimensions to delete: ' + str(del_coord))
+print('\tOutput directory: ' + str(output_dir))
+print('\tSlices files: ' + slices_file + ', ' + cont_file)
+print('')
 
 ######### Process
 
-print 'Loading the input graphs:'
+print('Loading the input graphs:')
 path, fname = os.path.split(pre_in_pkl)
 pst_stem_name, _ = os.path.splitext(fname)
 
-print '\tUnpicking graph ' + pre_in_pkl
+print('\tUnpicking graph ' + pre_in_pkl)
 pre_graph = ps.factory.unpickle_obj(pre_in_pkl)
 pre_seg = ps.disperse_io.load_tomo(pre_in_seg)
 
-print '\tLoading XML file with the slices...'
+print('\tLoading XML file with the slices...')
 v_slices = SliceSet(slices_file)
 c_slices = SliceSet(cont_file)
 box = make_plane_box(pre_graph.compute_bbox(), coord=del_coord) * pre_graph.get_resolution()
 
-print '\tSlices loop:'
+print('\tSlices loop:')
 sl = v_slices.get_slices_list()[0]
 cl = c_slices.get_slices_list()[0]
-print '\t\tLooking for slice named ' + sl.get_name()
+print('\t\tLooking for slice named ' + sl.get_name())
 
-print '\t\tProcessing slice ' + sl.get_name() + ':'
-print '\t\t\t-Euclidean distance: (' + sl.get_eu_dst_sign() + ')[' \
-              + str(sl.get_eu_dst_low()) + ', ' + str(sl.get_eu_dst_high()) + '] nm'
-print '\t\t\t-Geodesic distance: (' + sl.get_geo_dst_sign() + ')[' \
-              + str(sl.get_geo_dst_low()) + ', ' + str(sl.get_geo_dst_high()) + '] nm'
-print '\t\t\t-Geodesic length: (' + sl.get_geo_len_sign() + ')[' \
-              + str(sl.get_geo_len_low()) + ', ' + str(sl.get_geo_len_high()) + '] nm'
-print '\t\t\t-Sinuosity: (' + sl.get_sin_sign() + ')[' \
-              + str(sl.get_sin_low()) + ', ' + str(sl.get_sin_high()) + '] nm'
-print '\t\t\t-Cluster number of points: (' + sl.get_cnv_sign() + ')[' \
-              + str(sl.get_cnv_low()) + ', ' + str(sl.get_cnv_high()) + ']'
-print '\t\t\tGetting membrane slice filaments...'
+print('\t\tProcessing slice ' + sl.get_name() + ':')
+print('\t\t\t-Euclidean distance: (' + sl.get_eu_dst_sign() + ')[' \
+              + str(sl.get_eu_dst_low()) + ', ' + str(sl.get_eu_dst_high()) + '] nm')
+print('\t\t\t-Geodesic distance: (' + sl.get_geo_dst_sign() + ')[' \
+              + str(sl.get_geo_dst_low()) + ', ' + str(sl.get_geo_dst_high()) + '] nm')
+print('\t\t\t-Geodesic length: (' + sl.get_geo_len_sign() + ')[' \
+              + str(sl.get_geo_len_low()) + ', ' + str(sl.get_geo_len_high()) + '] nm')
+print('\t\t\t-Sinuosity: (' + sl.get_sin_sign() + ')[' \
+              + str(sl.get_sin_low()) + ', ' + str(sl.get_sin_high()) + '] nm')
+print('\t\t\t-Cluster number of points: (' + sl.get_cnv_sign() + ')[' \
+              + str(sl.get_cnv_low()) + ', ' + str(sl.get_cnv_high()) + ']')
+print('\t\t\tGetting membrane slice filaments...')
 pre_cloud, h_pre_cloud_ids = pre_graph.get_cloud_mb_slice_fils(sl)
 pre_cloud, pre_cloud_ids = purge_repeat_coords2(np.asarray(pre_cloud, dtype=np.float) * pre_graph.get_resolution(),
                                                         h_pre_cloud_ids, eps_cont)
-print '\t\t\t-Vertices found: ' + str(pre_cloud.shape[0])
+print('\t\t\t-Vertices found: ' + str(pre_cloud.shape[0]))
 
-print '\t\tProcessing slice for contact points ' + cl.get_name() + ':'
-print '\t\t\t-Euclidean distance: (' + cl.get_eu_dst_sign() + ')[' \
-              + str(cl.get_eu_dst_low()) + ', ' + str(cl.get_eu_dst_high()) + '] nm'
-print '\t\t\t-Geodesic distance: (' + cl.get_geo_dst_sign() + ')[' \
-              + str(cl.get_geo_dst_low()) + ', ' + str(cl.get_geo_dst_high()) + '] nm'
-print '\t\t\t-Geodesic length: (' + cl.get_geo_len_sign() + ')[' \
-              + str(cl.get_geo_len_low()) + ', ' + str(cl.get_geo_len_high()) + '] nm'
-print '\t\t\t-Sinuosity: (' + cl.get_sin_sign() + ')[' \
-              + str(cl.get_sin_low()) + ', ' + str(cl.get_sin_high()) + '] nm'
-print '\t\t\t-Cluster number of points: (' + cl.get_cnv_sign() + ')[' \
-              + str(cl.get_cnv_low()) + ', ' + str(cl.get_cnv_high()) + ']'
-print '\t\t\tGetting membrane slice filaments...'
+print('\t\tProcessing slice for contact points ' + cl.get_name() + ':')
+print('\t\t\t-Euclidean distance: (' + cl.get_eu_dst_sign() + ')[' \
+              + str(cl.get_eu_dst_low()) + ', ' + str(cl.get_eu_dst_high()) + '] nm')
+print('\t\t\t-Geodesic distance: (' + cl.get_geo_dst_sign() + ')[' \
+              + str(cl.get_geo_dst_low()) + ', ' + str(cl.get_geo_dst_high()) + '] nm')
+print('\t\t\t-Geodesic length: (' + cl.get_geo_len_sign() + ')[' \
+              + str(cl.get_geo_len_low()) + ', ' + str(cl.get_geo_len_high()) + '] nm')
+print('\t\t\t-Sinuosity: (' + cl.get_sin_sign() + ')[' \
+              + str(cl.get_sin_low()) + ', ' + str(cl.get_sin_high()) + '] nm')
+print('\t\t\t-Cluster number of points: (' + cl.get_cnv_sign() + ')[' \
+              + str(cl.get_cnv_low()) + ', ' + str(cl.get_cnv_high()) + ']')
+print('\t\t\tGetting membrane slice filaments...')
 pre_cloud_cont, h_pre_cloud_ids_cont = pre_graph.get_cloud_mb_slice(cl, cont_mode=True)
 pre_cloud_cont, pre_cloud_ids_cont = purge_repeat_coords2(np.asarray(pre_cloud_cont, dtype=np.float) * pre_graph.get_resolution(),
                                                                   h_pre_cloud_ids_cont, eps_cont)
-print '\t\t\t-Contact points found: '  + str(pre_cloud_cont.shape[0])
+print('\t\t\t-Contact points found: '  + str(pre_cloud_cont.shape[0]))
 
 
-print '\tGenerating segmentation...'
+print('\tGenerating segmentation...')
 pa_seg, pa_cl, pa_ids, pa_ids2 = gen_pre_seg(pre_graph, pre_cloud_ids, th_den)
 
-print '\tStoring clouds...'
+print('\tStoring clouds...')
 store_plt_clouds(pa_cl, pa_ids2, output_dir)
 cont_cl, cont_ids, cont_ids2 = store_plt_cont_clouds(pre_cloud_cont, pre_cloud_ids_cont, pa_ids, pa_ids2, output_dir)
 
-print '\tStoring poly data...'
+print('\tStoring poly data...')
 cont_cl = np.asarray(cont_cl, dtype=np.float) / pre_graph.get_resolution()
 store_vtp(pre_graph, pa_cl, pa_ids, pa_ids2, cont_cl, cont_ids, cont_ids2, output_dir)
 
-print '\tStoring segmentation...'
+print('\tStoring segmentation...')
 output_seg = output_dir + '/' + 'pre_seg_1.vti'
 ps.disperse_io.save_numpy(pa_seg, output_seg)
 
-print '\tStoring the set of clouds...'
+print('\tStoring the set of clouds...')
 set_clouds = ps.spatial.SetCloudsP(box, n_samp, n_sim_f, r_max, r_bord, p_f)
 cloud_1 = list()
 h_pa_cl = list(make_plane(np.asarray(pa_cl, dtype=np.float), del_coord))

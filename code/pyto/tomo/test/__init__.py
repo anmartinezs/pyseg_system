@@ -2,10 +2,12 @@
 Test tomo classes
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: __init__.py 709 2010-06-21 13:46:58Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-__version__ = "$Revision: 709 $"
+__version__ = "$Revision$"
 
 #import common
-from test_series import TestSeries
+from .test_series import TestSeries

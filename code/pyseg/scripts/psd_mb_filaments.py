@@ -31,7 +31,7 @@ from factory import unpickle_obj
 from vtk_ext import vtkFilterRedundacyAlgorithm
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -65,7 +65,7 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
 
     # Initialization
     if verbose:
-        print '\tInitializing...'
+        print('\tInitializing...')
     work_dir = output_dir + '/disperse'
     disperse = disperse_io.DisPerSe(input_file, work_dir)
     # Down skeleton
@@ -80,7 +80,7 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
 
     # Disperse
     if verbose:
-        print '\tRunning DisPerSe...'
+        print('\tRunning DisPerSe...')
     if f_update:
         disperse.clean_work_dir()
         disperse.mse(no_cut=False, inv=True)
@@ -96,7 +96,7 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
             density = density.transpose()
 
     # Filtering the redundancy of the skeleton
-    print '\tFiltering redundancy on DiSPerSe skeleton...'
+    print('\tFiltering redundancy on DiSPerSe skeleton...')
     red_filt = vtkFilterRedundacyAlgorithm()
     red_filt.SetInputData(skel)
     red_filt.Execute()
@@ -106,7 +106,7 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
     pkl_psd = work_dir + '/psd.pkl'
     if f_update or (not os.path.exists(pkl_psd)):
         if verbose:
-            print '\tGetting PSD graphs...'
+            print('\tGetting PSD graphs...')
         psd = PsdSynap(skel, manifolds, density, seg)
         psd.set_resolution(resolution)
         psd.set_memb_thickness(mb_thickness)
@@ -116,11 +116,11 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
         psd.pickle(pkl_psd)
     else:
         if verbose:
-            print '\tUnpickling PDS graphs...'
+            print('\tUnpickling PDS graphs...')
         psd = unpickle_obj(pkl_psd)
 
     if verbose:
-        print '\tExtracting Post-synaptic graph...'
+        print('\tExtracting Post-synaptic graph...')
     arc_graph = psd.get_post_arc_graph()
     arc_graph.add_geometry(manifolds, density)
     arc_graph.find_critical_points()
@@ -128,19 +128,19 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
 
     # Extracting the filaments
     if verbose:
-        print '\tExtracting the filaments...'
+        print('\tExtracting the filaments...')
     f_factory = FilFactory(arc_graph)
     network = f_factory.inter_point_filaments(psd.get_post_anchors())
 
     # Analyzing the filaments
     if verbose:
-        print '\tAnalyzing the filaments...'
+        print('\tAnalyzing the filaments...')
     # network.arc_redundancy()
     network.vertex_redundancy()
 
     # Storing the result
     if verbose:
-        print '\tStoring the result...'
+        print('\tStoring the result...')
     writer = vtk.vtkXMLPolyDataWriter()
     path, stem = os.path.split(input_file)
     stem, _ = os.path.splitext(stem)
@@ -154,7 +154,7 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
         writer.SetInputData(poly_f)
     if writer.Write() == 1:
         if verbose:
-            print '\t\tFile %s stored.' % writer.GetFileName()
+            print('\t\tFile %s stored.' % writer.GetFileName())
     else:
         error_msg = 'Error writing %s.' % writer.GetFileName()
         raise pexceptions.PySegInputError(expr='do_psd_mb_filament (psd_mb_filaments)', msg=error_msg)
@@ -168,7 +168,7 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
         writer.SetInputData(poly_a)
     if writer.Write() == 1:
         if verbose:
-            print '\t\tFile %s stored.' % writer.GetFileName()
+            print('\t\tFile %s stored.' % writer.GetFileName())
     else:
         error_msg = 'Error writing %s.' % writer.GetFileName()
         raise pexceptions.PySegInputError(expr='do_psd_mb_filament (psd_mb_filaments)', msg=error_msg)
@@ -186,14 +186,14 @@ def do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, p_cut, resol
         writer.SetInputData(disperse_io.numpy_to_vti(img))
     if writer.Write() == 1:
         if verbose:
-            print '\t\tFile %s stored.' % writer.GetFileName()
+            print('\t\tFile %s stored.' % writer.GetFileName())
     else:
         error_msg = 'Error writing %s.' % writer.GetFileName()
         raise pexceptions.PySegInputError(expr='do_psd_mb_filament (psd_mb_filaments)', msg=error_msg)
 
     # Do analysis
     if n_bins > 0:
-        print '\tGenerating analysis'
+        print('\tGenerating analysis')
         lengths = network.get_fil_lengths()
         hist = np.histogram(lengths, n_bins)
         len_fname = output_dir + '/' + stem + '_len.pkl'
@@ -222,7 +222,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hvdi:s:o:m:c:r:t:p:q:e:b:v")
     except getopt.GetoptError:
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
 
     input_file = ''
@@ -240,8 +240,8 @@ def main(argv):
     n_bins = 0
     for opt, arg in opts:
         if opt == '-h':
-            print usage_msg
-            print help_msg
+            print(usage_msg)
+            print(help_msg)
             sys.exit()
         elif opt == "-d":
             f_update = True
@@ -271,41 +271,41 @@ def main(argv):
             verbose = True
 
     if (input_file == '') or (seg_file == '') or (output_dir == ''):
-        print usage_msg
+        print(usage_msg)
         sys.exit(2)
     else:
         # Print init message
         if verbose:
-            print 'Running for analyzing the filaments attached to a post-synaptic membrane.'
-            print '\tAuthor: ' + __author__
-            print '\tDate: ' + time.strftime("%c") + '\n'
-            print 'Options:'
-            print '\tInput file: ' + input_file
-            print '\tSegmentation file: ' + seg_file
-            print '\tOutput directory: ' + output_dir
+            print('Running for analyzing the filaments attached to a post-synaptic membrane.')
+            print('\tAuthor: ' + __author__)
+            print('\tDate: ' + time.strftime("%c") + '\n')
+            print('Options:')
+            print('\tInput file: ' + input_file)
+            print('\tSegmentation file: ' + seg_file)
+            print('\tOutput directory: ' + output_dir)
             if mask_file == '':
-                print '\tMask not used.'
+                print('\tMask not used.')
             else:
-                print '\tMask file: ' + mask_file
+                print('\tMask file: ' + mask_file)
             if f_update:
-                print '\tUpdate disperse: yes'
+                print('\tUpdate disperse: yes')
             else:
-                print '\tUpdate disperse: no'
-            print '\tResolution: ' + str(res) + ' nm'
-            print '\tMembrane thickness: ' + str(mb_t) + ' nm'
-            print '\tPostsynaptic thickness: ' + str(post_t) + ' nm'
-            print '\tPresynaptic thickness: ' + str(pre_t) + ' nm'
-            print '\tPersistence threshold: ' + str(cut)
-            print '\n'
+                print('\tUpdate disperse: no')
+            print('\tResolution: ' + str(res) + ' nm')
+            print('\tMembrane thickness: ' + str(mb_t) + ' nm')
+            print('\tPostsynaptic thickness: ' + str(post_t) + ' nm')
+            print('\tPresynaptic thickness: ' + str(pre_t) + ' nm')
+            print('\tPersistence threshold: ' + str(cut))
+            print('\n')
 
         # Do the job
         if verbose:
-            print 'Starting...'
+            print('Starting...')
         do_psd_mb_filament(input_file, seg_file, output_dir, mask_file, cut, res, mb_t, post_t,
                            pre_t, f_update, th_density, n_bins, verbose)
 
         if verbose:
-            print cmd_name + ' successfully executed.'
+            print(cmd_name + ' successfully executed.')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

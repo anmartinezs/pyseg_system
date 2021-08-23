@@ -3,10 +3,17 @@ Contains class Density for the calculation of densities of gray images along
 segments.
 
 # Author: Vladan Lucic (MPI for Biochemistry)
-# $Id: density.py 1217 2015-08-13 16:57:05Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
+from past.builtins import basestring
 
-__version__ = "$Revision: 1217 $"
+__version__ = "$Revision$"
 
 import sys
 import logging
@@ -17,11 +24,11 @@ import numpy
 import scipy
 import scipy.ndimage as ndimage
 
-from features import Features
+from .features import Features
 from pyto.core.image import Image
-from segment import Segment
-from statistics import Statistics
-from morphology import Morphology
+from .segment import Segment
+from .statistics import Statistics
+from .morphology import Morphology
 
 
 class Density(Features):
@@ -163,7 +170,7 @@ class Density(Features):
         # make new instance
         new = self.__class__()
         new_len = len(ids) + 1
-        new.setIds(ids=range(1, new_len))
+        new.setIds(ids=list(range(1, new_len)))
 
         # initrialize new data arrays
         new.mean = numpy.zeros(new_len) - 1
@@ -176,9 +183,9 @@ class Density(Features):
         # agregated segments
         for old_ids, new_id in zip(ids, new.ids):
             new.volume[new_id] = self.volume[old_ids].sum()
-            new.mean[new_id] = numpy.inner(self.mean[old_ids], 
-                                           self.volume[old_ids]) \
-                                           / new.volume[new_id].astype(float)
+            new.mean[new_id] = (
+                numpy.inner(self.mean[old_ids], self.volume[old_ids])
+                / new.volume[new_id].astype(float))
             new.min[new_id] = self.min[old_ids].min()
             new.max[new_id] = self.max[old_ids].max()
 
@@ -187,9 +194,9 @@ class Density(Features):
             sum_sq[new_id] = \
                 ((self.std[old_ids] ** 2 * (self.volume[old_ids] - ddof))
                  + self.mean[old_ids] ** 2 * self.volume[old_ids]).sum()
-            new.std[new_id] = numpy.sqrt(\
-                (sum_sq[new_id] - new.mean[new_id] ** 2 * new.volume[new_id]) \
-                    / (new.volume[new_id] - ddof))
+            new.std[new_id] = numpy.sqrt(
+                (sum_sq[new_id] - new.mean[new_id] ** 2 * new.volume[new_id])
+                / (new.volume[new_id] - ddof))
 
         # set total (index 0) values
         new.setTotal()
@@ -239,7 +246,7 @@ class Density(Features):
         # mean
         if ('mean' in self.dataNames) and ('volume' in self.dataNames):
             self.mean[0] = (
-                numpy.dot(self.mean[self.ids], self.volume[self.ids]) 
+                numpy.dot(self.mean[self.ids], self.volume[self.ids])
                 / float(self.volume[0]))
 
         # std
@@ -251,7 +258,7 @@ class Density(Features):
             means = numpy.dot(
                 self.mean[self.ids], self.volume[self.ids]) 
             self.std[0] = numpy.sqrt(
-                variances / float(self.volume[0]) 
+                variances / float(self.volume[0])
                 - (means / float(self.volume[0]))**2)
 
     def merge(
@@ -283,7 +290,7 @@ class Density(Features):
 
         # 
         mode0_consistent = False
-        if isinstance(mode0, str) and (mode0 == 'consistent'):
+        if isinstance(mode0, basestring) and (mode0 == 'consistent'):
             mode0_consistent = True
             mode0 = -1
 
@@ -339,8 +346,9 @@ class Density(Features):
         self.volume[0] = self.volume[ids].sum()
 
         # mean, min, max
-        self.mean[0] = numpy.inner(self.mean[ids], self.volume[ids]) \
-            / float(self.volume[0])
+        self.mean[0] = (
+            numpy.inner(self.mean[ids], self.volume[ids])
+            / float(self.volume[0]))
         self.max[0] = self.max[ids].max()
         self.min[0] = self.min[ids].min()
 

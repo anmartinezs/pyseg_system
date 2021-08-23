@@ -8,7 +8,7 @@ Classes for doing the spatial analysis of structures in membranes
 __author__ = 'martinez'
 
 from pyto.segmentation.cluster import Cluster
-from globals import *
+from .globals import *
 from pyorg import pexceptions
 
 ##### PACKAGE VARIABLES
@@ -74,7 +74,7 @@ class CMCAnalyzer(object):
 
         if comp_2d:
             x_m, x_M, y_m, y_M = self.__plane_bounds()
-            X, Y = np.meshgrid(range(x_m, x_M), range(y_m, y_M))
+            X, Y = np.meshgrid(list(range(x_m, x_M)), list(range(y_m, y_M)))
             n = X.shape.sum()
             cloud = np.zeros(shape=(n, 2), dtype=np.float)
             cloud[:, 0] = np.reshape(X, n)

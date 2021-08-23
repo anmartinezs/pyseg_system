@@ -3,10 +3,10 @@
 Catalog example for testing analysis.catalog
 
 # Author: Vladan Lucic
-# $Id: catalog_4.py 988 2013-09-27 07:50:48Z vladan $
+# $Id$
 """
 
-__version__ = "$Revision: 988 $"
+__version__ = "$Revision$"
 
 
 

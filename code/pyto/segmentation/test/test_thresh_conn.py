@@ -3,12 +3,17 @@
 Tests module thresh_connd and implicitly Hierarchy.addLevel and related
 
 # Author: Vladan Lucic
-# $Id: test_thresh_conn.py 1302 2016-05-16 10:36:10Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 
-__version__ = "$Revision: 1302 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
+import importlib
 import unittest
 
 import numpy
@@ -18,14 +23,14 @@ import scipy
 from pyto.segmentation.grey import Grey
 from pyto.segmentation.segment import Segment
 from pyto.segmentation.thresh_conn import ThreshConn
-import common as common
+from pyto.segmentation.test import common
 
 class TestThreshConn(np_test.TestCase):
     """
     """
 
     def setUp(self):
-        pass
+        importlib.reload(common) # to avoid problems when running multiple tests
 
     def testMakeLevelsGen(self):
         """
@@ -44,7 +49,7 @@ class TestThreshConn(np_test.TestCase):
         desired_levelIds = [[], [5,6], [10,11,12], [1,2,3,4], [13,14],
                             [7], [9], [8]]
         np_test.assert_equal(tc_a.levelIds, desired_levelIds)
-        np_test.assert_equal(tc_a.threshold, range(8))
+        np_test.assert_equal(tc_a.threshold, list(range(8)))
         np_test.assert_equal(tc_a.thresh, [0,3,3,3,3,1,1,5,7,6,2,2,2,4,4])
         self.id_correspondence(actual=tc_a.data, desired=common.hi_data_1)
 
@@ -122,7 +127,7 @@ class TestThreshConn(np_test.TestCase):
                             [12], [13], [14]]
         np_test.assert_equal(tc_c.levelIds, desired_levelIds)
         self.id_correspondence(actual=tc_c.data, desired=common.hi_data_1)
-        np_test.assert_equal(tc_c.threshold, range(8))
+        np_test.assert_equal(tc_c.threshold, list(range(8)))
         np_test.assert_equal(tc_c.thresh, [0,1,1,2,2,2,3,3,3,3,4,4,5,6,7])
 
         # contacts

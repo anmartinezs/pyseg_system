@@ -24,8 +24,8 @@ import sys
 import time
 import pyseg as ps
 import numpy as np
-from scipy.misc import imsave
 from matplotlib import pyplot as plt
+from matplotlib import image as mimg
 
 ########################################################################################
 # PARAMETERS
@@ -34,16 +34,16 @@ from matplotlib import pyplot as plt
 ROOT_PATH = '/fs/pool/pool-lucic2/antonio/pick_test'
 
 # Input STAR file to classify
-in_star = ROOT_PATH + '/klass/mclass_data/test_unequal_mb_big/test_1.star' # '/klass/mclass_data/test_equal_mb/test_1.star' # '/klass/mclass_data/test_realist/test_6.star' # '/klass/mclass_data/test_1_nk8_snr0.01.star'
+in_star = ROOT_PATH + '/klass/mclass_data/test_realistic_uniovi/test_1_big.star' # '/klass/mclass_data/test_equal_mb/test_1.star' # '/klass/mclass_data/test_realist/test_6.star' # '/klass/mclass_data/test_1_nk8_snr0.01.star'
 
 # Output directory for the star files
-out_dir = ROOT_PATH + '/klass/mclass_data/out_ap/unequal_mb_big' # '/klass/mclass_data/out_ap/equal_mb' # '/klass/mclass_data/out_ap/test_realist/test_6'
+out_dir = ROOT_PATH + '/klass/mclass_data/out_ap/realistic_uniovi_pca_big_mb' # '/klass/mclass_data/out_ap/equal_mb' # '/klass/mclass_data/out_ap/test_realist/test_6'
 out_stem = 'klass_hc'
 
 # Particles pre-processing
-pp_mask = ROOT_PATH + '/klass/mclass_data/masks/mask_cyl_160_35_125_30_nomb.mrc' # '/klass/mclass_data/mask_90_0_90_30_nomb.mrc' # '/masks/mask_cyl_160_81_128_20.mrc' #
+pp_mask = ROOT_PATH + '/klass/mclass_data/mask_90_0_90_30.mrc' # '/klass/mclass_data/masks/mask_cyl_160_35_125_30_nomb.mrc' # '/masks/mask_cyl_160_81_128_20.mrc' #
 pp_low_sg = 4 # voxels
-pp_npr = 10 # Number of parallel processors if None then auto
+pp_npr = 40 # Number of parallel processors if None then auto
 ap_pref = -6
 
 ###### Advanced settings
@@ -57,11 +57,11 @@ pp_n_sset = None # 3000
 
 # CC 2d radial matrix computation parameters
 cc_metric = 'cc' # 'cc' or 'similarity'
-cc_npr = 20 # None # 1 # None # if None then auto
+cc_npr = 40 # None # 1 # None # if None then auto
 
 ## Clustering
-cu_mode = 'ncc_2dz' # 'vectors' # 'moments' # 'ncc_2dz'
-cu_n_comp = 21 # None
+cu_mode = 'vectors' # 'moments' # 'ncc_2dz'
+cu_n_comp = 20 # None
 
 # Affinity Propagation clustering parameters
 ap_damp = 0.9
@@ -83,118 +83,123 @@ ag_ncomp = 21
 
 ########## Print initial message
 
-print 'Test for deterministic classification of a STAR file.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file: ' + str(in_star)
-print '\tOutput directory: ' + str(out_dir)
-print '\tOutput stem for AP: ' + str(out_stem)
-print '\tParticles pre-processing:'
-print '\t\t-Mask: ' + str(pp_mask)
-print '\t\t-Low pass Gaussian filter sigma: ' + str(pp_low_sg) + ' voxels'
+print('Test for deterministic classification of a STAR file.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file: ' + str(in_star))
+print('\tOutput directory: ' + str(out_dir))
+print('\tOutput stem for AP: ' + str(out_stem))
+print('\tParticles pre-processing:')
+print('\t\t-Mask: ' + str(pp_mask))
+print('\t\t-Low pass Gaussian filter sigma: ' + str(pp_low_sg) + ' voxels')
 if pp_rln_norm:
-    print '\t\t-Normalize particles according relion convention.'
+    print('\t\t-Normalize particles according relion convention.')
 if pp_2d_norm:
-    print '\t\t-Renormalize particles after the radial averaging.'
+    print('\t\t-Renormalize particles after the radial averaging.')
 if pp_3d:
-    print '\t\t-Radial compensation for 3D.'
+    print('\t\t-Radial compensation for 3D.')
 if pp_npr is None:
-    print '\t\t-Number of processes: Auto'
+    print('\t\t-Number of processes: Auto')
 else:
-    print '\t\t-Number of processes: ' + str(pp_npr)
+    print('\t\t-Number of processes: ' + str(pp_npr))
 if pp_direct:
-    print '\t\t-Direct particles loading activated.'
+    print('\t\t-Direct particles loading activated.')
 if pp_n_sset:
-    print '\t\t-Taking a random subset of: ' + str(pp_n_sset) + ' particles'
+    print('\t\t-Taking a random subset of: ' + str(pp_n_sset) + ' particles')
 if cu_mode == 'ncc_2dz':
-    print '\tCC Z-axis radially averages matrix parameters: '
-    print '\t\t-Metric: ' + str(cc_metric)
+    print('\tCC Z-axis radially averages matrix parameters: ')
+    print('\t\t-Metric: ' + str(cc_metric))
     if cc_npr is None:
-        print '\t\t-Number of processes: Auto'
+        print('\t\t-Number of processes: Auto')
     else:
-        print '\t\t-Number of processes: ' + str(cc_npr)
-print '\tClustering: '
-print '\t\t-Mode: ' + str(cu_mode)
+        print('\t\t-Number of processes: ' + str(cc_npr))
+print('\tClustering: ')
+print('\t\t-Mode: ' + str(cu_mode))
 if cu_mode != 'ncc_2dz':
-    print '\t\t-Number of components: ' + str(cu_n_comp)
-print '\t\tAffinity Propagation classification settings: '
-print '\t\t\t-Damping: ' + str(ap_damp)
+    print('\t\t-Number of components: ' + str(cu_n_comp))
+print('\t\tAffinity Propagation classification settings: ')
+print('\t\t\t-Damping: ' + str(ap_damp))
 if ap_pref is not None:
-    print '\t\t\t-Affinity propagation preference: ' + str(ap_pref)
-    print '\t\t\t-Maximum number of iterations: ' + str(ap_max_iter)
-    print '\t\t\t-Iterations for convergence: ' + str(ap_conv_iter)
-    print '\t\t\t-Reference for statistics: ' + str(ap_ref)
-    print '\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %'
+    print('\t\t\t-Affinity propagation preference: ' + str(ap_pref))
+    print('\t\t\t-Maximum number of iterations: ' + str(ap_max_iter))
+    print('\t\t\t-Iterations for convergence: ' + str(ap_conv_iter))
+    print('\t\t\t-Reference for statistics: ' + str(ap_ref))
+    print('\t\t\t-Percentile for statistics: ' + str(ap_ref_per) + ' %')
 if do_ag:
-    print '\tAgglomerative clustering post-processing: '
-    print '\t\t-Number of clusters to find: ' + str(ag_n_clusters)
-    print '\t\t-Linkage: ' + str(ag_linkage)
-    print '\t\t-Mode: ' + str(ag_mode)
+    print('\tAgglomerative clustering post-processing: ')
+    print('\t\t-Number of clusters to find: ' + str(ag_n_clusters))
+    print('\t\t-Linkage: ' + str(ag_linkage))
+    print('\t\t-Mode: ' + str(ag_mode))
     if ag_ncomp is not None:
-        print '\t\t-PCA number of components: ' + str(ag_ncomp)
-print ''
+        print('\t\t-PCA number of components: ' + str(ag_ncomp))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading STAR file...'
+print('\tLoading STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
     if pp_n_sset:
-        print '\t\tCurrent STAR file has ' + str(star.get_nrows()) + ' particles'
-        print '\t\tGetting a random subset of ' + str(pp_n_sset) + ' particles'
+        print('\t\tCurrent STAR file has ' + str(star.get_nrows()) + ' particles')
+        print('\t\tGetting a random subset of ' + str(pp_n_sset) + ' particles')
         star = star.gen_random_subset(pp_n_sset)
     star_class = ps.sub.ClassStar(star)
+    np.savetxt(out_dir + '/labels.txt', star.get_column_data('_rlnClassNumber'), fmt='%d')
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tLoading and pre-processing the particles...'
+print('\tLoading and pre-processing the particles...')
 try:
     mask = ps.disperse_io.load_tomo(pp_mask)
     star_class.load_particles(mask, low_sg=pp_low_sg, avg_norm=pp_2d_norm, rln_norm=pp_rln_norm, rad_3D=pp_3d,
                               npr=pp_npr, debug_dir=None, ref_dir=None, direct_rec=pp_direct)
-    star_class.save_particles(out_dir+'/all_particles', out_stem, masks=True, stack=True)
-    imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
+    star_class.save_particles(out_dir+'/all_particles', out_stem, masks=False, stack=False)
+    mimg.imsave(out_dir+'/all_particles/global_mask.png', star_class.get_global_mask())
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Particles could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Particles could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if cu_mode == 'ncc_2dz':
-    print '\tBuilding the NCC matrix...'
+    print('\tBuilding the NCC matrix...')
     try:
         star_class.build_ncc_z2d(metric=cc_metric, npr=cc_npr)
+        star_class.save_cc(out_dir + '/cc_matrix.txt', txt=True)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 elif cu_mode == 'vectors':
-    print '\tBuilding vectors...'
+    print('\tBuilding vectors...')
     try:
         star_class.build_vectors()
+        if (do_ag == True) and (ag_ncomp is not True):
+            star_class.vectors_dim_reduction(n_comp=ag_ncomp, method='pca')
+        star_class.save_vectors(out_dir + '/vectors.txt', txt=True)
         if cu_n_comp is not None:
             star_class.vectors_dim_reduction(n_comp=cu_n_comp, method='pca')
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: The NCC matrix could not be created because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
-    print '\tPCA dimensionality reduction...'
+    print('\tPCA dimensionality reduction...')
     try:
         evs = star_class.vectors_dim_reduction(n_comp=cu_n_comp, method='pca')
         ids_evs_sorted = np.argsort(evs)[::-1]
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: Classification failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Classification failed because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
     plt.figure()
     plt.bar(np.arange(1, len(evs) + 1) - 0.25, evs[ids_evs_sorted], width=0.5, linewidth=2)
     plt.xlim(0, len(evs) + 1)
-    plt.xticks(range(1, len(evs) + 1))
+    plt.xticks(list(range(1, len(evs) + 1)))
     plt.xlabel('#eigenvalue')
     plt.ylabel('fraction of total correlation')
     plt.tight_layout()
@@ -212,13 +217,13 @@ elif cu_mode == 'vectors':
     plt.ylim(0, 1)
     if th_x is not None:
         plt.plot((th_x + 0.5, th_x + 0.5), (0, 1), color='k', linewidth=2, linestyle='--')
-    plt.xticks(range(1, len(evs) + 1))
+    plt.xticks(list(range(1, len(evs) + 1)))
     plt.xlabel('#eigenvalue')
     plt.ylabel('Accumulated fraction of total correlation')
     plt.tight_layout()
     plt.savefig(out_dir + '/' + out_stem + '_cdf_evs.png', dpi=300)
 
-print '\tPreparing the ground truth...'
+print('\tPreparing the ground truth...')
 k_set = list(set(star.get_column_data('_rlnClassNumber')))
 gt_im, gt_bc = dict().fromkeys(k_set), dict().fromkeys(k_set)
 gt_np, gt_nn = dict().fromkeys(k_set), dict().fromkeys(k_set)
@@ -240,64 +245,64 @@ for i, k_id in enumerate(star.get_column_data('_rlnClassNumber')):
     gt_tpr[k_id], gt_fpr[k_id] = 0, 0
     gt_pr[k_id], gt_f1[k_id] = 0, 0
 
-print '\tAffinity Propagation classification...'
+print('\tAffinity Propagation classification...')
 try:
     star_class.affinity_propagation(mode_in=cu_mode, damping=ap_damp, preference=ap_pref,
                                     max_iter=ap_max_iter, convergence_iter=ap_conv_iter,
                                     verbose=True)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Classification failed because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Classification failed because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 star_class.update_relion_classes()
 
 if do_ag:
-    print '\tAgglomerative Clustering refinement...'
+    print('\tAgglomerative Clustering refinement...')
     try:
         star_class.agglomerative_clustering_ref(n_clusters=ag_n_clusters, mode=ag_mode, pca_ncomp=ag_ncomp,
                                             linkage=ag_linkage, verbose=True)
     except ps.pexceptions.PySegInputError as e:
-        print 'ERROR: Classification failed because of "' + e.get_message() + '"'
-        print 'Terminated. (' + time.strftime("%c") + ')'
+        print('ERROR: Classification failed because of "' + e.get_message() + '"')
+        print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
 star_class.update_relion_classes()
 split_stars = star_class.get_split_stars()
 
-print '\t\tEvaluating the classification (VERSION: merging classes):'
-print '\t\t\t-Finding the most representative output classes: '
-ko_set = range(len(split_stars))
-ko_ids = dict().fromkeys(range(len(split_stars)))
+print('\t\tEvaluating the classification (VERSION: merging classes):')
+print('\t\t\t-Finding the most representative output classes: ')
+ko_set = list(range(len(split_stars)))
+ko_ids = dict().fromkeys(list(range(len(split_stars))))
 for ko_id, split_star in enumerate(split_stars):
     for row in range(split_star.get_nrows()):
         img = split_star.get_element('_rlnImageName', row)
-        for k_id in gt_im.iterkeys():
+        for k_id in gt_im.keys():
             if img in gt_im[k_id]:
                 try:
                     ko_ids[ko_id].append(k_id)
                 except AttributeError:
                     ko_ids[ko_id] = [k_id,]
-ko_mr = dict().fromkeys(ko_ids.keys())
-for ko_id, ids in zip(ko_ids.iterkeys(), ko_ids.itervalues()):
+ko_mr = dict().fromkeys(list(ko_ids.keys()))
+for ko_id, ids in zip(iter(ko_ids.keys()), iter(ko_ids.values())):
     ko_mr[ko_id] = np.argmax(np.bincount(np.asarray(ids)))
-for k_id in gt_tp.iterkeys():
+for k_id in gt_tp.keys():
     hold_np = 0
-    for ko_id, k_id_max in zip(ko_mr.iterkeys(), ko_mr.itervalues()):
+    for ko_id, k_id_max in zip(iter(ko_mr.keys()), iter(ko_mr.values())):
         if k_id_max == k_id:
             gt_bc[k_id].append(ko_id)
             hold_np += len(ko_ids[ko_id])
-    print '\t\t\t\t+Class ' + str(k_id) + ': NP=' + str(gt_np[k_id])
-    print '\t\t\t\t\t*Classes associated ' + str(gt_bc[k_id]) + ': NPf=' + str(hold_np)
-    for kk_id in gt_tp.iterkeys():
+    print('\t\t\t\t+Class ' + str(k_id) + ': NP=' + str(gt_np[k_id]))
+    print('\t\t\t\t\t*Classes associated ' + str(gt_bc[k_id]) + ': NPf=' + str(hold_np))
+    for kk_id in gt_tp.keys():
         if kk_id != k_id:
             gt_nn[k_id] += gt_np[kk_id]
-print '\t\t\t-Computing the metrics: '
-for k_id in gt_tp.iterkeys():
+print('\t\t\t-Computing the metrics: ')
+for k_id in gt_tp.keys():
     for ko_id in gt_bc[k_id]:
         hold = (np.asarray(ko_ids[ko_id]) == k_id).sum()
         gt_tp[k_id] += hold
         hold = (np.asarray(ko_ids[ko_id]) != k_id).sum()
         gt_fp[k_id] += hold
-    for kk_id in gt_bc.iterkeys():
+    for kk_id in gt_bc.keys():
         if kk_id != k_id:
             for ko_id in gt_bc[kk_id]:
                 hold = (np.asarray(ko_ids[ko_id]) == k_id).sum()
@@ -312,43 +317,43 @@ for k_id in gt_tp.iterkeys():
         gt_f1[k_id] = 2. * (gt_pr[k_id] * gt_tpr[k_id]) / (gt_pr[k_id] + gt_tpr[k_id])
     except ZeroDivisionError:
         gt_f1[k_id] = 0
-    print '\t\t\t\t+Class ' + str(k_id) + ': '
-    print '\t\t\t\t\t->TP=' + str(gt_tp[k_id]) + ', FP=' + str(gt_fp[k_id]) + ', FN=' + str(gt_fn[k_id])
-    print '\t\t\t\t\t->TPR=' + str(gt_tpr[k_id]) + ', FPR=' + str(gt_fpr[k_id])
-    print '\t\t\t\t\t->P=' + str(gt_pr[k_id]) + ', F1=' + str(gt_f1[k_id])
-print '\t\t\t-Computing global metrics: '
-print '\t\t\t-Global metrics: '
-gt_tpr, gt_pr = np.asarray(gt_tpr.values(), dtype=np.float32), np.asarray(gt_pr.values(), dtype=np.float32)
+    print('\t\t\t\t+Class ' + str(k_id) + ': ')
+    print('\t\t\t\t\t->TP=' + str(gt_tp[k_id]) + ', FP=' + str(gt_fp[k_id]) + ', FN=' + str(gt_fn[k_id]))
+    print('\t\t\t\t\t->TPR=' + str(gt_tpr[k_id]) + ', FPR=' + str(gt_fpr[k_id]))
+    print('\t\t\t\t\t->P=' + str(gt_pr[k_id]) + ', F1=' + str(gt_f1[k_id]))
+print('\t\t\t-Computing global metrics: ')
+print('\t\t\t-Global metrics: ')
+gt_tpr, gt_pr = np.asarray(list(gt_tpr.values()), dtype=np.float32), np.asarray(list(gt_pr.values()), dtype=np.float32)
 precision = gt_pr.mean()
 recall = gt_tpr.mean()
-print '\t\t\t\t+Precision=' + str(precision)
-print '\t\t\t\t+Recall=' + str(recall)
-print '\t\t\t\t+F1-score=' + str(2.*(precision*recall)/(precision+recall))
+print('\t\t\t\t+Precision=' + str(precision))
+print('\t\t\t\t+Recall=' + str(recall))
+print('\t\t\t\t+F1-score=' + str(2.*(precision*recall)/(precision+recall)))
 
-print '\t\tEvaluating the classification (VERSION: one-to-one class):'
-print '\t\t\t-Finding the most representative output classes: '
-ge_lut = dict().fromkeys(gt_np.keys())
-eg_lut = dict().fromkeys(ko_ids.keys())
-for g_key in gt_np.iterkeys():
+print('\t\tEvaluating the classification (VERSION: one-to-one class):')
+print('\t\t\t-Finding the most representative output classes: ')
+ge_lut = dict().fromkeys(list(gt_np.keys()))
+eg_lut = dict().fromkeys(list(ko_ids.keys()))
+for g_key in gt_np.keys():
     hold_max, hold_max_id = 0, -1
-    for e_key in ko_ids.iterkeys():
+    for e_key in ko_ids.keys():
         hold_np = (np.asarray(ko_ids[e_key]) == g_key).sum()
         if hold_np > hold_max:
             hold_max = hold_np
             hold_max_id = e_key
     ge_lut[g_key] = hold_max_id
     eg_lut[hold_max_id] = g_key
-print '\t\t\t-Computing the metrics: '
+print('\t\t\t-Computing the metrics: ')
 gt_tp, gt_fp, gt_fn = dict().fromkeys(k_set), dict().fromkeys(k_set), dict().fromkeys(k_set)
 gt_tpr, gt_fpr = dict().fromkeys(k_set), dict().fromkeys(k_set)
 gt_pr, gt_f1 = dict().fromkeys(k_set), dict().fromkeys(k_set)
-for k_id in gt_tp.iterkeys():
+for k_id in gt_tp.keys():
     gt_nn[k_id] = 0
-for k_id in gt_tp.iterkeys():
-    for kk_id in gt_tp.iterkeys():
+for k_id in gt_tp.keys():
+    for kk_id in gt_tp.keys():
         if k_id != kk_id:
             gt_nn[k_id] += gt_np[kk_id]
-for k_id in gt_tp.iterkeys():
+for k_id in gt_tp.keys():
     bc_id = ge_lut[k_id]
     gt_tp[k_id] = (np.asarray(ko_ids[bc_id]) == k_id).sum()
     gt_fp[k_id] = (np.asarray(ko_ids[bc_id]) != k_id).sum()
@@ -363,20 +368,20 @@ for k_id in gt_tp.iterkeys():
         gt_f1[k_id] = 2. * (gt_pr[k_id] * gt_tpr[k_id]) / (gt_pr[k_id] + gt_tpr[k_id])
     except ZeroDivisionError:
         gt_f1[k_id] = 0
-    print '\t\t\t\t+Class ' + str(k_id) + ': '
-    print '\t\t\t\t\t->TP=' + str(gt_tp[k_id]) + ', FP=' + str(gt_fp[k_id]) + ', FN=' + str(gt_fn[k_id])
-    print '\t\t\t\t\t->TPR=' + str(gt_tpr[k_id]) + ', FPR=' + str(gt_fpr[k_id])
-    print '\t\t\t\t\t->P=' + str(gt_pr[k_id]) + ', F1=' + str(gt_f1[k_id])
-print '\t\t\t-Computing global metrics: '
-print '\t\t\t-Global metrics: '
-gt_tpr, gt_pr = np.asarray(gt_tpr.values(), dtype=np.float32), np.asarray(gt_pr.values(), dtype=np.float32)
+    print('\t\t\t\t+Class ' + str(k_id) + ': ')
+    print('\t\t\t\t\t->TP=' + str(gt_tp[k_id]) + ', FP=' + str(gt_fp[k_id]) + ', FN=' + str(gt_fn[k_id]))
+    print('\t\t\t\t\t->TPR=' + str(gt_tpr[k_id]) + ', FPR=' + str(gt_fpr[k_id]))
+    print('\t\t\t\t\t->P=' + str(gt_pr[k_id]) + ', F1=' + str(gt_f1[k_id]))
+print('\t\t\t-Computing global metrics: ')
+print('\t\t\t-Global metrics: ')
+gt_tpr, gt_pr = np.asarray(list(gt_tpr.values()), dtype=np.float32), np.asarray(list(gt_pr.values()), dtype=np.float32)
 precision = gt_pr.mean()
 recall = gt_tpr.mean()
-print '\t\t\t\t+Precision=' + str(precision)
-print '\t\t\t\t+Recall=' + str(recall)
-print '\t\t\t\t+F1-score=' + str(2.*(precision*recall)/(precision+recall))
+print('\t\t\t\t+Precision=' + str(precision))
+print('\t\t\t\t+Recall=' + str(recall))
+print('\t\t\t\t+F1-score=' + str(2.*(precision*recall)/(precision+recall)))
 
-print '\t\tStoring the results...'
+print('\t\tStoring the results...')
 try:
     star_class.save_star(out_dir, out_stem, parse_rln=True, mode='gather')
     star_class.save_star(out_dir, out_stem, parse_rln=True, mode='split')
@@ -384,8 +389,8 @@ try:
     star_class.save_class(out_dir, out_stem, purge_k=0, mode='exemplars')
     star_class.save_class(out_dir, out_stem, purge_k=0, mode='averages')
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: Result could not be stored because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: Result could not be stored because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

@@ -4,10 +4,15 @@ Tests class Cluster.
 Only some methods tested in the moment.
 
 # Author: Vladan Lucic
-# $Id: test_cluster.py 1446 2017-04-12 15:46:43Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+from builtins import range
+#from past.utils import old_div
 
-__version__ = "$Revision"
+__version__ = "$Revision$"
 
 
 import warnings
@@ -40,6 +45,8 @@ class TestCluster(np_test.TestCase):
         self.clusters_2 = [set([1,2,3,4,5,6]), set([7,8,9,10])]
         self.clusters_data_2 = [1,1,1,1,1,1,2,2,2,2]
         self.cl_2 = Cluster(clusters=self.clusters_data_2, form='scipy')
+        self.clusters_data_3 = [1,1,1,1,1,1,3,3,3,3]
+        self.cl_3 = Cluster(clusters=self.clusters_data_3, form='scipy')
 
     def expand(self, array, ids, default=-1):
         """
@@ -52,7 +59,7 @@ class TestCluster(np_test.TestCase):
         expanded = np.zeros(shape) + default
         
         # set values
-        for id_, index in zip(ids, range(len(ids))):
+        for id_, index in zip(ids, list(range(len(ids)))):
             expanded[id_] = array[index]
 
         return expanded
@@ -70,7 +77,7 @@ class TestCluster(np_test.TestCase):
         np_test.assert_equal(cl.clusters, clusters)
         np_test.assert_equal(cl.clustersData[1:], clusters_data)
         np_test.assert_equal(cl.clustersData0, clusters_data)
-        np_test.assert_equal(cl.dataIds, range(1,11))
+        np_test.assert_equal(cl.dataIds, list(range(1,11)))
         np_test.assert_equal(cl.ids, [1,2]) 
         np_test.assert_equal(cl.nItems, [10, 5, 5])
         np_test.assert_equal(cl.nClusters, 2)
@@ -80,7 +87,7 @@ class TestCluster(np_test.TestCase):
         np_test.assert_equal(cl.clusters, clusters)
         np_test.assert_equal(cl.clustersData[1:], clusters_data)
         np_test.assert_equal(cl.clustersData0, clusters_data)
-        np_test.assert_equal(cl.dataIds, range(1,11))
+        np_test.assert_equal(cl.dataIds, list(range(1,11)))
         np_test.assert_equal(cl.ids, [1,2]) 
         np_test.assert_equal(cl.nItems, [10, 5, 5])
         np_test.assert_equal(cl.nClusters, 2)
@@ -249,6 +256,9 @@ class TestCluster(np_test.TestCase):
             self.cl_1.findSimilarityVI(reference=self.cl_2),
             self.cl_1.getEntropy() + self.cl_2.getEntropy())
         np_test.assert_almost_equal(
+            self.cl_1.findSimilarityVI(reference=self.cl_3),
+            self.cl_1.getEntropy() + self.cl_2.getEntropy())
+        np_test.assert_almost_equal(
             self.cl_1.findSimilarityVI(reference=self.cl_1), 0)
         np_test.assert_almost_equal(
             self.cl_2.findSimilarityVI(reference=self.cl_2), 0)
@@ -260,6 +270,8 @@ class TestCluster(np_test.TestCase):
 
         np_test.assert_almost_equal(
             self.cl_1.findSimilarityRand(reference=self.cl_2), 20 / 45.)
+        np_test.assert_almost_equal(
+            self.cl_1.findSimilarityRand(reference=self.cl_3), 20 / 45.)
         np_test.assert_almost_equal(
             self.cl_1.findSimilarityRand(reference=self.cl_2, single=False), 
             20 / 45.)
@@ -279,6 +291,9 @@ class TestCluster(np_test.TestCase):
 
         np_test.assert_almost_equal(
             self.cl_1.findSimilarityBFlat(reference=self.cl_2), 
+            8. / np.sqrt(20 * 21))
+        np_test.assert_almost_equal(
+            self.cl_1.findSimilarityBFlat(reference=self.cl_3), 
             8. / np.sqrt(20 * 21))
         np_test.assert_almost_equal(
             self.cl_1.findSimilarityBFlat(reference=self.cl_1), 1)

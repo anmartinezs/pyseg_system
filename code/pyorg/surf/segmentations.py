@@ -9,12 +9,12 @@ import copy
 import numpy as np
 import scipy as sp
 from shutil import rmtree
-from utils import *
+from .utils import *
 from pyorg import pexceptions, sub, disperse_io
 from pyorg.globals.utils import unpickle_obj
 from pyorg import globals as gl
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -323,7 +323,7 @@ class TomoOMSegmentations(object):
             error_msg = 'Input tomograms for membranes and lumen must have the same sizes.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoOMSegmentations)', msg=error_msg)
         self.__lbl_voi_lm, nlbls = sp.ndimage.label(voi_lm, structure=np.ones(shape=(3, 3, 3)))
-        lbls_lm = range(1, nlbls+1)
+        lbls_lm = list(range(1, nlbls+1))
         # disperse_io.save_numpy(self.__lbl_voi_lm, '/fs/pool/pool-ruben/antonio/filaments/ltomos_omsegs/test/hold_lm.mrc')
         hold_lm = sp.ndimage.morphology.binary_dilation(voi_lm > 0)
         dst_field_lm, dst_ids_lm = sp.ndimage.morphology.distance_transform_edt(hold_lm, return_distances=True,
@@ -550,46 +550,46 @@ class ListTomoOMSegmentations(object):
         self.__tomos = dict()
         # For pickling
         self.__pkls = None
+        self.__res = 1
 
     # EXTERNAL FUNCTIONALITY
 
-    def set_resolution(self, res, key):
+    def set_resolution(self, res):
         """
         Set resolution in nm/pixel
         :param res: input value
-        :param key: tomogram index key
         :return:
         """
-        # for tomo in self.__tomos.itervalues():
-        tomo = self.get_tomo_by_key(key)
-        tomo.set_resolution(res)
+        for tomo in self.__tomos.values():
+            tomo.set_resolution(res)
+        self.__res = res
 
     def get_tomos(self):
         return self.__tomos
 
     def get_num_segmentations(self):
         total = 0
-        for tomo in self.__tomos.itervalues():
+        for tomo in self.__tomos.values():
             total += tomo.get_num_filaments()
         return total
 
     def get_num_segmentations_dict(self):
         nsegs = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             nsegs[key] = tomo.get_num_segmentations()
         return nsegs
 
     def get_volumes_dict(self):
         vols = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             vols[key] = tomo.compute_voi_volume()
         return vols
 
     def get_tomo_name_list(self):
-        return self.__tomos.keys()
+        return list(self.__tomos.keys())
 
     def get_tomo_list(self):
-        return self.__tomos.values()
+        return list(self.__tomos.values())
 
     def get_tomo_by_key(self, key):
         return self.__tomos[key]
@@ -602,7 +602,7 @@ class ListTomoOMSegmentations(object):
         # Input parsing
         tomo_fname = tomo_fils.get_tomo_fname()
         if tomo_fname in self.get_tomo_name_list():
-            print 'WARNING: tomo_surf (ListTomoOMSegmentations): tomogram ' + tomo_fname + ' was already inserted.'
+            print('WARNING: tomo_surf (ListTomoOMSegmentations): tomogram ' + tomo_fname + ' was already inserted.')
             return
         # Adding the tomogram to the list and dictionaries
         self.__tomos[tomo_fname] = tomo_fils
@@ -615,7 +615,7 @@ class ListTomoOMSegmentations(object):
         """
         del self.__tomos[tomo_key]
 
-    def insert_tomo(self, name, voi_mb=None, voi_lm=None, max_dst=0, res=1):
+    def insert_tomo(self, name, voi_mb=None, voi_lm=None, max_dst=0):
         """
         :param name: name to identify the tomogram
         :param voi_mb: if None (default) the membrane tomogram is loaded from tomo_fname, otherwise this is actually
@@ -623,10 +623,9 @@ class ListTomoOMSegmentations(object):
         :param voi_lm: if None (default) the lumen tomogram is loaded from tomo_fname, otherwise this is actually
         the input tomogram
         :param max_dst: maximum distance for membrane pixles to border inside the lumen (in segmentation pixels)
-        :param res: resolution or pixel size
         :param lbls_lm: lists of labels with the lumen segmentations
         """
-        self.__tomos[name] = TomoOMSegmentations(name, voi_mb=voi_mb, voi_lm=voi_lm, max_dst=max_dst, res=res)
+        self.__tomos[name] = TomoOMSegmentations(name, voi_mb=voi_mb, voi_lm=voi_lm, max_dst=max_dst)
 
     def store_stars(self, out_stem, out_dir):
         """
@@ -691,7 +690,7 @@ class ListTomoOMSegmentations(object):
         :return:
         """
         hold_dict = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             # print key + ': ' + str(tomo.get_num_filaments())
             if tomo.get_num_segmentations() >= min_num_seg:
                 hold_dict[key] = tomo
@@ -703,14 +702,14 @@ class ListTomoOMSegmentations(object):
         :param n_keep: number of tomograms to, the one with the highest amount of particles
         :return:
         """
-        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(self.__tomos.keys())):
+        if (n_keep is None) or (n_keep < 0) or (n_keep >= len(list(self.__tomos.keys()))):
             return
         # Sorting loop
         n_segs = dict()
-        for key, tomo in zip(self.__tomos.iterkeys(), self.__tomos.itervalues()):
+        for key, tomo in zip(iter(self.__tomos.keys()), iter(self.__tomos.values())):
             n_segs[key] = tomo.get_num_segmentations()
-        pargs_sort = np.argsort(np.asarray(n_segs.values()))[::-1]
-        keys = n_segs.keys()
+        pargs_sort = np.argsort(np.asarray(list(n_segs.values())))[::-1]
+        keys = list(n_segs.keys())
         # Cleaning loop
         hold_dict = dict()
         for parg in pargs_sort[:n_keep]:
@@ -768,7 +767,7 @@ class SetListTomoOMSegmentations(object):
         return self.__lists[key]
 
     def get_key_from_short_key(self, short_key):
-        for lkey in self.__lists.iterkeys():
+        for lkey in self.__lists.keys():
             fkey = os.path.split(lkey)[1]
             hold_key_idx = fkey.index('_')
             hold_key = fkey[:hold_key_idx]
@@ -776,13 +775,13 @@ class SetListTomoOMSegmentations(object):
                 return lkey
 
     def get_lists_by_short_key(self, key):
-        for lkey, list in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for lkey, list in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             if self.get_key_from_short_key(lkey) == key:
                 return  list
 
     def get_tomos_name(self):
         hold_list = list()
-        for ltomos in self.get_lists().values():
+        for ltomos in list(self.get_lists().values()):
             hold_list += ltomos.get_tomo_name_list()
         return list(set(hold_list))
 
@@ -805,7 +804,7 @@ class SetListTomoOMSegmentations(object):
         :return: return a set with all tomos in all list
         """
         tomos_l = list()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 tomos_l.append(tomo.get_tomo_fname())
         return set(tomos_l)
@@ -815,7 +814,7 @@ class SetListTomoOMSegmentations(object):
         :return: Return a dictionary with the number of filaments by list
         """
         segs = dict()
-        for key, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             segs[key] = ltomos.get_num_segmentations()
         return segs
 
@@ -824,7 +823,7 @@ class SetListTomoOMSegmentations(object):
         :return: Return a dictionary with the number of filaments by tomogram
         """
         segs = dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 try:
                     segs[tomo.get_tomo_fname()] += tomo.get_num_segmentations()
@@ -837,7 +836,7 @@ class SetListTomoOMSegmentations(object):
         :return: Return a dictionary with the proportions for every tomogram
         """
         segs = dict()
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for tomo in ltomos.get_tomo_list():
                 key_t = tomo.get_tomo_name()
                 try:
@@ -852,20 +851,20 @@ class SetListTomoOMSegmentations(object):
         :return: Return a dictionary with the proportions for every tomogram
         """
         # Initialization
-        segs_list, segs_tomo = dict.fromkeys(self.__lists.keys()), dict.fromkeys(self.get_set_tomos())
-        for key_t in segs_tomo.iterkeys():
+        segs_list, segs_tomo = dict.fromkeys(list(self.__lists.keys())), dict.fromkeys(self.get_set_tomos())
+        for key_t in segs_tomo.keys():
             segs_tomo[key_t] = 0
-        for key_l in segs_list.iterkeys():
-            segs_list[key_l] = np.zeros(shape=len(segs_tomo.keys()))
+        for key_l in segs_list.keys():
+            segs_list[key_l] = np.zeros(shape=len(list(segs_tomo.keys())))
         # Particles loop
-        for key_l, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for key_l, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             for i, key_t in enumerate(segs_tomo.keys()):
                 tomo = ltomos.get_tomo_by_key(key_t)
                 hold_fils = tomo.get_num_segmentations()
                 segs_tomo[key_t] += hold_fils
                 segs_list[key_l][i] += hold_fils
         # Proportions loop
-        for key_l in segs_list.iterkeys():
+        for key_l in segs_list.keys():
             for i, tomo_nfils in enumerate(segs_tomo.values()):
                 if tomo_nfils > 0:
                     segs_list[key_l][i] /= tomo_nfils
@@ -886,7 +885,7 @@ class SetListTomoOMSegmentations(object):
         star_list.add_column('_psPickleFile')
 
         # Tomograms loop
-        for lname, ltomo in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+        for lname, ltomo in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
             lkey = os.path.splitext(os.path.split(lname)[1])[0]
             out_star, out_list_dir = out_dir_pkl + '/' + lkey + '_tf.star', out_dir_pkl + '/' + lkey + '_tf'
             clean_dir(out_list_dir)
@@ -907,19 +906,19 @@ class SetListTomoOMSegmentations(object):
         # Computing total particles per tomogram loop
         if isinstance(min_num_segs, dict):
             tomos_dict = dict().fromkeys(self.get_set_tomos(), 0)
-            for lkey, ltomos in zip(self.__lists.iterkeys(), self.__lists.itervalues()):
+            for lkey, ltomos in zip(iter(self.__lists.keys()), iter(self.__lists.values())):
                 hold_min = min_num_segs[lkey]
                 for tomo in ltomos.get_tomo_list():
                     if tomo.get_num_segmentations() >= hold_min:
                         tomos_dict[tomo.get_tomo_fname()] += 1
             tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-            for key in tomos_dict.iterkeys():
-                if tomos_dict[key] < len(min_num_segs.keys()):
+            for key in tomos_dict.keys():
+                if tomos_dict[key] < len(list(min_num_segs.keys())):
                     tomos_del[key] = True
         else:
             tomos_del = dict().fromkeys(self.get_set_tomos(), False)
-            for tkey in tomos_del.keys():
-                for ltomos in self.__lists.itervalues():
+            for tkey in list(tomos_del.keys()):
+                for ltomos in self.__lists.values():
                     try:
                         tomo = ltomos.get_tomo_by_key(tkey)
                     except KeyError:
@@ -928,8 +927,8 @@ class SetListTomoOMSegmentations(object):
                         tomos_del[tkey] = True
 
         # Deleting loop
-        for ltomos in self.__lists.itervalues():
-            for tkey in tomos_del.keys():
+        for ltomos in self.__lists.values():
+            for tkey in list(tomos_del.keys()):
                 if tomos_del[tkey]:
                     try:
                         ltomos.del_tomo(tkey)
@@ -945,7 +944,7 @@ class SetListTomoOMSegmentations(object):
 
         # Computing total particles per tomogram loop
         hold_dict = dict()
-        for ltomos in self.__lists.itervalues():
+        for ltomos in self.__lists.values():
             for tomo in ltomos.get_tomo_list():
                 tkey, n_parts = tomo.get_tomo_fname(), tomo.get_num_segmentations()
                 try:
@@ -954,7 +953,7 @@ class SetListTomoOMSegmentations(object):
                     hold_dict[tkey] = n_parts
 
         # Deleting loop
-        for tkey, n_parts in zip(hold_dict.iterkeys(), hold_dict.itervalues()):
+        for tkey, n_parts in zip(iter(hold_dict.keys()), iter(hold_dict.values())):
             if n_parts < min_num_segs:
-                for ltomos in self.__lists.itervalues():
+                for ltomos in self.__lists.values():
                     ltomos.del_tomo(tkey)

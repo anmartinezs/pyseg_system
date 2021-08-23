@@ -2,10 +2,11 @@
 Contains Exception classes for image io.
 
 # Author: Vladan Lucic Max Planck Institute for Biochemistry
-# $Id: local_exceptions.py 1194 2015-06-12 09:43:33Z vladan $
+# $Id$
 """
+from builtins import str
 
-__version__ = "$Revision: 1194 $"
+__version__ = "$Revision$"
 
 
 class FileTypeError(IOError):

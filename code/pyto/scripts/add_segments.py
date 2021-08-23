@@ -14,10 +14,15 @@ boundary file is then used for the segmentation and analysis procedures.
 
 This script may be placed anywhere in the directory tree.
 
-$Id: add_segments.py 1430 2017-03-24 13:18:43Z vladan $
+$Id$
 Author: Vladan Lucic 
 """
-__version__ = "$Revision: 1430 $"
+from __future__ import unicode_literals
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import range
+
+__version__ = "$Revision$"
 
 import numpy
 import pyto
@@ -48,8 +53,8 @@ labels_data_type = 'int8'
 # labels file byte order ('<' for little-endian, '>' for big-endian)
 labels_byte_order = '<'
 
-# labels file array order ('FORTRAN' for x-axis fastest, 'C' for z-axis fastest)
-labels_array_order = 'FORTRAN'
+# labels file array order ('F' for x-axis fastest, 'C' for z-axis fastest)
+labels_array_order = 'F'
 
 #################################################################
 #
@@ -58,8 +63,8 @@ labels_array_order = 'FORTRAN'
 
 # ids of the segments that need to be added, one entry for each labels file
 ids = ([3,5,7],
-       range(2,8) + [4],
-       range(3,5) + range(6,10))
+       list(range(2,8)) + [4],
+       list(range(3,5)) + list(range(6,10)))
 
 # id shift in each subsequent labels (in case of multiple labels files).
 # Important: Shift has to be larger than the largest id (of all labels file) 

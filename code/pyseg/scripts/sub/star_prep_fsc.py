@@ -53,40 +53,40 @@ keep_classes = [1, ] # None #
 
 ########## Print initial message
 
-print 'Fix random halves by tomograms.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tSource STAR file: ' + str(in_star)
-print '\tOutput STAR file: ' + str(out_star)
-print '\tOptions:'
+print('Fix random halves by tomograms.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tSource STAR file: ' + str(in_star))
+print('\tOutput STAR file: ' + str(out_star))
+print('\tOptions:')
 if del_subset:
     if del_subset:
-        print '\t\t-Delete random subset column.'
+        print('\t\t-Delete random subset column.')
     if set_groups:
-        print '\t\t-Set all particles to group 1.'
+        print('\t\t-Set all particles to group 1.')
     if set_halves:
-        print '\t\t-Separate halves by tomograms'
+        print('\t\t-Separate halves by tomograms')
     if keep_classes is not None:
-        print '\t\t-Keep the next classes: ' + str(keep_classes)
-print ''
+        print('\t\t-Keep the next classes: ' + str(keep_classes))
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR files...'
+print('\tLoading input STAR files...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
-    print '\t\t-Number of particles: ' + str(star.get_nrows())
+    print('\t\t-Number of particles: ' + str(star.get_nrows()))
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input list of STAR files could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input list of STAR files could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
 if del_subset:
-    print '\tDeleting random subset column...'
+    print('\tDeleting random subset column...')
     if star.has_column('_rlnRandomSubset'):
         star.del_column('_rlnRandomSubset')
 
@@ -102,7 +102,7 @@ if set_groups:
 if set_halves:
     if not star.has_column('_rlnRandomSubset'):
         star.add_column('_rlnRandomSubset')
-    print '\tComputing tomograms dictionary...'
+    print('\tComputing tomograms dictionary...')
     parts_mic = dict()
     mics = star.get_column_data('_rlnMicrographName')
     mic_keys = set(mics)
@@ -110,7 +110,7 @@ if set_halves:
         parts_mic[mic] = mics.count(mic)
     mic_keys_sorted = sorted(parts_mic.keys())[::-1]
 
-    print '\tSorted alternated half assignment...'
+    print('\tSorted alternated half assignment...')
     half = 1
     parts_half = dict().fromkeys(mic_keys, 0)
     for mic in mic_keys_sorted:
@@ -134,7 +134,7 @@ if (keep_classes is not None) and (star.has_column('_rlnClassNumber')):
             row_ids.append(row)
     star.del_rows(row_ids)
 
-print 'Storing output STAR file in: ' + out_star
+print('Storing output STAR file in: ' + out_star)
 star.store(out_star)
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

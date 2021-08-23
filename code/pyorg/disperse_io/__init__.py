@@ -8,4 +8,4 @@ Set of functions for IO communication with DisPerSe
 __author__ = 'martinez'
 __version__ = "$Revision: 001 $"
 
-from disperse_io import *
+from .disperse_io import *

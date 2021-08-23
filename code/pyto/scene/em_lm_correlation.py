@@ -2,10 +2,12 @@
 Contains class EmLmCorrelation for the correlation between EM and LM
 
 # Author: Vladan Lucic (Max Planck Institute for Biochemistry)
-# $Id: em_lm_correlation.py 1373 2016-12-14 16:36:28Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from builtins import object
 
-__version__ = "$Revision: 1373 $"
+__version__ = "$Revision$"
 
 
 import logging
@@ -13,7 +15,7 @@ from copy import copy, deepcopy
 import numpy
 import scipy
 
-from pyto.geometry.affine_2d import Affine2D 
+from ..geometry.affine_2d import Affine2D 
 
 
 class EmLmCorrelation(object):
@@ -254,7 +256,7 @@ class EmLmCorrelation(object):
         """
 
         # set file parsing parameters
-        if format is 'imagej':
+        if format == 'imagej':
 
             # ImageJ definitions
             comments = '#'
@@ -267,7 +269,7 @@ class EmLmCorrelation(object):
                              " Currently implemented format is 'imagej'.")
 
         # read positions and save as attributes
-        for name, val in specs.items():
+        for name, val in list(specs.items()):
 
             # read columns from file
             try:

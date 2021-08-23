@@ -25,7 +25,7 @@ STR_TO_SCALES = 'scales'
 STR_GR_FDEG = 'feat_degree'
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 
@@ -33,12 +33,9 @@ except:
 #   Abstract class for being base class for all phantoms
 #
 #
-class Phantom(object):
+class Phantom(object, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    #### Constructor Area
     def __init__(self):
         self.__gtruth = None
         self.__tomo = None
@@ -168,12 +165,9 @@ class Phantom(object):
 #   Abstract class for creating a torus made up by randomly distributed multiscale features
 #
 #
-class Torus(Phantom):
+class Torus(Phantom, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    #### Constructor Area
     def __init__(self):
         super(Torus, self).__init__()
         self.__R = 50
@@ -359,12 +353,9 @@ class Torus(Phantom):
 #   Abstract class for creating a 3D grid with multiscale features
 #
 #
-class Grid3D(Phantom):
+class Grid3D(Phantom, metaclass=ABCMeta):
 
     # For Abstract Base Classes in python
-    __metaclass__ = ABCMeta
-
-    #### Constructor Area
     def __init__(self):
         super(Grid3D, self).__init__()
         self.__L = (4, 4, 3)
@@ -537,7 +528,7 @@ class Grid3D(Phantom):
     # fname: file name ended with .pkl
     def pickle(self, fname):
 
-        pkl_f = open(fname, 'w')
+        pkl_f = open(fname, 'wb')
         try:
             pickle.dump(self, pkl_f)
         finally:

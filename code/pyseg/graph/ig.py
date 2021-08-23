@@ -15,7 +15,7 @@ try:
 except:
     import pyseg.disperse_io
 import pexceptions
-from morse import GraphMCF
+from .morse import GraphMCF
 import igraph as ig
 
 ##################################################################################################

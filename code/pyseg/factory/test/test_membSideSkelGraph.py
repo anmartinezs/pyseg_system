@@ -20,7 +20,7 @@ class TestMembSideSkelGraph(TestCase):
     def test_Class(self):
 
         # Read the DisPerSe skeleton
-        print 'Loading skeleton...'
+        print('Loading skeleton...')
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName(DATA_DIR + '/skel2.vtp')
         # reader.SetFileName(DATA_DIR + '/skel_small.vtp')
@@ -35,11 +35,11 @@ class TestMembSideSkelGraph(TestCase):
         skel = red_filt.GetOutput()
 
         # Read the density
-        print 'Loading density...'
-        density = pyfits.getdata(DATA_DIR + '/density.fits')
+        print('Loading density...')
+        density = fits.getdata(DATA_DIR + '/density.fits')
 
         # Read the manifolds
-        print 'Loading manifolds...'
+        print('Loading manifolds...')
         reader = vtk.vtkXMLImageDataReader()
         # reader.SetFileName(DATA_DIR + '/manifolds.vti')
         reader.SetFileName(DATA_DIR + '/manifolds2.vti')
@@ -48,14 +48,14 @@ class TestMembSideSkelGraph(TestCase):
         del reader
 
         # Read the segmented membrane
-        print 'Loading membrane segmentation...'
-        hold = pyfits.getdata(DATA_DIR + '/mb_seg.fits')
+        print('Loading membrane segmentation...')
+        hold = fits.getdata(DATA_DIR + '/mb_seg.fits')
         seg = np.zeros(hold.shape, dtype=np.int)
         # Keep as foreground just the postsynaptic membrane
         seg[hold == 1] = 1
 
         # Factoring a MembSideSkelGraph object
-        print 'Factoring the MembSideSkelGraph object...'
+        print('Factoring the MembSideSkelGraph object...')
         mb_skel = MembSideSkelGraph(skel, manifolds, density, seg)
         mb_skel.set_resolution(TEST_RESOLUTION)
         mb_skel.set_memb_thickness(TEST_MB_THICK)
@@ -63,11 +63,11 @@ class TestMembSideSkelGraph(TestCase):
         mb_skel.set_side(STR_SIGN_N)
         mb_skel.build_skelgraph()
 
-        print 'Getting the ArcGraph...'
+        print('Getting the ArcGraph...')
         mb_skel.build_arcgraph()
 
         # Write the output skel graph
-        print 'Storing the graphs as VTK poly data...'
+        print('Storing the graphs as VTK poly data...')
         sgraph = mb_skel.get_SkelGraph()
         poly = sgraph.get_vtp()
         writer = vtk.vtkXMLPolyDataWriter()
@@ -93,7 +93,7 @@ class TestMembSideSkelGraph(TestCase):
         self.assertEqual(out_writer, 1, 'Graph not stored properly.')
 
         # Loop for checking the graph
-        print 'Checking the object has been built properly...'
+        print('Checking the object has been built properly...')
         dev = 0
         dist_filt = vtkClosestPointAlgorithm()
         hold_surf = gen_surface(seg)
@@ -108,14 +108,14 @@ class TestMembSideSkelGraph(TestCase):
             # Positive configuration
             dist = abs(dist * TEST_RESOLUTION)
             if (dist < TEST_MB_THICK_2) or (dist > TEST_MAX_DIST):
-                print dist
+                print(dist)
 
         error_msg = 'Error, number of vertices out of the specified area inserted %d.' % dev
         self.assertEqual(dev, 0, error_msg)
 
         # Check that the geometries have been built properly
         # Print the segmentation: densities and vertex labels
-        print 'Printing vertices in a image...'
+        print('Printing vertices in a image...')
         segs = sgraph.print_vertices(STR_VERTEX_ID, th_den=0)
         lbls = sgraph.print_vertices(STR_VERTEX_ID, th_den=None)
         # Store result
@@ -134,7 +134,7 @@ class TestMembSideSkelGraph(TestCase):
         self.assertEqual(out_writer, 1, 'Labels stored properly.')
 
         # Check that all vertex coordinates are within the final segmentation
-        print 'Checking the object has been printed properly...'
+        print('Checking the object has been printed properly...')
         good_lbls = 0
         n_min = 0
         for i in range(skel.GetNumberOfPoints()):

@@ -20,7 +20,7 @@ import scipy as sp
 import multiprocessing as mp
 from pyseg.pexceptions import *
 import itertools as it
-from variables import RadialAvg3D
+from .variables import RadialAvg3D
 
 ###########################################################################################
 # Global functionality
@@ -54,7 +54,7 @@ def relion_norm(tomo, mask=None, inv=True):
     if st > 0:
         tomo_out = (hold_tomo-mn) / st
     else:
-        print 'WARNING (relion_norm): standard deviation=' + str(st)
+        print('WARNING (relion_norm): standard deviation=' + str(st))
 
     return tomo_out
 
@@ -90,7 +90,7 @@ def pr_bin_star_svols(pr_id, beg_ids, end_ids, bin, res, sv_shape, cutoff, dstar
 
     # Particles loop
     with open(tmp_csv, 'w') as tfile:
-        writer = csv.DictWriter(tfile, fieldnames=dstar.keys())
+        writer = csv.DictWriter(tfile, fieldnames=list(dstar.keys()))
         writer.writeheader()
         for row_id in range(beg_ids, end_ids+1):
             svol = disperse_io.load_tomo(dstar['_rlnImageName'][row_id], mmap=False)
@@ -122,7 +122,7 @@ def pr_bin_star_svols(pr_id, beg_ids, end_ids, bin, res, sv_shape, cutoff, dstar
             except ValueError:
                 pass
             row = dict.fromkeys(dstar)
-            for key in dstar.keys():
+            for key in list(dstar.keys()):
                 row[key] = dstar[key][row_id]
             writer.writerow(row)
 
@@ -239,7 +239,7 @@ def pr_star_tm(pr_id, row_ids, temp, mask, dstar, max_shift_v, angs_arr, shared_
         if ctemp_std > 0:
             nctemp /= ctemp_std
         # nctemp *= mask
-        print sp.__version__
+        print(sp.__version__)
         if (int(sp.__version__.split('.')[0]) < 1) and (int(sp.__version__.split('.')[1]) < 19):
             nctemp_conj = np.real(sp.fftpack.ifftn(np.conjugate(sp.fftpack.fftn(nctemp))))
 
@@ -296,7 +296,7 @@ def pr_star_tm(pr_id, row_ids, temp, mask, dstar, max_shift_v, angs_arr, shared_
         # disperse_io.save_numpy(st_temp, parts_dir + '/tm_model_' + str(row_id) + '.mrc')
         # disperse_io.save_numpy(st_conv, parts_dir + '/tm_conv_' + str(row_id) + '.mrc')
 
-        print 'Process: ' + str(os.path.split(psvol_paths[row_id])[1]) + ', Particle: ' + str(count) + ' of ' + str(len(row_ids)) + ', ncc: ' + str(max_ncc)
+        print('Process: ' + str(os.path.split(psvol_paths[row_id])[1]) + ', Particle: ' + str(count) + ' of ' + str(len(row_ids)) + ', ncc: ' + str(max_ncc))
         count += 1
 
     if pr_id < 0:
@@ -486,6 +486,8 @@ class RelionCols(object):
                        '_rlnMaxValueProbDistribution',
                        '_rlnNrOfSignificantSamples',
                        '_rlnRandomSubset',
+                       '_rlnDetectorPixelSize',
+                       '_rlnMagnification',
                        # PySeg: Graph analysis
                        '_psGhMCFPickle',
                        # PySeg: Segmentation
@@ -499,6 +501,7 @@ class RelionCols(object):
                        '_psSegOffY',
                        '_psSegOffZ',
                        '_psCCScores',
+                       '_psMaskImage',
                        # PySeg: Affinity Propagation
                        '_psAPClass',
                        '_psAPCenter',
@@ -528,6 +531,8 @@ class RelionCols(object):
                          float,
                          int,
                          int,
+                         float,
+                         float,
                          # PySeg: Graph analysis
                          str,
                          # PySeg: Segmentation
@@ -541,6 +546,7 @@ class RelionCols(object):
                          float,
                          float,
                          float,
+                         str,
                          # PySeg: Affinity Propagation
                          int,
                          int,
@@ -853,7 +859,7 @@ class Star(object):
     # all columns, every column key and data pair is introduced via kwargs
     def add_row(self, **kwargs):
         if kwargs is not None:
-            keys, values = kwargs.keys(), kwargs.values()
+            keys, values = list(kwargs.keys()), list(kwargs.values())
             if len(keys) != self.get_ncols():
                 error_msg = 'Number of columns introduced for this row, ' + str(len(keys)) + ' does not ' + \
                     ' fit the current number of columns, ' + str(self.get_ncols())
@@ -1364,7 +1370,7 @@ class Star(object):
         bin_f = float(bin)
 
         # Coordinates loop
-        for i in xrange(star_cp.get_nrows()):
+        for i in range(star_cp.get_nrows()):
             try:
                 val = star_cp.get_element('_rlnCoordinateX', i)
                 star_cp.set_element('_rlnCoordinateX', i, val/bin_f)
@@ -1408,7 +1414,7 @@ class Star(object):
         # Create the list on indices to split
         npart = star_cp.get_nrows()
         sym_ids = np.arange(npart)
-        spl_ids = np.array_split(range(len(sym_ids)), npr)
+        spl_ids = np.array_split(list(range(len(sym_ids))), npr)
         if npr <= 1:
             pr_bin_star_svols(-1, spl_ids[0][0], spl_ids[0][-1], bin_f, res, sv_shape, cutoff, star_cp.__data, sout_dir,
                               tmp_csv_dir)
@@ -1508,7 +1514,7 @@ class Star(object):
         # Create the list on indices to split
         npart = self.get_nrows()
         sym_ids = np.arange(npart)
-        spl_ids = np.array_split(range(len(sym_ids)), npr)
+        spl_ids = np.array_split(list(range(len(sym_ids))), npr)
         shared_ncc = mp.Array('f', npart)
         if npr <= 1:
             pr_star_tm(-1, spl_ids[0], temp, mask, self.__data, max_shift_v, angs_arr,
@@ -1583,7 +1589,7 @@ class Star(object):
         # Create the list on indices to split
         npart = self.get_nrows()
         sym_ids = np.arange(npart)
-        spl_ids = np.array_split(range(len(sym_ids)), npr)
+        spl_ids = np.array_split(list(range(len(sym_ids))), npr)
         shared_ncc = mp.Array('f', npart)
         if npr <= 1:
             pr_star_tm_za(-1, spl_ids[0], temp, mask, self.__data, shift_arr,

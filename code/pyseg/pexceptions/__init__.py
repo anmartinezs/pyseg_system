@@ -8,4 +8,4 @@ Set of exceptions used in PySeg package
 __author__ = 'martinez'
 __version__ = "$Revision: 001 $"
 
-from pexceptions import *
+from .pexceptions import *

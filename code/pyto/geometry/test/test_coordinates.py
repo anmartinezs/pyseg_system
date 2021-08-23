@@ -3,10 +3,13 @@
 Tests module coordinates
 
 # Author: Vladan Lucic
-# $Id: test_coordinates.py 1311 2016-06-13 12:41:50Z vladan $
+# $Id$
 """
+from __future__ import unicode_literals
+from __future__ import division
+#from past.utils import old_div
 
-__version__ = "$Revision: 1311 $"
+__version__ = "$Revision$"
 
 from copy import copy, deepcopy
 import unittest

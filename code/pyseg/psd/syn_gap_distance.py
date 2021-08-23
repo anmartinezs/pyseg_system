@@ -146,7 +146,7 @@ def syn_gap_dsts(pst_surf, pre_surf):
     dsts = list()
 
     # From to pst to pre
-    for i in xrange(pst_surf.GetNumberOfPoints()):
+    for i in range(pst_surf.GetNumberOfPoints()):
         pst_pt, pst_n = pst_surf.GetPoint(i), normals_pst.GetTuple(i)
         pre_pt_id = locator_pre.FindClosestPoint(pst_pt)
         pre_pt, pre_n = pre_surf.GetPoint(pre_pt_id), normals_pre.GetTuple(pre_pt_id)
@@ -155,7 +155,7 @@ def syn_gap_dsts(pst_surf, pre_surf):
             dsts.append(np.sqrt((hold*hold).sum()))
 
     # From to pre to pst
-    for i in xrange(pre_surf.GetNumberOfPoints()):
+    for i in range(pre_surf.GetNumberOfPoints()):
         pre_pt, pre_n = pre_surf.GetPoint(i), normals_pre.GetTuple(i)
         pst_pt_id = locator_pst.FindClosestPoint(pre_pt)
         pst_pt, pst_n = pst_surf.GetPoint(pst_pt_id), normals_pst.GetTuple(pst_pt_id)
@@ -174,7 +174,7 @@ import pyseg as ps
 import matplotlib.pyplot as plt
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -183,70 +183,70 @@ except ImportError:
 
 ########## Print initial message
 
-print 'Synapse gap distance analysis.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tInput STAR file with segmentations: ' + in_star
-print '\tOutput directory: ' + out_dir
-print '\tPre-processing segmentation options:'
-print '\t\t-Pixel size: ' + str(sg_res)
-print '\t\t-Gaussian smoothing sigma: ' + str(sg_sg)
-print '\t\t-Iso-surface threshold: ' + str(sg_th)
+print('Synapse gap distance analysis.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tInput STAR file with segmentations: ' + in_star)
+print('\tOutput directory: ' + out_dir)
+print('\tPre-processing segmentation options:')
+print('\t\t-Pixel size: ' + str(sg_res))
+print('\t\t-Gaussian smoothing sigma: ' + str(sg_sg))
+print('\t\t-Iso-surface threshold: ' + str(sg_th))
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 
-print '\tLoading input STAR file...'
+print('\tLoading input STAR file...')
 star = ps.sub.Star()
 try:
     star.load(in_star)
 except ps.pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 in_segs = star.get_column_data('_psSegImage')
 if in_segs is None:
-    print 'ERROR: input STAR does not contain any synapse segmentation to process.'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR does not contain any synapse segmentation to process.')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 
-print '\tMain loop:'
+print('\tMain loop:')
 dst_mns, dst_stds, dst_lbls = list(), list(), list()
 dst_per_lows, dst_per_highs = list(), list()
 for in_seg in in_segs:
 
-    print '\t\tLoading file: ' + in_seg
+    print('\t\tLoading file: ' + in_seg)
     seg = ps.disperse_io.load_tomo(in_seg)
     pst_seg = sp.ndimage.filters.gaussian_filter(np.asarray(seg==MB_PST, dtype=np.float32), 3.0)
     pre_seg = sp.ndimage.filters.gaussian_filter(np.asarray(seg==MB_PRE, dtype=np.float32), 3.0)
 
-    print '\t\tGenerating membrane surfaces...'
+    print('\t\tGenerating membrane surfaces...')
     pst_surf = iso_surface(pst_seg, sg_th, closed=True, normals='outwards')
     pre_surf = iso_surface(pre_seg, sg_th, closed=True, normals='outwards')
 
-    print '\t\tComputing distances...'
+    print('\t\tComputing distances...')
     dsts = syn_gap_dsts(pst_surf, pre_surf) * sg_res
     try:
         lbl = syn_lbl(in_seg)
     except ValueError:
-        print 'WARNING: segmentation file uncorrectly formatted, no synapse label can be extracted.'
+        print('WARNING: segmentation file uncorrectly formatted, no synapse label can be extracted.')
         continue
     dst_lbls.append(lbl)
     dst_mns.append(dsts.mean())
     dst_stds.append(dsts.std())
     dst_per_lows.append(np.percentile(dsts, PER_LOW))
     dst_per_highs.append(np.percentile(dsts, PER_HIGH))
-    print '\t\t\t+Mean: ' + str(dst_mns[-1]) + ' nm'
-    print '\t\t\t+Std: ' + str(dst_stds[-1]) + ' nm'
-    print '\t\t\t+Percentiles: [' + str(dst_per_lows[-1]) + ', ' + str(dst_per_highs[-1]) + '] +  nm'
+    print('\t\t\t+Mean: ' + str(dst_mns[-1]) + ' nm')
+    print('\t\t\t+Std: ' + str(dst_stds[-1]) + ' nm')
+    print('\t\t\t+Percentiles: [' + str(dst_per_lows[-1]) + ', ' + str(dst_per_highs[-1]) + '] +  nm')
 
-    print '\t\tSaving generated surfaces...'
+    print('\t\tSaving generated surfaces...')
     ps.disperse_io.save_vtp(pst_surf, out_dir + '/syn_' + lbl + END_STR + '_pst_surf.vtp')
     ps.disperse_io.save_vtp(pre_surf, out_dir + '/syn_' + lbl + END_STR + '_pre_surf.vtp')
 
-print '\tPickling results...'
+print('\tPickling results...')
 with open(out_dir + '/dst_lbls.pkl', 'w') as file_lbls:
     pickle.dump(dst_lbls, file_lbls)
 with open(out_dir + '/dst_mns.pkl', 'w') as file_mns:
@@ -258,9 +258,9 @@ with open(out_dir + '/dst_per_lows.pkl', 'w') as file_per_lows:
 with open(out_dir + '/dst_per_highs.pkl', 'w') as file_per_highs:
     pickle.dump(dst_per_lows, file_per_highs)
 
-print '\tPlotting the results (mean, std) in nm: '
+print('\tPlotting the results (mean, std) in nm: ')
 for lbl, mn, st in zip(dst_lbls, dst_mns, dst_stds):
-    print '\t\t-' + lbl + ': ' + str(mn) + ', ' + str(st)
+    print('\t\t-' + lbl + ': ' + str(mn) + ', ' + str(st))
 plt.figure()
 plt.title('Synapse gap distances')
 plt.xlabel('Mean (nm)')
@@ -276,4 +276,4 @@ plt.plot(np.asarray(dst_per_lows), np.asarray(dst_per_highs))
 plt.show(block=True)
 plt.close()
 
-print 'Terminated. (' + time.strftime("%c") + ')'
+print('Terminated. (' + time.strftime("%c") + ')')

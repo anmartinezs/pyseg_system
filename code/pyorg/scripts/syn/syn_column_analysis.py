@@ -29,7 +29,7 @@ from matplotlib import pyplot as plt, rcParams
 import seaborn as sns
 import pandas as pd
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -141,75 +141,75 @@ ana_max_dist_v = ana_max_dist / ana_res
 
 ########## Print initial message
 
-print 'Second order analysis for colocalization to  ListTomoParticles by tomograms.'
-print '\tAuthor: ' + __author__
-print '\tDate: ' + time.strftime("%c") + '\n'
-print 'Options:'
-print '\tOutput directory: ' + str(out_dir)
-print '\tOuput stem: ' + str(out_stem)
-print '\tInput analysis STAR file 1: ' + str(in_star_1)
-print '\t\t-Key: ' + key_1
-print '\tInput analysis STAR file 2: ' + str(in_star_2)
-print '\t\t-Key: ' + key_2
-print '\tInput analysis STAR file 3: ' + str(in_star_3)
-print '\t\t-Key: ' + key_3
+print('Second order analysis for colocalization to  ListTomoParticles by tomograms.')
+print('\tAuthor: ' + __author__)
+print('\tDate: ' + time.strftime("%c") + '\n')
+print('Options:')
+print('\tOutput directory: ' + str(out_dir))
+print('\tOuput stem: ' + str(out_stem))
+print('\tInput analysis STAR file 1: ' + str(in_star_1))
+print('\t\t-Key: ' + key_1)
+print('\tInput analysis STAR file 2: ' + str(in_star_2))
+print('\t\t-Key: ' + key_2)
+print('\tInput analysis STAR file 3: ' + str(in_star_3))
+print('\t\t-Key: ' + key_3)
 if in_wspace is not None:
-    print '\tLoad workspace from: ' + in_wspace
+    print('\tLoad workspace from: ' + in_wspace)
 else:
-    print '\tPre-processing: '
+    print('\tPre-processing: ')
     if pre_ssup is not None:
-        print '\t\t-Scale supression: ' + str(pre_ssup) + ' nm'
-print '\tOrganization analysis settings: '
-print '\t\t-Data resolution: ' + str(ana_res) + ' nm/vx '
-print '\t\t-Column radius: ' + str(ana_max_dist) + ' nm'
-print '\t\t-Column radius: ' + str(ana_max_dist_v) + ' vx'
-print '\t\t-Number of aligned particles in layer 2: ' + str(ana_nn_2)
-print '\t\t-Number of aligned particles in layer 3: ' + str(ana_nn_3)
+        print('\t\t-Scale supression: ' + str(pre_ssup) + ' nm')
+print('\tOrganization analysis settings: ')
+print('\t\t-Data resolution: ' + str(ana_res) + ' nm/vx ')
+print('\t\t-Column radius: ' + str(ana_max_dist) + ' nm')
+print('\t\t-Column radius: ' + str(ana_max_dist_v) + ' vx')
+print('\t\t-Number of aligned particles in layer 2: ' + str(ana_nn_2))
+print('\t\t-Number of aligned particles in layer 3: ' + str(ana_nn_3))
 if do_ap_1 or do_ap_2 or do_ap_3:
-    print '\tAffinity propagation settings: '
-    print '\t\t-Damping: ' + str(ap_damp)
-    print '\t\t-Maximum iterations: ' + str(ap_damp)
-    print '\t\t-Convergence iterations: ' + str(ap_damp)
-    print '\t\t-Preference: ' + str(ap_damp)
-    print '\t\t-Centroid radius: ' + str(ap_c_rad)
-    print '\t\t-Processing layers: '
+    print('\tAffinity propagation settings: ')
+    print('\t\t-Damping: ' + str(ap_damp))
+    print('\t\t-Maximum iterations: ' + str(ap_damp))
+    print('\t\t-Convergence iterations: ' + str(ap_damp))
+    print('\t\t-Preference: ' + str(ap_damp))
+    print('\t\t-Centroid radius: ' + str(ap_c_rad))
+    print('\t\t-Processing layers: ')
     if do_ap_1:
-        print '\t\t\t+Layer 1'
+        print('\t\t\t+Layer 1')
     if do_ap_2:
-        print '\t\t\t+Layer 2'
+        print('\t\t\t+Layer 2')
     if do_ap_3:
-        print '\t\t\t+Layer 3'
-print '\tP-Value computation setting:'
-print '\t\t-Percentile: ' + str(p_per) + ' %'
-print '\t\t-Number of instances for simulations: ' + str(p_nsims)
+        print('\t\t\t+Layer 3')
+print('\tP-Value computation setting:')
+print('\t\t-Percentile: ' + str(p_per) + ' %')
+print('\t\t-Number of instances for simulations: ' + str(p_nsims))
 if fig_fmt is not None:
-    print '\tStoring figures:'
-    print '\t\t-Format: ' + str(fig_fmt)
+    print('\tStoring figures:')
+    print('\t\t-Format: ' + str(fig_fmt))
 else:
-    print '\tPlotting settings: '
-print ''
+    print('\tPlotting settings: ')
+print('')
 
 ######### Process
 
-print 'Main Routine: '
+print('Main Routine: ')
 mats_lists, gl_lists = None, None
 
 out_stem_dir = out_dir + '/' + out_stem
-print '\tCleaning the output dir: ' + out_stem
+print('\tCleaning the output dir: ' + out_stem)
 if os.path.exists(out_stem_dir):
     clean_dir(out_stem_dir)
 else:
     os.makedirs(out_stem_dir)
 
-print '\tLoading input data (only the first entry is loaded)...'
+print('\tLoading input data (only the first entry is loaded)...')
 star_1, star_2, star_3 = sub.Star(), sub.Star(), sub.Star()
 try:
     star_1.load(in_star_1)
     star_2.load(in_star_2)
     star_3.load(in_star_3)
 except pexceptions.PySegInputError as e:
-    print 'ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"'
-    print 'Terminated. (' + time.strftime("%c") + ')'
+    print('ERROR: input STAR file could not be loaded because of "' + e.get_message() + '"')
+    print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
 ltomos_pkl = star_1.get_element('_psPickleFile', 0)
 list_1 = unpickle_obj(ltomos_pkl)
@@ -222,7 +222,7 @@ set_lists.add_list_tomos(list_1, key_1)
 set_lists.add_list_tomos(list_2, key_2)
 set_lists.add_list_tomos(list_3, key_3)
 
-print '\tSet pre-processing...'
+print('\tSet pre-processing...')
 if pre_ssup is not None:
     pre_ssup_v = pre_ssup / ana_res
     set_lists.scale_suppression(pre_ssup_v)
@@ -232,7 +232,7 @@ if pre_min_parts > 0:
     list_2 = set_lists.get_lists_by_key(key_2)
     list_3 = set_lists.get_lists_by_key(key_3)
 
-print '\tBuilding the dictionaries...'
+print('\tBuilding the dictionaries...')
 short_tkeys_dic = dict()
 tomos_np_1, tomos_np_2, tomos_np_3 = dict(), dict(), dict()
 tomos_nc, tomos_den, tomos_denv, tomos_dent = dict(), dict(), dict(), dict()
@@ -244,11 +244,11 @@ tomos_nc_sims13, tomos_den_sims13, tomos_denv_sims13, tomos_dent_sims13 = dict()
 tomos_nc_sims2, tomos_den_sims2, tomos_denv_sims2, tomos_dent_sims2 = dict(), dict(), dict(), dict()
 tomos_nc_sims212, tomos_den_sims212, tomos_denv_sims212, tomos_dent_sims212 = dict(), dict(), dict(), dict()
 tomos_nc_sims213, tomos_den_sims213, tomos_denv_sims213, tomos_dent_sims213 = dict(), dict(), dict(), dict()
-for tkey, ltomo in zip(list_1.get_tomos().iterkeys(), list_1.get_tomos().itervalues()):
+for tkey, ltomo in zip(iter(list_1.get_tomos().keys()), iter(list_1.get_tomos().values())):
     try:
         ltomo_1, ltomo_2 = list_2.get_tomo_by_key(tkey), list_2.get_tomo_by_key(tkey)
     except KeyError:
-        print 'WARNING: tomogram in layer 1 not in lists for layers 2 or 3!'
+        print('WARNING: tomogram in layer 1 not in lists for layers 2 or 3!')
         continue
     tomos_np_1[tkey], tomos_np_2[tkey], tomos_np_3[tkey] = 0, 0, 0
     tomos_nc[tkey], tomos_den[tkey], tomos_denv[tkey], tot_dent = 0, 0, 0, 0
@@ -269,7 +269,7 @@ for tkey, ltomo in zip(list_1.get_tomos().iterkeys(), list_1.get_tomos().iterval
     short_tkey = os.path.splitext(os.path.split(tkey)[1])[0]
     short_tkeys_dic[short_tkey] = tkey
 
-print '\tComputing reference properties...'
+print('\tComputing reference properties...')
 vols = list_1.get_volumes_dict()
 with open(in_tethers_csv, mode='r') as infile:
     reader = csv.reader(infile, delimiter='\t')
@@ -285,12 +285,12 @@ os.makedirs(out_tomos_dir)
 if in_wspace is None:
 
     tomo_count = 0
-    print '\t\t-Tomograms computing loop:'
-    for tkey, ltomo_1 in zip(list_1.get_tomos().iterkeys(), list_1.get_tomos().itervalues()):
+    print('\t\t-Tomograms computing loop:')
+    for tkey, ltomo_1 in zip(iter(list_1.get_tomos().keys()), iter(list_1.get_tomos().values())):
 
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
-        print '\t\t\t+Processing tomogram (' + str(tomo_count + 1) + \
-              ' of ' + str(len(tomos_nc.keys())) + ') : ' + os.path.split(tkey)[1]
+        print('\t\t\t+Processing tomogram (' + str(tomo_count + 1) + \
+              ' of ' + str(len(list(tomos_nc.keys()))) + ') : ' + os.path.split(tkey)[1])
         tomo_count += 1
         ltomo_2, ltomo_3 = list_2.get_tomo_by_key(tkey), list_3.get_tomo_by_key(tkey)
 
@@ -302,31 +302,31 @@ if in_wspace is None:
         if do_ap_1:
             ltomo_1_ap = ltomo_1.gen_newtomo_ap(ap_pref, ap_damp, ap_max_iter, ap_conv_iter,
                                                 c_rad=ap_c_rad, pj=True)
-            print '\t\t\t\t-Particles->APc for layer 1: ' + str(ltomo_1.get_num_particles()) \
-                  + '->' + str(ltomo_1_ap.get_num_particles())
+            print('\t\t\t\t-Particles->APc for layer 1: ' + str(ltomo_1.get_num_particles()) \
+                  + '->' + str(ltomo_1_ap.get_num_particles()))
             disperse_io.save_vtp(ltomo_1_ap.gen_particles_vtp(), hold_dir + '/' + tkey_short + '_cap1.vtp')
             ltomo_1 = ltomo_1_ap
         if do_ap_2:
             ltomo_2_ap = ltomo_2.gen_newtomo_ap(ap_pref, ap_damp, ap_max_iter, ap_conv_iter,
                                                 c_rad=ap_c_rad, pj=True)
-            print '\t\t\t\t-Particles->APc for layer 2: ' + str(ltomo_2.get_num_particles()) \
-                  + '->' + str(ltomo_2_ap.get_num_particles())
+            print('\t\t\t\t-Particles->APc for layer 2: ' + str(ltomo_2.get_num_particles()) \
+                  + '->' + str(ltomo_2_ap.get_num_particles()))
             disperse_io.save_vtp(ltomo_2_ap.gen_particles_vtp(), hold_dir + '/' + tkey_short + '_cap2.vtp')
             ltomo_2 = ltomo_2_ap
         if do_ap_3:
             ltomo_3_ap = ltomo_3.gen_newtomo_ap(ap_pref, ap_damp, ap_max_iter, ap_conv_iter,
                                                 c_rad=ap_c_rad, pj=True)
-            print '\t\t\t\t-Particles->APc for layer 3: ' + str(ltomo_3.get_num_particles()) \
-                    + '->' + str(ltomo_3_ap.get_num_particles())
+            print('\t\t\t\t-Particles->APc for layer 3: ' + str(ltomo_3.get_num_particles()) \
+                    + '->' + str(ltomo_3_ap.get_num_particles()))
             disperse_io.save_vtp(ltomo_3_ap.gen_particles_vtp(), hold_dir + '/' + tkey_short + '_cap3.vtp')
             ltomo_3 = ltomo_3_ap
 
-        print '\t\t\t\t-Count the number of particles...'
+        print('\t\t\t\t-Count the number of particles...')
         tomos_np_1[tkey] = ltomo_1.get_num_particles()
         tomos_np_2[tkey] = ltomo_2.get_num_particles()
         tomos_np_3[tkey] = ltomo_3.get_num_particles()
 
-        print '\t\t\t\t-Computing columns...'
+        print('\t\t\t\t-Computing columns...')
         cfinder = ColumnsFinder(ltomo_1, ltomo_2, ltomo_3)
         cfinder.find_columns(ana_max_dist_v, ana_nn_2, ana_nn_3)
         cfinder.find_aln12(ana_max_dist_v, ana_nn_2)
@@ -345,21 +345,21 @@ if in_wspace is None:
             tomos_denv12[tkey] = float(cfinder.get_num_aln12()) / float(vesicles[tkey])
             tomos_denv13[tkey] = float(cfinder.get_num_aln13()) / float(vesicles[tkey])
 
-        print '\t\t\t\t-Simulating columns (v1):'
+        print('\t\t\t\t-Simulating columns (v1):')
         for i in range(p_nsims):
-            print '\t\t\t\t\t+Simulating instance ' + str(i) + ' of ' + str(p_nsims) + '...'
+            print('\t\t\t\t\t+Simulating instance ' + str(i) + ' of ' + str(p_nsims) + '...')
             sim_lyr_2 = cfinder_raw.gen_layer_model(2, ModelCSRV, mode_emb='center')
             sim_lyr_3 = cfinder_raw.gen_layer_model(3, ModelCSRV, mode_emb='center')
             if do_ap_2:
                 hold = sim_lyr_2.get_num_particles()
                 sim_lyr_2 = sim_lyr_2.gen_newtomo_ap(ap_pref, ap_damp, ap_max_iter, ap_conv_iter,
                                                      c_rad=ap_c_rad, pj=True)
-                print '\t\t\t\t-Particles->APc for layer 2: ' + str(hold) + '->' + str(sim_lyr_2.get_num_particles())
+                print('\t\t\t\t-Particles->APc for layer 2: ' + str(hold) + '->' + str(sim_lyr_2.get_num_particles()))
             if do_ap_3:
                 hold = sim_lyr_3.get_num_particles()
                 sim_lyr_3 = sim_lyr_3.gen_newtomo_ap(ap_pref, ap_damp, ap_max_iter, ap_conv_iter,
                                                      c_rad=ap_c_rad, pj=True)
-                print '\t\t\t\t-Particles->APc for layer 3: ' + str(hold) + '->' + str(sim_lyr_3.get_num_particles())
+                print('\t\t\t\t-Particles->APc for layer 3: ' + str(hold) + '->' + str(sim_lyr_3.get_num_particles()))
             sim_cfinder = ColumnsFinder(ltomo_1, sim_lyr_2, sim_lyr_3)
             sim_cfinder.find_columns(ana_max_dist_v, ana_nn_2, ana_nn_3)
             sim_cfinder.find_aln12(ana_max_dist_v, ana_nn_2)
@@ -378,15 +378,15 @@ if in_wspace is None:
                 tomos_denv_sims12[tkey].append(float(sim_cfinder.get_num_aln12()) / float(vesicles[tkey]))
                 tomos_denv_sims13[tkey].append(float(sim_cfinder.get_num_aln13()) / float(vesicles[tkey]))
 
-        print '\t\t\t\t-Simulating columns (v2):'
+        print('\t\t\t\t-Simulating columns (v2):')
         for i in range(p_nsims):
-            print '\t\t\t\t\t+Simulating instance ' + str(i) + ' of ' + str(p_nsims) + '...'
+            print('\t\t\t\t\t+Simulating instance ' + str(i) + ' of ' + str(p_nsims) + '...')
             sim_lyr_1 = cfinder_raw.gen_layer_model(1, ModelCSRV, mode_emb='center')
             if do_ap_1:
                 hold = sim_lyr_1.get_num_particles()
                 sim_lyr_1 = sim_lyr_1.gen_newtomo_ap(ap_pref, ap_damp, ap_max_iter, ap_conv_iter,
                                                      c_rad=ap_c_rad, pj=True)
-                print '\t\t\t\t-Particles->APc for layer 1: ' + str(hold) + '->' + str(sim_lyr_1.get_num_particles())
+                print('\t\t\t\t-Particles->APc for layer 1: ' + str(hold) + '->' + str(sim_lyr_1.get_num_particles()))
             sim_cfinder2 = ColumnsFinder(sim_lyr_1, ltomo_2, ltomo_3)
             sim_cfinder2.find_columns(ana_max_dist_v, ana_nn_2, ana_nn_3)
             sim_cfinder2.find_aln12(ana_max_dist_v, ana_nn_2)
@@ -406,7 +406,7 @@ if in_wspace is None:
                 tomos_denv_sims213[tkey].append(float(sim_cfinder2.get_num_aln13()) / float(vesicles[tkey]))
 
     out_wspace = out_dir + '/' + out_stem + '_wspace.pkl'
-    print '\tPickling computation workspace in: ' + out_wspace
+    print('\tPickling computation workspace in: ' + out_wspace)
     wspace = (tomos_nc, tomos_den, tomos_denv, tomos_dent,
               tomos_nc12, tomos_den12, tomos_denv12, tomos_dent12,
               tomos_nc13, tomos_den13, tomos_denv13, tomos_dent13,
@@ -424,7 +424,7 @@ if in_wspace is None:
 
 else:
 
-    print '\tLoading the workspace: ' + in_wspace
+    print('\tLoading the workspace: ' + in_wspace)
     with open(in_wspace, 'r') as pkl:
         wspace = pickle.load(pkl)
     tomos_nc, tomos_den, tomos_denv, tomos_dent = wspace[0], wspace[1], wspace[2], wspace[3]
@@ -446,10 +446,10 @@ else:
     tomos_np_1, tomos_np_2, tomos_np_3 = wspace[38], wspace[39], wspace[40]
 
 
-print '\tTOMOGRAMS PLOTTING LOOP: '
+print('\tTOMOGRAMS PLOTTING LOOP: ')
 
-print '\t\t-Plotting the number of columns...'
-for tkey, nc in zip(tomos_nc.iterkeys(), tomos_nc.itervalues()):
+print('\t\t-Plotting the number of columns...')
+for tkey, nc in zip(iter(tomos_nc.keys()), iter(tomos_nc.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Number of columns')
@@ -478,7 +478,7 @@ for tkey, nc in zip(tomos_nc.iterkeys(), tomos_nc.itervalues()):
         plt.savefig(hold_dir + '/nc.png')
     plt.close()
 
-for tkey, nc in zip(tomos_nc12.iterkeys(), tomos_nc12.itervalues()):
+for tkey, nc in zip(iter(tomos_nc12.keys()), iter(tomos_nc12.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Number of alignments 1->2')
@@ -507,7 +507,7 @@ for tkey, nc in zip(tomos_nc12.iterkeys(), tomos_nc12.itervalues()):
         plt.savefig(hold_dir + '/nc.png')
     plt.close()
 
-for tkey, nc in zip(tomos_nc13.iterkeys(), tomos_nc13.itervalues()):
+for tkey, nc in zip(iter(tomos_nc13.keys()), iter(tomos_nc13.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Number of alignments 1->3')
@@ -536,8 +536,8 @@ for tkey, nc in zip(tomos_nc13.iterkeys(), tomos_nc13.itervalues()):
         plt.savefig(hold_dir + '/nc.png')
     plt.close()
 
-print '\t\t-Plotting columns density...'
-for tkey, den in zip(tomos_den.iterkeys(), tomos_den.itervalues()):
+print('\t\t-Plotting columns density...')
+for tkey, den in zip(iter(tomos_den.keys()), iter(tomos_den.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Columns density [column/nm$^3$]')
@@ -569,7 +569,7 @@ for tkey, den in zip(tomos_den.iterkeys(), tomos_den.itervalues()):
         plt.savefig(hold_dir + '/den.png')
     plt.close()
 
-for tkey, den in zip(tomos_den12.iterkeys(), tomos_den12.itervalues()):
+for tkey, den in zip(iter(tomos_den12.keys()), iter(tomos_den12.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Alignments 1->2 density [column/nm$^3$]')
@@ -601,7 +601,7 @@ for tkey, den in zip(tomos_den12.iterkeys(), tomos_den12.itervalues()):
         plt.savefig(hold_dir + '/den.png')
     plt.close()
 
-for tkey, den in zip(tomos_den13.iterkeys(), tomos_den13.itervalues()):
+for tkey, den in zip(iter(tomos_den13.keys()), iter(tomos_den13.values())):
     tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
     plt.figure()
     plt.ylabel('Alignments 1->3 density [column/nm$^3$]')
@@ -633,8 +633,8 @@ for tkey, den in zip(tomos_den13.iterkeys(), tomos_den13.itervalues()):
         plt.savefig(hold_dir + '/den.png')
     plt.close()
 
-print '\t\t-Plotting columns density per synaptic vesicle...'
-for tkey, denv in zip(tomos_denv.iterkeys(), tomos_denv.itervalues()):
+print('\t\t-Plotting columns density per synaptic vesicle...')
+for tkey, denv in zip(iter(tomos_denv.keys()), iter(tomos_denv.values())):
     if len(tomos_denv_sims[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -667,7 +667,7 @@ for tkey, denv in zip(tomos_denv.iterkeys(), tomos_denv.itervalues()):
             plt.savefig(hold_dir + '/denv.png')
         plt.close()
 
-for tkey, denv in zip(tomos_denv12.iterkeys(), tomos_denv12.itervalues()):
+for tkey, denv in zip(iter(tomos_denv12.keys()), iter(tomos_denv12.values())):
     if len(tomos_denv_sims12[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -700,7 +700,7 @@ for tkey, denv in zip(tomos_denv12.iterkeys(), tomos_denv12.itervalues()):
             plt.savefig(hold_dir + '/denv.png')
         plt.close()
 
-for tkey, denv in zip(tomos_denv13.iterkeys(), tomos_denv13.itervalues()):
+for tkey, denv in zip(iter(tomos_denv13.keys()), iter(tomos_denv13.values())):
     if len(tomos_denv_sims13[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -733,9 +733,9 @@ for tkey, denv in zip(tomos_denv13.iterkeys(), tomos_denv13.itervalues()):
             plt.savefig(hold_dir + '/denv.png')
         plt.close()
 
-print '\t\t-Plotting columns density per tether...'
+print('\t\t-Plotting columns density per tether...')
 high_pvals, high_pvals2 = dict(), dict()
-for tkey, dent in zip(tomos_dent.iterkeys(), tomos_dent.itervalues()):
+for tkey, dent in zip(iter(tomos_dent.keys()), iter(tomos_dent.values())):
     if len(tomos_dent_sims[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -771,7 +771,7 @@ for tkey, dent in zip(tomos_dent.iterkeys(), tomos_dent.itervalues()):
         high_pvals2[tkey] = compute_pval(dent, dent_sims2)
 
 high_pvals12, high_pvals212 = dict(), dict()
-for tkey, dent in zip(tomos_dent12.iterkeys(), tomos_dent12.itervalues()):
+for tkey, dent in zip(iter(tomos_dent12.keys()), iter(tomos_dent12.values())):
     if len(tomos_dent_sims12[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -807,7 +807,7 @@ for tkey, dent in zip(tomos_dent12.iterkeys(), tomos_dent12.itervalues()):
         high_pvals212[tkey] = compute_pval(dent, dent_sims2)
 
 high_pvals13, high_pvals213 = dict(), dict()
-for tkey, dent in zip(tomos_dent13.iterkeys(), tomos_dent13.itervalues()):
+for tkey, dent in zip(iter(tomos_dent13.keys()), iter(tomos_dent13.values())):
     if len(tomos_dent_sims13[tkey]) > 0:
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         plt.figure()
@@ -842,13 +842,13 @@ for tkey, dent in zip(tomos_dent13.iterkeys(), tomos_dent13.itervalues()):
         high_pvals13[tkey] = compute_pval(dent, dent_sims)
         high_pvals213[tkey] = compute_pval(dent, dent_sims2)
 
-print '\t\t-Plotting column density by categories...'
+print('\t\t-Plotting column density by categories...')
 lst, cols = list(), ['side', 'p-value']
 plt.figure()
 pd_pvals = None
 plt.title('Columns density [Col/Tether]')
 for hold_side, hold_pvals in zip(('SIMULATED', 'SIMULATED\''), (high_pvals, high_pvals2)):
-    for tkey, hold_pval in zip(hold_pvals.iterkeys(), hold_pvals.itervalues()):
+    for tkey, hold_pval in zip(iter(hold_pvals.keys()), iter(hold_pvals.values())):
         if (hold_pval is not None) and np.isfinite(hold_pval):
             if fig_weight_tet:
                 for i in range(tomos_np_1[tkey]):
@@ -878,7 +878,7 @@ plt.figure()
 pd_pvals = None
 plt.title('Alignments 1->2 density [Aln/Tether]')
 for hold_side, hold_pvals in zip(('SIMULATED', 'SIMULATED\''), (high_pvals12, high_pvals212)):
-    for tkey, hold_pval in zip(hold_pvals.iterkeys(), hold_pvals.itervalues()):
+    for tkey, hold_pval in zip(iter(hold_pvals.keys()), iter(hold_pvals.values())):
         if (hold_pval is not None) and np.isfinite(hold_pval):
             if fig_weight_tet:
                 for i in range(tomos_np_1[tkey]):
@@ -908,7 +908,7 @@ plt.figure()
 pd_pvals = None
 plt.title('Alignments 1->3 density [Aln/Tether]')
 for hold_side, hold_pvals in zip(('SIMULATED', 'SIMULATED\''), (high_pvals13, high_pvals213)):
-    for tkey, hold_pval in zip(hold_pvals.iterkeys(), hold_pvals.itervalues()):
+    for tkey, hold_pval in zip(iter(hold_pvals.keys()), iter(hold_pvals.values())):
         if (hold_pval is not None) and np.isfinite(hold_pval):
             if fig_weight_tet:
                 for i in range(tomos_np_1[tkey]):
@@ -933,13 +933,13 @@ else:
     plt.savefig(out_tomos_dir + '/aln13.png', dpi=300)
 plt.close()
 
-print '\t\t-Plotting column density by categories (CTRL vs STIM)...'
+print('\t\t-Plotting column density by categories (CTRL vs STIM)...')
 lst, cols = list(), ['side', 'p-value']
 plt.figure()
 pd_pvals = None
 plt.title('Columns density [Col/Tether]')
 for hold_side, hold_pvals in zip(('SIMULATED', 'SIMULATED\''), (high_pvals, high_pvals2)):
-    for tkey, hold_pval in zip(hold_pvals.iterkeys(), hold_pvals.itervalues()):
+    for tkey, hold_pval in zip(iter(hold_pvals.keys()), iter(hold_pvals.values())):
         tkey_hold = os.path.split(tkey)[1].split('_')
         tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
         if (hold_pval is not None) and np.isfinite(hold_pval):
@@ -973,13 +973,13 @@ else:
     plt.savefig(out_tomos_dir + '/coloc_ctrl_vs_stim.png', dpi=300)
 plt.close()
 
-print '\t\t-Plotting alignment 1->2 density by categories (CTRL vs STIM)...'
+print('\t\t-Plotting alignment 1->2 density by categories (CTRL vs STIM)...')
 lst, cols = list(), ['side', 'p-value']
 plt.figure()
 pd_pvals = None
 plt.title('Alignment 1->2 density [Aln/Tether]')
 for hold_side, hold_pvals in zip(('SIMULATED', 'SIMULATED\''), (high_pvals12, high_pvals212)):
-    for tkey, hold_pval in zip(hold_pvals.iterkeys(), hold_pvals.itervalues()):
+    for tkey, hold_pval in zip(iter(hold_pvals.keys()), iter(hold_pvals.values())):
         tkey_hold = os.path.split(tkey)[1].split('_')
         tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
         if (hold_pval is not None) and np.isfinite(hold_pval):
@@ -1013,13 +1013,13 @@ else:
     plt.savefig(out_tomos_dir + '/aln12_ctrl_vs_stim.png', dpi=300)
 plt.close()
 
-print '\t\t-Plotting alignment 1->3 density by categories (CTRL vs STIM)...'
+print('\t\t-Plotting alignment 1->3 density by categories (CTRL vs STIM)...')
 lst, cols = list(), ['side', 'p-value']
 plt.figure()
 pd_pvals = None
 plt.title('Alignment 1->3 density [Aln/Tether]')
 for hold_side, hold_pvals in zip(('SIMULATED', 'SIMULATED\''), (high_pvals13, high_pvals213)):
-    for tkey, hold_pval in zip(hold_pvals.iterkeys(), hold_pvals.itervalues()):
+    for tkey, hold_pval in zip(iter(hold_pvals.keys()), iter(hold_pvals.values())):
         tkey_hold = os.path.split(tkey)[1].split('_')
         tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
         if (hold_pval is not None) and np.isfinite(hold_pval):
@@ -1053,12 +1053,12 @@ else:
     plt.savefig(out_tomos_dir + '/aln13_ctrl_vs_stim.png', dpi=300)
 plt.close()
 
-print '\tTOTAL PLOTTING: '
+print('\tTOTAL PLOTTING: ')
 
 out_lists_dir = out_stem_dir + '/lists'
 os.makedirs(out_lists_dir)
 
-print '\t\t-Gathering tomogram simulations: '
+print('\t\t-Gathering tomogram simulations: ')
 tot_nc, tot_nc12, tot_nc13, tot_vol, tot_ves, tot_teth = 0, 0, 0, 0, 0, 0
 ncs_sims, ncs_sims2 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 ncs_sims12, ncs_sims212 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
@@ -1072,7 +1072,7 @@ denv_sims13, denv_sims213 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(sh
 dent_sims, dent_sims2 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 dent_sims12, dent_sims212 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 dent_sims13, dent_sims213 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-for tkey, nc_sim in zip(tomos_nc_sims.iterkeys(), tomos_nc_sims.itervalues()):
+for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     for i in range(p_nsims):
         ncs_sims[i] += nc_sim[i]
         ncs_sims2[i] += tomos_nc_sims2[tkey][i]
@@ -1100,7 +1100,7 @@ for i in range(p_nsims):
         dent_sims12[i], dent_sims212[i] = ncs_sims12[i] / tot_teth, ncs_sims212[i] / tot_teth
         dent_sims13[i], dent_sims213[i] = ncs_sims13[i] / tot_teth, ncs_sims213[i] / tot_teth
 
-print '\t\t-Plotting the number of columns...'
+print('\t\t-Plotting the number of columns...')
 plt.figure()
 plt.ylabel('Number of columns')
 # plt.xlabel('Total columns in the dataset')
@@ -1185,7 +1185,7 @@ else:
     plt.savefig(hold_dir + '/nc.png')
 plt.close()
 
-print '\t\t-Plotting columns density..'
+print('\t\t-Plotting columns density..')
 tot_den = tot_nc / tot_vol
 plt.figure()
 plt.ylabel('Column density [Col/nm$^3$]')
@@ -1276,7 +1276,7 @@ else:
     plt.savefig(hold_dir + '/den.png')
 plt.close()
 
-print '\t\t-Plotting columns density by synaptic vesicles..'
+print('\t\t-Plotting columns density by synaptic vesicles..')
 tot_denv = tot_nc / tot_ves
 plt.figure()
 plt.ylabel('Column density [Col/SV]')
@@ -1364,7 +1364,7 @@ else:
     plt.savefig(hold_dir + '/denv.png')
 plt.close()
 
-print '\t\t-Plotting columns density by tethers..'
+print('\t\t-Plotting columns density by tethers..')
 tot_dent = float(tot_nc) / tot_teth
 plt.figure()
 plt.ylabel('Column density [Col/Tether]')
@@ -1452,12 +1452,12 @@ else:
     plt.savefig(hold_dir + '/dent.png')
 plt.close()
 
-print '\tCTRL vs STIM PLOTTING: '
+print('\tCTRL vs STIM PLOTTING: ')
 
 out_cs_dir = out_stem_dir + '/ctrl_vs_stim'
 os.makedirs(out_cs_dir)
 
-print '\t\t-Gathering tomogram simulations: '
+print('\t\t-Gathering tomogram simulations: ')
 tot_ctrl_nc, tot_ctrl_nc12, tot_ctrl_nc13, tot_ctrl_vol, tot_ctrl_ves, tot_ctrl_teth = 0, 0, 0, 0, 0, 0
 tot_stim_nc, tot_stim_nc12, tot_stim_nc13, tot_stim_vol, tot_stim_ves, tot_stim_teth = 0, 0, 0, 0, 0, 0
 ncs_ctrl_sims, ncs_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
@@ -1484,7 +1484,7 @@ denv_ctrl_sims213, denv_stim_sims213 = np.zeros(shape=p_nsims, dtype=np.float), 
 dent_ctrl_sims2, dent_stim_sims2 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 dent_ctrl_sims212, dent_stim_sims212 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
 dent_ctrl_sims213, dent_stim_sims213 = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-for tkey, nc_sim in zip(tomos_nc_sims.iterkeys(), tomos_nc_sims.itervalues()):
+for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     tkey_hold = os.path.split(tkey)[1].split('_')
     tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]
     if tkey_stem in ctrl_stems:
@@ -1558,7 +1558,7 @@ for i in range(p_nsims):
         dent_stim_sims212[i] = ncs_stim_sims212[i] / tot_stim_teth
         dent_stim_sims213[i] = ncs_stim_sims213[i] / tot_stim_teth
 
-print '\t\t-Plotting the number of columns...'
+print('\t\t-Plotting the number of columns...')
 plt.figure()
 plt.ylabel('Number of columns')
 plt.bar(0.8, tot_ctrl_nc, BAR_WIDTH, color='blue', linewidth=2)
@@ -1679,7 +1679,7 @@ else:
     plt.savefig(hold_dir + '/nc.png')
 plt.close()
 
-print '\t\t-Plotting columns density..'
+print('\t\t-Plotting columns density..')
 tot_ctrl_den, tot_stim_den = float(tot_ctrl_nc)/tot_ctrl_vol, float(tot_stim_nc)/tot_stim_vol
 plt.figure()
 plt.ylabel('Column density [Col/nm$^3$]')
@@ -1806,7 +1806,7 @@ else:
     plt.savefig(hold_dir + '/den.png')
 plt.close()
 
-print '\t\t-Plotting columns density by synaptic vesicles..'
+print('\t\t-Plotting columns density by synaptic vesicles..')
 tot_ctrl_denv, tot_stim_denv = float(tot_ctrl_nc)/tot_ctrl_ves, float(tot_stim_nc)/tot_stim_ves
 plt.figure()
 plt.ylabel('Column density [Col/SV]')
@@ -1930,7 +1930,7 @@ else:
     plt.savefig(hold_dir + '/denv.png')
 plt.close()
 
-print '\t\t-Plotting columns density by tethers..'
+print('\t\t-Plotting columns density by tethers..')
 tot_ctrl_dent, tot_stim_dent = float(tot_ctrl_nc)/tot_ctrl_teth, float(tot_stim_nc)/tot_stim_teth
 plt.figure()
 plt.ylabel('Column density [Col/Tether]')
@@ -2054,72 +2054,72 @@ else:
     plt.savefig(hold_dir + '/dent.png')
 plt.close()
 
-print '\t\t-Printing results: '
-print '\n'
-print '\t\t\t+Number of columns found: ' + str(tot_nc)
-print '\t\t\t+Column density per pre-synaptic membrane volume: ' + str(tot_den)
-print '\t\t\t+Column density per synaptic vesicle: ' + str(tot_denv)
-print '\t\t\t+Column density per tether: ' + str(tot_dent)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_dent, dent_sims))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_dent, dent_sims2))
-print '\t\t\t+Tether per synaptic vesicle: ' + str(float(tot_teth) / float(tot_ves))
-print ''
-print '\t\t\t+Number of columns found for CTRL: ' + str(tot_ctrl_nc)
-print '\t\t\t+Column density per pre-synaptic membrane volume: ' + str(tot_ctrl_den)
-print '\t\t\t+Column density per synaptic vesicle: ' + str(tot_ctrl_denv)
-print '\t\t\t+Column density per tether: ' + str(tot_ctrl_dent)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_ctrl_dent, dent_ctrl_sims))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_ctrl_dent, dent_ctrl_sims2))
-print '\t\t\t+Tether per synaptic vesicle: ' + str(float(tot_ctrl_teth) / float(tot_ctrl_ves))
-print ''
-print '\t\t\t+Number of columns found for STIM: ' + str(tot_stim_nc)
-print '\t\t\t+Column density per pre-synaptic membrane volume: ' + str(tot_stim_den)
-print '\t\t\t+Column density per synaptic vesicle: ' + str(tot_stim_denv)
-print '\t\t\t+Column density per tether: ' + str(tot_stim_dent)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_stim_dent, dent_stim_sims))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_stim_dent, dent_stim_sims2))
-print '\t\t\t+Tether per synaptic vesicle: ' + str(float(tot_stim_teth) / float(tot_stim_ves))
-print '\n'
-print '\t\t\t+Number of alignments 1->2 found: ' + str(tot_nc12)
-print '\t\t\t+Alignment 1->2 density per pre-synaptic membrane volume: ' + str(tot_den12)
-print '\t\t\t+Alignment 1->2 density per synaptic vesicle: ' + str(tot_denv12)
-print '\t\t\t+Column density per tether: ' + str(tot_dent12)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_dent12, dent_sims12))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_dent12, dent_sims212))
-print ''
-print '\t\t\t+Number of alignments 1->2 found for CTRL: ' + str(tot_ctrl_nc12)
-print '\t\t\t+Alignment 1->2 density per pre-synaptic membrane volume: ' + str(tot_ctrl_den12)
-print '\t\t\t+Alignment 1->2 density per synaptic vesicle: ' + str(tot_ctrl_denv12)
-print '\t\t\t+Alignment 1->2 density per tether: ' + str(tot_ctrl_dent12)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_ctrl_dent12, dent_ctrl_sims12))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_ctrl_dent12, dent_ctrl_sims212))
-print ''
-print '\t\t\t+Number of alignments 1->2 found for STIM: ' + str(tot_stim_nc12)
-print '\t\t\t+Alignment 1->2 density per pre-synaptic membrane volume: ' + str(tot_stim_den12)
-print '\t\t\t+Alignment 1->2 density per synaptic vesicle: ' + str(tot_stim_denv12)
-print '\t\t\t+Alignment 1->2 density per tether: ' + str(tot_stim_dent12)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_stim_dent12, dent_stim_sims12))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_stim_dent12, dent_stim_sims212))
-print '\n'
-print '\t\t\t+Number of alignments 1->3 found: ' + str(tot_nc13)
-print '\t\t\t+Alignment 1->3 density per pre-synaptic membrane volume: ' + str(tot_den13)
-print '\t\t\t+Alignment 1->3 density per synaptic vesicle: ' + str(tot_denv13)
-print '\t\t\t+Column density per tether: ' + str(tot_dent13)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_dent13, dent_sims13))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_dent13, dent_sims213))
-print ''
-print '\t\t\t+Number of alignments 1->3 found for CTRL: ' + str(tot_ctrl_nc13)
-print '\t\t\t+Alignment 1->3 density per pre-synaptic membrane volume: ' + str(tot_ctrl_den13)
-print '\t\t\t+Alignment 1->3 density per synaptic vesicle: ' + str(tot_ctrl_denv13)
-print '\t\t\t+Alignment 1->3 density per tether: ' + str(tot_ctrl_dent13)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_ctrl_dent13, dent_ctrl_sims13))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_ctrl_dent13, dent_ctrl_sims213))
-print ''
-print '\t\t\t+Number of alignments 1->3 found for STIM: ' + str(tot_stim_nc13)
-print '\t\t\t+Alignment 1->3 density per pre-synaptic membrane volume: ' + str(tot_stim_den13)
-print '\t\t\t+Alignment 1->3 density per synaptic vesicle: ' + str(tot_stim_denv13)
-print '\t\t\t+Alignment 1->3 density per tether: ' + str(tot_stim_dent13)
-print '\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_stim_dent13, dent_stim_sims13))
-print '\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_stim_dent13, dent_stim_sims213))
-print ''
-print 'Successfully terminated. (' + time.strftime("%c") + ')'
+print('\t\t-Printing results: ')
+print('\n')
+print('\t\t\t+Number of columns found: ' + str(tot_nc))
+print('\t\t\t+Column density per pre-synaptic membrane volume: ' + str(tot_den))
+print('\t\t\t+Column density per synaptic vesicle: ' + str(tot_denv))
+print('\t\t\t+Column density per tether: ' + str(tot_dent))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_dent, dent_sims)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_dent, dent_sims2)))
+print('\t\t\t+Tether per synaptic vesicle: ' + str(float(tot_teth) / float(tot_ves)))
+print('')
+print('\t\t\t+Number of columns found for CTRL: ' + str(tot_ctrl_nc))
+print('\t\t\t+Column density per pre-synaptic membrane volume: ' + str(tot_ctrl_den))
+print('\t\t\t+Column density per synaptic vesicle: ' + str(tot_ctrl_denv))
+print('\t\t\t+Column density per tether: ' + str(tot_ctrl_dent))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_ctrl_dent, dent_ctrl_sims)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_ctrl_dent, dent_ctrl_sims2)))
+print('\t\t\t+Tether per synaptic vesicle: ' + str(float(tot_ctrl_teth) / float(tot_ctrl_ves)))
+print('')
+print('\t\t\t+Number of columns found for STIM: ' + str(tot_stim_nc))
+print('\t\t\t+Column density per pre-synaptic membrane volume: ' + str(tot_stim_den))
+print('\t\t\t+Column density per synaptic vesicle: ' + str(tot_stim_denv))
+print('\t\t\t+Column density per tether: ' + str(tot_stim_dent))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_stim_dent, dent_stim_sims)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_stim_dent, dent_stim_sims2)))
+print('\t\t\t+Tether per synaptic vesicle: ' + str(float(tot_stim_teth) / float(tot_stim_ves)))
+print('\n')
+print('\t\t\t+Number of alignments 1->2 found: ' + str(tot_nc12))
+print('\t\t\t+Alignment 1->2 density per pre-synaptic membrane volume: ' + str(tot_den12))
+print('\t\t\t+Alignment 1->2 density per synaptic vesicle: ' + str(tot_denv12))
+print('\t\t\t+Column density per tether: ' + str(tot_dent12))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_dent12, dent_sims12)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_dent12, dent_sims212)))
+print('')
+print('\t\t\t+Number of alignments 1->2 found for CTRL: ' + str(tot_ctrl_nc12))
+print('\t\t\t+Alignment 1->2 density per pre-synaptic membrane volume: ' + str(tot_ctrl_den12))
+print('\t\t\t+Alignment 1->2 density per synaptic vesicle: ' + str(tot_ctrl_denv12))
+print('\t\t\t+Alignment 1->2 density per tether: ' + str(tot_ctrl_dent12))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_ctrl_dent12, dent_ctrl_sims12)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_ctrl_dent12, dent_ctrl_sims212)))
+print('')
+print('\t\t\t+Number of alignments 1->2 found for STIM: ' + str(tot_stim_nc12))
+print('\t\t\t+Alignment 1->2 density per pre-synaptic membrane volume: ' + str(tot_stim_den12))
+print('\t\t\t+Alignment 1->2 density per synaptic vesicle: ' + str(tot_stim_denv12))
+print('\t\t\t+Alignment 1->2 density per tether: ' + str(tot_stim_dent12))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_stim_dent12, dent_stim_sims12)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_stim_dent12, dent_stim_sims212)))
+print('\n')
+print('\t\t\t+Number of alignments 1->3 found: ' + str(tot_nc13))
+print('\t\t\t+Alignment 1->3 density per pre-synaptic membrane volume: ' + str(tot_den13))
+print('\t\t\t+Alignment 1->3 density per synaptic vesicle: ' + str(tot_denv13))
+print('\t\t\t+Column density per tether: ' + str(tot_dent13))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_dent13, dent_sims13)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_dent13, dent_sims213)))
+print('')
+print('\t\t\t+Number of alignments 1->3 found for CTRL: ' + str(tot_ctrl_nc13))
+print('\t\t\t+Alignment 1->3 density per pre-synaptic membrane volume: ' + str(tot_ctrl_den13))
+print('\t\t\t+Alignment 1->3 density per synaptic vesicle: ' + str(tot_ctrl_denv13))
+print('\t\t\t+Alignment 1->3 density per tether: ' + str(tot_ctrl_dent13))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_ctrl_dent13, dent_ctrl_sims13)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_ctrl_dent13, dent_ctrl_sims213)))
+print('')
+print('\t\t\t+Number of alignments 1->3 found for STIM: ' + str(tot_stim_nc13))
+print('\t\t\t+Alignment 1->3 density per pre-synaptic membrane volume: ' + str(tot_stim_den13))
+print('\t\t\t+Alignment 1->3 density per synaptic vesicle: ' + str(tot_stim_denv13))
+print('\t\t\t+Alignment 1->3 density per tether: ' + str(tot_stim_dent13))
+print('\t\t\t\t*P-value (SIMULATED): ' + str(compute_pval(tot_stim_dent13, dent_stim_sims13)))
+print('\t\t\t\t*P-value (SIMULATED\'): ' + str(compute_pval(tot_stim_dent13, dent_stim_sims213)))
+print('')
+print('Successfully terminated. (' + time.strftime("%c") + ')')
