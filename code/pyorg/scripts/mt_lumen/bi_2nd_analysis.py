@@ -52,14 +52,14 @@ rcParams['ytick.labelsize'] = 14
 ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering'
 
 # Input STAR file
-in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded4/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
+in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded3_min600/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
 in_ref_short_key = '0' # '0'
-in_star = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded4/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
-in_wspace = None # ROOT_PATH + '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded3_min600/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
+in_wspace = ROOT_PATH + '/org/bi/bi_2nd//v1_nobc_proj_lumen_eroded3_10_600_25_switch_wspace.pkl' # '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/org/bi/bi_2nd/'
-out_stem = 'v1_nobc_proj_lumen_eroded4_10_600_25_switch'  # 'uni_sph_4_60_5'
+out_stem = 'v1_nobc_proj_lumen_eroded3_10_600_25_switch_2'  # 'uni_sph_4_60_5'
 
 # Analysis variables
 ana_res = 1.368  # nm/voxel
@@ -110,6 +110,15 @@ def compute_ic(per, sims):
     ic_high = np.percentile(sims, 100 - per, axis=0, interpolation='linear')
     return ic_low, ic_med, ic_high
 
+# Computes the dispersion range based on mean and std from a matrix of measurements (n_arrays, array_samples)
+def compute_std(sims, std_coef=3):
+    if len(sims.shape) == 1:
+        return sims, sims, sims
+    mn, std = np.mean(sims, axis=0), np.std(sims, axis=0)
+    std_low = mn - std_coef * std
+    std_med = mn
+    std_high = mn + std_coef * std
+    return std_low, std_med, std_high
 
 # Computes pvalue from a matrix of simulations (n_arrays, array_samples)
 def compute_pvals(exp_med, sims):
@@ -351,7 +360,7 @@ if in_wspace is None:
 else:
 
     print('\tLoading the workspace: ' + in_wspace)
-    with open(in_wspace, 'r') as pkl:
+    with open(in_wspace, 'rb') as pkl:
         wspace = pickle.load(pkl)
     lists_count, tomos_count = wspace[0], wspace[1]
     lists_hash, tomos_hash = wspace[2], wspace[3]
@@ -632,6 +641,40 @@ for lkey, tlist in zip(iter(lists_exp.keys()), iter(lists_exp.values())):
     plt.close()
 sims = np.asarray(hold_sim)
 
+print('\t\t-Plotting 2nd order metric (STD ranges)...')
+sims = list()
+for lkey, tlist in zip(iter(lists_exp.keys()), iter(lists_exp.values())):
+    if len(tlist) <= 0:
+        continue
+    plt.figure()
+    plt.title('Bivariate 2nd order for ' + lkey + ' (mean +/- 3*std)')
+    if ana_shell_thick is None:
+        plt.ylabel('Ripley\'s L')
+    else:
+        if ana_rdf:
+            plt.ylabel('Radial Distribution Function')
+        else:
+            plt.ylabel('Ripley\'s O')
+    plt.xlabel('Scale (nm)')
+    # Getting experimental IC
+    exp_low, exp_med, exp_high = compute_std(np.asarray(tlist), std_coef=3)
+    plt.plot(ana_rg, exp_low, color=lists_color[lkey], linestyle='--', label=lkey)
+    plt.plot(ana_rg, exp_med, color=lists_color[lkey], linestyle='-', label=lkey)
+    plt.plot(ana_rg, exp_high, color=lists_color[lkey], linestyle='--', label=lkey)
+    # Getting simulations IC
+    hold_sim = lists_sim[lkey]
+    ic_low, ic_med, ic_high = compute_std(np.asarray(hold_sim), std_coef=3)
+    plt.plot(ana_rg, ic_low, 'k--')
+    plt.plot(ana_rg, ic_med, 'k')
+    plt.plot(ana_rg, ic_high, 'k--')
+    plt.tight_layout()
+    if fig_fmt is None:
+        plt.show(block=True)
+    else:
+        plt.savefig(out_lists_dir + '/bi_list_std_' + lkey + '.png')
+    plt.close()
+sims = np.asarray(hold_sim)
+
 print('\t\t-Plotting clustering p-value...')
 plt.figure()
 plt.title('Co-localization significance')
@@ -650,6 +693,31 @@ if fig_fmt is None:
     plt.show(block=True)
 else:
     plt.savefig(out_lists_dir + '/pvals_lists.png')
+plt.close()
+
+print('\t\t-Exp. vs Random distribuition...')
+plt.figure()
+plt.title('Exp. vs Model distribution')
+plt.ylabel('100*(1-p) [%]')
+plt.xlabel('Scale [nm]')
+for lkey, tlist in zip(iter(lists_exp.keys()), iter(lists_exp.values())):
+    if len(tlist) <= 0:
+        continue
+    p_values = np.zeros(shape=ana_rg.shape)
+    for i in range(len(p_values)):
+        p_values[i] = 100. * (1 - sp.stats.ttest_ind(np.asarray(tlist)[:, i], np.asarray(lists_sim[lkey])[:, i],
+                                                    alternative='greater', equal_var=False)[1])
+    plt.plot(ana_rg, p_values, color=lists_color[lkey], linestyle='-', label=lkey)
+plt.plot(ana_rg, 99*np.ones(shape=ana_rg.shape), 'k', linestyle='--', label=lkey)
+plt.plot(ana_rg, 100*np.ones(shape=ana_rg.shape), 'k', linestyle='--', label=lkey)
+plt.legend(loc=4)
+plt.tight_layout()
+plt.xlim((0, ana_rg[-1]))
+plt.ylim((95, 100.5))
+if fig_fmt is None:
+    plt.show(block=True)
+else:
+    plt.savefig(out_lists_dir + '/exp_vs_model_lists.png')
 plt.close()
 
 print('Successfully terminated. (' + time.strftime("%c") + ')')

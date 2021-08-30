@@ -64,3 +64,5 @@
     + Adding computation level option (out_level) to plane_align_class.py
 * **15/04/2021**
     + Modifications to reduce memory occupancy for PyOrg.
+* **30/08/2021**
+    + Updating **pyto** to deal with scipy 1.6.
