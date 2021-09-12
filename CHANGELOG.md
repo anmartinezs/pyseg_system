@@ -66,3 +66,5 @@
     + Modifications to reduce memory occupancy for PyOrg.
 * **30/08/2021**
     + Updating **pyto** to deal with scipy 1.6.
+* **12/09/2021**
+    + Updating script for pre-processing tomograms for single un-oriented membranes.
