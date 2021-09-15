@@ -68,3 +68,5 @@
     + Updating **pyto** to deal with scipy 1.6.
 * **12/09/2021**
     + Updating script for pre-processing tomograms for single un-oriented membranes.
+* **15/09/2021**
+    + Bug correction: input parsing for Booleans introduced during integration with SCIPION.
