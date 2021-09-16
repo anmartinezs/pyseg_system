@@ -13,6 +13,7 @@
 
 import os
 import vtk
+import math
 import numpy as np
 import scipy as sp
 import sys
@@ -42,7 +43,7 @@ in_star = ROOT_PATH + '/in/0_plus_end_center_points.star' # '/in/1_picking.star'
 in_seg = ROOT_PATH + '/in/mts_clines_mts.star' # '/in/mts_clines_1_mts_t3_t6_pcorr.star' # '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
 
 # Output directory
-out_star = ROOT_PATH + '/in/0_plus_end_center_points_curated.star' # '/in/1_picking_curated.star' # '/in/1_picking_curated.star' # '/in/0_lattice_break_center_points_curated.star'
+out_star = ROOT_PATH + '/in/0_plus_end_center_points_curated_min600.star' # '/in/1_picking_curated.star' # '/in/1_picking_curated.star' # '/in/0_lattice_break_center_points_curated.star'
 
 p_bin = 1 # since particle coordinates are binned in the relion star file corresponding to picking resolution
 p_max_dst = 1000 # 10 # nm
@@ -51,6 +52,8 @@ p_swapxy = True
 p_cp_ptomo = False # Copy column '_rlnMicrographName' values to '_mtParticlesTomo'
 p_cp_mt_to_mn = True # if '_mtParticleTomo' does not exist, it is taken from '_rlnMicrographName'
 p_is_end = True # if True then only MT centerline extrema are considered
+
+ct_min_len = 600 # nm minimum length for MT
 
 ########################################################################################
 # MAIN ROUTINE
@@ -145,8 +148,16 @@ for row_ct in range(star_seg.get_nrows()):
     print('\t\t-MT to process: ' + ct_str)
     ct_vtp = disperse_io.load_poly(ct_str)
     ct_points = np.zeros(shape=(ct_vtp.GetNumberOfPoints(), 3), dtype=np.float32)
-    for i in range(ct_points.shape[0]):
+    ct_len = 0
+    ct_points[0, :] = ct_vtp.GetPoint(0)
+    for i in range(1, ct_points.shape[0]):
         ct_points[i, :] = ct_vtp.GetPoint(i)
+        hold_len = ct_points[i-1, :] - ct_points[i, :]
+        ct_len += math.sqrt((hold_len * hold_len).sum())
+    ct_len *= p_res
+    print('\t\t\t+Length: ' + str(ct_len))
+    if ct_len <= ct_min_len:
+        print('\t\t\t+MT discarder because is shorter than ' + str(ct_min_len))
     seg_dic[star_seg.get_element('_psSegImage', row_ct)] = star_seg.get_element('_rlnMicrographName', row_ct)
 
     print('\tLoop for particles: ')

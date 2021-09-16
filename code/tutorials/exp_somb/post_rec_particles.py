@@ -266,11 +266,11 @@ in_mask_mb = None if args.inMaskMbSup == 'None' else args.inMaskMbSup  # Scipion
 do_mb_sf = args.mbSupFactor
 out_part_dir = args.outDir
 out_star = args.outStar
-do_glp = ast.literal_eval(args.doGaussLowPass)
+do_glp = ast.literal_eval(str(args.doGaussLowPass))
 glp_res = args.resolution
 glp_cres = args.cutOffRes
 glp_ca = args.ampCutOff
-glp_ctf = ast.literal_eval(args.filterCTF)
+glp_ctf = ast.literal_eval(str(args.filterCTF))
 mp_npr = args.j
 
 # Print initial message

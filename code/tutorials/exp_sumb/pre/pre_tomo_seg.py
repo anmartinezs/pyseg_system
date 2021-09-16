@@ -45,13 +45,13 @@ MB_NEIGH_INT, MB_NEIGH_EXT = 2, 3
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-ruben/antonio/shiwei'
+ROOT_PATH = '/fs/pool/pool-plitzko/Matthias/Tomography/4Antonio/pyseg'
 
 # Input STAR file
-in_star = ROOT_PATH + '/pre/in/mb_seg_single_oriented.star'
+in_star = ROOT_PATH + '/pre/in/tomograms_short_for_pre.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/pre/mbo'
+out_dir = ROOT_PATH + '/pre/out'
 
 # Subvolume splitting settings
 sp_split = (2, 2, 1) # None
@@ -59,6 +59,7 @@ sp_off_voxels = 30 # vox
 
 # Membrane segmentation
 sg_res = 0.52 # nm/voxel
+sg_keep_seg = True
 sg_th = None # 8
 sg_sz = None # 3e3
 sg_mb_thick = 3 # nm
@@ -171,48 +172,51 @@ for row in range(gl_star.get_nrows()):
         mt_mask = sp.ndimage.morphology.distance_transform_edt(mt_mask, sampling=sg_res, return_indices=False)
         mt_mask = mt_mask > mt_rad
 
-    mb_lbl = 0
-    if sg_th is None:
-        if gl_star.has_column('_psSegLabel'):
-            mb_lbl = gl_star.get_element('_psSegLabel', row)
-            print('\t\t\t+Segmenting membranes with label: ' + str(mb_lbl))
-            if mb_lbl > 0:
-                tomo_mb = tomo_mb == mb_lbl
+    if sg_keep_seg and gl_star.has_column('_psSegImage'):
+        tomo_mb = ps.disperse_io.load_tomo(gl_star.get_element('_psSegImage', row))
+    else:
+        mb_lbl = 0
+        if sg_th is None:
+            if gl_star.has_column('_psSegLabel'):
+                mb_lbl = gl_star.get_element('_psSegLabel', row)
+                print('\t\t\t+Segmenting membranes with label: ' + str(mb_lbl))
+                if mb_lbl > 0:
+                    tomo_mb = tomo_mb == mb_lbl
+                else:
+                    tomo_mb = tomo_mb > 0
             else:
                 tomo_mb = tomo_mb > 0
         else:
-            tomo_mb = tomo_mb > 0
-    else:
-        tomo_mb = tomo_mb >= sg_th
-    if gl_star.has_column('_mtMtubesCsv'):
-        tomo_mb *= mt_mask
-        del mt_mask
-    if gl_star.has_column('_psSegImage'):
-        print('\tApplying the mask...')
-        hold_mask = ps.disperse_io.load_tomo(gl_star.get_element('_psSegImage', row))
-        if mb_lbl > 0:
-            hold_mask = hold_mask == mb_lbl
-        else:
-            hold_mask = hold_mask > 0
-        tomo_mb *= hold_mask
-        ids_mask = np.where(hold_mask)
-        off_mask_min_x, off_mask_max_x = ids_mask[0].min()-sp_off_voxels, ids_mask[0].max()+sp_off_voxels
-        if off_mask_min_x < 0:
-            off_mask_min_x = 0
-        if off_mask_max_x > hold_mask.shape[0]:
-            off_mask_max_x = hold_mask.shape[0]
-        off_mask_min_y, off_mask_max_y = ids_mask[1].min()-sp_off_voxels, ids_mask[1].max()+sp_off_voxels
-        if off_mask_min_y < 0:
-            off_mask_min_y = 0
-        if off_mask_max_y > hold_mask.shape[1]:
-            off_mask_max_y = hold_mask.shape[1]
-        off_mask_min_z, off_mask_max_z = ids_mask[2].min()-sp_off_voxels, ids_mask[2].max()+sp_off_voxels
-        if off_mask_min_z < 0:
-            off_mask_min_z = 0
-        if off_mask_max_z > hold_mask.shape[2]:
-            off_mask_max_z = hold_mask.shape[2]
-        del hold_mask
-        del ids_mask
+            tomo_mb = tomo_mb >= sg_th
+        if gl_star.has_column('_mtMtubesCsv'):
+            tomo_mb *= mt_mask
+            del mt_mask
+        if gl_star.has_column('_psSegImage'):
+            print('\tApplying the mask...')
+            hold_mask = ps.disperse_io.load_tomo(gl_star.get_element('_psSegImage', row))
+            if mb_lbl > 0:
+                hold_mask = hold_mask == mb_lbl
+            else:
+                hold_mask = hold_mask > 0
+            tomo_mb *= hold_mask
+            ids_mask = np.where(hold_mask)
+            off_mask_min_x, off_mask_max_x = ids_mask[0].min()-sp_off_voxels, ids_mask[0].max()+sp_off_voxels
+            if off_mask_min_x < 0:
+                off_mask_min_x = 0
+            if off_mask_max_x > hold_mask.shape[0]:
+                off_mask_max_x = hold_mask.shape[0]
+            off_mask_min_y, off_mask_max_y = ids_mask[1].min()-sp_off_voxels, ids_mask[1].max()+sp_off_voxels
+            if off_mask_min_y < 0:
+                off_mask_min_y = 0
+            if off_mask_max_y > hold_mask.shape[1]:
+                off_mask_max_y = hold_mask.shape[1]
+            off_mask_min_z, off_mask_max_z = ids_mask[2].min()-sp_off_voxels, ids_mask[2].max()+sp_off_voxels
+            if off_mask_min_z < 0:
+                off_mask_min_z = 0
+            if off_mask_max_z > hold_mask.shape[2]:
+                off_mask_max_z = hold_mask.shape[2]
+            del hold_mask
+            del ids_mask
     # ps.disperse_io.save_numpy(tomo_mb, out_dir + '/hold.mrc')
     if sg_th is not None:
         print('\tMembrane thresholding...')
@@ -224,23 +228,26 @@ for row in range(gl_star.get_nrows()):
     if sp_split is None:
         svol_mb = tomo_mb[off_mask_min_x:off_mask_max_x, off_mask_min_y:off_mask_max_y, off_mask_min_z:off_mask_max_z]
         svol = tomo_ref[off_mask_min_x:off_mask_max_x, off_mask_min_y:off_mask_max_y, off_mask_min_z:off_mask_max_z]
-        svol_dst = sp.ndimage.morphology.distance_transform_edt(np.invert(svol_mb), sampling=sg_res,
-                                                                return_indices=False)
-        svol_seg = np.zeros(shape=svol.shape, dtype=np.float32)
-        if not mode_oriented:
-            svol_seg[svol_dst < sg_mb_neigh + sg_mb_thick] = MB_NEIGH
-            svol_seg[svol_dst < sg_mb_thick] = MB_LBL
+        if sg_keep_seg and gl_star.has_column('_psSegImage'):
+            svol_seg = svol_mb
         else:
-            svol_dst = signed_distance_2d(svol_mb, res=1, del_b=True, mode_2d=True, set_point=seg_center)
-            svol_seg[svol_dst < 0], svol_seg[svol_dst > 0] = MB_NEIGH_EXT, MB_NEIGH_INT
-            svol_seg[np.absolute(svol_dst) < sg_mb_thick] = MB_LBL
-            svol_seg[svol_dst == 0] = 0
+            svol_dst = sp.ndimage.morphology.distance_transform_edt(np.invert(svol_mb), sampling=sg_res,
+                                                                    return_indices=False)
+            svol_seg = np.zeros(shape=svol.shape, dtype=np.float32)
+            if not mode_oriented:
+                svol_seg[svol_dst < sg_mb_neigh + sg_mb_thick] = MB_NEIGH
+                svol_seg[svol_dst < sg_mb_thick] = MB_LBL
+            else:
+                svol_dst = signed_distance_2d(svol_mb, res=1, del_b=True, mode_2d=True, set_point=seg_center)
+                svol_seg[svol_dst < 0], svol_seg[svol_dst > 0] = MB_NEIGH_EXT, MB_NEIGH_INT
+                svol_seg[np.absolute(svol_dst) < sg_mb_thick] = MB_LBL
+                svol_seg[svol_dst == 0] = 0
+            del svol_dst
         out_svol = out_seg_dir + '/' + out_ref_stem + '_tid_' + str(tomo_id) + '.mrc'
         out_seg = out_seg_dir + '/' + out_ref_stem + '_tid_' + str(tomo_id) + '_seg.mrc'
         ps.disperse_io.save_numpy(svol, out_svol)
         ps.disperse_io.save_numpy(svol_seg, out_seg)
         del svol_seg
-        del svol_dst
         row_dic = dict()
         row_dic['_rlnMicrographName'] = in_ref
         row_dic['_rlnImageName'] = out_svol
@@ -312,27 +319,30 @@ for row in range(gl_star.get_nrows()):
                     print('\t\t-Splitting subvolume: [' + str(off_x) + ', ' + str(off_y) + ', ' + str(off_z) +']')
                     svol_mb = tomo_mb[off_x[0]:off_x[1], off_y[0]:off_y[1], off_z[0]:off_z[1]]
                     svol = tomo_ref[off_x[0]:off_x[1], off_y[0]:off_y[1], off_z[0]:off_z[1]]
-                    svol_seg = np.zeros(shape=svol.shape, dtype=np.float32)
-                    if not mode_oriented:
-                        svol_dst = sp.ndimage.morphology.distance_transform_edt(np.invert(svol_mb), sampling=sg_res,
-                                                                                return_indices=False)
-                        svol_seg[svol_dst < sg_mb_neigh + sg_mb_thick] = MB_NEIGH
-                        svol_seg[svol_dst < sg_mb_thick] = MB_LBL
+                    if sg_keep_seg and gl_star.has_column('_psSegImage'):
+                        svol_seg = svol_mb
                     else:
-                        seg_off_center = seg_center - np.asarray((off_x[0], off_y[0], off_z[0]))
-                        svol_dst = signed_distance_2d(svol_mb, res=1, del_b=True, mode_2d=True,
-                                                      set_point=seg_off_center)
-                        svol_seg[(svol_dst > 0) & (svol_dst < sg_mb_neigh + sg_mb_thick)] = MB_NEIGH_INT
-                        svol_seg[(svol_dst < 0) & (svol_dst > -1. * (sg_mb_neigh + sg_mb_thick))] = MB_NEIGH_EXT
-                        svol_seg[np.absolute(svol_dst) < sg_mb_thick] = MB_LBL
-                        svol_seg[svol_dst == 0] = 0
-                        svol_seg[svol_mb > 0] = MB_LBL
+                        svol_seg = np.zeros(shape=svol.shape, dtype=np.float32)
+                        if not mode_oriented:
+                            svol_dst = sp.ndimage.morphology.distance_transform_edt(np.invert(svol_mb), sampling=sg_res,
+                                                                                    return_indices=False)
+                            svol_seg[svol_dst < sg_mb_neigh + sg_mb_thick] = MB_NEIGH
+                            svol_seg[svol_dst < sg_mb_thick] = MB_LBL
+                        else:
+                            seg_off_center = seg_center - np.asarray((off_x[0], off_y[0], off_z[0]))
+                            svol_dst = signed_distance_2d(svol_mb, res=1, del_b=True, mode_2d=True,
+                                                          set_point=seg_off_center)
+                            svol_seg[(svol_dst > 0) & (svol_dst < sg_mb_neigh + sg_mb_thick)] = MB_NEIGH_INT
+                            svol_seg[(svol_dst < 0) & (svol_dst > -1. * (sg_mb_neigh + sg_mb_thick))] = MB_NEIGH_EXT
+                            svol_seg[np.absolute(svol_dst) < sg_mb_thick] = MB_LBL
+                            svol_seg[svol_dst == 0] = 0
+                            svol_seg[svol_mb > 0] = MB_LBL
+                        del svol_dst
                     out_svol = out_seg_dir + '/' + out_ref_stem + '_id_' + str(tomo_id) + '_split_' + str(split_id) + '.mrc'
                     out_seg = out_seg_dir + '/' + out_ref_stem + '_id_' + str(tomo_id) + '_split_' + str(split_id) + '_mb.mrc'
                     ps.disperse_io.save_numpy(svol, out_svol)
                     ps.disperse_io.save_numpy(svol_seg, out_seg)
                     del svol_seg
-                    del svol_dst
                     split_id += 1
                     row_dic = dict()
                     row_dic['_rlnMicrographName'] = in_ref
