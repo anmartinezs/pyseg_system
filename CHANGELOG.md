@@ -70,3 +70,5 @@
     + Updating script for pre-processing tomograms for single un-oriented membranes.
 * **15/09/2021**
     + Bug correction: input parsing for Booleans introduced during integration with SCIPION.
+* **02/10/2021**
+    + Adding MRC I/O TOM-Toolbox functions
