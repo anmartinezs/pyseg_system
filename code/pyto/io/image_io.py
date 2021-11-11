@@ -28,7 +28,7 @@ import io
 from io import open
 try:
     import tifffile as tf
-except ModuleNotFoundError:
+except (ModuleNotFoundError, AttributeError):
     pass
 
 import numpy

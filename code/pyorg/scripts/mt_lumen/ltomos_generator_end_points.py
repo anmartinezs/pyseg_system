@@ -33,13 +33,13 @@ __author__ = 'Antonio Martinez-Sanchez'
 ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/v1_end_points.star' # '/in/v1_bpoints.star'
+in_star = ROOT_PATH + '/in/v1_end_points_min600.star' # '/in/v1_bpoints.star'
 
 # Input STAR for with the sub-volumes segmentations
 in_seg = ROOT_PATH + '/in/mts_clines_mts.star' # '/in/mts_clines_1_mts_t2_t3_t6_pcorr.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded4' # '/ltomos/v1_nobc_proj' # '/stat/ltomos/trans_run2_test_swapxy'
+out_dir = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded3_min600' # '/ltomos/v1_nobc_proj' # '/stat/ltomos/trans_run2_test_swapxy'
 out_stem = 'v1_nobc' # 'pre'
 
 pt_res = 1.368 # 1.792 # nm/vx - resolution
@@ -159,7 +159,7 @@ for tomo_row in range(star_seg.get_nrows()):
     # tomo = disperse_io.load_tomo(seg_str, mmap=True).swapaxes(0, 1)
     tomo = disperse_io.load_tomo(seg_str, mmap=True)
     if sg_voi_surf:
-        tomo = (sp.ndimage.binary_erosion(tomo == sg_lbl, iterations=4)).astype(np.float32)
+        tomo = (sp.ndimage.binary_erosion(tomo == sg_lbl, iterations=3)).astype(np.float32)
         if (sg_sg is not None) and (sg_sg > 0):
             tomo = sp.ndimage.filters.gaussian_filter(tomo, sg_sg)
         voi = surf.iso_surface(tomo, 0.5, closed=True, normals='outwards')
@@ -169,7 +169,7 @@ for tomo_row in range(star_seg.get_nrows()):
         out_voi = out_dir + '/' + seg_fname + '_surf_voi.vtp'
         vois[seg_str] = out_voi
     else:
-        voi = sp.ndimage.binary_erosion(tomo == sg_lbl, iterations=4)
+        voi = sp.ndimage.binary_erosion(tomo == sg_lbl, iterations=3)
         # seg_fname = os.path.split(os.path.splitext(seg_str)[0])[1]
         seg_fname = os.path.splitext(seg_str.replace('/', '_'))[0]
         out_voi = out_dir + '/' + seg_fname + '_mask_voi.mrc'
