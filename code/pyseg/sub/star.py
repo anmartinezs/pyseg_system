@@ -488,6 +488,10 @@ class RelionCols(object):
                        '_rlnRandomSubset',
                        '_rlnDetectorPixelSize',
                        '_rlnMagnification',
+                       '_rlnCtfMaxResolution',
+                       '_rlnPixelSize',
+                       '_rlnVoltage',
+                       '_rlnSphericalAberration',
                        # PySeg: Graph analysis
                        '_psGhMCFPickle',
                        # PySeg: Segmentation
@@ -531,6 +535,10 @@ class RelionCols(object):
                          float,
                          int,
                          int,
+                         float,
+                         float,
+                         float,
+                         float,
                          float,
                          float,
                          # PySeg: Graph analysis
