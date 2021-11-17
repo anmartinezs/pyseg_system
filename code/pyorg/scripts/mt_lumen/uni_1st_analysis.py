@@ -46,15 +46,15 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/all_P19' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star'
-in_wspace =ROOT_PATH + '/uni_1nd/v2/v2_25_25_sim_50_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos_surf.star' # '/ltomos/v1/v1_ltomos.star'
+in_wspace = None # ROOT_PATH + '/uni_1nd/v2/v2_25_25_sim_50_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/uni_1nd/v2'
-out_stem = 'v2_25_25_sim_50_2'
+out_dir = ROOT_PATH + '/uni_1nd/v1'
+out_stem = 'test_25_25_sim_50'
 
 # List pre-processing options
 pr_ss = None # 10 # nm
