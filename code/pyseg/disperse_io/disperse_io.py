@@ -22,6 +22,7 @@ except:
     from pyseg.globals import *
 
 from pyto.io.image_io import ImageIO as ImageIO
+from pyto.grey.image import Image as GreyImage
 from vtk.util import numpy_support
 
 
@@ -869,7 +870,11 @@ def seg_dist_trans(seg):
 #       MRC and EM.
 #       VERY IMPORTANT: This subclass of ndarray has some unpleasant interaction with some operations,
 #       because it does not quite fit properly as a subclass of numpy.ndarray
-def load_tomo(fname, mmap=False):
+def load_tomo(fname, mmap=False, out_pixel=False):
+    """
+    Arguments:
+      - out_pixel: if True, image data and pixel size [nm] are returned
+    """
 
     # Input parsing
     stem, ext = os.path.splitext(fname)
@@ -879,20 +884,22 @@ def load_tomo(fname, mmap=False):
 
     if ext == '.fits':
         im_data = fits.getdata(fname).transpose()
-    elif (ext == '.mrc') or (ext == '.rec'):
-        image = ImageIO()
-        if mmap:
-            image.readMRC(fname, memmap=mmap)
-        else:
-            image.readMRC(fname)
+    elif (ext == '.mrc') or (ext == '.rec') or (ext == '.em'):
+        #image = ImageIO()
+        #if mmap:
+        #    image.readMRC(fname, memmap=mmap)
+        #else:
+        #    image.readMRC(fname)
+        image = GreyImage.read(file=fname, memmap=mmap)
         im_data = image.data
-    elif ext == '.em':
-        image = ImageIO()
-        if mmap:
-            image.readEM(fname, memmap=mmap)
-        else:
-            image.readEM(fname)
-        im_data = image.data
+        pixelsize = image.pixelsize
+    #elif ext == '.em':
+    #    image = ImageIO()
+    #    if mmap:
+    #        image.readEM(fname, memmap=mmap)
+    #    else:
+    #        image.readEM(fname)
+    #    im_data = image.data
     elif ext == '.vti':
         reader = vtk.vtkXMLImageDataReader()
         reader.SetFileName(fname)
@@ -906,7 +913,10 @@ def load_tomo(fname, mmap=False):
     if len(im_data.shape) == 2:
         im_data = numpy.reshape(im_data, (im_data.shape[0], im_data.shape[1], 1))
 
-    return im_data
+    if out_pixel:
+        return im_data, pixelsize
+    else:
+        return im_data
 
 # Load data from VTK PolyData file called fname
 def load_poly(fname):
@@ -1034,7 +1044,11 @@ def vtp_to_numpy(poly, size=None, key_prop=None):
 
     return tomo
 
-def save_numpy(array, fname):
+def save_numpy(array, fname, pixelsize=None):
+    """
+    Arguments:
+      - pixelsize: pixel size in nm
+    """
 
     _, ext = os.path.splitext(fname)
 
@@ -1054,16 +1068,21 @@ def save_numpy(array, fname):
         fits.writeto(fname, array, overwrite=True, output_verify='silentfix')
         warnings.resetwarnings()
         warnings.filterwarnings('always', category=UserWarning, append=True)
-    elif ext == '.mrc':
-        img = ImageIO()
-        # img.setData(numpy.transpose(array, (1, 0, 2)))
-        img.setData(array)
-        img.writeMRC(fname)
-    elif ext == '.em':
-        img = ImageIO()
-        # img.setData(numpy.transpose(array, (1, 0, 2)))
-        img.setData(array)
-        img.writeEM(fname)
+    elif (ext == '.mrc') or (ext == '.em'):
+        img = GreyImage(data=array)
+        if pixelsize is not None:
+            img.write(file=fname, pixel=pixelsize)
+        else:
+            img.write(file=fname)
+        #img = ImageIO()
+        ## img.setData(numpy.transpose(array, (1, 0, 2)))
+        #img.setData(array)
+        #img.writeMRC(fname)
+    #elif ext == '.em':
+    #    img = ImageIO()
+    #    # img.setData(numpy.transpose(array, (1, 0, 2)))
+    #    img.setData(array)
+    #    img.writeEM(fname)
     else:
         error_msg = 'Format not valid %s.' % ext
         raise pyseg.pexceptions.PySegInputError(expr='save_numpy', msg=error_msg)
