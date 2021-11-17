@@ -47,15 +47,15 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/neuronal_picking'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/all_P19' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/neuronal_picking'
 
 # Input STAR file
-in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star' # '/ltomos/v1/v1_ltomos.star'
+in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos.star' # '/ltomos/v1/v1_ltomos.star' # '/ltomos/v1/v1_ltomos.star'
 in_wspace = None # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa/uni_2nd/v1/fmm_6_150_3_sim_20_wspace.pkl' # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/uni_2nd/v2'
-out_stem = 'fmm_6_150_3_sim_20_v3'
+out_dir = ROOT_PATH + '/uni_2nd/test' # '/uni_2nd/v2'
+out_stem = 'fmm_6_150_6_sim_20_test'
 
 # Analysis variables
 ana_res = 1.368 # 1.796 # nm/voxel
@@ -76,7 +76,7 @@ p_per = 5 # %
 ana_border = True
 
 # Particle surface
-p_vtp = ROOT_PATH + '/vtp/sphere_6nm_res1.368.vtp' # ROOT_PATH + '/in/sphere_6nm_res1.796.vtp'
+p_vtp = ROOT_PATH + '/in/k13_k2_k2_model.vtp' # '/vtp/sphere_6nm_res1.368.vtp' # ROOT_PATH + '/in/sphere_6nm_res1.796.vtp'
 
 # Figure saving options
 fig_fmt = '.png' # if None they are displayed instead
@@ -150,7 +150,8 @@ if in_wspace is None:
 print('\tP-Value computation setting:')
 print('\t\t-Percentile: ' + str(p_per) + ' %')
 print('\t\t-Number of instances for simulations: ' + str(p_nsims))
-print('\t\t-Particle surface: ' + p_vtp)
+if p_vtp is not None:
+    print('\t\t-Particle surface: ' + p_vtp)
 if fig_fmt is not None:
     print('\tStoring figures:')
     print('\t\t-Format: ' + str(fig_fmt))
@@ -191,7 +192,10 @@ if in_wspace is None:
         ltomos = unpickle_obj(ltomos_pkl)
         set_lists.add_list_tomos(ltomos, ltomos_pkl)
     try:
-        part_vtp = disperse_io.load_poly(p_vtp)
+        if p_vtp is not None:
+            part_vtp = disperse_io.load_poly(p_vtp)
+        else:
+            part_vtp = disperse_io.load_poly(star.get_element('_suSurfaceVtpSim', row))
     except pexceptions.PySegInputError as e:
         print('ERROR: reference particle surface file could not be loaded because of "' + e.get_message() + '"')
         print('Terminated. (' + time.strftime("%c") + ')')

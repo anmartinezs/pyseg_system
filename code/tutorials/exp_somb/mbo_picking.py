@@ -238,7 +238,11 @@ for (input_pkl, in_tomo_ref, in_seg, in_img, in_off, in_rot) in \
                 cloud_cc = graph.get_prop_values(peak_prop, cloud_ids)
             hold_cloud, hold_cloud_ids, hold_cloud_cc = cloud, cloud_ids, cloud_cc
             cloud, cloud_ids, cloud_cc = list(), list(), list()
-            per_th = np.percentile(hold_cloud_cc, peak_th)
+            try:
+                per_th = np.percentile(hold_cloud_cc, peak_th)
+            except IndexError:
+                print('\t\t\t-No filaments found in %s --> picking will be skipped for that subtomogram.' % in_img)
+                continue
             print('\t\t\t-Threshold found: ' + str(per_th))
             for (point, cloud_id, c_cc) in zip(hold_cloud, hold_cloud_ids, hold_cloud_cc):
                 if peak_th_op(c_cc, per_th):

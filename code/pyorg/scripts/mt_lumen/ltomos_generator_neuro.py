@@ -30,13 +30,13 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH =  '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
+ROOT_PATH =  '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/all_P19' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/v1_org_curated.star'
+in_star = ROOT_PATH +  '/in/v1_org_curated.star' # '/in/v1_org_curated.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
+in_seg = ROOT_PATH + '/in/mts_clines_mts_seg_int_p19_antonio.star' # '/in/mts_clines_mts_seg_picking_v1_parth_curated.star'
 
 # Output directory
 out_dir = ROOT_PATH + '/ltomos/v1' # '/stat/ltomos/trans_run2_test_swapxy'
@@ -51,7 +51,7 @@ sg_lbl = 1 # segmented label
 sg_bc = True # False
 sg_bm = 'center' # Embedding checking mode
 sg_pj = False # Project particles to VOI's surfaces
-sg_origins = [8, 8, 8, 8, 8] # If not None, subtomoavg shiftings are considered,
+sg_origins = [4,] # If not None, subtomoavg shiftings are considered,
                     # then scale factor (one per each pattern in in_star) from picked particle to subtomograms
 sg_swap_xy = False # Swap X and Y coordinates of the input particle STAR files
 sg_voi_surf = False # It forces to convert VOI to a surface (vtkPolyData object)
@@ -62,7 +62,7 @@ sg_dec = 0.9 # Decimation factor for the triangle mesh
 pt_ssup = 6 # nm - scale suppression for the input particles
 pt_ss_ref = None # ('0', '1') # a tuple with the sorted preference for crossed patterns scaled suppresion, if None deactivated
 pt_ss_ref_dst = 6 # for using different scale-suppression distances for crossed scale suppression
-pt_min_parts = 10 # Tomograms with less particles are removed
+pt_min_parts = 1 # Tomograms with less particles are removed
 pt_min_by_tomo = True # If True particle from all patterns are considered
 pt_keep = None # To keep just the indicated highly populated tomograms
 pt_pparts = False # Print the particles found in an output tomogram
