@@ -885,21 +885,9 @@ def load_tomo(fname, mmap=False, out_pixel=False):
     if ext == '.fits':
         im_data = fits.getdata(fname).transpose()
     elif (ext == '.mrc') or (ext == '.rec') or (ext == '.em'):
-        #image = ImageIO()
-        #if mmap:
-        #    image.readMRC(fname, memmap=mmap)
-        #else:
-        #    image.readMRC(fname)
         image = GreyImage.read(file=fname, memmap=mmap)
         im_data = image.data
         pixelsize = image.pixelsize
-    #elif ext == '.em':
-    #    image = ImageIO()
-    #    if mmap:
-    #        image.readEM(fname, memmap=mmap)
-    #    else:
-    #        image.readEM(fname)
-    #    im_data = image.data
     elif ext == '.vti':
         reader = vtk.vtkXMLImageDataReader()
         reader.SetFileName(fname)
@@ -1074,15 +1062,6 @@ def save_numpy(array, fname, pixelsize=None):
             img.write(file=fname, pixel=pixelsize)
         else:
             img.write(file=fname)
-        #img = ImageIO()
-        ## img.setData(numpy.transpose(array, (1, 0, 2)))
-        #img.setData(array)
-        #img.writeMRC(fname)
-    #elif ext == '.em':
-    #    img = ImageIO()
-    #    # img.setData(numpy.transpose(array, (1, 0, 2)))
-    #    img.setData(array)
-    #    img.writeEM(fname)
     else:
         error_msg = 'Format not valid %s.' % ext
         raise pyseg.pexceptions.PySegInputError(expr='save_numpy', msg=error_msg)
