@@ -259,7 +259,7 @@ for row in range(gl_star.get_nrows()):
             svol_seg[svol_dst < sg_mb_neigh + sg_mb_thick] = MB_NEIGH
             svol_seg[svol_dst < sg_mb_thick] = MB_LBL
         else:
-            svol_dst = signed_distance_2d(svol_mb, res=1, del_b=True, mode_2d=True, set_point=seg_center)
+            svol_dst = signed_distance_2d(svol_mb, res=sg_res, del_b=True, mode_2d=True, set_point=seg_center)
             svol_seg[(svol_dst > 0) & (svol_dst < sg_mb_neigh + sg_mb_thick)] = MB_NEIGH_INT
             svol_seg[(svol_dst < 0) & (svol_dst > -1. * (sg_mb_neigh + sg_mb_thick))] = MB_NEIGH_EXT
             svol_seg[np.absolute(svol_dst) < sg_mb_thick] = MB_LBL
