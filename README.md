@@ -56,7 +56,7 @@ Licensed under the Apache License, Version 2.0 (see LICENSE file)
 
         [2] Martinez-Sanchez et al. "Robust membrane detection based on tensor voting for electron tomography" J Struct Biol (2014) https://doi.org/10.1016/j.jsb.2014.02.015
  
-* Membrane segmentation (PyOrg):
+* Statistical spatial analysis (PyOrg):
 
         [3] Martinez-Sanchez, Lucic & Baumeister. "Statistical spatial analysis for cryo-electron tomography" Comput Methods Programs Biomed (2022) https://doi.org/10.1016/j.cmpb.2022.106693
 
