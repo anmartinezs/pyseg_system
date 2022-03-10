@@ -47,7 +47,7 @@ Licensed under the Apache License, Version 2.0 (see LICENSE file)
 
 ### PUBLICATIONS
 
-* Template-free particle picking and unsupervised classification (PySeg, PyOrg):
+* Template-free particle picking and unsupervised classification (PySeg):
 
         [1] Martinez-Sanchez et al. "Template-free detection and classification of heterogeneous membrane-bound complexes in cryo-electron tomograms" Nature Methods (2020) doi:10.1038/s41592-019-0687-1
 
@@ -55,4 +55,8 @@ Licensed under the Apache License, Version 2.0 (see LICENSE file)
 * Membrane segmentation (TomoSegMemTV):
 
         [2] Martinez-Sanchez et al. "Robust membrane detection based on tensor voting for electron tomography" J Struct Biol (2014) https://doi.org/10.1016/j.jsb.2014.02.015
+ 
+* Membrane segmentation (PyOrg):
+
+        [3] Martinez-Sanchez, Lucic & Baumeister. "Statistical spatial analysis for cryo-electron tomography" Comput Methods Programs Biomed (2022) https://doi.org/10.1016/j.cmpb.2022.106693
 
