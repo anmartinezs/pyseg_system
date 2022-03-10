@@ -46,21 +46,21 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/all_P19' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/primary_neuron' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/all_P19' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/int_HeLa'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos_surf.star' # '/ltomos/v1/v1_ltomos.star'
-in_wspace = None # ROOT_PATH + '/uni_1nd/v2/v2_25_25_sim_50_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/v1/v1_ltomos_surf_part5.star' # '/ltomos/v1/v1_ltomos_surf.star' # '/ltomos/v1/v1_ltomos.star'
+in_wspace = ROOT_PATH + '/uni_1st/v1/part5_25_25_sim_20_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/uni_1nd/v1'
-out_stem = 'test_25_25_sim_50'
+out_dir = ROOT_PATH + '/uni_1st/v1'
+out_stem = 'part5_25_25_sim_20_2' # 'test_25_25_sim_50'
 
 # List pre-processing options
 pr_ss = None # 10 # nm
 
 # Analysis variables
-ana_res = 1.368 # 0.684 # nm/voxel
+ana_res = 1.792 # 1.368 # 0.684 # nm/voxel
 ana_nbins = 25 # 100
 ana_rmax = 25 # nm   #60 #controls the length-scale over which the plot is made.
 ana_f_npoints = 1000
