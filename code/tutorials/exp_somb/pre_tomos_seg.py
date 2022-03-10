@@ -307,7 +307,7 @@ for row in range(gl_star.get_nrows()):
             hold_split = int(sp_split[1] * math.ceil(float(hold_pad) / hold_wide))
             offs_y = list()
             pad_y = off_mask_min_y + int(math.ceil((off_mask_max_y-off_mask_min_y) / hold_split))
-            offs_y.append((off_mask_min_x, pad_y + sp_off_voxels))
+            offs_y.append((off_mask_min_y, pad_y + sp_off_voxels))
             lock = False
             while not lock:
                 hold = offs_y[-1][1] + pad_y
@@ -317,7 +317,7 @@ for row in range(gl_star.get_nrows()):
                 else:
                     offs_y.append((offs_y[-1][1] - sp_off_voxels, offs_y[-1][1] + pad_y + sp_off_voxels))
         else:
-            offs_y = [(off_mask_min_x, off_mask_max_x),]
+            offs_y = [(off_mask_min_y, off_mask_max_y),]
         if sp_split[2] > 1:
             hold_wide = int(math.ceil(wide_z / sp_split[2]))
             hold_pad = int(math.ceil((off_mask_max_z - off_mask_min_z) / sp_split[2]))
