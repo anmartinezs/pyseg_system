@@ -30,16 +30,16 @@ __author__ = 'Antonio Martinez-Sanchez'
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
+ROOT_PATH = '/fs/pool/pool-lucic2/restore_pool-engel_EngelArchive112021_antonio_ribo/ribo' # '/fs/pool/pool-engel/antonio/ribo'
 
 # Input STAR file
-in_star = ROOT_PATH + '/in/in_ltomos_all.star'
+in_star = ROOT_PATH + '/in/in_ltomos_all_v3.star'
 
 # Input STAR for with the sub-volumes segmentations
-in_seg = ROOT_PATH + '/in/in_seg_all.star' # '/in/in_seg_test.star'
+in_seg = ROOT_PATH + '/in/in_seg_all_v3.star' # '/in/in_seg_test.star'
 
 # Output directory
-out_dir = ROOT_PATH + '/ltomos_v2/all_no_pid_p3_proj_swapxy' # '/stat/ltomos/trans_run2_test_swapxy'
+out_dir = ROOT_PATH + '/ltomos_v3/all_no_pid_p3_proj_swapxy' # '/stat/ltomos/trans_run2_test_swapxy'
 out_stem = 'all_L_proj' # 'pre'
 
 #### Advanced settings
@@ -398,7 +398,7 @@ for star_row in range(star.get_nrows()):
     try:
         list_tomos.pickle(out_pkl)
         kwargs = {'_psPickleFile': out_pkl,
-                  '_suSurfaceVtp': part_star_str,
+                  '_suSurfaceVtp': part_surf_str,
                   '_suSurfaceVtpSim': part_surf_sim_str}
         star_out.add_row(**kwargs)
     except pexceptions.PySegInputError as e:

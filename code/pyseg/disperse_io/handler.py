@@ -15,7 +15,7 @@ from astropy.io import fits
 from . import disperse_io
 import shutil
 from pyto.io import ImageIO as ImageIO
-# import pexceptions
+from pyseg import pexceptions
 try:
     from globals import *
 except:
@@ -291,6 +291,8 @@ class DisPerSe(object):
     # no_cut: if True (default False) no cut threshold is applied
     # inv: if True (default False) the manifolds are taken from the inverted image
     def mse(self, no_cut=False, inv=False):
+
+        raise pexceptions.PySegInputError(expr='mse DisPerSe', msg='simulating an pexception')
 
         # Parsing input parameters
         mask_opt = None

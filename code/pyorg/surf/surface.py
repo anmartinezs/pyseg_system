@@ -1848,6 +1848,9 @@ class TomoParticles(object):
                                    dtype=np.float32)
         for i in range(self.get_num_particles()):
             parts_centers_1[i] = self.__parts[i].get_center()
+        ###### JUST FOR TESTING ROBUSTNESS AGAINST PIXEL SHIFTING
+        parts_centers_1 += np.random.normal(0, 1, size=parts_centers_1.shape)
+        ######
         parts_centers_2 = parts_centers_1
 
         # Particles loop (Parallel)

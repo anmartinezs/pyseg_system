@@ -46,28 +46,28 @@ rcParams['ytick.labelsize'] = 22 # 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-engel/antonio/ribo'
+ROOT_PATH = '/fs/pool/pool-lucic2/restore_pool-engel_EngelArchive112021_antonio_ribo/ribo' # '/fs/pool/pool-engel/antonio/ribo'
 
 # Input STAR files
-in_star = ROOT_PATH + '/ltomos_v2/all_no_pid_p3/all_L_ltomos.star'
-in_wspace = ROOT_PATH + '/tests/uni_1st_nopid_p3//test_all_100_60_sim_20_2_wspace.pkl' # None # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos_v3/all_no_pid_p3_proj_swapxy/all_L_proj_ltomos.star' # '/ltomos_v2/all_no_pid_p3/all_L_ltomos.star'
+in_wspace =ROOT_PATH + '/tests/uni_1st_nopid_p3_v3/test_all_100_120_sim_20_3_wspace.pkl' #  (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
-out_dir = ROOT_PATH + '/tests/uni_1st_nopid_p3/'
-out_stem = 'test_all_100_60_sim_20_2_plot'
+out_dir = ROOT_PATH + '/tests/uni_1st_nopid_p3_v3/'
+out_stem = 'test_all_50_120_sim_20_3_plot2'
 
 # List pre-processing options
 pr_ss = 0 # 10 # nm
 
 # Analysis variables
 ana_res = 2.096 # 0.684 # nm/voxel
-ana_nbins = 100
+ana_nbins = 50
 ana_rmax = 60 # nm
 ana_f_npoints = 1000
-ana_npr_model = 1 # 10
+ana_npr_model = 1 # 5 # 10
 # Required for function-NNS computation, only if columns '_psStartSurfIds' and '_psEndSurfIds' are present
 # in the input STAR file
-ana_ndst_rg = [0, 40] # nm
+ana_ndst_rg = [0, 80] # nm
 ana_ssize = None # 5 # nm
 ana_mx_conn = 3 # None
 
@@ -422,11 +422,11 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
             if len(arr[0]) == 0:
                 # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
                 continue
-            hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
+            hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax_v)
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
             sims_hist_vals = list()
             for sim_dsts in tomo_sim_dsts:
-                sims_hist_vals.append(compute_hist(sim_dsts, ana_nbins, ana_rmax)[1])
+                sims_hist_vals.append(compute_hist(sim_dsts, ana_nbins, ana_rmax_v)[1])
             if len(sims_hist_vals) > 0:
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_hist_vals))
             else:
@@ -438,15 +438,15 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
         # plt.title('Histogram Nearest distances for ' + tkey_short + ' and ' + lkey)
         plt.ylabel('Probability density')
         plt.xlabel('Scale [nm]')
-        plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
+        plt.plot(ana_res * hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
         # plt.legend(loc=4)
         # plt.plot(hist_bins, ic_low, 'k--')
-        plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
+        plt.plot(ana_res * hist_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(hist_bins, ic_high, 'k--')
-        plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+        plt.fill_between(ana_res * hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
         arg_max = np.argmax(hist_vals)
-        plt.plot((hist_bins[arg_max], hist_bins[arg_max]), (0, hist_vals[arg_max]), 'k--', linewidth=2.0)
-        plt.xlim(8, 30)
+        plt.plot((ana_res * hist_bins[arg_max], ana_res * hist_bins[arg_max]), (0, hist_vals[arg_max]), 'k--', linewidth=2.0)
+        # plt.xlim(8, 30)
         plt.tight_layout()
         # plt.grid(True)
         if fig_fmt is None:
@@ -466,11 +466,11 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
             if len(arr[0]) == 0:
                 # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
                 continue
-            cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
+            cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax_v)
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
             sims_cdf_vals = list()
             for sim_dsts in tomo_sim_dsts:
-                sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
+                sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax_v)[1])
             n_exp, n_sim = len(arr[0]), len(sims_cdf_vals)
             if n_sim > 0:
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
@@ -485,18 +485,18 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
         plt.ylabel('Function-G')
         plt.xlabel('Scale [nm]')
-        plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], label=lkey, linewidth=2.0)
+        plt.plot(ana_res * cdf_bins, cdf_vals, color=lists_color[lkey], label=lkey, linewidth=2.0)
         # plt.legend(loc=4)
         # plt.plot(cdf_bins, ic_low, 'k--')
-        plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
+        plt.plot(ana_res * cdf_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(cdf_bins, ic_high, 'k--')
-        plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+        plt.fill_between(ana_res * hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
         diff = cdf_vals - ic_med
         i_dm = np.argmax(np.abs(diff))
         dm, r_dm = diff[i_dm], cdf_bins[i_dm]
         alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-        plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
-        plt.xlim(8, 30)
+        plt.plot((ana_res * r_dm, ana_res * r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
+        # plt.xlim(8, 30)
         plt.tight_layout()
         # plt.grid(True)
         if fig_fmt is None:
@@ -510,7 +510,7 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
 
         print('\t\t-Plotting KS-test results for tomogram ' + str(tkey) + ' and list ' + str(lkey) + ':')
         print('\t\t\t+Dm: ' + str(dm))
-        print('\t\t\t+rD: ' + str(r_dm))
+        print('\t\t\t+rD: ' + str(ana_res * r_dm))
         print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
         print('\t\t\t+alpha: ' + str(alpha))
         print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100. * (1. - alpha)) + '  %')
@@ -554,8 +554,8 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
 
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
             for sim_dsts in tomo_sim_dsts[:max_nsims]:
-                cdf_bins, cdf_vals = compute_cdf(sim_dsts, ana_nbins, ana_rmax)
-                plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
+                cdf_bins, cdf_vals = compute_cdf(sim_dsts, ana_nbins, ana_rmax_v)
+                plt.plot(ana_res * cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
                 try:
                     hold_cdf_vals[lkey].append(cdf_vals)
                 except KeyError:
@@ -571,8 +571,8 @@ for lkey, cdf_vals in zip(iter(hold_cdf_vals.keys()), iter(hold_cdf_vals.values(
         lbl = 'CONTROL'
     elif lkey == '1':
         lbl = 'RAPA'
-    plt.plot(cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
-plt.xlim(8, 35)
+    plt.plot(ana_res * cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
+# plt.xlim(8, 35)
 plt.legend(loc=4)
 plt.tight_layout()
 # plt.grid(True)
@@ -598,8 +598,8 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
 
             tomo_sim_fdsts = tomos_sim_fdsts[tkey][lkey]
             for sim_fdsts in tomo_sim_fdsts[:max_nsims]:
-                cdf_bins, cdf_vals = compute_cdf(sim_fdsts, ana_nbins, ana_rmax)
-                plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
+                cdf_bins, cdf_vals = compute_cdf(sim_fdsts, ana_nbins, ana_rmax_v)
+                plt.plot(ana_res * cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
                 try:
                     hold_cdf_vals[lkey].append(cdf_vals)
                 except KeyError:
@@ -615,8 +615,8 @@ for lkey, cdf_vals in zip(iter(hold_cdf_vals.keys()), iter(hold_cdf_vals.values(
         lbl = 'CONTROL'
     elif lkey == '1':
         lbl = 'RAPA'
-    plt.plot(cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
-plt.xlim(0, 35)
+    plt.plot(ana_res * cdf_bins, np.median(cdf_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
+# plt.xlim(0, 35)
 plt.legend(loc=4)
 plt.tight_layout()
 # plt.grid(True)
@@ -638,8 +638,8 @@ for tkey, ltomo in zip(iter(tomos_exp_dsts.keys()), iter(tomos_exp_dsts.values()
         try:
             tomo_sim_dsts = tomos_sim_dsts[tkey][lkey]
             for sim_dsts in tomo_sim_dsts[:max_nsims]:
-                hist_bins, hist_vals = compute_hist(sim_dsts, ana_nbins, ana_rmax)
-                plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
+                hist_bins, hist_vals = compute_hist(sim_dsts, ana_nbins, ana_rmax_v)
+                plt.plot(ana_res * hist_bins, hist_vals, color=lists_color[lkey], linewidth=.5, alpha=.3)
                 try:
                     hold_hist_vals[lkey].append(hist_vals)
                 except KeyError:
@@ -655,8 +655,8 @@ for lkey, hist_vals in zip(iter(hold_hist_vals.keys()), iter(hold_hist_vals.valu
         lbl = 'CONTROL'
     elif lkey == '1':
         lbl = 'RAPA'
-    plt.plot(hist_bins, np.median(hist_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
-plt.xlim(8, 35)
+    plt.plot(ana_res * hist_bins, np.median(hist_mat, axis=0), color=lists_color[lkey], label=lbl, linewidth=3.0, linestyle='-')
+# plt.xlim(8, 35)
 # plt.legend(loc=0)
 plt.tight_layout()
 # plt.grid(True)
@@ -675,11 +675,11 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
             if len(arr[0]) == 0:
                 # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
                 continue
-            cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
+            cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax_v)
             tomo_sim_fdsts = tomos_sim_fdsts[tkey][lkey]
             sims_cdf_fvals = list()
             for sim_fdsts in tomo_sim_fdsts:
-                sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
+                sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax_v)[1])
             n_exp, n_sim = len(arr[0]), len(sims_cdf_fvals)
             if n_sim > 0:
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_fvals))
@@ -693,17 +693,17 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
         plt.ylabel('Function-F')
         plt.xlabel('Scale [nm]')
-        plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], label=lkey, linewidth=2.0)
+        plt.plot(ana_res * cdf_bins, cdf_vals, color=lists_color[lkey], label=lkey, linewidth=2.0)
         # plt.legend(loc=4)
         # plt.plot(cdf_bins, ic_low, 'k--')
-        plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
+        plt.plot(ana_res * cdf_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(cdf_bins, ic_high, 'k--')
-        plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+        plt.fill_between(ana_res * hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
         diff = cdf_vals - ic_med
         i_dm = np.argmax(np.abs(diff))
         dm, r_dm = diff[i_dm], cdf_bins[i_dm]
         alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-        plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
+        plt.plot((ana_res * r_dm, ana_res * r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
         plt.tight_layout()
         # plt.grid(True)
         if fig_fmt is None:
@@ -717,7 +717,7 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
 
         print('\t\t-Plotting KS-test results for tomogram ' + str(tkey) + ' and list ' + str(lkey) + ':')
         print('\t\t\t+Dm: ' + str(dm))
-        print('\t\t\t+rD: ' + str(r_dm))
+        print('\t\t\t+rD: ' + str(ana_res * r_dm))
         print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
         print('\t\t\t+alpha: ' + str(alpha))
         print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100. * (1. - alpha)) + '  %')
@@ -754,14 +754,14 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
             if len(arr[0]) == 0:
                 # print('\t\t\t+WARNING: no valid simulations for tomogram and list: ' + tkey + ', ' + lkey)
                 continue
-            cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax)
-            cdf_fvals = compute_cdf(farr, ana_nbins, ana_rmax)[1]
+            cdf_bins, cdf_vals = compute_cdf(arr, ana_nbins, ana_rmax_v)
+            cdf_fvals = compute_cdf(farr, ana_nbins, ana_rmax_v)[1]
             cdf_jvals = compute_J(cdf_vals, cdf_fvals, high=p_jhigh)
             tomo_sim_fdsts = tomos_sim_fdsts[tkey][lkey]
             sims_cdf_vals, sims_cdf_fvals = list(), list()
             for sim_dsts, sim_fdsts in zip(tomos_sim_dsts[tkey][lkey], tomo_sim_fdsts):
-                sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
-                sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
+                sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax_v)[1])
+                sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax_v)[1])
             if (len(sims_cdf_vals) > 0) and (len(sims_cdf_fvals) > 0):
                 ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
                 icf_low, icf_med, icf_high = compute_ic(p_per, np.asarray(sims_cdf_fvals))
@@ -777,17 +777,17 @@ for tkey, ltomo in zip(iter(tomos_exp_fdsts.keys()), iter(tomos_exp_fdsts.values
         # plt.title('Univariate 1st order for ' + tkey_short + ' and ' + lkey)
         plt.ylabel('Function-J')
         plt.xlabel('Scale [nm]')
-        plt.plot(cdf_bins[:len(cdf_jvals)], cdf_jvals, color=lists_color[lkey], label=lkey, linewidth=2.0)
+        plt.plot(ana_res * cdf_bins[:len(cdf_jvals)], cdf_jvals, color=lists_color[lkey], label=lkey, linewidth=2.0)
         # plt.legend(loc=4)
         # plt.plot(cdf_bins[:len(cdf_sim_jlow)], cdf_sim_jlow, 'k--')
-        plt.plot(cdf_bins[:len(cdf_sim_jmed)], cdf_sim_jmed, 'k', linewidth=2.0)
+        plt.plot(ana_res * cdf_bins[:len(cdf_sim_jmed)], cdf_sim_jmed, 'k', linewidth=2.0)
         # plt.plot(cdf_bins[:len(cdf_sim_jhigh)], cdf_sim_jhigh, 'k--')
         cdf_sim_len = len(cdf_sim_jhigh)
         if len(cdf_sim_jlow) < len(cdf_sim_jhigh):
             cdf_sim_len = len(cdf_sim_jlow)
-        plt.fill_between(cdf_bins[:cdf_sim_len], cdf_sim_jlow[:cdf_sim_len], cdf_sim_jhigh[:cdf_sim_len],
+        plt.fill_between(ana_res * cdf_bins[:cdf_sim_len], cdf_sim_jlow[:cdf_sim_len], cdf_sim_jhigh[:cdf_sim_len],
                          alpha=0.5, color='gray', edgecolor='w')
-        plt.xlim(0, 20)
+        plt.xlim(0, 38)
         plt.tight_layout()
         # plt.grid(True)
         if fig_fmt is None:
@@ -814,7 +814,7 @@ for tkey, ltomo in zip(iter(tomos_exp_mnnd.keys()), iter(tomos_exp_mnnd.values()
                 for pr_id in range(hold_mnnd.shape[0]):
                     arr += hold_mnnd[pr_id, p_id]
                 arr = np.asarray(arr, dtype=np.float32)
-                hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
+                hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax_v)
                 hold_sim_mnnd, hold_sim2_mnnd = tomos_sim_mnnd[tkey][lkey], tomos_sim2_mnnd[tkey][lkey]
                 sims_hist_vals, sims2_hist_vals = list(), list()
                 for sim_dsts in hold_sim_mnnd:
@@ -841,16 +841,16 @@ for tkey, ltomo in zip(iter(tomos_exp_mnnd.keys()), iter(tomos_exp_mnnd.values()
             plt.figure()
             plt.ylabel('Function-G inter-Surface distribution')
             plt.xlabel('Scale [nm]')
-            plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
+            plt.plot(ana_res * hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
             plt.legend(loc=4)
             # plt.plot(hist_bins, ic_low, 'k--')
-            plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
+            plt.plot(ana_res * hist_bins, ic_med, 'k', linewidth=2.0)
             # plt.plot(hist_bins, ic_high, 'k--')
-            plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+            plt.fill_between(ana_res * hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
             # plt.plot(hist_bins, ic2_low, 'c--')
-            plt.plot(hist_bins, ic2_med, 'c', linewidth=2.0)
+            plt.plot(ana_res * hist_bins, ic2_med, 'c', linewidth=2.0)
             # plt.plot(hist_bins, ic2_high, 'c--')
-            plt.fill_between(hist_bins, ic2_low, ic2_high, alpha=0.5, color='cyan', edgecolor='c')
+            plt.fill_between(ana_res * hist_bins, ic2_low, ic2_high, alpha=0.5, color='cyan', edgecolor='c')
             plt.tight_layout()
             # plt.grid(True)
             if fig_fmt is None:
@@ -872,11 +872,11 @@ print('\t\t-Plotting Histogram...')
 for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
-        hist_bins, hist_vals = compute_hist(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)
+        hist_bins, hist_vals = compute_hist(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax_v)
         list_sim_dsts = lists_sim_dsts[lkey]
         sims_hist_vals = list()
         for sim_dsts in list_sim_dsts:
-            sims_hist_vals.append(compute_hist(sim_dsts, ana_nbins, ana_rmax)[1])
+            sims_hist_vals.append(compute_hist(sim_dsts, ana_nbins, ana_rmax_v)[1])
         if len(sims_hist_vals) > 0:
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_hist_vals))
         else:
@@ -889,14 +889,14 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
     # plt.title('Nearest distance histogram for ' + lkey_short)
     plt.ylabel('Probability density')
     plt.xlabel('Scale [nm]')
-    plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
+    plt.plot(ana_res * hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(hist_bins, ic_low, 'k--')
-    plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
+    plt.plot(ana_res * hist_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(hist_bins, ic_high, 'k--')
-    plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+    plt.fill_between(ana_res * hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
     arg_max = np.argmax(hist_vals)
-    plt.plot((hist_bins[arg_max], hist_bins[arg_max]), (0, hist_vals[arg_max]), 'k--', linewidth=2.0)
-    plt.xlim(8, 40)
+    plt.plot((ana_res * hist_bins[arg_max], ana_res * hist_bins[arg_max]), (0, hist_vals[arg_max]), 'k--', linewidth=2.0)
+    # plt.xlim(8, 40)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -909,11 +909,11 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         exp_vals, sim_vals = np.concatenate(np.asarray(ltomo, dtype=object)), np.concatenate(np.asarray(list_sim_dsts, dtype=object))
-        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)
+        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax_v)
         list_sim_dsts = lists_sim_dsts[lkey]
         sims_cdf_vals = list()
         for sim_dsts in list_sim_dsts:
-            sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
+            sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax_v)[1])
         n_exp, n_sim = len(exp_vals), len(sims_cdf_vals)
         if n_sim > 0:
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
@@ -926,16 +926,16 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
     # plt.title('Univariate 1st order for ' + lkey_short)
     plt.ylabel('Function-G')
     plt.xlabel('Scale [nm]')
-    plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=2.0)
+    plt.plot(ana_res * cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(cdf_bins, ic_low, 'k--')
-    plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
+    plt.plot(ana_res * cdf_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(cdf_bins, ic_high, 'k--')
-    plt.fill_between(cdf_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+    plt.fill_between(ana_res * cdf_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
     diff = cdf_vals - ic_med
     i_dm = np.argmax(np.abs(diff))
     dm, r_dm = diff[i_dm], cdf_bins[i_dm]
     alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-    plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
+    plt.plot((ana_res * r_dm, ana_res * r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -945,13 +945,13 @@ for lkey, ltomo in zip(iter(lists_exp_dsts.keys()), iter(lists_exp_dsts.values()
 
     print('\t\t-Plotting KS-test results for ' + str(lkey_short) + ':')
     print('\t\t\t+Dm: ' + str(dm))
-    print('\t\t\t+rD: ' + str(r_dm))
+    print('\t\t\t+rD: ' + str(ana_res * r_dm))
     print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
     print('\t\t\t+alpha: ' + str(alpha))
     print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100.*(1. - alpha)) + '  %')
 
     print('\t\t-Plotting KS-test two-samples two-sided scipy results for ' + str(lkey_short) + ' :')
-    dm, p_ks = sp.stats.ks_2samp(exp_vals, sim_vals, alternative='two-sided')
+    dm, p_ks = sp.stats.ks_2samp(ana_res * exp_vals, ana_res * sim_vals, alternative='two-sided')
     print('\t\t\t+Dm: ' + str(dm))
     print('\t\t\t+p: ' + str(p_ks))
     print('\t\t\t+Experimental does not follow null-model confidence 100*(1-p): ' + str(100. * (1. - p_ks)) + '  %')
@@ -961,11 +961,11 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
         exp_vals, sim_vals = np.concatenate(np.asarray(ltomo, dtype=object)), np.concatenate(np.asarray(list_sim_dsts, dtype=object))
-        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)
+        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax_v)
         list_sim_fdsts = lists_sim_fdsts[lkey]
         sims_cdf_vals = list()
         for sim_fdsts in list_sim_fdsts:
-            sims_cdf_vals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
+            sims_cdf_vals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax_v)[1])
         n_exp, n_sim = len(exp_vals), len(sims_cdf_vals)
         if n_sim > 0:
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals))
@@ -978,16 +978,16 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
     # plt.title('Univariate 1st order for ' + lkey_short)
     plt.ylabel('Function-F')
     plt.xlabel('Scale [nm]')
-    plt.plot(cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=2.0)
+    plt.plot(ana_res * cdf_bins, cdf_vals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(cdf_bins, ic_low, 'k--')
-    plt.plot(cdf_bins, ic_med, 'k', linewidth=2.0)
+    plt.plot(ana_res * cdf_bins, ic_med, 'k', linewidth=2.0)
     # plt.plot(cdf_bins, ic_high, 'k--')
-    plt.fill_between(cdf_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+    plt.fill_between(ana_res * cdf_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
     diff = cdf_vals - ic_med
     i_dm = np.argmax(np.abs(diff))
     dm, r_dm = diff[i_dm], cdf_bins[i_dm]
     alpha = 2. * np.exp((-2. * n_exp * n_sim * dm * dm) / (n_sim + 1))
-    plt.plot((r_dm, r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
+    plt.plot((ana_res * r_dm, ana_res * r_dm), (cdf_vals[i_dm], ic_med[i_dm]), 'k--', linewidth=2.0)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -997,13 +997,13 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
 
     print('\t\t-Plotting KS-test results for ' + str(lkey_short) + ':')
     print('\t\t\t+Dm: ' + str(dm))
-    print('\t\t\t+rD: ' + str(r_dm))
+    print('\t\t\t+rD: ' + str(ana_res * r_dm))
     print('\t\t\t+n_exp, n_sim: ' + str(n_exp) + ', ' + str(n_sim))
     print('\t\t\t+alpha: ' + str(alpha))
     print('\t\t\t+Does not follow null-model with a confidence 100*(1-alpha): ' + str(100.*(1. - alpha)) + '  %')
 
     print('\t\t-Plotting KS-test two-samples two-sided scipy results for ' + str(lkey_short) + ' :')
-    dm, p_ks = sp.stats.ks_2samp(exp_vals, sim_vals, alternative='two-sided')
+    dm, p_ks = sp.stats.ks_2samp(ana_res * exp_vals, ana_res * sim_vals, alternative='two-sided')
     print('\t\t\t+Dm: ' + str(dm))
     print('\t\t\t+p: ' + str(p_ks))
     print('\t\t\t+Experimental does not follow null-model confidence 100*(1-p): ' + str(100. * (1. - p_ks)) + '  %')
@@ -1012,14 +1012,14 @@ print('\t\t-Plotting Function-J...')
 for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values())):
     lkey_short = os.path.splitext(os.path.split(lkey)[1])[0]
     try:
-        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(lists_exp_dsts[lkey], dtype=object)), ana_nbins, ana_rmax)
-        cdf_fvals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax)[1]
+        cdf_bins, cdf_vals = compute_cdf(np.concatenate(np.asarray(lists_exp_dsts[lkey], dtype=object)), ana_nbins, ana_rmax_v)
+        cdf_fvals = compute_cdf(np.concatenate(np.asarray(ltomo, dtype=object)), ana_nbins, ana_rmax_v)[1]
         cdf_jvals = compute_J(cdf_vals, cdf_fvals, high=p_jhigh)
         list_sim_fdsts = lists_sim_fdsts[lkey]
         sims_cdf_vals, sims_cdf_fvals = list(), list()
         for sim_dsts, sim_fdsts in zip(lists_sim_dsts[lkey], list_sim_fdsts):
-            sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax)[1])
-            sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax)[1])
+            sims_cdf_vals.append(compute_cdf(sim_dsts, ana_nbins, ana_rmax_v)[1])
+            sims_cdf_fvals.append(compute_cdf(sim_fdsts, ana_nbins, ana_rmax_v)[1])
         if (len(sims_cdf_vals) > 0) and (len(sims_cdf_fvals) > 0):
             ic_low, ic_med, ic_high = compute_ic(p_per, np.asarray(sims_cdf_vals, dtype=object))
             icf_low, icf_med, icf_high = compute_ic(p_per, np.asarray(sims_cdf_fvals, dtype=object))
@@ -1036,17 +1036,18 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
     # plt.title('Univariate 1st order for ' + lkey_short)
     plt.ylabel('Function-J')
     plt.xlabel('Scale (nm)')
-    plt.plot(cdf_bins[:len(cdf_jvals)], cdf_jvals, color=lists_color[lkey], linewidth=2.0)
+    plt.plot(ana_res * cdf_bins[:len(cdf_jvals)], cdf_jvals, color=lists_color[lkey], linewidth=2.0)
     # plt.plot(cdf_bins[:len(cdf_sim_jlow)], cdf_sim_jlow, 'k--')
-    plt.plot(cdf_bins[:len(cdf_sim_jmed)], cdf_sim_jmed, 'k', linewidth=2.0)
+    plt.plot(ana_res * cdf_bins[:len(cdf_sim_jmed)], cdf_sim_jmed, 'k', linewidth=2.0)
     # plt.plot(cdf_bins[:len(cdf_sim_jhigh)], cdf_sim_jhigh, 'k--')
     cdf_sim_len = len(cdf_sim_jhigh)
     if len(cdf_sim_jlow) < len(cdf_sim_jhigh):
         cdf_sim_len = len(cdf_sim_jlow)
-    plt.fill_between(cdf_bins[:cdf_sim_len].astype(np.float), cdf_sim_jlow[:cdf_sim_len].astype(np.float),
+    plt.fill_between(ana_res * cdf_bins[:cdf_sim_len].astype(np.float), cdf_sim_jlow[:cdf_sim_len].astype(np.float),
                      cdf_sim_jhigh[:cdf_sim_len].astype(np.float), alpha=0.5, color='gray', edgecolor='w')
     # ax.set_xlim((0, 60))
-    plt.xlim(0, min((cdf_bins[len(cdf_jvals)], cdf_bins[len(cdf_sim_jmed)])))
+    # plt.xlim(0, min((cdf_bins[len(cdf_jvals)], cdf_bins[len(cdf_sim_jmed)])))
+    plt.xlim(0, 38)
     plt.tight_layout()
     if fig_fmt is None:
         plt.show(block=True)
@@ -1065,7 +1066,7 @@ for lkey, ltomo in zip(iter(lists_exp_mnnd.keys()), iter(lists_exp_mnnd.values()
             for pr_id in range(hold_mnnd.shape[0]):
                 arr += hold_mnnd[pr_id, p_id]
             arr = np.asarray(arr, dtype=np.float32)
-            hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax)
+            hist_bins, hist_vals = compute_hist(arr, ana_nbins, ana_rmax_v)
             hold_sim_mnnds, hold_sim2_mnnds = lists_sim_mnnd[lkey], lists_sim2_mnnd[lkey]
             sims_hist_vals, sims2_hist_vals = list(), list()
             for s_id in range(len(hold_sim_mnnds)):
@@ -1091,16 +1092,16 @@ for lkey, ltomo in zip(iter(lists_exp_mnnd.keys()), iter(lists_exp_mnnd.values()
         plt.figure()
         plt.ylabel('Nearest Neighbor inter-Surface distribution')
         plt.xlabel('Scale [nm]')
-        plt.plot(hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
+        plt.plot(ana_res * hist_bins, hist_vals, color=lists_color[lkey], linewidth=2.0)
         plt.legend(loc=4)
         # plt.plot(hist_bins, ic_low, 'k--')
-        plt.plot(hist_bins, ic_med, 'k', linewidth=2.0)
+        plt.plot(ana_res * hist_bins, ic_med, 'k', linewidth=2.0)
         # plt.plot(hist_bins, ic_high, 'k--')
-        plt.fill_between(hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
+        plt.fill_between(ana_res * hist_bins, ic_low, ic_high, alpha=0.5, color='gray', edgecolor='w')
         # plt.plot(hist_bins, ic2_low, 'c--')
-        plt.plot(hist_bins, ic2_med, 'c', linewidth=2.0)
+        plt.plot(ana_res * hist_bins, ic2_med, 'c', linewidth=2.0)
         # plt.plot(hist_bins, ic2_high, 'c--')
-        plt.fill_between(hist_bins, ic2_low, ic2_high, alpha=0.5, color='cyan', edgecolor='c')
+        plt.fill_between(ana_res * hist_bins, ic2_low, ic2_high, alpha=0.5, color='cyan', edgecolor='c')
         plt.tight_layout()
         if fig_fmt is None:
             plt.show(block=True)

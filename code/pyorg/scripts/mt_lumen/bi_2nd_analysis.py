@@ -49,21 +49,21 @@ rcParams['ytick.labelsize'] = 14
 # PARAMETERS
 ########################################################################################
 
-ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering'
+ROOT_PATH = '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/lattice_break_clustering' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering_test' # '/fs/pool/pool-plitzko/Saikat/luminal_particle_organization/plus_end_clustering'
 
 # Input STAR file
-in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded3_min600/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'
+in_star_ref = ROOT_PATH + '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star' # '/ltomos/v1_nobc_proj_lumen_eroded3_min600/v1_nobc_ltomos_surf.star'
 in_ref_short_key = '0' # '0'
-in_star = ROOT_PATH + '/ltomos/v1_nobc_proj_lumen_eroded3_min600/v1_nobc_ltomos_surf.star' # '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star'  #
-in_wspace = ROOT_PATH + '/org/bi/bi_2nd//v1_nobc_proj_lumen_eroded3_10_600_25_switch_wspace.pkl' # '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
+in_star = ROOT_PATH + '/ltomos/v1_nobc_proj/v1_nobc_proj_ltomos.star' # '/ltomos/v1_nobc_proj_lumen_eroded3_min600/v1_nobc_ltomos_surf.star'  #
+in_wspace = ROOT_PATH + '/org/bi/bi_2nd/v1_nobc_proj_sph_10_600_10_wspace.pkl' # '/org/bi/bi_2nd//v1_nobc_proj_lumen_eroded3_10_600_25_switch_wspace.pkl' # '/data/tutorials/synth_sumb/org/uni_2nd/test_1_ref_0_proj_8_300_10_sim_10_wspace.pkl'  # (Insert a path to recover a pickled workspace instead of doing a new computation)
 
 # Output directory
 out_dir = ROOT_PATH + '/org/bi/bi_2nd/'
-out_stem = 'v1_nobc_proj_lumen_eroded3_10_600_25_switch_2'  # 'uni_sph_4_60_5'
+out_stem = 'v1_nobc_proj_sph_10_600_10_welch'  # 'uni_sph_4_60_5'
 
 # Analysis variables
 ana_res = 1.368  # nm/voxel
-ana_rg = np.arange(10, 600, 25)  # in nm
+ana_rg = np.arange(10, 600, 10) # np.arange(10, 600, 25)  # in nm
 ana_shell_thick = None  # 15 # 5
 ana_rdf = False # True
 ana_fmm = True # False
