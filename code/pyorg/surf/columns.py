@@ -825,13 +825,15 @@ class ColumnsFinder(object):
                         continue
         return tomo
 
-    def add_columns_to_star(self, star, mic_name, layer=None, mode='cols'):
+    def add_columns_to_star(
+            self, star, mic_name, layer=None, mode='cols', swap_xy=False):
         '''
         Add the corresponding rows for columns to a particles STAR file (Star object)
         :param star: input Star object
         :param mic: _rlnMicrographName entry
         :param layer: and integer
         :param mode: valid; 'cols' (default) column particles, 'scols' sub-column particles, otherwise all particles
+        :param swap_xy: flag indicating if x and y coords should be swapped
         '''
 
         # Parsing the input coordinates
@@ -896,10 +898,15 @@ class ColumnsFinder(object):
 
         # Adding the rows
         for coord in hold_coords:
+            x_coord = coord[0]
+            y_coord = coord[1]
+            if swap_xy:
+                x_coord = coord[1]
+                y_coord = coord[0]
             hold_dict = {'_rlnMicrographName': mic_name,
                          '_rlnGroupNumber': g_name,
-                         '_rlnCoordinateX': coord[1],
-                         '_rlnCoordinateY': coord[0],
+                         '_rlnCoordinateX': x_coord,
+                         '_rlnCoordinateY': y_coord,
                          '_rlnCoordinateZ': coord[2]}
             star.add_row(**hold_dict)
 

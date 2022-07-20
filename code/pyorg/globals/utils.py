@@ -21,6 +21,8 @@ def unpickle_obj(fname):
     f_pkl = open(fname, 'rb')
     try:
         gen_obj = pickle.load(f_pkl)
+    except UnicodeDecodeError:
+        gen_obj = pickle.load(f_pkl, encoding='latin1')
     finally:
         f_pkl.close()
 
