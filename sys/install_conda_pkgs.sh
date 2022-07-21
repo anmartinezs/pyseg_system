@@ -1,22 +1,27 @@
 #!/bin/bash
 set -ex
 
-## Installing conda packages (requires Anaconda with Python 2.7)
-$PWD/soft/miniconda2/bin/conda install --yes \
-      --channel menpo \
-      --channel jochym \
-      --channel anaconda \
+## Installing conda packages (requires Anaconda with Python 3)
+$PWD/soft/miniconda3/bin/conda install --yes \
       --channel conda-forge \
+      graph-tool \
       beautifulsoup4 \
       lxml \
       numpy \
-      opencv \
       pillow \
-      pyfits \
       scikit-image \
       scikit-learn \
       scipy \
       vtk \
       scikit-fmm \
-      graph-tool \
-    && $PWD/soft/miniconda2/bin/conda clean --yes --all
+      astropy \
+      pytest \
+      opencv \
+      future \
+    && $PWD/soft/miniconda3/bin/conda clean --yes --all
+    
+# ## Installing conda VTK package (it must be installed after graph-tool to avoid conficts)
+# $PWD/soft/miniconda3/bin/conda install --yes \
+#       --channel conda-forge \
+#       vtk \
+#     && $PWD/soft/miniconda3/bin/conda clean --yes --all

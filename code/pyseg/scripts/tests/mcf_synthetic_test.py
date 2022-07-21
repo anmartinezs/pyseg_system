@@ -148,14 +148,14 @@ print('\tAuthor: ' + __author__)
 print('\tDate: ' + time.strftime("%c") + '\n')
 print('Running main loop:')
 
-hold_snr = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_t_p = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_f_p = (-1) * np.ones(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_f_n = (-1) * np.ones(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_p_e = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_pp_e = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_b_e = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
-hold_snr = np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=np.float)
+hold_snr = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_t_p = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_f_p = (-1) * np.ones(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_f_n = (-1) * np.ones(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_p_e = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_pp_e = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_b_e = (-1) * np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
+hold_snr = np.zeros(shape=(G3_NUM_REP, len(G3_STD_NOISE)), dtype=float)
 thick = G3_SP * G3_FEAT
 thick2 = 2 * math.ceil(thick * G3_RESOLUTION)
 
@@ -263,7 +263,7 @@ for j in range(len(G3_STD_NOISE)):
         labels, v_tps = list(), list()
         vertices = graph_mcf.get_vertices_list()
         n_points = float(len(vertices))
-        # points = np.zeros(shape=(n_points, 3), dtype=np.float)
+        # points = np.zeros(shape=(n_points, 3), dtype=float)
         gxs, gys, gzs = grid.get_grid_points()
         grid_vs = -1 * np.ones(shape=gxs.shape, dtype=np.int)
         good_picks, bad_picks, fp_picks, tot_picks = 0., 0., 0., float(np.asarray(gxs.shape).prod())
@@ -271,7 +271,7 @@ for j in range(len(G3_STD_NOISE)):
             for y in range(gys.shape[1]):
                 for z in range(gzs.shape[2]):
                     labels.append(str(x) + '_' + str(y) + '_' + str(z))
-                    hold_min = np.finfo(np.float).max
+                    hold_min = np.finfo(float).max
                     g_point = np.asarray((gxs[x, y, z], gys[x, y, z], gzs[x, y, z]), dtype=np.float32)
                     pick_found = False
                     for v in vertices:

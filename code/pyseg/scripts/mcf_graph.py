@@ -66,7 +66,7 @@ def do_mcf_graph(input_file, output_dir, mask_file=None, res=1, tilt_rot=None, t
         if verbose:
             print('\tGaussian filtering for input data...')
         input_img = disperse_io.load_tomo(input_file)
-        flt_img = sp.ndimage.filters.gaussian_filter(input_img, gsig)
+        flt_img = sp.ndimage.gaussian_filter(input_img, gsig)
         flt_img = lin_map(flt_img, lb=0, ub=1)
         path, stem = os.path.split(input_file)
         stem_pkl, _ = os.path.splitext(stem)

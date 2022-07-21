@@ -25,4 +25,5 @@ sudo apt-get update \
       "unzip" \
       "zip" \
       "git" \
+      "python3-graph-tool" \
 

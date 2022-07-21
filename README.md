@@ -17,10 +17,10 @@ Python 3 transition completed and changes for being compatible with [Scipion](ht
   + DisPerSe (v. 0.9.24)
     - Cfitsio (v. 3.380)
   + CGAL (v 4.7)
-  + Graph-tool (v 2.2.44)
-  + VTK (v 6.3.0)
+  + Graph-tool 
+  + VTK 
 * **doc**: documentation files
-  + manual: a general manual, with installation, for PySeg (v 0.1)
+  + manual: a general manual, with installation instructions included, for PySeg 
   + tutorials: specific examples to introduce the users in the usage of the software
     - synth_sumb: basic tutorial for using PySeg for **s**ingle **u**noriented **m**em**b**ranes using **synth**etic data
     - synth_ssmb: Deprecated, just for testing.

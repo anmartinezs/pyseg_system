@@ -78,7 +78,7 @@
 \begin_body
 
 \begin_layout Title
-Manual for PySeg system installation and usage (v 1.0)
+Manual for PySeg system installation and usage (v 1.1)
 \end_layout
 
 \begin_layout Author
@@ -150,8 +150,8 @@ System requirements
 \end_layout
 
 \begin_layout Standard
-The installers provided in this release has been tested in a Ubuntu 18.04
- machine.
+The installers provided in this release has been tested in a Ubuntu 20.04.4
+ LTS machine.
  However, PySeg system can also be installed in any other Linux 64bit platform
  if all dependencies are satisfied.
 \end_layout
@@ -161,11 +161,11 @@ System prerequisites:
 \end_layout
 
 \begin_layout Itemize
-Anaconda (tested version 4.3.21), package manager for Python (v 2.7.13)
+Anaconda (tested version miniconda3), package manager for Python (v 3.9)
 \end_layout
 
 \begin_layout Itemize
-CMAKE (tested version 2.812.2)
+CMAKE (tested version 3.13.3)
 \end_layout
 
 \begin_layout Itemize
@@ -215,31 +215,6 @@ CGAL
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-Ubuntu packages required by graph-tool, if you have already a installed
- version of graph-tool they may not be needed:
-\begin_inset Separator latexpar
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-pycairo
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-CHECK
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_deeper
 \begin_layout Standard
 PySeg has some other dependencies not included in Ubuntu, advanced users
  can install them separately, but they are included in this release with
@@ -273,6 +248,10 @@ Python packages (are downloaded/installed through Anaconda package manager):
 
 \begin_deeper
 \begin_layout Itemize
+Graph-tool
+\end_layout
+
+\begin_layout Itemize
 Numpy
 \end_layout
 
@@ -301,23 +280,11 @@ scikit-fmm
 \end_layout
 
 \begin_layout Itemize
-Pyfits
+Astropy
 \end_layout
 
 \begin_layout Itemize
-OpenCV
-\end_layout
-
-\begin_layout Itemize
-Graph-tool 
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Peixoto2014"
-literal "true"
-
-\end_inset
-
-
+OpenCV 
 \end_layout
 
 \begin_layout Itemize
@@ -334,6 +301,10 @@ pillow
 
 \begin_layout Itemize
 vtk
+\end_layout
+
+\begin_layout Itemize
+future
 \end_layout
 
 \end_deeper
@@ -416,7 +387,7 @@ python_system
 \series default
 \size default
  folder in the path you want to install the whole system.
- The installation of all dependencies to run PySeg on a Ubuntu 18.04 computer
+ The installation of all dependencies to run PySeg on a Ubuntu 20.04 computer
  requires the next steps (other systems may need some modifications for
  the installers):
 \end_layout
@@ -468,9 +439,7 @@ path/to/pyseg_system/sys>./install_third_parties.sh
 \begin_layout Enumerate
 Install conda, if you have already a conda version installed on your computer
  this step may not be required.
- This step actually installs the latest version for Miniconda2, and follow
- the interactive instruction (choose the default values, and don't forget
- to close and open the terminal in order to make the changes have effect):
+ This step actually installs the latest version for Miniconda3:
 \end_layout
 
 \begin_deeper
@@ -639,6 +608,17 @@ pyseg_system/data/
 \series default
 \size default
 , remember that this script also erases any previous output file.
+\end_layout
+
+\begin_layout Standard
+The most basic test is 
+\family sans
+\series bold
+\size footnotesize
+pyseg_system/code/tests/tracing_grid.sh 
+\series default
+useful for testing conection between python code, DisPerSe, graph-tool and
+ multicore processing.
 \end_layout
 
 \begin_layout Standard

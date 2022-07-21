@@ -956,7 +956,7 @@ class TomoPeaks(object):
         :return:
         '''
 
-        if shift is None or shift is 0:
+        if shift == None or shift == 0:
             return
 
         # Input parsing
