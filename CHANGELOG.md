@@ -73,4 +73,6 @@
 * **02/10/2021**
     + Adding MRC I/O TOM-Toolbox functions
 * **21/07/2022**
-    + Adding system installers for Python3 on Ubuntu 20.04		
+    + Adding system installers for Python3 on Ubuntu 20.04	
+* **27/07/2022**
+    + Adding models in MRC format for generating synthetic tomogras in /data/tutorials/synth_sumb/modes	
