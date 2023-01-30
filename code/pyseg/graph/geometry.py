@@ -142,10 +142,10 @@ class GeometryMCF:
         if (len(x.shape) != 1) or (x.shape != y.shape) or (x.shape != z.shape):
             error_msg = 'Unexpected state.'
             raise pexceptions.PySegTransitionError(expr='get_array_mask (GeometryMCF)', msg=error_msg)
-        mask_array = np.zeros(shape=(x.size, 3), dtype=np.int)
-        mask_array[:, 0] = x.astype(np.int)
-        mask_array[:, 1] = y.astype(np.int)
-        mask_array[:, 2] = z.astype(np.int)
+        mask_array = np.zeros(shape=(x.size, 3), dtype=int)
+        mask_array[:, 0] = x.astype(int)
+        mask_array[:, 1] = y.astype(int)
+        mask_array[:, 2] = z.astype(int)
 
         return mask_array
 
@@ -177,9 +177,9 @@ class GeometryMCF:
             raise pexceptions.PySegTransitionError(expr='extend (GeometryMCF)', msg=error_msg)
 
         # Compute new geometry size and offset
-        hold_offset = np.zeros(shape=3, dtype=np.int)
-        off_img_s = np.zeros(shape=3, dtype=np.int)
-        off_img_g = np.zeros(shape=3, dtype=np.int)
+        hold_offset = np.zeros(shape=3, dtype=int)
+        off_img_s = np.zeros(shape=3, dtype=int)
+        off_img_g = np.zeros(shape=3, dtype=int)
         if self.__offset[0] < geom.__offset[0]:
             hold_offset[0] = self.__offset[0]
             off_img_g[0] = geom.__offset[0] - self.__offset[0]
@@ -198,7 +198,7 @@ class GeometryMCF:
         else:
             hold_offset[2] = geom.__offset[2]
             off_img_s[2] = self.__offset[2] - geom.__offset[2]
-        hold_size = np.zeros(shape=3, dtype=np.int)
+        hold_size = np.zeros(shape=3, dtype=int)
         hold_s = self.__offset + self.__size
         hold_g = geom.__offset + geom.__size
         if hold_s[0] > hold_g[0]:
@@ -251,7 +251,7 @@ class GeometryMCF:
         self.__density = densities
 
         # Creates image and mask
-        self.__mask = np.zeros(shape=self.__size, dtype=np.bool)
+        self.__mask = np.zeros(shape=self.__size, dtype=bool)
         self.__image = np.zeros(shape=self.__size, dtype=densities.dtype)
 
         # Fill up image and mask
@@ -350,10 +350,10 @@ class Geometry(metaclass=ABCMeta):
         if (len(x.shape) != 1) or (x.shape != y.shape) or (x.shape != z.shape):
             error_msg = 'Unexpected state.'
             raise pexceptions.PySegTransitionError(expr='get_array_mask (Geometry)', msg=error_msg)
-        mask_array = np.zeros(shape=(x.size, 3), dtype=np.int)
-        mask_array[:, 0] = x.astype(np.int)
-        mask_array[:, 1] = y.astype(np.int)
-        mask_array[:, 2] = z.astype(np.int)
+        mask_array = np.zeros(shape=(x.size, 3), dtype=int)
+        mask_array[:, 0] = x.astype(int)
+        mask_array[:, 1] = y.astype(int)
+        mask_array[:, 2] = z.astype(int)
 
         return mask_array
 
@@ -529,7 +529,7 @@ class ArcGeometry(Geometry):
         xmax = self._Geometry__manifold.shape[0]
         ymax = self._Geometry__manifold.shape[1]
         zmax = self._Geometry__manifold.shape[2]
-        lbls = np.zeros(shape=self.__seed_coords.shape[0], dtype=np.int)
+        lbls = np.zeros(shape=self.__seed_coords.shape[0], dtype=int)
         idxs = (-1) * np.ones(shape=lbls.shape, dtype=object)
         for i in range(self.__seed_coords.shape[0]):
             lbls[i] = self._Geometry__manifold[int(round(self.__seed_coords[i][0])),
@@ -554,7 +554,7 @@ class ArcGeometry(Geometry):
         self._Geometry__size -= self._Geometry__offset
 
         # Create the image and mask
-        self._Geometry__mask = np.zeros(shape=self._Geometry__size, dtype=np.bool)
+        self._Geometry__mask = np.zeros(shape=self._Geometry__size, dtype=bool)
         self._Geometry__image = np.zeros(shape=self._Geometry__size, dtype=self._Geometry__density.dtype)
         for i in range(self.__seed_coords.shape[0]):
             self._Geometry__mask[idxs[i]] = True

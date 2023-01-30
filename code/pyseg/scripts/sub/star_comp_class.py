@@ -75,8 +75,8 @@ classes_2 = list(set(star_2.get_column_data(CLASS_COL)))
 print('\t\t-' + str(len(classes_1)) + ' classes found: ' + str(classes_1))
 
 print('\tComputing similitude matrix (1 to 2)...')
-nparts_1 = np.zeros(shape=max(classes_1)+1, dtype=np.int)
-sim_mat_1 = np.zeros(shape=(max(classes_1)+1,max(classes_2)+1), dtype=np.float)
+nparts_1 = np.zeros(shape=max(classes_1)+1, dtype=int)
+sim_mat_1 = np.zeros(shape=(max(classes_1)+1,max(classes_2)+1), dtype=float)
 parts_1, pclasses_1 = star_1.get_column_data(PART_COL), star_1.get_column_data(CLASS_COL)
 parts_2, pclasses_2 = star_2.get_column_data(PART_COL), star_2.get_column_data(CLASS_COL)
 for part_1, pclass_1 in zip(parts_1, pclasses_1):
@@ -91,8 +91,8 @@ for i in range(1, sim_mat_1.shape[0]):
     sim_mat_1[i, :] /= float(nparts_1[i])
 
 print('\tComputing similitude matrix (2 to 1)...')
-nparts_2 = np.zeros(shape=max(classes_2)+1, dtype=np.int)
-sim_mat_2 = np.zeros(shape=(max(classes_2)+1,max(classes_1)+1), dtype=np.float)
+nparts_2 = np.zeros(shape=max(classes_2)+1, dtype=int)
+sim_mat_2 = np.zeros(shape=(max(classes_2)+1,max(classes_1)+1), dtype=float)
 for part_2, pclass_2 in zip(parts_2, pclasses_2):
     nparts_2[pclass_2] += 1
     try:

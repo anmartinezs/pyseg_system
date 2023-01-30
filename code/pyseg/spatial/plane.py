@@ -39,7 +39,7 @@ LP_NORM_CUTOFF = 0.3
 # coord: coordinate to delete: 0, 1, 2 (default)
 def make_plane_box(box_3d, coord=2):
 
-    bbox_2d = np.zeros(shape=4, dtype=np.float)
+    bbox_2d = np.zeros(shape=4, dtype=float)
 
     if coord == 0:
         bbox_2d[0] = box_3d[1]
@@ -64,7 +64,7 @@ def make_plane_box(box_3d, coord=2):
 # coord: coordinate to delete: 0, 1, 2 (default)
 def make_plane(cloud_3d, coord=2):
 
-    cloud_2d = np.zeros(shape=(cloud_3d.shape[0], 2), dtype=np.float)
+    cloud_2d = np.zeros(shape=(cloud_3d.shape[0], 2), dtype=float)
 
     if coord == 0:
         cloud_2d[:, 0] = cloud_3d[:, 1]
@@ -90,7 +90,7 @@ def gen_rand_cloud(n, box):
 # Computes Nearest Neighbour Distance of a cloud of points in a Euclidean space
 # cloud: array with point coordinates [n, 2]
 def nnde(cloud):
-    dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+    dists = np.zeros(shape=cloud.shape[0], dtype=float)
     for i in range(len(dists)):
         hold = cloud[i] - cloud
         hold = np.sum(hold*hold, axis=1)
@@ -103,7 +103,7 @@ def nnde(cloud):
 # cloud: array with point coordinates [n, 2]
 # cloud_ref: reference array with point coordinates [n, 2]
 def cnnde(cloud, cloud_ref):
-    dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+    dists = np.zeros(shape=cloud.shape[0], dtype=float)
     for i in range(len(dists)):
         hold = cloud[i] - cloud_ref
         hold = np.sum(hold*hold, axis=1)
@@ -133,7 +133,7 @@ def func_envelope(funcs, per=50):
 def purge_repeat_coords(cloud, eps):
 
     # Initialization
-    lut_del = np.zeros(shape=cloud.shape[0], dtype=np.bool)
+    lut_del = np.zeros(shape=cloud.shape[0], dtype=bool)
     surv = list()
 
     for i, point in enumerate(cloud):
@@ -144,7 +144,7 @@ def purge_repeat_coords(cloud, eps):
             lut_del[ids] = True
             surv.append(cloud[ids, :].mean(axis=0))
 
-    return np.asarray(surv, dtype=np.float)
+    return np.asarray(surv, dtype=float)
 
 # Delete repeated points (coordinates and ids) (closer each other then eps) and leaves just one coordinate (median)
 # cloud: array with coordinates
@@ -152,7 +152,7 @@ def purge_repeat_coords(cloud, eps):
 def purge_repeat_coords2(cloud, cloud_ids, eps):
 
     # Initialization
-    lut_del = np.zeros(shape=cloud.shape[0], dtype=np.bool)
+    lut_del = np.zeros(shape=cloud.shape[0], dtype=bool)
     surv = list()
     surv_ids = list()
 
@@ -165,12 +165,12 @@ def purge_repeat_coords2(cloud, cloud_ids, eps):
             surv.append(cloud[ids, :].mean(axis=0))
             surv_ids.append(cloud_ids[ids[0]])
 
-    return np.asarray(surv, dtype=np.float), np.asarray(surv_ids)
+    return np.asarray(surv, dtype=float), np.asarray(surv_ids)
 
 # Merge two boxes by intersection
 def merge_boxes_2D(box_a, box_b):
 
-    box = np.zeros(shape=4, dtype=np.float)
+    box = np.zeros(shape=4, dtype=float)
 
     if box_a[0] > box_b[0]:
         box[0] = box_a[0]
@@ -210,7 +210,7 @@ def ripley_goreaud(cloud, box, n, max_d):
     area = side_a * side_b
     rd = np.linspace(0, max_d, n)
     N = float(cloud.shape[0])
-    K = np.zeros(shape=n, dtype=np.float)
+    K = np.zeros(shape=n, dtype=float)
     if N <= 1:
         return K, rd
 
@@ -230,14 +230,14 @@ def ripley_goreaud(cloud, box, n, max_d):
 
             # Loop for neighbours
             p = cloud[i, :]
-            weights = np.ones(shape=len(ids), dtype=np.float)
+            weights = np.ones(shape=len(ids), dtype=float)
             # Distance to edges
             hold_dists = list()
             hold_dists.append(box[2] - p[0])
             hold_dists.append(p[1] - box[1])
             hold_dists.append(p[0] - box[0])
             hold_dists.append(box[3] - p[1])
-            hold_dists = np.asarray(hold_dists, dtype=np.float)
+            hold_dists = np.asarray(hold_dists, dtype=float)
             hold_dists = np.sqrt(hold_dists * hold_dists)
             hold_dists = np.sort(hold_dists)
             d1, d2, d3, d4 = hold_dists[0], hold_dists[1], hold_dists[2], hold_dists[3]
@@ -306,21 +306,21 @@ class SpA(object, metaclass=ABCMeta):
         self.__boxes = list()
         self.__dens = list()
         self.__hsim = False
-        self.__g = np.zeros(shape=n_samp, dtype=np.float)
+        self.__g = np.zeros(shape=n_samp, dtype=float)
         self.__gx = np.linspace(0., 1., self.__n)
-        self.__grl = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grm = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grh = np.zeros(shape=n_samp, dtype=np.float)
-        self.__f = np.zeros(shape=n_samp, dtype=np.float)
+        self.__grl = np.zeros(shape=n_samp, dtype=float)
+        self.__grm = np.zeros(shape=n_samp, dtype=float)
+        self.__grh = np.zeros(shape=n_samp, dtype=float)
+        self.__f = np.zeros(shape=n_samp, dtype=float)
         self.__fx = np.linspace(0., 1., self.__n)
-        self.__frl = np.zeros(shape=n_samp, dtype=np.float)
-        self.__frm = np.zeros(shape=n_samp, dtype=np.float)
-        self.__frh = np.zeros(shape=n_samp, dtype=np.float)
+        self.__frl = np.zeros(shape=n_samp, dtype=float)
+        self.__frm = np.zeros(shape=n_samp, dtype=float)
+        self.__frh = np.zeros(shape=n_samp, dtype=float)
         self.__h = list()
         self.__hx = list()
-        self.__hrl = np.zeros(shape=n_samp, dtype=np.float)
-        self.__hrm = np.zeros(shape=n_samp, dtype=np.float)
-        self.__hrh = np.zeros(shape=n_samp, dtype=np.float)
+        self.__hrl = np.zeros(shape=n_samp, dtype=float)
+        self.__hrm = np.zeros(shape=n_samp, dtype=float)
+        self.__hrh = np.zeros(shape=n_samp, dtype=float)
         self.__cards = list()
 
     # Get/Set functionality
@@ -410,7 +410,7 @@ class SpA(object, metaclass=ABCMeta):
         plt.title('Points density')
         plt.xlabel('Sample')
         plt.ylabel('Density (points/nm^2)')
-        plt.bar(ind, np.asarray(self.__dens, dtype=np.float), width)
+        plt.bar(ind, np.asarray(self.__dens, dtype=float), width)
 
         # Plot G-Function
         fig_count += 1
@@ -486,12 +486,12 @@ class SpA(object, metaclass=ABCMeta):
     def __ripleys_H(self, n, max_d, border=0):
 
         # Initialization
-        rips = np.zeros(shape=(n, len(self.__clouds)), dtype=np.float)
-        rd = np.zeros(shape=n, dtype=np.float)
+        rips = np.zeros(shape=(n, len(self.__clouds)), dtype=float)
+        rd = np.zeros(shape=n, dtype=float)
 
         # Ripleys K factors computation
         area = 0
-        weights = np.zeros(shape=len(self.__clouds), dtype=np.float)
+        weights = np.zeros(shape=len(self.__clouds), dtype=float)
         for i, cloud in enumerate(self.__clouds):
             box = self.__boxes[i]
             area_h = float((box[2] - box[0]) * (box[3] - box[1]))
@@ -554,9 +554,9 @@ class SpA(object, metaclass=ABCMeta):
     def __rand_ripleys_H(self, n, m, max_d, border=True, p=5):
 
         # Generate random points
-        rips = np.zeros(shape=(n, m*len(self.__clouds)), dtype=np.float)
+        rips = np.zeros(shape=(n, m*len(self.__clouds)), dtype=float)
         cont = 0
-        rd = np.zeros(shape=n, dtype=np.float)
+        rd = np.zeros(shape=n, dtype=float)
         for i in range(m):
             for j, cloud in enumerate(self.__clouds):
                 box = self.__boxes[j]
@@ -653,7 +653,7 @@ class SpA(object, metaclass=ABCMeta):
         area = side_a * side_b
         rd = np.linspace(0, max_d, n)
         N = float(len(core_ids))
-        K = np.zeros(shape=n, dtype=np.float)
+        K = np.zeros(shape=n, dtype=float)
         if N <= 1:
             return K, rd
 
@@ -694,7 +694,7 @@ class SpA(object, metaclass=ABCMeta):
         area = side_a * side_b
         rd = np.linspace(0, max_d, n)
         N = float(cloud.shape[0])
-        K = np.zeros(shape=n, dtype=np.float)
+        K = np.zeros(shape=n, dtype=float)
         if N <= 1:
             return K, rd
 
@@ -714,14 +714,14 @@ class SpA(object, metaclass=ABCMeta):
 
                 # Loop for neighbours
                 p = cloud[i, :]
-                weights = np.ones(shape=len(ids), dtype=np.float)
+                weights = np.ones(shape=len(ids), dtype=float)
                 # Distance to edges
                 hold_dists = list()
                 hold_dists.append(box[2] - p[0])
                 hold_dists.append(p[1] - box[1])
                 hold_dists.append(p[0] - box[0])
                 hold_dists.append(box[3] - p[1])
-                hold_dists = np.asarray(hold_dists, dtype=np.float)
+                hold_dists = np.asarray(hold_dists, dtype=float)
                 hold_dists = np.sqrt(hold_dists * hold_dists)
                 hold_dists = np.sort(hold_dists)
                 d1, d2, d3, d4 = hold_dists[0], hold_dists[1], hold_dists[2], hold_dists[3]
@@ -781,7 +781,7 @@ class SpA(object, metaclass=ABCMeta):
         dists = list()
         for cloud in self.__clouds:
             dists += nnde(cloud).tolist()
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # CDF
         return compute_cdf(dists, n)
@@ -862,7 +862,7 @@ class SetClouds(SpA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self._SpA__clouds)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self._SpA__clouds)), dtype=float)
         cont = 0
         for i in range(m):
             for j, cloud in enumerate(self._SpA__clouds):
@@ -870,7 +870,7 @@ class SetClouds(SpA):
                 cdfs[:, cont], _ = compute_cdf(hold_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
@@ -889,7 +889,7 @@ class SetClouds(SpA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self._SpA__clouds)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self._SpA__clouds)), dtype=float)
         cont = 0
         for i in range(m):
             for j, cloud in enumerate(self._SpA__clouds):
@@ -899,7 +899,7 @@ class SetClouds(SpA):
                 cdfs[:, cont], _ = compute_cdf(hold_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
@@ -920,7 +920,7 @@ class SetClouds(SpA):
         for i in range(m):
             for j, cloud in enumerate(self._SpA__clouds):
                 dists += cnnde(cloud, gen_rand_cloud(cloud.shape[0], self._SpA__boxes[j])).tolist()
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # CDF
         return compute_cdf(dists, n)
@@ -977,7 +977,7 @@ class SetClusters(SpA):
     def __get_rand_clsts(self, clsts, box, mask):
 
         # Initialization
-        n_cgs = np.zeros(shape=(len(clsts), 2), dtype=np.float)
+        n_cgs = np.zeros(shape=(len(clsts), 2), dtype=float)
 
         # Loop for clusters
         mask_h = np.copy(mask)
@@ -1010,7 +1010,7 @@ class SetClusters(SpA):
                 r_cloud[:, 0] = f_cloud[:, 0]*cosr - f_cloud[:, 1]*sinr
                 r_cloud[:, 1] = f_cloud[:, 0]*sinr + f_cloud[:, 1]*cosr
                 # Translation to randomly already selected center
-                n_cg = np.asarray((cg_x, cg_y) , dtype=np.float)
+                n_cg = np.asarray((cg_x, cg_y) , dtype=float)
                 # v = n_cg - cg
                 t_cloud = r_cloud + n_cg
                 chull, _ = self.__compute_chull_no_bound(t_cloud, box)
@@ -1052,10 +1052,10 @@ class SetClusters(SpA):
         off_x = math.floor(box[1])
         off_y = math.floor(box[0])
         m, n = math.ceil(box[3]) - off_x + 1, math.ceil(box[2]) - off_y + 1
-        img = np.zeros(shape=(m, n), dtype=np.bool)
+        img = np.zeros(shape=(m, n), dtype=bool)
 
         # Filling holding image
-        hold = np.asarray(np.round(c_cloud), dtype=np.int)
+        hold = np.asarray(np.round(c_cloud), dtype=int)
         hold[:, 0] -= off_y
         hold[:, 1] -= off_x
         excep = False
@@ -1070,7 +1070,7 @@ class SetClusters(SpA):
 
         # Computing the convex hull
         if p_count > 0:
-            chull = np.asarray(convex_hull_image(img), dtype=np.bool)
+            chull = np.asarray(convex_hull_image(img), dtype=bool)
         else:
             chull = img
 
@@ -1085,7 +1085,7 @@ class SetClusters(SpA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=float)
         cont = 0
         for i in range(m):
             for j, clsts in enumerate(self.__clsts_l):
@@ -1094,7 +1094,7 @@ class SetClusters(SpA):
                 cdfs[:, cont], _ = compute_cdf(hold_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
@@ -1113,7 +1113,7 @@ class SetClusters(SpA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=float)
         cont = 0
         for i in range(m):
             for j, clsts in enumerate(self.__clsts_l):
@@ -1123,7 +1123,7 @@ class SetClusters(SpA):
                 cdfs[:, cont], _ = compute_cdf(hold_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
@@ -1146,7 +1146,7 @@ class SetClusters(SpA):
                 dists += cnnde(cloud, self.__get_rand_clsts(self.__clsts_l[j],
                                                             self._SpA__boxes[j],
                                                             self.__masks_l[j])).tolist()
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # CDF
         return compute_cdf(dists, n)
@@ -1171,16 +1171,16 @@ class SlA(object, metaclass=ABCMeta):
         self.__dens = list()
         self.__g = list()
         self.__gx = list()
-        self.__grm = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grm1 = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grm2 = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grmx = np.zeros(shape=n_samp, dtype=np.float)
+        self.__grm = np.zeros(shape=n_samp, dtype=float)
+        self.__grm1 = np.zeros(shape=n_samp, dtype=float)
+        self.__grm2 = np.zeros(shape=n_samp, dtype=float)
+        self.__grmx = np.zeros(shape=n_samp, dtype=float)
         self.__f = list()
         self.__fx = list()
-        self.__frm = np.zeros(shape=n_samp, dtype=np.float)
-        self.__frm1 = np.zeros(shape=n_samp, dtype=np.float)
-        self.__frm2 = np.zeros(shape=n_samp, dtype=np.float)
-        self.__frmx = np.zeros(shape=n_samp, dtype=np.float)
+        self.__frm = np.zeros(shape=n_samp, dtype=float)
+        self.__frm1 = np.zeros(shape=n_samp, dtype=float)
+        self.__frm2 = np.zeros(shape=n_samp, dtype=float)
+        self.__frmx = np.zeros(shape=n_samp, dtype=float)
         self.__h = list()
         self.__hx = list()
         self.__l = list()
@@ -1212,7 +1212,7 @@ class SlA(object, metaclass=ABCMeta):
         return self.__clouds
 
     def get_densities(self):
-        return np.asarray(self.__dens, dtype=np.float)
+        return np.asarray(self.__dens, dtype=float)
 
     def get_function_G(self):
         return self.__g, self.__gx, self.__grm
@@ -1328,7 +1328,7 @@ class SlA(object, metaclass=ABCMeta):
         plt.xlabel('Sample')
         plt.ylabel('Density (points/nm^2)')
         plt.xlim(ind[0]-1, ind[-1]+1)
-        plt.stem(ind, np.asarray(self.__dens, dtype=np.float))
+        plt.stem(ind, np.asarray(self.__dens, dtype=float))
 
         # Plot G-Function
         fig_count += 1
@@ -1560,21 +1560,21 @@ class SlA(object, metaclass=ABCMeta):
             plt.xlabel('Sample')
             plt.ylabel('H maximum')
             plt.xlim(nsam[0]-1, nsam[-1]+1)
-            plt.stem(nsam, np.asarray(maxs, dtype=np.float))
+            plt.stem(nsam, np.asarray(maxs, dtype=float))
             fig_count += 1
             plt.figure(fig_count)
             plt.title('Ripley\'s H medians')
             plt.xlabel('Sample')
             plt.ylabel('H medians')
             plt.xlim(nsam[0]-1, nsam[-1]+1)
-            plt.stem(nsam, np.asarray(medians, dtype=np.float))
+            plt.stem(nsam, np.asarray(medians, dtype=float))
             fig_count += 1
             plt.figure(fig_count)
             plt.title('Ripley\'s H standard deviations')
             plt.xlabel('Sample')
             plt.ylabel('H deviations')
             plt.xlim(nsam[0]-1, nsam[-1]+1)
-            plt.stem(nsam, np.asarray(stds, dtype=np.float))
+            plt.stem(nsam, np.asarray(stds, dtype=float))
 
         # Show
         plt.show(block=block)
@@ -1636,7 +1636,7 @@ class SlA(object, metaclass=ABCMeta):
         plt.xlabel('Sample')
         plt.ylabel('Density (points/nm^2)')
         plt.xlim(ind[0]-1, ind[-1]+1)
-        plt.stem(ind, np.asarray(self.__dens, dtype=np.float))
+        plt.stem(ind, np.asarray(self.__dens, dtype=float))
         plt.savefig(path + '/dens.png')
         plt.close()
 
@@ -2015,7 +2015,7 @@ class SlA(object, metaclass=ABCMeta):
         area = side_a * side_b
         rd = np.linspace(0, max_d, n)
         N = float(len(core_ids))
-        K = np.zeros(shape=n, dtype=np.float)
+        K = np.zeros(shape=n, dtype=float)
         if N <= 1:
             return K, rd
 
@@ -2056,7 +2056,7 @@ class SlA(object, metaclass=ABCMeta):
         area = side_a * side_b
         rd = np.linspace(0, max_d, n)
         N = float(cloud.shape[0])
-        K = np.zeros(shape=n, dtype=np.float)
+        K = np.zeros(shape=n, dtype=float)
         if N <= 1:
             return K, rd
 
@@ -2076,14 +2076,14 @@ class SlA(object, metaclass=ABCMeta):
 
                 # Loop for neighbours
                 p = cloud[i, :]
-                weights = np.ones(shape=len(ids), dtype=np.float)
+                weights = np.ones(shape=len(ids), dtype=float)
                 # Distance to edges
                 hold_dists = list()
                 hold_dists.append(box[2] - p[0])
                 hold_dists.append(p[1] - box[1])
                 hold_dists.append(p[0] - box[0])
                 hold_dists.append(box[3] - p[1])
-                hold_dists = np.asarray(hold_dists, dtype=np.float)
+                hold_dists = np.asarray(hold_dists, dtype=float)
                 hold_dists = np.sqrt(hold_dists * hold_dists)
                 hold_dists = np.sort(hold_dists)
                 d1, d2, d3, d4 = hold_dists[0], hold_dists[1], hold_dists[2], hold_dists[3]
@@ -2217,7 +2217,7 @@ class SetCloudsP(SlA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self._SlA__clouds)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self._SlA__clouds)), dtype=float)
         cont = 0
         # Random simulation
         for i in range(m):
@@ -2229,14 +2229,14 @@ class SetCloudsP(SlA):
         for cloud in self._SlA__clouds:
             hold_dists = nnde(cloud)
             dists += hold_dists.tolist()
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
         env_05 = func_envelope(cdfs, per=50)
         if p is None:
             return sp, env_05, \
-                   np.zeros(shape=len(sp), dtype=np.float), np.zeros(shape=len(sp), dtype=np.float)
+                   np.zeros(shape=len(sp), dtype=float), np.zeros(shape=len(sp), dtype=float)
         else:
             env_1 = func_envelope(cdfs, per=p)
             env_2 = func_envelope(cdfs, per=100-p)
@@ -2246,7 +2246,7 @@ class SetCloudsP(SlA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self._SlA__clouds)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self._SlA__clouds)), dtype=float)
         cont = 0
         # Random simulation and real data
         for i in range(m):
@@ -2258,14 +2258,14 @@ class SetCloudsP(SlA):
                 hold_dists = cnnde(cloud_1, cloud)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
         env_05 = func_envelope(cdfs, per=50)
         if p is None:
             return sp, env_05, \
-                   np.zeros(shape=len(sp), dtype=np.float), np.zeros(shape=len(sp), dtype=np.float)
+                   np.zeros(shape=len(sp), dtype=float), np.zeros(shape=len(sp), dtype=float)
         else:
             env_1 = func_envelope(cdfs, per=p)
             env_2 = func_envelope(cdfs, per=100-p)
@@ -2282,7 +2282,7 @@ class SetCloudsP(SlA):
             dists = list()
             for j in range(m):
                 dists += cnnde(cloud, gen_rand_cloud(cloud.shape[0], self._SlA__box)).tolist()
-            dists = np.asarray(dists, dtype=np.float)
+            dists = np.asarray(dists, dtype=float)
             hold_f, hold_fx = compute_cdf(dists, n)
             self._SlA__f.append(hold_f)
             self._SlA__fx.append(hold_fx)
@@ -2338,7 +2338,7 @@ class SetClustersP(SlA):
     def __get_rand_clsts(self, clsts, box, mask):
 
         # Initialization
-        n_cgs = np.zeros(shape=(len(clsts), 2), dtype=np.float)
+        n_cgs = np.zeros(shape=(len(clsts), 2), dtype=float)
 
         # Loop for clusters
         mask_h = np.copy(mask)
@@ -2371,7 +2371,7 @@ class SetClustersP(SlA):
                 r_cloud[:, 0] = f_cloud[:, 0]*cosr - f_cloud[:, 1]*sinr
                 r_cloud[:, 1] = f_cloud[:, 0]*sinr + f_cloud[:, 1]*cosr
                 # Translation to randomly already selected center
-                n_cg = np.asarray((cg_x, cg_y) , dtype=np.float)
+                n_cg = np.asarray((cg_x, cg_y) , dtype=float)
                 # v = n_cg - cg
                 t_cloud = r_cloud + n_cg
                 chull, _ = self.__compute_chull_no_bound(t_cloud, box)
@@ -2403,10 +2403,10 @@ class SetClustersP(SlA):
         off_x = math.floor(box[1])
         off_y = math.floor(box[0])
         m, n = math.ceil(box[3]) - off_x + 1, math.ceil(box[2]) - off_y + 1
-        img = np.zeros(shape=(m, n), dtype=np.bool)
+        img = np.zeros(shape=(m, n), dtype=bool)
 
         # Filling holding image
-        hold = np.asarray(np.round(c_cloud), dtype=np.int)
+        hold = np.asarray(np.round(c_cloud), dtype=int)
         hold[:, 0] -= off_y
         hold[:, 1] -= off_x
         excep = False
@@ -2421,7 +2421,7 @@ class SetClustersP(SlA):
 
         # Computing the convex hull
         if p_count > 0:
-            chull = np.asarray(convex_hull_image(img), dtype=np.bool)
+            chull = np.asarray(convex_hull_image(img), dtype=bool)
         else:
             chull = img
 
@@ -2431,7 +2431,7 @@ class SetClustersP(SlA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=float)
         cont = 0
         for i in range(m):
             for j, clsts in enumerate(self.__clsts_l):
@@ -2440,14 +2440,14 @@ class SetClustersP(SlA):
                 cdfs[:, cont], _ = compute_cdf(hold_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
         env_05 = func_envelope(cdfs, per=50)
         if p is None:
             return sp, env_05, \
-                   np.zeros(shape=len(sp), dtype=np.float), np.zeros(shape=len(sp), dtype=np.float)
+                   np.zeros(shape=len(sp), dtype=float), np.zeros(shape=len(sp), dtype=float)
         else:
             env_1 = func_envelope(cdfs, per=p)
             env_2 = func_envelope(cdfs, per=100-p)
@@ -2457,7 +2457,7 @@ class SetClustersP(SlA):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self.__clsts_l)), dtype=float)
         cont = 0
         for i in range(m):
             for j, clsts in enumerate(self.__clsts_l):
@@ -2467,14 +2467,14 @@ class SetClustersP(SlA):
                 cdfs[:, cont], _ = compute_cdf(hold_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
         env_05 = func_envelope(cdfs, per=50)
         if p is None:
             return sp, env_05, \
-                   np.zeros(shape=len(sp), dtype=np.float), np.zeros(shape=len(sp), dtype=np.float)
+                   np.zeros(shape=len(sp), dtype=float), np.zeros(shape=len(sp), dtype=float)
         else:
             env_1 = func_envelope(cdfs, per=p)
             env_2 = func_envelope(cdfs, per=100-p)
@@ -2492,7 +2492,7 @@ class SetClustersP(SlA):
                 dists += cnnde(cloud, self.__get_rand_clsts(self.__clsts_l[i],
                                                             self._SlA__box,
                                                             self.__masks_l[i])).tolist()
-            dists = np.asarray(dists, dtype=np.float)
+            dists = np.asarray(dists, dtype=float)
             hold_f, hold_fx = compute_cdf(dists, n)
             self._SlA__f.append(hold_f)
             self._SlA__fx.append(hold_fx)
@@ -2529,8 +2529,8 @@ class PairClouds(object):
 
         # Initialization
         img = np.zeros(shape=(self.__m, self.__n), dtype=np.uint8)
-        cloud_a = np.asarray(np.round(self.__cloud_a), dtype=np.int)
-        cloud_b = np.asarray(np.round(self.__cloud_b), dtype=np.int)
+        cloud_a = np.asarray(np.round(self.__cloud_a), dtype=int)
+        cloud_b = np.asarray(np.round(self.__cloud_b), dtype=int)
         cloud = np.concatenate((cloud_a, cloud_b), axis=0)
         cloud[:, 0] -= self.__oy
         cloud[:, 1] -= self.__ox
@@ -2569,8 +2569,8 @@ class PairClouds(object):
 
         # Initialization
         img = np.zeros(shape=(self.__m, self.__n), dtype=np.uint8)
-        cloud_a = np.asarray(np.round(self.__cloud_a), dtype=np.int)
-        cloud_b = np.asarray(np.round(self.__cloud_b), dtype=np.int)
+        cloud_a = np.asarray(np.round(self.__cloud_a), dtype=int)
+        cloud_b = np.asarray(np.round(self.__cloud_b), dtype=int)
         cloud = np.concatenate((cloud_a, cloud_b), axis=0)
         cloud[:, 0] -= self.__oy
         cloud[:, 1] -= self.__ox
@@ -2627,10 +2627,10 @@ class SetPairClouds(object):
         self.__srs = list()
         self.__g = list()
         self.__gx = list()
-        self.__grm = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grm1 = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grm2 = np.zeros(shape=n_samp, dtype=np.float)
-        self.__grmx = np.zeros(shape=n_samp, dtype=np.float)
+        self.__grm = np.zeros(shape=n_samp, dtype=float)
+        self.__grm1 = np.zeros(shape=n_samp, dtype=float)
+        self.__grm2 = np.zeros(shape=n_samp, dtype=float)
+        self.__grmx = np.zeros(shape=n_samp, dtype=float)
         self.__hcr = list()
         self.__hcp = list()
         self.__hx = list()
@@ -2798,21 +2798,21 @@ class SetPairClouds(object):
             plt.xlabel('Sample')
             plt.ylabel('H maximum')
             plt.xlim(nsam[0]-1, nsam[-1]+1)
-            plt.stem(nsam, np.asarray(maxs, dtype=np.float))
+            plt.stem(nsam, np.asarray(maxs, dtype=float))
             fig_count += 1
             plt.figure(fig_count)
             plt.title('Ripley\'s H medians')
             plt.xlabel('Sample')
             plt.ylabel('H medians')
             plt.xlim(nsam[0]-1, nsam[-1]+1)
-            plt.stem(nsam, np.asarray(medians, dtype=np.float))
+            plt.stem(nsam, np.asarray(medians, dtype=float))
             fig_count += 1
             plt.figure(fig_count)
             plt.title('Ripley\'s H standard deviations')
             plt.xlabel('Sample')
             plt.ylabel('H deviations')
             plt.xlim(nsam[0]-1, nsam[-1]+1)
-            plt.stem(nsam, np.asarray(stds, dtype=np.float))
+            plt.stem(nsam, np.asarray(stds, dtype=float))
 
         # Show
         plt.show(block=block)
@@ -2934,7 +2934,7 @@ class SetPairClouds(object):
 
         # Generate random points
         dists = list()
-        cdfs = np.zeros(shape=(n, m*len(self.__clouds_b)), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m*len(self.__clouds_b)), dtype=float)
         cont = 0
         for i in range(m):
             for j, cloud_b in enumerate(self.__clouds_b):
@@ -2945,14 +2945,14 @@ class SetPairClouds(object):
                 cdfs[:, cont], _ = compute_cdf(rand_dists, n)
                 dists += hold_dists.tolist()
                 cont += 1
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
 
         # Compute results
         gf, sp = compute_cdf(dists, n)
         env_05 = func_envelope(cdfs, per=50)
         if p is None:
             return sp, env_05, \
-                   np.zeros(shape=len(sp), dtype=np.float), np.zeros(shape=len(sp), dtype=np.float)
+                   np.zeros(shape=len(sp), dtype=float), np.zeros(shape=len(sp), dtype=float)
         else:
             env_1 = func_envelope(cdfs, per=p)
             env_2 = func_envelope(cdfs, per=100-p)
@@ -3019,7 +3019,7 @@ class SetPairClouds(object):
         area = side_a * side_b
         rd = np.linspace(0, max_d, n)
         N = float(cloud.shape[0])
-        K = np.zeros(shape=n, dtype=np.float)
+        K = np.zeros(shape=n, dtype=float)
         if N <= 1:
             return K, rd
 
@@ -3039,14 +3039,14 @@ class SetPairClouds(object):
 
                 # Loop for neighbours
                 p = cloud[i, :]
-                weights = np.ones(shape=len(ids), dtype=np.float)
+                weights = np.ones(shape=len(ids), dtype=float)
                 # Distance to edges
                 hold_dists = list()
                 hold_dists.append(box[2] - p[0])
                 hold_dists.append(p[1] - box[1])
                 hold_dists.append(p[0] - box[0])
                 hold_dists.append(box[3] - p[1])
-                hold_dists = np.asarray(hold_dists, dtype=np.float)
+                hold_dists = np.asarray(hold_dists, dtype=float)
                 hold_dists = np.sqrt(hold_dists * hold_dists)
                 hold_dists = np.sort(hold_dists)
                 d1, d2, d3, d4 = hold_dists[0], hold_dists[1], hold_dists[2], hold_dists[3]
@@ -3118,7 +3118,7 @@ class SetPairClouds(object):
         area = side_a * side_b
         rd = np.linspace(0, max_d, n)
         N = float(cloud_a.shape[0])
-        K = np.zeros(shape=n, dtype=np.float)
+        K = np.zeros(shape=n, dtype=float)
         if N <= 1:
             return K, rd
 
@@ -3138,14 +3138,14 @@ class SetPairClouds(object):
 
                 # Loop for neighbours
                 p = cloud_a[i, :]
-                weights = np.ones(shape=len(ids), dtype=np.float)
+                weights = np.ones(shape=len(ids), dtype=float)
                 # Distance to edges
                 hold_dists = list()
                 hold_dists.append(box[2] - p[0])
                 hold_dists.append(p[1] - box[1])
                 hold_dists.append(p[0] - box[0])
                 hold_dists.append(box[3] - p[1])
-                hold_dists = np.asarray(hold_dists, dtype=np.float)
+                hold_dists = np.asarray(hold_dists, dtype=float)
                 hold_dists = np.sqrt(hold_dists * hold_dists)
                 hold_dists = np.sort(hold_dists)
                 d1, d2, d3, d4 = hold_dists[0], hold_dists[1], hold_dists[2], hold_dists[3]
@@ -3226,7 +3226,7 @@ class NetFilCloud(object):
     # Returns the number of different vertices which compound the filament network
     def get_num_fil_vertices(self):
         cont = 0
-        lut = np.ones(shape=self.__graph.num_vertices(), dtype=np.bool)
+        lut = np.ones(shape=self.__graph.num_vertices(), dtype=bool)
         for fil in self.__fils:
             for v in fil.get_vertices():
                 if lut[int(v)]:
@@ -3237,7 +3237,7 @@ class NetFilCloud(object):
     def get_num_fil_edges(self):
         cont = 0
         n_verts = self.__graph.num_vertices()
-        lut = np.ones(shape=(n_verts, n_verts), dtype=np.bool)
+        lut = np.ones(shape=(n_verts, n_verts), dtype=bool)
         for fil in self.__fils:
             for e in fil.get_edges():
                 s, t = int(e.source()), (e.target())
@@ -3426,7 +3426,7 @@ class NetFilCloud(object):
     def threshold_and_fils(self, th_len=None, th_ct=None, th_sin=None, th_smo=None, th_mc=None):
 
         # LUT for marking filaments to delete
-        del_lut = np.ones(shape=len(self.__fils), dtype=np.bool)
+        del_lut = np.ones(shape=len(self.__fils), dtype=bool)
 
         # Loop for filaments
         for i, fil in enumerate(self.__fils):
@@ -3487,7 +3487,7 @@ class NetFilCloud(object):
 
         # Set edge length as the euclidean distance
         graph.edge_properties[STR_2GT_EL] = graph.new_edge_property('float')
-        graph.edge_properties[STR_2GT_EL].get_array()[:] = np.asarray(lengths, dtype=np.float)
+        graph.edge_properties[STR_2GT_EL].get_array()[:] = np.asarray(lengths, dtype=float)
 
         return graph
 
@@ -3495,7 +3495,7 @@ class NetFilCloud(object):
 
         # Visiting procedure initialization
         n_vertices = self.__graph.num_vertices()
-        connt = np.zeros(shape=(n_vertices, n_vertices), dtype=np.bool)
+        connt = np.zeros(shape=(n_vertices, n_vertices), dtype=bool)
         prop_con = self.__graph.edge_properties[STR_2GT_EL]
 
         # Main loop for finding filaments at every vertex
@@ -3574,13 +3574,13 @@ class FilamentU(object):
         for i in range(coords.shape[0] - 1):
             x1, y1 = coords[i, 0], coords[i, 1]
             x2, y2 = coords[i+1, 0], coords[i+1, 1]
-            hold = np.asarray((x1-x2, y1-y2), dtype=np.float)
+            hold = np.asarray((x1-x2, y1-y2), dtype=float)
             length += math.sqrt(np.sum(hold*hold))
         return length * self.__res
 
     def get_head_tail_dist(self):
         hold = np.asarray((self.__coords[0][0]-self.__coords[-1][0],
-                           self.__coords[0][1]-self.__coords[-1][1],), dtype=np.float)
+                           self.__coords[0][1]-self.__coords[-1][1],), dtype=float)
         return math.sqrt(np.sum(hold*hold)) * self.__res
 
     # Computes total curvature
@@ -3656,7 +3656,7 @@ class FilamentU(object):
 
     def __get_path_coords(self, cloud):
         n_v = len(self.__vertices)
-        coords = np.zeros(shape=(n_v, 2), dtype=np.float)
+        coords = np.zeros(shape=(n_v, 2), dtype=float)
         for i in range(n_v):
             coords[i, :] = cloud[int(self.__vertices[i]), :]
         return coords
@@ -3793,13 +3793,13 @@ class GroupClouds(object):
         # Compute Ripleys for every group
         for (h_pairs, clouds) in zip(self.__groups_h, self.__groups_cloud):
             # Compute weights
-            weights = np.zeros(shape=len(clouds), dtype=np.float)
+            weights = np.zeros(shape=len(clouds), dtype=float)
             for i, cloud in enumerate(clouds):
                 weights[i] = cloud.shape[0]
             weights /= weights.sum()
             # Compute averages
-            ha = np.zeros(shape=h_pairs[0][0].shape, dtype=np.float)
-            hpa = np.zeros(shape=h_pairs[0][0].shape, dtype=np.float)
+            ha = np.zeros(shape=h_pairs[0][0].shape, dtype=float)
+            hpa = np.zeros(shape=h_pairs[0][0].shape, dtype=float)
             for i in range(len(h_pairs)):
                 ha += (weights[i] * h_pairs[i][0])
                 hpa += (weights[i] * np.gradient(h_pairs[i][0], h_pairs[i][1][1] - h_pairs[i][1][0]))
@@ -3808,8 +3808,8 @@ class GroupClouds(object):
             self.__groups_whp.append((hpa, ha_x))
 
         # Computing cross-correlation coefficients
-        h_mat = np.zeros(shape=(tot-1, self.__n), dtype=np.float)
-        hp_mat = np.zeros(shape=(tot-1, self.__n), dtype=np.float)
+        h_mat = np.zeros(shape=(tot-1, self.__n), dtype=float)
+        hp_mat = np.zeros(shape=(tot-1, self.__n), dtype=float)
         cont = 0
         for i in range(len(self.__groups_h)):
             for j in range(len(self.__groups_h[i])):
@@ -3854,8 +3854,8 @@ class GroupClouds(object):
         for (group, lbl) in zip(self.__groups_g, self.__names):
             means.append(np.mean(group[0]))
             stds.append(np.std(group[0]))
-        bars1 = plt.bar(ind, np.asarray(means, dtype=np.float), width, color='b')
-        bars2 = plt.bar(ind+width, np.asarray(stds, dtype=np.float), width, color='r')
+        bars1 = plt.bar(ind, np.asarray(means, dtype=float), width, color='b')
+        bars2 = plt.bar(ind+width, np.asarray(stds, dtype=float), width, color='r')
         ax.set_xticks(ind + width)
         ax.set_xticklabels(self.__names)
         ax.legend((bars1[0], bars2[0]), ('Mean', 'Std'))
@@ -3926,8 +3926,8 @@ class GroupClouds(object):
         for (group, lbl) in zip(self.__groups_g, self.__names):
             means.append(np.mean(group[0]))
             stds.append(np.std(group[0]))
-        bars1 = plt.bar(ind, np.asarray(means, dtype=np.float), width, color='b')
-        bars2 = plt.bar(ind+width, np.asarray(stds, dtype=np.float), width, color='r')
+        bars1 = plt.bar(ind, np.asarray(means, dtype=float), width, color='b')
+        bars2 = plt.bar(ind+width, np.asarray(stds, dtype=float), width, color='r')
         ax.set_xticks(ind + width)
         ax.set_xticklabels(self.__names)
         ax.legend((bars1[0], bars2[0]), ('Mean', 'Std'))
@@ -4217,7 +4217,7 @@ class GroupClouds(object):
             dists += nnde(cloud).tolist()
 
         # Computing Cumulative Probability Distribution
-        return compute_cdf(np.asarray(dists, dtype=np.float), n)
+        return compute_cdf(np.asarray(dists, dtype=float), n)
 
     # Computes F function from a list of clouds
     # group: list of clouds
@@ -4240,7 +4240,7 @@ class GroupClouds(object):
             dists += cnnde(gen_rand_cloud(group[c_id].shape[0], boxes[c_id]), group[c_id]).tolist()
 
         # Computing Cumulative Probability Distribution
-        dists = np.asarray(dists, dtype=np.float)
+        dists = np.asarray(dists, dtype=float)
         return compute_cdf(dists, n)
 
     # Simulates G-Function for a the random case with a number of simulations
@@ -4260,7 +4260,7 @@ class GroupClouds(object):
 
         # Generate random points
         cont = 0
-        cdfs = np.zeros(shape=(n, m), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m), dtype=float)
         # Random simulation
         for i in range(m):
             c_id = i % l_group
@@ -4292,7 +4292,7 @@ class GroupClouds(object):
 
         # Generate random points
         cont = 0
-        cdfs = np.zeros(shape=(n, m), dtype=np.float)
+        cdfs = np.zeros(shape=(n, m), dtype=float)
         # Random simulation
         for i in range(m):
             c_id = i % l_group

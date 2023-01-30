@@ -135,9 +135,9 @@ for (row, input_seg, input_tomo) in zip(list(range(star.get_nrows())), in_seg_l,
 
     print('\tComputing distance, mask and segmentation tomograms...')
     tomod = ps.disperse_io.seg_dist_trans(segh == SEG_MB) * res
-    maskh = np.ones(shape=segh.shape, dtype=np.int)
+    maskh = np.ones(shape=segh.shape, dtype=int)
     maskh[DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER] = 0
-    mask = np.asarray(tomod > (max_len + mb_dst_off + 2 * DILATE_NITER * res), dtype=np.int)
+    mask = np.asarray(tomod > (max_len + mb_dst_off + 2 * DILATE_NITER * res), dtype=int)
     maskh += mask
     maskh += (segh == 0)
     mask = np.asarray(maskh > 0, dtype=np.float32)
@@ -145,7 +145,7 @@ for (row, input_seg, input_tomo) in zip(list(range(star.get_nrows())), in_seg_l,
     # ps.disperse_io.save_numpy(mask, input_msk)
     input_msk = output_dir + '/' + stem + '_mask.fits'
     ps.disperse_io.save_numpy(mask.transpose(), input_msk)
-    mask_den = np.asarray(tomod <= mb_dst_off, dtype=np.bool)
+    mask_den = np.asarray(tomod <= mb_dst_off, dtype=bool)
     # input_msk = output_dir + '/' + stem + '_mb_mask.mrc'
     # ps.disperse_io.save_numpy(mask_den, input_msk)
 
@@ -226,7 +226,7 @@ for (row, input_seg, input_tomo) in zip(list(range(star.get_nrows())), in_seg_l,
         print('\t\tProperty used: ' + prop_topo)
         graph.set_pair_prop(prop_topo)
     try:
-        graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=np.int), v_den=v_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=int), v_den=v_den,
                                      v_prop=v_prop, v_mode=v_mode)
     except ps.pexceptions.PySegInputWarning as e:
         print('WARNING: graph density simplification failed:')
@@ -237,7 +237,7 @@ for (row, input_seg, input_tomo) in zip(list(range(star.get_nrows())), in_seg_l,
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
 
     print('\tComputing graph global statistics (after simplification)...')

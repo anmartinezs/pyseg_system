@@ -141,10 +141,10 @@ def pr_worker(pr_id, ids, q_pkls):
         seg = ps.disperse_io.load_tomo(input_seg)
 
         print('\tP[' + str(pr_id) + '] Computing masks and segmentation tomograms...')
-        tomoh = np.zeros(shape=seg.shape, dtype=np.bool)
+        tomoh = np.zeros(shape=seg.shape, dtype=bool)
         mb_dst_off_v = int(math.ceil(mb_dst_off * res))
         tomoh[mb_dst_off_v:-mb_dst_off_v, mb_dst_off_v:-mb_dst_off_v, mb_dst_off_v:-mb_dst_off_v] = True
-        mask = ((tomoh & (seg != BG_LBL)) == False).astype(np.float)
+        mask = ((tomoh & (seg != BG_LBL)) == False).astype(float)
         input_msk = output_dir + '/' + stem_pkl + '_mask.fits'
         ps.disperse_io.save_numpy(mask.transpose(), input_msk)
         mask = mask == False
@@ -228,7 +228,7 @@ def pr_worker(pr_id, ids, q_pkls):
             print('\t\tProperty used: ' + prop_topo)
             graph.set_pair_prop(prop_topo)
         try:
-            graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=np.int), v_den=v_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=int), v_den=v_den,
                                          v_prop=v_prop, v_mode=v_mode)
         except ps.pexceptions.PySegInputWarning as e:
             print('P[' + str(pr_id) + '] WARNING: graph density simplification failed:')
@@ -240,7 +240,7 @@ def pr_worker(pr_id, ids, q_pkls):
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=np.int), e_den=e_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
         else:
             print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -251,7 +251,7 @@ def pr_worker(pr_id, ids, q_pkls):
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=np.int), e_den=e_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
         else:
             print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -262,7 +262,7 @@ def pr_worker(pr_id, ids, q_pkls):
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=np.int), e_den=e_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
         else:
             print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -273,7 +273,7 @@ def pr_worker(pr_id, ids, q_pkls):
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=np.int), e_den=e_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
         else:
             print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -284,7 +284,7 @@ def pr_worker(pr_id, ids, q_pkls):
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask_clf, dtype=np.int), e_den=e_den,
+            graph.graph_density_simp_ref(mask=np.asarray(mask_clf, dtype=int), e_den=e_den,
                                          e_prop=hold_e_prop, e_mode=e_mode, fit=True)
         else:
             print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))

@@ -118,9 +118,9 @@ if in_col_1 == '_rlnRotation':
             sys.exit(-1)
         print('\t\t-Performing data column operation...')
         dat = list()
-        rot_ref = np.zeros(shape=3, dtype=np.float)
+        rot_ref = np.zeros(shape=3, dtype=float)
         for i in range(star_1.get_nrows()):
-            dat = op_ang_eu_degs(np.asarray((rots[i], tilts[i], psis[i]), dtype=np.float), rot_ref)
+            dat = op_ang_eu_degs(np.asarray((rots[i], tilts[i], psis[i]), dtype=float), rot_ref)
     else:
         dat = list()
         dat_2 = star_2.get_column_data(in_col_2)
@@ -144,8 +144,8 @@ if in_col_1 == '_rlnRotation':
             if (rot2 is None) or (tilt2 is None) or (psi2 is None):
                 print('ERROR: one or more of the rotation angles are not present in the STAR file ' + in_star_2)
                 sys.exit(-1)
-            dat.append(op_ang_eu_degs(np.asarray((rot1, tilt1, psi1), dtype=np.float),
-                                      np.asarray((rot2, tilt2, psi2), dtype=np.float)))
+            dat.append(op_ang_eu_degs(np.asarray((rot1, tilt1, psi1), dtype=float),
+                                      np.asarray((rot2, tilt2, psi2), dtype=float)))
 else:
     if in_star_2 is None:
         dat = star_1.get_column_data(in_col_1)
@@ -172,7 +172,7 @@ if len(dat) == 0:
     print('WARNING: Nothing to plot')
 else:
     print('\tPlotting the histogram...')
-    dat = np.asarray(dat, dtype=np.float)
+    dat = np.asarray(dat, dtype=float)
     plt.hist(dat, bins=hist_nbins, range=hist_rg, normed=hist_norm)
     plt.show(block=True)
     plt.close()

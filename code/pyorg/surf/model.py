@@ -441,7 +441,7 @@ class Model(object, metaclass=abc.ABCMeta):
             if (not hasattr(vect, '__len__')) or ((len(vect) != 3) and (len(vect) != 4)):
                 error_msg = 'Invalid vector must be 3-tuple!'
                 raise pexceptions.PySegInputError(expr='__init__ (Model)', msg=error_msg)
-            self.__vect = np.asarray(vect, dtype=np.float)
+            self.__vect = np.asarray(vect, dtype=float)
 
     def set_ParticleL_ref(self, ref_surf_fname):
         """
@@ -689,7 +689,7 @@ class ModelSRPV(Model):
             error_msg = 'Input sin_t must in range [0, 1]!'
             raise pexceptions.PySegInputError(expr='__init__ (ModelSRPV)', msg=error_msg)
         self._Model__type_name = 'SRPV'
-        self.__n_cycles = np.asarray(n_cycles, dtype=np.int)
+        self.__n_cycles = np.asarray(n_cycles, dtype=int)
         self.__sin_t = float(sin_t)
         self.__phase = np.asarray(phase, dtype=float)
 
@@ -737,7 +737,7 @@ class ModelSRPV(Model):
                 if self._Model__selector.IsInsideSurface(coord_rnd[0], coord_rnd[1], coord_rnd[2]) == 0:
                     continue
             else:
-                rcoord = np.round(coord_rnd).astype(np.int)
+                rcoord = np.round(coord_rnd).astype(int)
                 if (rcoord[0] >= 0) and (rcoord[1] >= 0) and (rcoord[2] >= 0) and (rcoord[0] < voi_shape[0]) and \
                         (rcoord[1] < voi_shape[1]) and (rcoord[2] < voi_shape[2]):
                     if not self._Model__voi[rcoord[0], rcoord[1], rcoord[2]]:
@@ -1102,7 +1102,7 @@ class ModelFils(object, metaclass=abc.ABCMeta):
 
         # Initialization
         tomo = np.zeros(shape=self.__voi.shape, dtype=np.float32)
-        tomo_lut = np.zeros(shape=self.__voi.shape, dtype=np.bool)
+        tomo_lut = np.zeros(shape=self.__voi.shape, dtype=bool)
 
         # Loop for filament
         for i, fil in enumerate(ref_fils):
@@ -1130,7 +1130,7 @@ class ModelFils(object, metaclass=abc.ABCMeta):
             angs = np.asarray((rot, tilt, psi), dtype=np.float32)
 
             # Apply the 3D rigid transformation
-            hold_tomo = np.roll(hold_tomo, np.asarray(np.round(t_fil), dtype=np.int), axis=(0, 1, 2))
+            hold_tomo = np.roll(hold_tomo, np.asarray(np.round(t_fil), dtype=int), axis=(0, 1, 2))
             # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test/test_ns2/hold2.mrc')
             r3d_r = pyto.geometry.Rigid3D()
             r3d_r.q = r3d_r.make_r_euler(angles=np.radians(angs), mode='zyz_in_active')
@@ -1185,7 +1185,7 @@ class ModelFils(object, metaclass=abc.ABCMeta):
         den2d_len = max(self.__density_2d.shape)
         pad, off = .5 * den2d_len, den2d_len * spacing
         tomo = np.zeros(shape=self.__voi.shape, dtype=np.float32)
-        tomo_lut = np.zeros(shape=self.__voi.shape, dtype=np.bool)
+        tomo_lut = np.zeros(shape=self.__voi.shape, dtype=bool)
 
         # Loop for axis 1
         i_1, l_1 = pad, self.__voi.shape[ax_1]
@@ -1219,7 +1219,7 @@ class ModelFils(object, metaclass=abc.ABCMeta):
                 angs = np.asarray((rot, tilt, psi), dtype=np.float32)
 
                 # Apply the 3D rigid transformation
-                hold_tomo = np.roll(hold_tomo, np.asarray(np.round(t_fil), dtype=np.int), axis=(0, 1, 2))
+                hold_tomo = np.roll(hold_tomo, np.asarray(np.round(t_fil), dtype=int), axis=(0, 1, 2))
                 # disperse_io.save_numpy(hold_tomo, '/fs/pool/pool-ruben/antonio/filaments/sim_den/test_ps0.704/test_ns1/hold2.mrc')
                 if not (math.isnan(rot) or math.isnan(tilt) or math.isnan(psi)):
                     r3d_r = pyto.geometry.Rigid3D()
@@ -1325,7 +1325,7 @@ class ModelFilsRSR(ModelFils):
             n_fils = max_fils
         n_tries = n_fils * max_ntries
         rnd_ids_fils = np.random.randint(0, len(fils), size=n_tries)
-        # fils_lut = np.zeros(shape=len(fils), dtype=np.bool)
+        # fils_lut = np.zeros(shape=len(fils), dtype=bool)
 
         # Generations loop
         count_added = 0
@@ -1412,7 +1412,7 @@ class ModelFilsRSR(ModelFils):
             n_fils = max_fils
         n_tries = n_fils * max_ntries
         rnd_ids_fils = np.random.randint(0, len(fils), size=n_tries)
-        # fils_lut = np.zeros(shape=len(fils), dtype=np.bool)
+        # fils_lut = np.zeros(shape=len(fils), dtype=bool)
 
         # Generations loop
         count_added = 0

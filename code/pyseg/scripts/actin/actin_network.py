@@ -178,7 +178,7 @@ for (in_tomo, in_mask, in_th) in zip(in_tomo_l, in_mask_l, in_th_l):
     ps.disperse_io.save_numpy(density, output_dir + '/' + f_stem + '.vti')
 
     print('\tLoading mask: ' + in_mask)
-    mask = ps.disperse_io.load_tomo(in_mask).astype(np.bool)
+    mask = ps.disperse_io.load_tomo(in_mask).astype(bool)
 
     print('\tStoring temporal tomograms for VTK...')
     ps.disperse_io.save_numpy(density, output_dir + '/' + f_stem_pkl + '.vti')
@@ -265,7 +265,7 @@ for (in_tomo, in_mask, in_th) in zip(in_tomo_l, in_mask_l, in_th_l):
         print('\t\tProperty used: ' + ps.globals.STR_FIELD_VALUE)
         graph.set_pair_prop(ps.globals.STR_FIELD_VALUE)
     try:
-        graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=np.int), v_den=v_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=int), v_den=v_den,
                                      v_prop=v_prop, v_mode=v_mode)
     except ps.pexceptions.PySegInputWarning as e:
         print('WARNING: graph density simplification failed:')
@@ -276,7 +276,7 @@ for (in_tomo, in_mask, in_th) in zip(in_tomo_l, in_mask_l, in_th_l):
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(ve_ratio) + ' could not be achieved (current is ' + str(nepv))

@@ -53,7 +53,7 @@ def read_csv_mts(fname, coords_cols, id_col, swap_xy=False):
             else:
                 x, y, z, idx = float(row[coords_cols[0]]), float(row[coords_cols[1]]), float(row[coords_cols[2]]),\
                                int(row[id_col])
-            coords.append(np.asarray((x, y, z), dtype=np.float))
+            coords.append(np.asarray((x, y, z), dtype=float))
             ids.append(idx)
 
         # Dictionary creation
@@ -71,7 +71,7 @@ def read_csv_mts(fname, coords_cols, id_col, swap_xy=False):
 # inv: if False (default) then True-fg and False-bg, otherwise these values are inverted
 # Returns: a 3D numpy binray array
 def points_to_mask(points, mask_shape, inv=False):
-    mask = np.zeros(shape=mask_shape, dtype=np.bool)
+    mask = np.zeros(shape=mask_shape, dtype=bool)
     for point in points:
         i, j, k = int(round(point[0])), int(round(point[1])), int(round(point[2]))
         if (i < 0) or (j < 0) or (k < 0) or \
@@ -218,7 +218,7 @@ def cont_en_std(array, nstd=3, lb=0, ub=1, mask=None, do_mask=True):
     if mask is None:
         hold_array = array
     else:
-        m_ids = np.asarray(mask > 0, dtype=np.bool)
+        m_ids = np.asarray(mask > 0, dtype=bool)
         hold_array = array[m_ids]
 
     # Remapping parameters estimation
@@ -315,7 +315,7 @@ def crop_cube(vol, x_dims, y_dims, z_dims, value_border=0):
         z_dims[1] = vol.shape[2]
 
     # Cropping
-    hold_vol = value_border * np.ones(shape=vol.shape, dtype=np.float)
+    hold_vol = value_border * np.ones(shape=vol.shape, dtype=float)
     hold_vol[x_dims[0]:x_dims[1], y_dims[0]:y_dims[1], z_dims[0]:z_dims[1]] = \
         vol[x_dims[0]:x_dims[1], y_dims[0]:y_dims[1], z_dims[0]:z_dims[1]]
 
@@ -509,7 +509,7 @@ def wedge(in_shape, wr_ang, tilt_ang=90.):
 
     # Wedge criteria
     Id = np.logical_and(P > phi, P < phi2)
-    W = np.zeros(shape=W.shape, dtype=np.float)
+    W = np.zeros(shape=W.shape, dtype=float)
     W[Id] = 1
 
     return W
@@ -549,7 +549,7 @@ def add_mw(tomo, wr_ang, tilt_ang=0):
     P = np.arccos(Z * W_inv)
     # Wedge criterium
     Id = np.logical_and(P > phi, P < phi2)
-    W = np.zeros(shape=W.shape, dtype=np.float)
+    W = np.zeros(shape=W.shape, dtype=float)
     W[Id] = 1
 
     # disperse_io.save_numpy(W, './out/wedge.vti')
@@ -570,13 +570,13 @@ def ann_vol(vol, mask=None):
         msk_vol = vol
     else:
         est_vol = float(mask.sum())
-        msk_vol = (vol * mask).astype(np.bool)
+        msk_vol = (vol * mask).astype(bool)
     n_points = msk_vol.sum()
     if (est_vol == 0) or (n_points == 0):
         return 0, 0, 0
     d_e = 1. / math.pow(n_points/est_vol, 1./3.)
     cloud = get_cloud_coords(msk_vol)
-    dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+    dists = np.zeros(shape=cloud.shape[0], dtype=float)
 
     # Shortest distance loop
     for i in range(len(dists)):
@@ -602,7 +602,7 @@ def get_cloud_coords(cloud):
     for i in range(len(ids[0])):
         coords.append(np.asarray((ids[0][i], ids[1][i], ids[2][i])))
 
-    return np.asarray(coords, dtype=np.float)
+    return np.asarray(coords, dtype=float)
 
 # Computes local curvature of a curve in space
 # curve: array of n points in a 3D space
@@ -612,8 +612,8 @@ def compute_space_k(curve):
     # Initialization
     n_p = curve.shape[0]
     if n_p <= 2:
-        return np.zeros(shape=1, dtype=np.float)
-    curvatures = np.zeros(shape=n_p-2, dtype=np.float)
+        return np.zeros(shape=1, dtype=float)
+    curvatures = np.zeros(shape=n_p-2, dtype=float)
 
     # Loop for computing the curvatures
     cont = 0
@@ -657,8 +657,8 @@ def compute_plane_k(curve):
     # Initialization
     n_p = curve.shape[0]
     if n_p <= 2:
-        return np.zeros(shape=1, dtype=np.float)
-    curvatures = np.zeros(shape=n_p-2, dtype=np.float)
+        return np.zeros(shape=1, dtype=float)
+    curvatures = np.zeros(shape=n_p-2, dtype=float)
 
     # Loop for computing the curvatures
     cont = 0
@@ -760,13 +760,13 @@ def normal3d_point_cloud(cloud, weights=None):
     pc = k_inv * np.sum(cloud, axis=0)
     pm_00, pm_11, pm_22 = pc[0]*pc[0], pc[1]*pc[1], pc[2]*pc[2]
     pm_01, pm_02, pm_12 = pc[0]*pc[1], pc[0]*pc[2], pc[1]*pc[2]
-    P = np.zeros(shape=(3, 3), dtype=np.float)
+    P = np.zeros(shape=(3, 3), dtype=float)
     P[0][0], P[0][1], P[0][2] = pm_00, pm_01, pm_02
     P[1][0], P[1][1], P[1][2] = pm_01, pm_11, pm_12
     P[2][0], P[2][1], P[2][2] = pm_02, pm_12, pm_22
 
     # Covariance matrix
-    M = np.zeros(shape=(3, 3), dtype=np.float)
+    M = np.zeros(shape=(3, 3), dtype=float)
     if weights is None:
         for i in range(k):
             p = cloud[i, :]
@@ -783,7 +783,7 @@ def normal3d_point_cloud(cloud, weights=None):
             M[2][2] += p_22
         M = k_inv*M - P
     else:
-        H = np.zeros(shape=(3, 3), dtype=np.float)
+        H = np.zeros(shape=(3, 3), dtype=float)
         for i in range(k):
             p = cloud[i, :]
             p_00, p_11, p_22 = p[0]*p[0], p[1]*p[1], p[2]*p[2]
@@ -1568,7 +1568,7 @@ def coords_scale_supression(coords, scale, weights=None):
 
     # Initialization
     del_l = list()
-    del_lut = np.zeros(shape=len(coords), dtype=np.bool)
+    del_lut = np.zeros(shape=len(coords), dtype=bool)
 
     coords = np.asarray(coords, dtype=np.float32)
     if weights is None:
@@ -1744,7 +1744,7 @@ def read_csv_mts(fname, coords_cols, id_col):
         for row in reader:
             x, y, z, idx = float(row[coords_cols[0]]), float(row[coords_cols[1]]), float(row[coords_cols[2]]),\
                            int(row[id_col])
-            coords.append(np.asarray((x, y, z), dtype=np.float))
+            coords.append(np.asarray((x, y, z), dtype=float))
             ids.append(idx)
 
         # Dictionary creation
@@ -1869,8 +1869,8 @@ def global_analysis(tomo, b_th, c=18):
     else:
         raise ValueError
     tomo_lbl, num_lbls = sp.ndimage.label(tomo >= b_th, structure=np.ones(shape=[3, 3, 3]))
-    tomo_out = np.zeros(shape=tomo.shape, dtype=np.int)
-    lut = np.zeros(shape=num_lbls+1, dtype=np.int)
+    tomo_out = np.zeros(shape=tomo.shape, dtype=int)
+    lut = np.zeros(shape=num_lbls+1, dtype=int)
 
     ## COUNTING REGIONS METHODS
     # import time

@@ -78,7 +78,7 @@ def do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, in
         seg_prop_id = graph_mcf.get_prop_id(seg_key)
         for v in graph_mcf.get_vertices_list():
             v_id = v.get_id()
-            hold = graph_mcf.get_prop_entry_fast(seg_prop_id, v_id, 1, np.float)
+            hold = graph_mcf.get_prop_entry_fast(seg_prop_id, v_id, 1, float)
             if hold[0] == seg_val:
                 neighs, edges = graph_mcf.get_vertex_neighbours(v_id)
                 if len(neighs) == 0:
@@ -86,7 +86,7 @@ def do_rwr(input_file, output_dir, prop_key, seg_key, seg_val, usual, weight, in
                     continue
                 count = 0
                 for i, n in enumerate(neighs):
-                    hold = graph_mcf.get_prop_entry_fast(seg_prop_id, n.get_id(), 1, np.float)
+                    hold = graph_mcf.get_prop_entry_fast(seg_prop_id, n.get_id(), 1, float)
                     if hold[0] == seg_val:
                         graph_mcf.remove_edge(edges[i])
                     else:

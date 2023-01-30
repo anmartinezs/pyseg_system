@@ -87,7 +87,7 @@ class TestListNhoodNum(TestCase):
         # disperse_io.save_vtp(voi, OUT_DIR + '/cube_voi.vtp')
         # voi_center = (0, 0, 0)
         max_size = int(math.ceil(2 * RAD + SHELL_THICK))
-        seg = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        seg = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = (.5 * seg.shape[0], .5 * seg.shape[1], .5 * seg.shape[2])
         X = np.meshgrid(np.arange(seg.shape[0]), np.arange(seg.shape[1]), np.arange(seg.shape[2]))[0]
         seg[X > voi_center[0]] = False
@@ -185,7 +185,7 @@ class TestListNhoodNum(TestCase):
 
         # VOI array creation
         max_size = int(math.ceil(2 * RAD + SHELL_THICK))
-        voi = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        voi = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = (.5 * voi.shape[0], .5 * voi.shape[1], .5 * voi.shape[2])
 
         # Particles coordinates generation (just for storing)
@@ -276,7 +276,7 @@ class TestListNhoodNum(TestCase):
 
         # VOI Creation
         max_size = int(math.ceil(2 * RAD + SHELL_THICK))
-        voi = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        voi = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = (.5 * voi.shape[0], .5 * voi.shape[1], .5 * voi.shape[2])
         X = np.meshgrid(np.arange(voi.shape[0]), np.arange(voi.shape[1]), np.arange(voi.shape[2]))[0]
         voi[X > voi_center[0]] = False
@@ -284,8 +284,8 @@ class TestListNhoodNum(TestCase):
         voi_surf = poly_decimate(voi_surf, .9)
 
         # Computations loop
-        # n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=str(N_PARTS).count('0')).astype(np.int)
-        n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=4*str(N_PARTS).count('0')).astype(np.int)
+        # n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=str(N_PARTS).count('0')).astype(int)
+        n_parts_arr = np.logspace(1, str(N_PARTS).count('0'), num=4*str(N_PARTS).count('0')).astype(int)
         sph_times = np.zeros(shape=(len(n_parts_arr), N_SIMS), dtype=np.float32)
         she_times = np.zeros(shape=(len(n_parts_arr), N_SIMS), dtype=np.float32)
         sph_times_surf = np.zeros(shape=(len(n_parts_arr), N_SIMS), dtype=np.float32)

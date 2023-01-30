@@ -115,9 +115,9 @@ class CloudMbConn(object):
         # Initialization
         edges_list = self.__graph.get_edges_list()
         n_edges = len(edges_list)
-        self.__coords = (-1) * np.ones(shape=(n_edges, 3), dtype=np.float)
-        self.__deg = np.zeros(shape=n_edges, dtype=np.int)
-        self.__lbls = (-1) * np.ones(shape=n_edges, dtype=np.int)
+        self.__coords = (-1) * np.ones(shape=(n_edges, 3), dtype=float)
+        self.__deg = np.zeros(shape=n_edges, dtype=int)
+        self.__lbls = (-1) * np.ones(shape=n_edges, dtype=int)
         self.__i_points = 0
 
         # Loop for finding the edge which contains a connector point
@@ -445,7 +445,7 @@ class ConnSubGraph(object):
         # Computing connectors vertex properties
         cv_prop_typ = graph_gt.new_vertex_property('int', vals=1)
         cv_prop_len = graph_gt.new_vertex_property('float', vals=-1.)
-        nconn_lut = np.ones(shape=graph_gt.num_vertices(), dtype=np.bool)
+        nconn_lut = np.ones(shape=graph_gt.num_vertices(), dtype=bool)
         for v in graph_gt.vertices():
             v_id = i_prop[v]
             p_paths = self.__conn_p[v_id]
@@ -490,8 +490,8 @@ class ConnSubGraph(object):
 
         # Initialization
         n_conns = self.__conns.shape[0]
-        mx = np.finfo(np.float).max
-        dist_mat = mx * np.ones(shape=(n_conns, n_conns), dtype=np.float)
+        mx = np.finfo(float).max
+        dist_mat = mx * np.ones(shape=(n_conns, n_conns), dtype=float)
         graph_gt = ps.graph.GraphGT(self.__graph).get_gt()
         i_prop = graph_gt.vertex_properties[ps.globals.DPSTR_CELL]
         w_prop = graph_gt.edge_properties[ps.globals.SGT_EDGE_LENGTH]
@@ -521,11 +521,11 @@ class ConnSubGraph(object):
 
         # Store the result
         lut_rand = np.random.randint(0, n_conns, n_conns)
-        self.__clsts = np.zeros(shape=n_conns, dtype=np.int)
+        self.__clsts = np.zeros(shape=n_conns, dtype=int)
         for i in range(n_conns):
             self.__clsts[i] = lut_rand[cluster.labels_[i]]
         # Centers
-        self.__cents = (-1) * np.ones(shape=n_conns, dtype=np.int)
+        self.__cents = (-1) * np.ones(shape=n_conns, dtype=int)
         for i in range(len(cluster.cluster_centers_indices_)):
             v = cluster.cluster_centers_indices_[i]
             self.__cents[v] = lut_rand[cluster.labels_[v]]
@@ -552,7 +552,7 @@ class ConnSubGraph(object):
                         xh, yh, zh = x, y, z
                     lengths.append(hold_l)
 
-        return np.asarray(conns, dtype=np.int), np.asarray(lengths, dtype=np.float)
+        return np.asarray(conns, dtype=int), np.asarray(lengths, dtype=float)
 
 
 

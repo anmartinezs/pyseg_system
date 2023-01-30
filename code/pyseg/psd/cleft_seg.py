@@ -86,10 +86,10 @@ def gen_clft_seg(pst_graph, pre_graph, pst_cl_ids, pre_cl_ids, th_den):
     pre_skel = pre_graph.get_skel()
     pst_skel = pst_graph.get_skel()
     den_shape = pst_graph.get_density().shape
-    seg1 = np.zeros(shape=den_shape, dtype=np.int)
-    seg2 = np.zeros(shape=den_shape, dtype=np.int)
-    seg4 = np.zeros(shape=den_shape, dtype=np.int)
-    seg5 = np.zeros(shape=den_shape, dtype=np.int)
+    seg1 = np.zeros(shape=den_shape, dtype=int)
+    seg2 = np.zeros(shape=den_shape, dtype=int)
+    seg4 = np.zeros(shape=den_shape, dtype=int)
+    seg5 = np.zeros(shape=den_shape, dtype=int)
     pst_ids = list()
     pre_ids = list()
     pst_ids2 = list()
@@ -131,8 +131,8 @@ def gen_clft_seg(pst_graph, pre_graph, pst_cl_ids, pre_cl_ids, th_den):
     seg5[s_id] = 0
     seg6[s_id] = C_PRE_LB_1_2
     # Pst- and pre-synaptic intersection
-    pst_seg = (seg1 > 0).astype(np.int) + (seg2 > 0).astype(np.int) + (seg3 > 0).astype(np.int)
-    pre_seg = (seg4 > 0).astype(np.int) + (seg5 > 0).astype(np.int) + (seg6 > 0).astype(np.int)
+    pst_seg = (seg1 > 0).astype(int) + (seg2 > 0).astype(int) + (seg3 > 0).astype(int)
+    pre_seg = (seg4 > 0).astype(int) + (seg5 > 0).astype(int) + (seg6 > 0).astype(int)
     seg7 = pst_seg * pre_seg
     s_id = seg7 > 0
     seg1[s_id] = 0
@@ -237,7 +237,7 @@ def store_plt_clouds(clft_cl, clft_ids2, o_dir):
     lbls = list()
     for i, cloud in enumerate((cloud_1, cloud_2, cloud_3)):
         if len(cloud) > 0:
-            cloud = make_plane(np.asarray(cloud, dtype=np.float), del_coord)
+            cloud = make_plane(np.asarray(cloud, dtype=float), del_coord)
             line = plt.scatter(cloud[:, 0], cloud[:, 1], c=color1[i], marker=marks[i])
             lines.append(line)
             lbls.append(h_lbls[i])
@@ -267,7 +267,7 @@ def store_plt_clouds(clft_cl, clft_ids2, o_dir):
     lbls = list()
     for i, cloud in enumerate((cloud_1, cloud_2, cloud_3)):
         if len(cloud) > 0:
-            cloud = make_plane(np.asarray(cloud, dtype=np.float), del_coord)
+            cloud = make_plane(np.asarray(cloud, dtype=float), del_coord)
             line = plt.scatter(cloud[:, 0], cloud[:, 1], c=color1[i], marker=marks[i])
             lines.append(line)
             lbls.append(h_lbls[i])
@@ -292,7 +292,7 @@ def store_plt_clouds(clft_cl, clft_ids2, o_dir):
         if idx == C_PST_PRE_LB:
             cloud_1.append(clft_cl[1][i])
     if len(cloud_1) > 0:
-        cloud_1 = make_plane(np.asarray(cloud_1, dtype=np.float), del_coord)
+        cloud_1 = make_plane(np.asarray(cloud_1, dtype=float), del_coord)
         plt.scatter(cloud_1[:, 0], cloud_1[:, 1])
     plt.savefig(o_dir + '/' + 'inter_cloud.png')
     plt.close()
@@ -345,7 +345,7 @@ def store_plt_cont_clouds(pre_clc, pre_clc_ids, pst_clc, pst_clc_ids, clft_ids, 
     lbls = list()
     for i, cloud in enumerate((cloud_1, cloud_2, cloud_3, cloud_4)):
         if len(cloud) > 0:
-            cloud = make_plane(np.asarray(cloud, dtype=np.float), del_coord)
+            cloud = make_plane(np.asarray(cloud, dtype=float), del_coord)
             line = plt.scatter(cloud[:, 0], cloud[:, 1], c=color1[i], marker=marks[i])
             lines.append(line)
             lbls.append(h_lbls[i])
@@ -383,7 +383,7 @@ def store_plt_cont_clouds(pre_clc, pre_clc_ids, pst_clc, pst_clc_ids, clft_ids, 
     lbls = list()
     for i, cloud in enumerate((cloud_1, cloud_2, cloud_3, cloud_4)):
         if len(cloud) > 0:
-            cloud = make_plane(np.asarray(cloud, dtype=np.float), del_coord)
+            cloud = make_plane(np.asarray(cloud, dtype=float), del_coord)
             line = plt.scatter(cloud[:, 0], cloud[:, 1], c=color1[i], marker=marks[i])
             lines.append(line)
             lbls.append(h_lbls[i])
@@ -401,20 +401,20 @@ def store_vtp(pst_graph, pre_graph, clft_cl, clft_ids, clft_ids2, cont_cl, cont_
     points = vtk.vtkPoints()
     verts = vtk.vtkCellArray()
     lines = vtk.vtkCellArray()
-    struct = ps.disperse_io.TypesConverter().numpy_to_vtk(np.int)
+    struct = ps.disperse_io.TypesConverter().numpy_to_vtk(int)
     struct.SetName('struct')
     struct.SetNumberOfComponents(1)
-    ids = ps.disperse_io.TypesConverter().numpy_to_vtk(np.int)
+    ids = ps.disperse_io.TypesConverter().numpy_to_vtk(int)
     ids.SetName('ids')
     ids.SetNumberOfComponents(1)
-    lut_pre = (-1) * np.ones(shape=pre_graph.get_nid(), dtype=np.int)
-    lut_pst = (-1) * np.ones(shape=pst_graph.get_nid(), dtype=np.int)
-    lut_pre2 = (-1) * np.ones(shape=pre_graph.get_nid(), dtype=np.int)
-    lut_pst2 = (-1) * np.ones(shape=pst_graph.get_nid(), dtype=np.int)
-    lut_cont_pre = (-1) * np.ones(shape=len(cont_ids[0]), dtype=np.int)
-    lut_cont_pst = (-1) * np.ones(shape=len(cont_ids[1]), dtype=np.int)
-    lut_cont_pre2 = (-1) * np.ones(shape=len(cont_ids[0]), dtype=np.int)
-    lut_cont_pst2 = (-1) * np.ones(shape=len(cont_ids[1]), dtype=np.int)
+    lut_pre = (-1) * np.ones(shape=pre_graph.get_nid(), dtype=int)
+    lut_pst = (-1) * np.ones(shape=pst_graph.get_nid(), dtype=int)
+    lut_pre2 = (-1) * np.ones(shape=pre_graph.get_nid(), dtype=int)
+    lut_pst2 = (-1) * np.ones(shape=pst_graph.get_nid(), dtype=int)
+    lut_cont_pre = (-1) * np.ones(shape=len(cont_ids[0]), dtype=int)
+    lut_cont_pst = (-1) * np.ones(shape=len(cont_ids[1]), dtype=int)
+    lut_cont_pre2 = (-1) * np.ones(shape=len(cont_ids[0]), dtype=int)
+    lut_cont_pst2 = (-1) * np.ones(shape=len(cont_ids[1]), dtype=int)
     point_id = 0
 
     # Vertices
@@ -597,9 +597,9 @@ for valid_name in valid_names:
         print('\t\t\tGetting membrane slice filaments...')
         pre_cloud, h_pre_cloud_ids = pre_graph.get_cloud_mb_slice_fils(sl)
         pst_cloud, h_pst_cloud_ids = pst_graph.get_cloud_mb_slice_fils(sl)
-        pre_cloud, pre_cloud_ids = purge_repeat_coords2(np.asarray(pre_cloud, dtype=np.float) * pre_graph.get_resolution(),
+        pre_cloud, pre_cloud_ids = purge_repeat_coords2(np.asarray(pre_cloud, dtype=float) * pre_graph.get_resolution(),
                                                         h_pre_cloud_ids, eps_cont)
-        pst_cloud, pst_cloud_ids = purge_repeat_coords2(np.asarray(pst_cloud, dtype=np.float) * pst_graph.get_resolution(),
+        pst_cloud, pst_cloud_ids = purge_repeat_coords2(np.asarray(pst_cloud, dtype=float) * pst_graph.get_resolution(),
                                                         h_pst_cloud_ids, eps_cont)
         pre_cl.append(pre_cloud)
         pst_cl.append(pst_cloud)
@@ -621,9 +621,9 @@ for valid_name in valid_names:
         print('\t\t\tGetting membrane slice filaments...')
         pre_cloud_cont, h_pre_cloud_ids_cont = pre_graph.get_cloud_mb_slice(cl, cont_mode=True)
         pst_cloud_cont, h_pst_cloud_ids_cont = pst_graph.get_cloud_mb_slice(cl, cont_mode=True)
-        pre_cloud_cont, pre_cloud_ids_cont = purge_repeat_coords2(np.asarray(pre_cloud_cont, dtype=np.float) * pre_graph.get_resolution(),
+        pre_cloud_cont, pre_cloud_ids_cont = purge_repeat_coords2(np.asarray(pre_cloud_cont, dtype=float) * pre_graph.get_resolution(),
                                                                   h_pre_cloud_ids_cont, eps_cont)
-        pst_cloud_cont, pst_cloud_ids_cont = purge_repeat_coords2(np.asarray(pst_cloud_cont, dtype=np.float) * pst_graph.get_resolution(),
+        pst_cloud_cont, pst_cloud_ids_cont = purge_repeat_coords2(np.asarray(pst_cloud_cont, dtype=float) * pst_graph.get_resolution(),
                                                                   h_pst_cloud_ids_cont, eps_cont)
         pre_clc.append(pre_cloud_cont)
         pst_clc.append(pst_cloud_cont)
@@ -643,8 +643,8 @@ cont_cl, cont_ids, cont_ids2 = store_plt_cont_clouds(pre_clc, pre_clc_ids, pst_c
 
 print('\tStoring poly data...')
 cont_cl_ur = list()
-cont_cl_ur.append(np.asarray(cont_cl[0], dtype=np.float) / pst_graph.get_resolution())
-cont_cl_ur.append(np.asarray(cont_cl[1], dtype=np.float) / pst_graph.get_resolution())
+cont_cl_ur.append(np.asarray(cont_cl[0], dtype=float) / pst_graph.get_resolution())
+cont_cl_ur.append(np.asarray(cont_cl[1], dtype=float) / pst_graph.get_resolution())
 store_vtp(pst_graph, pre_graph, clft_cl, clft_ids, clft_ids2, cont_cl_ur, cont_ids, cont_ids2, output_dir)
 
 print('\tStoring segmentation...')
@@ -655,8 +655,8 @@ for i, seg in enumerate(clft_segs):
 print('\tStoring the set of clouds...')
 set_clouds = ps.spatial.SetCloudsP(box, n_samp, n_sim_f, r_max, r_bord, p_f)
 cloud_1, cloud_2, cloud_3, cloud_4, cloud_5, cloud_6, cloud_7 = list(), list(), list(), list(), list(), list(), list()
-h_clft_cl = list(make_plane(np.asarray(clft_cl[0], dtype=np.float), del_coord)) + \
-            list(make_plane(np.asarray(clft_cl[1], dtype=np.float), del_coord))
+h_clft_cl = list(make_plane(np.asarray(clft_cl[0], dtype=float), del_coord)) + \
+            list(make_plane(np.asarray(clft_cl[1], dtype=float), del_coord))
 h_clft_ids2 = list(clft_ids2[0]) + list(clft_ids2[1])
 for (cl, ids2) in zip(h_clft_cl, h_clft_ids2):
     if ids2 == C_PST_LB_1:
@@ -673,19 +673,19 @@ for (cl, ids2) in zip(h_clft_cl, h_clft_ids2):
         cloud_6.append(cl)
     elif ids2 == C_PST_PRE_LB:
         cloud_7.append(cl)
-set_clouds.insert_cloud(np.asarray(cloud_1, dtype=np.float), group_names[0])
-set_clouds.insert_cloud(np.asarray(cloud_2, dtype=np.float), group_names[1])
-set_clouds.insert_cloud(np.asarray(cloud_3, dtype=np.float), group_names[2])
-set_clouds.insert_cloud(np.asarray(cloud_4, dtype=np.float), group_names[3])
-set_clouds.insert_cloud(np.asarray(cloud_5, dtype=np.float), group_names[4])
-set_clouds.insert_cloud(np.asarray(cloud_6, dtype=np.float), group_names[5])
-set_clouds.insert_cloud(np.asarray(cloud_7, dtype=np.float), group_names[6])
+set_clouds.insert_cloud(np.asarray(cloud_1, dtype=float), group_names[0])
+set_clouds.insert_cloud(np.asarray(cloud_2, dtype=float), group_names[1])
+set_clouds.insert_cloud(np.asarray(cloud_3, dtype=float), group_names[2])
+set_clouds.insert_cloud(np.asarray(cloud_4, dtype=float), group_names[3])
+set_clouds.insert_cloud(np.asarray(cloud_5, dtype=float), group_names[4])
+set_clouds.insert_cloud(np.asarray(cloud_6, dtype=float), group_names[5])
+set_clouds.insert_cloud(np.asarray(cloud_7, dtype=float), group_names[6])
 output_pkl = output_dir + '/' + 'clouds_set.pkl'
 set_clouds.pickle(output_pkl)
 set_clouds_cont = ps.spatial.SetCloudsP(box, n_samp, n_sim_f, r_max, r_bord, p_f)
 cloud_1, cloud_2, cloud_3, cloud_4, cloud_5, cloud_6, cloud_7 = list(), list(), list(), list(), list(), list(), list()
-h_clft_cl = list(make_plane(np.asarray(cont_cl[0], dtype=np.float), del_coord)) + \
-            list(make_plane(np.asarray(cont_cl[1], dtype=np.float), del_coord))
+h_clft_cl = list(make_plane(np.asarray(cont_cl[0], dtype=float), del_coord)) + \
+            list(make_plane(np.asarray(cont_cl[1], dtype=float), del_coord))
 h_clft_ids2 = list(cont_ids2[0]) + list(cont_ids2[1])
 for (cl, ids2) in zip(h_clft_cl, h_clft_ids2):
     if ids2 == C_PST_LB_1:
@@ -702,13 +702,13 @@ for (cl, ids2) in zip(h_clft_cl, h_clft_ids2):
         cloud_6.append(cl)
     elif ids2 == C_PST_PRE_LB:
         cloud_7.append(cl)
-set_clouds_cont.insert_cloud(np.asarray(cloud_1, dtype=np.float), group_names[0])
-set_clouds_cont.insert_cloud(np.asarray(cloud_2, dtype=np.float), group_names[1])
-set_clouds_cont.insert_cloud(np.asarray(cloud_3, dtype=np.float), group_names[2])
-set_clouds_cont.insert_cloud(np.asarray(cloud_4, dtype=np.float), group_names[3])
-set_clouds_cont.insert_cloud(np.asarray(cloud_5, dtype=np.float), group_names[4])
-set_clouds_cont.insert_cloud(np.asarray(cloud_6, dtype=np.float), group_names[5])
-set_clouds_cont.insert_cloud(np.asarray(cloud_7, dtype=np.float), group_names[6])
+set_clouds_cont.insert_cloud(np.asarray(cloud_1, dtype=float), group_names[0])
+set_clouds_cont.insert_cloud(np.asarray(cloud_2, dtype=float), group_names[1])
+set_clouds_cont.insert_cloud(np.asarray(cloud_3, dtype=float), group_names[2])
+set_clouds_cont.insert_cloud(np.asarray(cloud_4, dtype=float), group_names[3])
+set_clouds_cont.insert_cloud(np.asarray(cloud_5, dtype=float), group_names[4])
+set_clouds_cont.insert_cloud(np.asarray(cloud_6, dtype=float), group_names[5])
+set_clouds_cont.insert_cloud(np.asarray(cloud_7, dtype=float), group_names[6])
 output_pkl = output_dir + '/' + 'cont_clouds_set.pkl'
 set_clouds_cont.pickle(output_pkl)
 

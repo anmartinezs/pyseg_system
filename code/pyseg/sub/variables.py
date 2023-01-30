@@ -41,7 +41,7 @@ class RadialAvg3D(object):
             print('ERROR msg')
 
         # Precompute kernels for the radial averaging
-        img_c = np.round(.5 * np.asarray(shape)).astype(np.int)
+        img_c = np.round(.5 * np.asarray(shape)).astype(int)
         self.__n_samp_h = shape[self.__axis_i]
         self.__n_samp_r = self.__n_samp_h - img_c[self.__axis_i]
         if axis == 'x':

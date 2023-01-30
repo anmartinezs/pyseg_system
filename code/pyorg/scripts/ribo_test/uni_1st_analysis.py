@@ -1043,8 +1043,8 @@ for lkey, ltomo in zip(iter(lists_exp_fdsts.keys()), iter(lists_exp_fdsts.values
     cdf_sim_len = len(cdf_sim_jhigh)
     if len(cdf_sim_jlow) < len(cdf_sim_jhigh):
         cdf_sim_len = len(cdf_sim_jlow)
-    plt.fill_between(ana_res * cdf_bins[:cdf_sim_len].astype(np.float), cdf_sim_jlow[:cdf_sim_len].astype(np.float),
-                     cdf_sim_jhigh[:cdf_sim_len].astype(np.float), alpha=0.5, color='gray', edgecolor='w')
+    plt.fill_between(ana_res * cdf_bins[:cdf_sim_len].astype(float), cdf_sim_jlow[:cdf_sim_len].astype(float),
+                     cdf_sim_jhigh[:cdf_sim_len].astype(float), alpha=0.5, color='gray', edgecolor='w')
     # ax.set_xlim((0, 60))
     # plt.xlim(0, min((cdf_bins[len(cdf_jvals)], cdf_bins[len(cdf_sim_jmed)])))
     plt.xlim(0, 38)

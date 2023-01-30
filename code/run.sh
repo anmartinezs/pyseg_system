@@ -1,8 +1,11 @@
 #!/bin/bash
 set -ex
 
+## This file is only used for testing in OceanCode
+
 # Setting system global variables
 ls /deps/*
+ls -lrt ./
 export PATH=/deps/disperse/bin:$PATH
 export PYTHONPATH=/code/python:$PYTHONPATH
 

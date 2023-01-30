@@ -309,7 +309,7 @@ for (pkl, d_coord) in zip(input_pkls, del_coord):
                 print('of side B...')
         cloud, cloud_cids = net.get_cloud_clst_id(side, struc, eps)
         cloud = make_plane(cloud, coord=d_coord) * net.get_resolution()
-        clst = ConnDom(cloud, cloud_cids, np.asarray(box, dtype=np.float))
+        clst = ConnDom(cloud, cloud_cids, np.asarray(box, dtype=float))
         print('\t\t\tApplying threshold to clusters...')
         clst.threshold(th_npoints=cnp_th, th_areas=ca_th, th_den=cd_th, th_round=cr_th)
         print('\t\t\tGetting clusters centers of gravity...')
@@ -344,7 +344,7 @@ for (pkl, d_coord) in zip(input_pkls, del_coord):
     if clstring:
         mask = clst.get_del_mask()
         if not del_mask:
-            mask = np.ones(shape=mask.shape, dtype=np.bool)
+            mask = np.ones(shape=mask.shape, dtype=bool)
         set_clouds.insert_cloud(cloud, box, clst.get_clsts_list(), mask)
     else:
         set_clouds.insert_cloud(cloud, box, cards)

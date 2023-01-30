@@ -118,7 +118,7 @@ def pr_worker(pr_id, star, star_seg, sh_star, rows, settings, qu):
         if star.get_element('_rlnMicrographName', row) in tomos_l:
 
             # Scaling particle
-            out_shape = np.round(scale * np.asarray(img.shape, dtype=np.float)).astype(np.int)
+            out_shape = np.round(scale * np.asarray(img.shape, dtype=float)).astype(int)
             img_scaled = sp.ndimage.zoom(img, scale, order=1)
             img = ps.globals.get_sub_copy(img_scaled, out_shape/2, img.shape).astype(np.float32)
 

@@ -240,7 +240,7 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
                         h_cloud.append(coord)
                         h_cloud_cc.append(c_cc)
                 print('\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud)))
-                cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=np.int), np.asarray(h_cloud, dtype=np.float32)
+                cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=int), np.asarray(h_cloud, dtype=np.float32)
             else:
                 del_ids = coords_scale_supression(cloud, peak_ns/graph.get_resolution(), weights=cloud_cc)
                 h_cloud_ids, h_cloud, h_cloud_cc = list(), list(), list()
@@ -250,7 +250,7 @@ for (input_pkl, in_tomo_ref, in_seg, in_off, in_rot) in \
                         h_cloud.append(coord)
                         h_cloud_cc.append(cloud_cc[i])
                 print('\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud)))
-                cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=np.int), np.asarray(h_cloud, dtype=np.float32)
+                cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=int), np.asarray(h_cloud, dtype=np.float32)
             cloud_cc = np.asarray(h_cloud_cc, dtype=np.float32)
         elif del_v_sl:
             graph.threshold_vertices_list(cloud_ids, in_mode=True)

@@ -1008,9 +1008,9 @@ class MbFilaments(object):
 
         # Getting coordinates
         skel = self.__graph_in.get_skel()
-        hold_coords = np.zeros(shape=(len(ids), 3), dtype=np.float)
+        hold_coords = np.zeros(shape=(len(ids), 3), dtype=float)
         if card:
-            hold_cards = np.zeros(shape=len(ids), dtype=np.int)
+            hold_cards = np.zeros(shape=len(ids), dtype=int)
             for i, idx in enumerate(ids):
                 hold_coords[i, :] = skel.GetPoint(idx)
                 hold_cards[i] = conts[i].get_card()
@@ -1023,7 +1023,7 @@ class MbFilaments(object):
             coords = list()
             if card:
                 cards = list()
-            del_lut = np.ones(shape=hold_coords.shape[0], dtype=np.bool)
+            del_lut = np.ones(shape=hold_coords.shape[0], dtype=bool)
             for i, coord in enumerate(hold_coords):
                 if del_lut[i]:
                     coords.append(coord)
@@ -1037,9 +1037,9 @@ class MbFilaments(object):
                     for idx in eps_ids:
                         del_lut[idx] = False
             if card:
-                return np.asarray(coords, dtype=np.float), np.asarray(cards, dtype=np.int)
+                return np.asarray(coords, dtype=float), np.asarray(cards, dtype=int)
             else:
-                return np.asarray(coords, dtype=np.float)
+                return np.asarray(coords, dtype=float)
         else:
             if card:
                 return hold_conts, hold_cards
@@ -1076,8 +1076,8 @@ class MbFilaments(object):
 
         # Getting coordinates
         skel = self.__graph_in.get_skel()
-        hold_clsts = np.zeros(shape=len(clsts), dtype=np.int)
-        hold_coords = np.zeros(shape=(len(ids), 3), dtype=np.float)
+        hold_clsts = np.zeros(shape=len(clsts), dtype=int)
+        hold_coords = np.zeros(shape=(len(ids), 3), dtype=float)
         for i, idx in enumerate(ids):
             hold_coords[i, :] = skel.GetPoint(idx)
             hold_clsts[i] = clsts[i]
@@ -1086,7 +1086,7 @@ class MbFilaments(object):
         if eps is not None:
             coords = list()
             clsts_l = list()
-            del_lut = np.ones(shape=hold_coords.shape[0], dtype=np.bool)
+            del_lut = np.ones(shape=hold_coords.shape[0], dtype=bool)
             for i, coord in enumerate(hold_coords):
                 if del_lut[i]:
                     coords.append(coord)
@@ -1098,7 +1098,7 @@ class MbFilaments(object):
                     eps_ids = np.where(dists < eps)[0]
                     for idx in eps_ids:
                         del_lut[idx] = False
-            return np.asarray(coords, dtype=np.float), np.asarray(clsts_l, np.int)
+            return np.asarray(coords, dtype=float), np.asarray(clsts_l, int)
         else:
             return hold_coords, hold_clsts
 
@@ -1123,7 +1123,7 @@ class MbFilaments(object):
         skel = graph.get_skel()
 
         # Find tail vertices within slice
-        lut_ver = (-1) * np.ones(shape=graph.get_nid(), dtype=np.int)
+        lut_ver = (-1) * np.ones(shape=graph.get_nid(), dtype=int)
         cont = 0
         v_ids = list()
         for f in fils:
@@ -1156,7 +1156,7 @@ class MbFilaments(object):
         visitor = SubGraphVisitor(sgraph_id)
 
         # Find subgraphs
-        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=np.float)
+        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=float)
         for i, v in enumerate(vertices_gt):
             if sgraph_id[v] == 0:
                 gt.dfs_search(graph, v, visitor)
@@ -1187,7 +1187,7 @@ class MbFilaments(object):
         skel = graph.get_skel()
 
         # Find tail vertices within slice
-        lut_ver = np.zeros(shape=graph.get_nid(), dtype=np.int)
+        lut_ver = np.zeros(shape=graph.get_nid(), dtype=int)
         v_ids = list()
         for f in fils:
             pent = f.get_pen_tail()
@@ -1198,9 +1198,9 @@ class MbFilaments(object):
                 lut_ver[v_id] += 1
 
         # Finding coordinates
-        coords = np.zeros(shape=(len(v_ids), 3), dtype=np.float)
+        coords = np.zeros(shape=(len(v_ids), 3), dtype=float)
         if card:
-            cards = np.zeros(shape=len(v_ids), dtype=np.int)
+            cards = np.zeros(shape=len(v_ids), dtype=int)
             for i, v_id in enumerate(v_ids):
                 coords[i, :] = skel.GetPoint(v_id)
                 cards[i] = lut_ver[v_id]
@@ -1301,8 +1301,8 @@ class MbFilaments(object):
     def threshold_cdst_conts(self, dst_th):
 
         # Initialization
-        lut_keep_in = np.zeros(shape=len(self.__cont_in), dtype=np.bool)
-        lut_keep_out = np.zeros(shape=len(self.__cont_out), dtype=np.bool)
+        lut_keep_in = np.zeros(shape=len(self.__cont_in), dtype=bool)
+        lut_keep_out = np.zeros(shape=len(self.__cont_out), dtype=bool)
         res = self.__graph_in.get_resolution()
 
         # Get clouds
@@ -1354,7 +1354,7 @@ class MbFilaments(object):
             error_msg = 'Non-valid side.'
             raise pexceptions.PySegInputError(expr='cont_clusters_eu (MbFilaments)',
                                               msg=error_msg)
-        lut_conts = (-1) * np.ones(shape=graph.get_skel().GetNumberOfPoints(), dtype=np.int)
+        lut_conts = (-1) * np.ones(shape=graph.get_skel().GetNumberOfPoints(), dtype=int)
         inn_coords = list()
 
         # Finding inner vertices
@@ -1365,7 +1365,7 @@ class MbFilaments(object):
                 lut_conts[i_id] = n_conts
                 inn_coords.append(c.get_coords())
                 n_conts += 1
-        inn_coords = np.asarray(inn_coords, dtype=np.float)
+        inn_coords = np.asarray(inn_coords, dtype=float)
 
         # Affinity propagation
         aff = sklearn.cluster.AffinityPropagation(affinity='euclidean')
@@ -1413,7 +1413,7 @@ class MbFilaments(object):
         prop_id_v = graph_gt.vertex_properties[ps.globals.DPSTR_CELL]
         prop_fv_e = graph_gt.edge_properties[ps.globals.STR_FIELD_VALUE]
         prop_el_e = graph_gt.edge_properties[ps.globals.SGT_EDGE_LENGTH]
-        lut_conts = (-1) * np.ones(shape=graph.get_skel().GetNumberOfPoints(), dtype=np.int)
+        lut_conts = (-1) * np.ones(shape=graph.get_skel().GetNumberOfPoints(), dtype=int)
         inn_vertices = list()
         inn_dsts = list()
 
@@ -1428,10 +1428,10 @@ class MbFilaments(object):
                 inn_vertices.append(gt.find_vertex(graph_gt, prop_id_v, v_id)[0])
                 inn_dsts.append(fils[i].get_cont_length(conts[i].get_id()))
                 n_conts += 1
-        inn_dsts = np.asarray(inn_dsts, dtype=np.float)
+        inn_dsts = np.asarray(inn_dsts, dtype=float)
 
         # Getting affinity matrix
-        aff_mat = np.zeros(shape=(n_conts, n_conts), dtype=np.float)
+        aff_mat = np.zeros(shape=(n_conts, n_conts), dtype=float)
         if not approx:
             for i in range(n_conts):
                 s = inn_vertices[i]
@@ -1478,7 +1478,7 @@ class MbFilaments(object):
         #     c.set_clst_id(aff.labels_[lut_conts[c.get_id()]])
 
         # 2nd label based purely on connectivity
-        lbls2 = (-1) * np.ones(shape=n_conts, dtype=np.int)
+        lbls2 = (-1) * np.ones(shape=n_conts, dtype=int)
         cont_lst = np.arange(n_conts).tolist()
         lbl2 = 0
         while len(cont_lst) > 0:
@@ -1555,7 +1555,7 @@ class MbFilaments(object):
         graph_gt = graph_GT.get_gt()
         prop_id_v = graph_gt.vertex_properties[ps.globals.DPSTR_CELL]
         prop_el_e = graph_gt.edge_properties[ps.globals.SGT_EDGE_LENGTH]
-        lut_conts = (-2) * np.ones(shape=graph.get_skel().GetNumberOfPoints(), dtype=np.int)
+        lut_conts = (-2) * np.ones(shape=graph.get_skel().GetNumberOfPoints(), dtype=int)
         inn_vertices = list()
 
 
@@ -1571,7 +1571,7 @@ class MbFilaments(object):
         n_conts = len(l_conts)
 
         # Measure all distances at once
-        lut_det = np.zeros(shape=n_conts, dtype=np.bool)
+        lut_det = np.zeros(shape=n_conts, dtype=bool)
         id_c = 0
         # ids = np.random.randint(0, n_conts, n_conts)
         ids = np.arange(n_conts)
@@ -1619,7 +1619,7 @@ class MbFilaments(object):
 
         # In graph
         # Counting cardinality
-        lut_card = np.zeros(shape=self.__graph_in.get_skel().GetNumberOfPoints(), dtype=np.int)
+        lut_card = np.zeros(shape=self.__graph_in.get_skel().GetNumberOfPoints(), dtype=int)
         for c in self.__cont_in:
             lut_card[c.get_id()] += 1
         # Setting cardinality
@@ -1628,7 +1628,7 @@ class MbFilaments(object):
 
         # Out graph
         # Counting cardinality
-        lut_card = np.zeros(shape=self.__graph_out.get_skel().GetNumberOfPoints(), dtype=np.int)
+        lut_card = np.zeros(shape=self.__graph_out.get_skel().GetNumberOfPoints(), dtype=int)
         for c in self.__cont_out:
             lut_card[c.get_id()] += 1
         # Setting cardinality
@@ -1673,7 +1673,7 @@ class MbFilaments(object):
         else:
             # Inside
             # Loop for making vertices
-            lut = np.ones(shape=self.__graph_in.get_nid(), dtype=np.bool)
+            lut = np.ones(shape=self.__graph_in.get_nid(), dtype=bool)
             for i, f in enumerate(self.__fils_in):
                 c = self.__cont_in[i]
                 func = getattr(f, func_name)
@@ -1699,7 +1699,7 @@ class MbFilaments(object):
             self.__cont_in = hold_conts
             # Outside
             # Loop for making vertices
-            lut = np.ones(shape=self.__graph_out.get_nid(), dtype=np.bool)
+            lut = np.ones(shape=self.__graph_out.get_nid(), dtype=bool)
             for i, f in enumerate(self.__fils_out):
                 c = self.__cont_out[i]
                 func = getattr(f, func_name)
@@ -1755,7 +1755,7 @@ class MbFilaments(object):
         else:
             # Inside
             # Loop for making vertices
-            lut = np.ones(shape=self.__graph_in.get_nid(), dtype=np.bool)
+            lut = np.ones(shape=self.__graph_in.get_nid(), dtype=bool)
             for i, f in enumerate(self.__fils_in):
                 c = self.__cont_in[i]
                 func = getattr(c, func_name)
@@ -1778,7 +1778,7 @@ class MbFilaments(object):
             self.__cont_in = hold_conts
             # Outside
             # Loop for making vertices
-            lut = np.ones(shape=self.__graph_out.get_nid(), dtype=np.bool)
+            lut = np.ones(shape=self.__graph_out.get_nid(), dtype=bool)
             for i, f in enumerate(self.__fils_out):
                 c = self.__cont_out[i]
                 func = getattr(c, func_name)
@@ -1950,7 +1950,7 @@ class MbFilaments(object):
         mb_ids = np.where(self.__seg == MB_LBL)
         n_x, n_y, n_z = self.__seg.shape
         for i in range(len(mb_ids[0])):
-            ids = np.asarray((mb_ids[0][i], mb_ids[1][i], mb_ids[2][i]), dtype=np.int)
+            ids = np.asarray((mb_ids[0][i], mb_ids[1][i], mb_ids[2][i]), dtype=int)
             x_min, y_min, z_min = ids - 2
             x_max, y_max, z_max = ids + 2
             if x_min <= 0:
@@ -1972,18 +1972,18 @@ class MbFilaments(object):
                 surf_cloud_out.append(ids)
         # Compute normal for every contact id
         if len(self.__cont_in) > 0:
-            surf_cloud_in = np.asarray(surf_cloud_in, dtype=np.float)
+            surf_cloud_in = np.asarray(surf_cloud_in, dtype=float)
             field_in = self.__compute_normal_field(surf_cloud_in, self.__seg, MB_IN_LBL, nrad)
-            c_in_ids = np.asarray(c_in_ids, dtype=np.int)
+            c_in_ids = np.asarray(c_in_ids, dtype=int)
             c_max = c_in_ids.max()
-            lut_ids = np.zeros(shape=c_max+1, dtype=np.bool)
-            lut_v = np.zeros(shape=(c_max+1, 3), dtype=np.float)
+            lut_ids = np.zeros(shape=c_max+1, dtype=bool)
+            lut_v = np.zeros(shape=(c_max+1, 3), dtype=float)
             skel = self.__graph_in.get_skel()
             for ct in self.__cont_in:
                 ct_id = ct.get_id()
                 # Find normal only if it has not been already computed
                 if not lut_ids[ct_id]:
-                    point = np.asarray(skel.GetPoint(ct_id), dtype=np.float)
+                    point = np.asarray(skel.GetPoint(ct_id), dtype=float)
                     norm = evaluate_field_3x3(field_in, point)
                     # Normalization
                     n_norm = np.sqrt(np.sum(norm * norm))
@@ -1995,18 +1995,18 @@ class MbFilaments(object):
                 # Set normal in contact point
                 ct.set_norm(lut_v[ct_id])
         if len(self.__cont_out) > 0:
-            surf_cloud_out = np.asarray(surf_cloud_out, dtype=np.float)
+            surf_cloud_out = np.asarray(surf_cloud_out, dtype=float)
             field_out = self.__compute_normal_field(surf_cloud_out, self.__seg, MB_OUT_LBL, nrad)
-            c_out_ids = np.asarray(c_out_ids, dtype=np.int)
+            c_out_ids = np.asarray(c_out_ids, dtype=int)
             c_max = c_out_ids.max()
-            lut_ids = np.zeros(shape=c_max+1, dtype=np.bool)
-            lut_v = np.zeros(shape=(c_max+1, 3), dtype=np.float)
+            lut_ids = np.zeros(shape=c_max+1, dtype=bool)
+            lut_v = np.zeros(shape=(c_max+1, 3), dtype=float)
             skel = self.__graph_out.get_skel()
             for ct in self.__cont_out:
                 ct_id = ct.get_id()
                 # Find normal only if it has not been already computed
                 if not lut_ids[ct_id]:
-                    point = np.asarray(skel.GetPoint(ct_id), dtype=np.float)
+                    point = np.asarray(skel.GetPoint(ct_id), dtype=float)
                     norm = evaluate_field_3x3(field_out, point)
                     # Normalization
                     n_norm = np.sqrt(np.sum(norm * norm))
@@ -2020,7 +2020,7 @@ class MbFilaments(object):
 
     def __filter_graphs(self):
 
-        lut_del = np.ones(shape=self.__graph_in.get_nid(), dtype=np.bool)
+        lut_del = np.ones(shape=self.__graph_in.get_nid(), dtype=bool)
         for f in self.__fils_in:
             for v in f.get_vertices():
                 lut_del[v.get_id()] = False
@@ -2074,7 +2074,7 @@ class MbFilaments(object):
         v /= vnorm
 
         # Compute smallest angle between this vector and missing wedge axis
-        n = np.asarray((0, 0, 1), dtype=np.float)
+        n = np.asarray((0, 0, 1), dtype=float)
         nnorm = math.sqrt((n * n).sum())
         if nnorm <= 0:
             return .0
@@ -2092,7 +2092,7 @@ class MbFilaments(object):
 
         # Computing seed normals
         n_x, n_y, n_z = seg.shape
-        n_field = np.zeros(shape=(n_x, n_y, n_z, 3), dtype=np.float)
+        n_field = np.zeros(shape=(n_x, n_y, n_z, 3), dtype=float)
         for p in cloud:
             hold = cloud - p
             hold = np.sqrt(np.sum(hold * hold, axis=1))
@@ -2136,8 +2136,8 @@ class ConnDom(object):
     # lbls: label (integers) for every point for defining the sets
     # box: box with encloses the cloud
     def __init__(self, cloud, lbls, box):
-        self.__cloud = np.asarray(cloud, dtype=np.float)
-        self.__lbls = np.asarray(lbls, dtype=np.int)
+        self.__cloud = np.asarray(cloud, dtype=float)
+        self.__lbls = np.asarray(lbls, dtype=int)
         self.__box = box
         self.__chulls = list()
         self.__c_clouds = list()
@@ -2161,13 +2161,13 @@ class ConnDom(object):
         return copy.deepcopy(self.__c_clouds)
 
     def get_clst_npoints(self):
-        npoints = np.zeros(shape=len(self.__c_clouds), dtype=np.int)
+        npoints = np.zeros(shape=len(self.__c_clouds), dtype=int)
         for i, clst in enumerate(self.__c_clouds):
             npoints[i] = len(clst)
         return npoints
 
     def get_clst_areas(self):
-        areas = np.zeros(shape=len(self.__moments), dtype=np.float)
+        areas = np.zeros(shape=len(self.__moments), dtype=float)
         for i, m in enumerate(self.__moments):
             areas[i] = m['m00']
         return areas
@@ -2175,11 +2175,11 @@ class ConnDom(object):
     def get_clst_densities(self):
         npoints = self.get_clst_npoints()
         areas = self.get_clst_areas()
-        return np.asarray(npoints, dtype=np.float) / areas
+        return np.asarray(npoints, dtype=float) / areas
 
     # Computing clusters' Center of Gravity
     def get_clst_cg(self):
-        cent = np.zeros(shape=(len(self.__moments), 2), dtype=np.float)
+        cent = np.zeros(shape=(len(self.__moments), 2), dtype=float)
         for i, m in enumerate(self.__moments):
             cent[i, 0] = m['m10'] / m['m00']
             cent[i, 1] = m['m01'] / m['m00']
@@ -2187,7 +2187,7 @@ class ConnDom(object):
 
     # Computing clusters' Semi-major axes
     def get_clst_axes(self):
-        axes = np.zeros(shape=(len(self.__moments), 2), dtype=np.float)
+        axes = np.zeros(shape=(len(self.__moments), 2), dtype=float)
         for i, m in enumerate(self.__moments):
             hold = m['mu20'] - m['mu02']
             hold *= hold
@@ -2208,14 +2208,14 @@ class ConnDom(object):
 
     # Computing clusters' orientation
     def get_clst_orient(self):
-        orients = np.zeros(shape=len(self.__moments), dtype=np.float)
+        orients = np.zeros(shape=len(self.__moments), dtype=float)
         for i, m in enumerate(self.__moments):
             orients[i] = 0.5 * math.atan2(2.*m['mu11'], m['mu20']-m['mu02'])
         return orients
 
     # Computing clusters' roundness
     def get_clst_round(self):
-        rounds = np.zeros(shape=len(self.__chulls), dtype=np.float)
+        rounds = np.zeros(shape=len(self.__chulls), dtype=float)
         for i, chull in enumerate(self.__chulls):
             # Computing perimeter
             chull_hold = np.asarray(chull, np.uint8)
@@ -2235,7 +2235,7 @@ class ConnDom(object):
 
      # Computing clusters' eccentricity
     def get_clst_ecc(self):
-        eccs = np.zeros(shape=len(self.__moments), dtype=np.float)
+        eccs = np.zeros(shape=len(self.__moments), dtype=float)
         for i, m in enumerate(self.__moments):
             hold1 = m['mu20'] - m['mu02']
             hold2 = m['mu20'] + m['mu02']
@@ -2256,12 +2256,12 @@ class ConnDom(object):
         # Initialization
         # Get the number of different labels
         set_lbls = np.array(list(set(self.__lbls)))
-        n_cgs = np.zeros(shape=(len(set_lbls), 2), dtype=np.float)
+        n_cgs = np.zeros(shape=(len(set_lbls), 2), dtype=float)
         # Mask for checking the overlapping
         off_x = math.floor(self.__box[1])
         off_y = math.floor(self.__box[0])
         m, n = math.ceil(self.__box[3]) - off_x + 1, math.ceil(self.__box[2]) - off_y + 1
-        mask = np.zeros(shape=(m, n), dtype=np.bool)
+        mask = np.zeros(shape=(m, n), dtype=bool)
 
         # Loop for clusters
         for i, lbl in enumerate(set_lbls):
@@ -2281,7 +2281,7 @@ class ConnDom(object):
                 raise pexceptions.PySegTransitionError(expr='get_rand_clsts (ConnDom)',
                                                        msg=error_msg)
             # Keep the best try (lower overlapping)
-            h_cgs = np.zeros(shape=(tries, 2), dtype=np.float)
+            h_cgs = np.zeros(shape=(tries, 2), dtype=float)
             min_ov = MAX_FLOAT
             h_cg = None
             h_chull = np.zeros(shape=mask.shape, dtype=mask.dtype)
@@ -2297,7 +2297,7 @@ class ConnDom(object):
                 r_cloud[:, 0] = f_cloud[:, 0]*cosr - f_cloud[:, 1]*sinr
                 r_cloud[:, 1] = f_cloud[:, 0]*sinr + f_cloud[:, 1]*cosr
                 # Translation to randomly already selected center
-                n_cg = np.asarray((cg_x, cg_y) , dtype=np.float)
+                n_cg = np.asarray((cg_x, cg_y) , dtype=float)
                 v = n_cg - cg
                 t_cloud = r_cloud + v
                 chull, _ = self.__compute_chull_no_bound(t_cloud)
@@ -2326,7 +2326,7 @@ class ConnDom(object):
 
         # Initialization
         # Generate random contacts
-        contacts = np.zeros(shape=(self.__cloud.shape[0], 2), dtype=np.float)
+        contacts = np.zeros(shape=(self.__cloud.shape[0], 2), dtype=float)
         hold = np.random.rand(self.__cloud.shape[0], 2)
         # Fit to box
         off_x = math.floor(self.__box[1])
@@ -2360,14 +2360,14 @@ class ConnDom(object):
         off_x = math.floor(self.__box[1])
         off_y = math.floor(self.__box[0])
         m, n = int(math.ceil(self.__box[3]) - off_x + 1), int(math.ceil(self.__box[2]) - off_y + 1)
-        img = np.zeros(shape=(m, n), dtype=np.float)
+        img = np.zeros(shape=(m, n), dtype=float)
         if prop is not None:
             if isinstance(prop, str):
                 values = getattr(self, 'get_clst_'+prop)()
             else:
                 values = prop
         else:
-            values = np.ones(shape=len(self.__chulls), dtype=np.float)
+            values = np.ones(shape=len(self.__chulls), dtype=float)
 
         # Printing the convex hull
         for i, chull in enumerate(self.__chulls):
@@ -2431,13 +2431,13 @@ class ConnDom(object):
         # Translating cloud coordinates
         off_x = math.floor(self.__box[1])
         off_y = math.floor(self.__box[0])
-        c_cloud = np.zeros(shape=cloud.shape, dtype=np.float)
+        c_cloud = np.zeros(shape=cloud.shape, dtype=float)
         c_cloud[:, 0] = cloud[:, 0] - off_x
         c_cloud[:, 1] = cloud[:, 1] - off_y
 
         # Loop for computing border for every convex hull
-        border = np.zeros(shape=cgs.shape[0], dtype=np.float)
-        n_pts = np.zeros(shape=cgs.shape[0], dtype=np.int)
+        border = np.zeros(shape=cgs.shape[0], dtype=float)
+        n_pts = np.zeros(shape=cgs.shape[0], dtype=int)
         if do_iilate:
             for i, chull in enumerate(self.__chulls):
                 d_chull = sp.ndimage.morphology.binary_dilation(chull,
@@ -2469,11 +2469,11 @@ class ConnDom(object):
     def __build(self):
 
         # Initialization
-        lut_lbls = np.ones(shape=self.__lbls.max()+1, dtype=np.bool)
+        lut_lbls = np.ones(shape=self.__lbls.max()+1, dtype=bool)
         off_x = int(math.floor(self.__box[1]))
         off_y = int(math.floor(self.__box[0]))
         m, n = int(math.ceil(self.__box[3]) - off_x + 1), int(math.ceil(self.__box[2]) - off_y + 1)
-        self.__del_mask = np.ones(shape=(m, n), dtype=np.bool)
+        self.__del_mask = np.ones(shape=(m, n), dtype=bool)
 
         # Loop for every label
         for lbl in self.__lbls:
@@ -2518,8 +2518,8 @@ class ConnDom(object):
                 self.__del_mask[chull] = False
 
         # Update class attributes
-        self.__cloud = np.asarray(hold_clouds, dtype=np.float)
-        self.__lbls = np.asarray(hold_lbls, dtype=np.int)
+        self.__cloud = np.asarray(hold_clouds, dtype=float)
+        self.__lbls = np.asarray(hold_lbls, dtype=int)
         self.__chulls = list(hold_chulls)
         self.__c_clouds = list(hold_c_clouds)
         self.__moments = list(hold_moments)
@@ -2533,10 +2533,10 @@ class ConnDom(object):
         off_x = int(math.floor(self.__box[1]))
         off_y = int(math.floor(self.__box[0]))
         m, n = int(math.ceil(self.__box[3]) - off_x + 2), int(math.ceil(self.__box[2]) - off_y + 2)
-        img = np.zeros(shape=(m, n), dtype=np.bool)
+        img = np.zeros(shape=(m, n), dtype=bool)
 
         # Filling holding image
-        hold = np.asarray(np.round(c_cloud), dtype=np.int)
+        hold = np.asarray(np.round(c_cloud), dtype=int)
         hold[:, 0] -= off_y
         hold[:, 1] -= off_x
         excep = False
@@ -2551,7 +2551,7 @@ class ConnDom(object):
 
         # Computing the convex hull
         if p_count > 0:
-            chull = np.asarray(convex_hull_image(img), dtype=np.bool)
+            chull = np.asarray(convex_hull_image(img), dtype=bool)
         else:
             chull = img
 
@@ -2563,10 +2563,10 @@ class ConnDom(object):
         off_x = int(math.floor(self.__box[1]))
         off_y = int(math.floor(self.__box[0]))
         m, n = int(math.ceil(self.__box[3]) - off_x + 1), int(math.ceil(self.__box[2]) - off_y + 1)
-        img = np.zeros(shape=(m, n), dtype=np.bool)
+        img = np.zeros(shape=(m, n), dtype=bool)
 
         # Filling holding image
-        hold = np.asarray(np.round(c_cloud), dtype=np.int)
+        hold = np.asarray(np.round(c_cloud), dtype=int)
         hold[:, 0] -= off_y
         hold[:, 1] -= off_x
         for p in hold:
@@ -2576,7 +2576,7 @@ class ConnDom(object):
             #     print '\tWarning: __compute_chull IndexError'
 
         # Computing the convex hull
-        chull = np.asarray(convex_hull_image(img), dtype=np.bool)
+        chull = np.asarray(convex_hull_image(img), dtype=bool)
 
         return chull
 
@@ -2601,7 +2601,7 @@ class ConnDom(object):
             # Is on the polygon?
             if trilin2d(chull, pt) > 0.:
                 # Getting border closest point
-                pi = np.round(p).astype(np.int)
+                pi = np.round(p).astype(int)
                 idy, idx = ids[0, pi[1], pi[0]], ids[1, pi[1], pi[0]]
                 b = [idx, idy]
                 # Distance point to center

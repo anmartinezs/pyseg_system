@@ -74,7 +74,7 @@ def do_loc_bet(input_file, output_dir, key_p, val_p, dist_max, dist_min, key_e, 
     prop_s = graph_gt.new_vertex_property('int')
     prop_p = graph_gt.vertex_properties[key_p]
     if key_p is None:
-        prop_s.get_array()[:] = np.ones(shape=graph_gt.num_vertices, dtype=np.int)
+        prop_s.get_array()[:] = np.ones(shape=graph_gt.num_vertices, dtype=int)
     else:
         for v in graph_gt.vertices():
             if prop_p[v] == val_p:

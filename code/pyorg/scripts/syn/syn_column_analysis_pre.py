@@ -130,7 +130,7 @@ def compute_pvals(exp_med, sims):
 
 # Check if a set of particles (rows) are aligned from the number of neighbours
 def are_aligned(neighs, mask):
-    aligns = np.zeros(shape=len(neighs), dtype=np.bool)
+    aligns = np.zeros(shape=len(neighs), dtype=bool)
     for i, p_neigh in enumerate(neighs):
         if ((p_neigh[mask]>0).sum()) > 0:
             aligns[i] = True
@@ -969,9 +969,9 @@ for idx in sort_ids:
         count += 1
 plt.boxplot(list(lst_sim.values()), positions=list(lst_sim.keys()), showfliers=False, notch=True, whis=[5, 95])
 plt.plot(list(lst_x.values()), list(lst.values()), color='k', marker='*', linestyle='')
-l_ves = np.asarray(list(lst_x.values()), dtype=np.int).reshape(-1, 1)
-l_col = np.asarray(list(lst.values()), dtype=np.int).reshape(-1, 1)
-l_col_sim = np.asarray(list(lst_sim_mn.values()), dtype=np.int).reshape(-1, 1)
+l_ves = np.asarray(list(lst_x.values()), dtype=int).reshape(-1, 1)
+l_col = np.asarray(list(lst.values()), dtype=int).reshape(-1, 1)
+l_col_sim = np.asarray(list(lst_sim_mn.values()), dtype=int).reshape(-1, 1)
 regr_0, regr_1 = linear_model.LinearRegression(fit_intercept=False), linear_model.LinearRegression(fit_intercept=False)
 regr_0.fit(l_ves, l_col), regr_1.fit(l_ves, l_col_sim)
 l_col_r, l_col_sim_r = regr_0.predict(l_ves), regr_1.predict(l_ves)
@@ -1018,9 +1018,9 @@ for idx in sort_ids:
         count += 1
 plt.boxplot(list(lst_sim.values()), positions=list(lst_sim.keys()), showfliers=False, notch=True, whis=[5, 95])
 plt.plot(list(lst_x.values()), list(lst.values()), color='k', marker='*', linestyle='')
-l_ves = np.asarray(list(lst_x.values()), dtype=np.int).reshape(-1, 1)
-l_col = np.asarray(list(lst.values()), dtype=np.int).reshape(-1, 1)
-l_col_sim = np.asarray(list(lst_sim_mn.values()), dtype=np.int).reshape(-1, 1)
+l_ves = np.asarray(list(lst_x.values()), dtype=int).reshape(-1, 1)
+l_col = np.asarray(list(lst.values()), dtype=int).reshape(-1, 1)
+l_col_sim = np.asarray(list(lst_sim_mn.values()), dtype=int).reshape(-1, 1)
 regr_0, regr_1 = linear_model.LinearRegression(fit_intercept=False), linear_model.LinearRegression(fit_intercept=False)
 regr_0.fit(l_ves, l_col), regr_1.fit(l_ves, l_col_sim)
 l_col_r, l_col_sim_r = regr_0.predict(l_ves), regr_1.predict(l_ves)
@@ -1066,9 +1066,9 @@ for idx in sort_ids:
         count += 1
 plt.boxplot(list(lst_sim.values()), positions=list(lst_sim.keys()), showfliers=False, notch=True, whis=[5, 95])
 plt.plot(list(lst_x.values()), list(lst.values()), color='k', marker='*', linestyle='')
-l_ves = np.asarray(list(lst_x.values()), dtype=np.int).reshape(-1, 1)
-l_col = np.asarray(list(lst.values()), dtype=np.int).reshape(-1, 1)
-l_col_sim = np.asarray(list(lst_sim_mn.values()), dtype=np.int).reshape(-1, 1)
+l_ves = np.asarray(list(lst_x.values()), dtype=int).reshape(-1, 1)
+l_col = np.asarray(list(lst.values()), dtype=int).reshape(-1, 1)
+l_col_sim = np.asarray(list(lst_sim_mn.values()), dtype=int).reshape(-1, 1)
 regr_0, regr_1 = linear_model.LinearRegression(fit_intercept=False), linear_model.LinearRegression(fit_intercept=False)
 regr_0.fit(l_ves, l_col), regr_1.fit(l_ves, l_col_sim)
 l_col_r, l_col_sim_r = regr_0.predict(l_ves), regr_1.predict(l_ves)
@@ -1097,20 +1097,20 @@ tot_occ, tot_nc_a12, tot_areas = 0, 0, 0
 tot_np_l1, tot_np_l2, tot_np_l3 = 0, 0, 0
 tot_npc_l1, tot_npc_l2, tot_npc_l3 = 0, 0, 0
 tot_nst, tot_scat, tot_scta = 0, 0, 0
-ncs_sims = np.zeros(shape=p_nsims, dtype=np.float)
-nsc_sims = np.zeros(shape=p_nsims, dtype=np.float)
-den_sims = np.zeros(shape=p_nsims, dtype=np.float)
-denv_sims = np.zeros(shape=p_nsims, dtype=np.float)
-dent_sims = np.zeros(shape=p_nsims, dtype=np.float)
-occ_sims = np.zeros(shape=p_nsims, dtype=np.float)
-npc_l1_sims = np.zeros(shape=p_nsims, dtype=np.float)
-npc_l2_sims = np.zeros(shape=p_nsims, dtype=np.float)
-npc_l3_sims = np.zeros(shape=p_nsims, dtype=np.float)
-nca_sims = np.zeros(shape=p_nsims, dtype=np.float)
-nca_sims2 = np.zeros(shape=p_nsims, dtype=np.float)
-nst_sims = np.zeros(shape=p_nsims, dtype=np.float)
-scat_sims = np.zeros(shape=p_nsims, dtype=np.float)
-scta_sims = np.zeros(shape=p_nsims, dtype=np.float)
+ncs_sims = np.zeros(shape=p_nsims, dtype=float)
+nsc_sims = np.zeros(shape=p_nsims, dtype=float)
+den_sims = np.zeros(shape=p_nsims, dtype=float)
+denv_sims = np.zeros(shape=p_nsims, dtype=float)
+dent_sims = np.zeros(shape=p_nsims, dtype=float)
+occ_sims = np.zeros(shape=p_nsims, dtype=float)
+npc_l1_sims = np.zeros(shape=p_nsims, dtype=float)
+npc_l2_sims = np.zeros(shape=p_nsims, dtype=float)
+npc_l3_sims = np.zeros(shape=p_nsims, dtype=float)
+nca_sims = np.zeros(shape=p_nsims, dtype=float)
+nca_sims2 = np.zeros(shape=p_nsims, dtype=float)
+nst_sims = np.zeros(shape=p_nsims, dtype=float)
+scat_sims = np.zeros(shape=p_nsims, dtype=float)
+scta_sims = np.zeros(shape=p_nsims, dtype=float)
 for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     if len(nc_sim) <= 0:
         continue
@@ -1370,7 +1370,7 @@ plt.ylabel('% of columns overlapped')
 # plt.xlabel('Column probability per tether')
 hold_val = 100. * (tot_scat / float(tot_nsc))
 plt.bar(1, hold_val, BAR_WIDTH, color='blue', linewidth=2, edgecolor='k')
-hold_arr = 100. * (scat_sims.astype(np.float) / nsc_sims.astype(np.float))
+hold_arr = 100. * (scat_sims.astype(float) / nsc_sims.astype(float))
 ic_low = np.percentile(hold_sims, p_per)
 ic_med = np.percentile(hold_sims, 50)
 ic_high = np.percentile(hold_sims, 100-p_per)
@@ -1379,7 +1379,7 @@ plt.errorbar(2, ic_med, yerr=np.asarray([[ic_med - ic_low, ic_high - ic_med], ])
              ecolor='k', elinewidth=4, capthick=4, capsize=8)
 hold_val = 100. * (tot_scta / float(tot_nst))
 plt.bar(4, hold_val, BAR_WIDTH, color='red', linewidth=2, edgecolor='k')
-hold_arr = 100. * (scta_sims.astype(np.float) / nst_sims.astype(np.float))
+hold_arr = 100. * (scta_sims.astype(float) / nst_sims.astype(float))
 ic_low = np.percentile(hold_sims, p_per)
 ic_med = np.percentile(hold_sims, 50)
 ic_high = np.percentile(hold_sims, 100-p_per)
@@ -1407,11 +1407,11 @@ print('\t\t-Gathering tomogram simulations: ')
 tot_ctrl_nc, tot_ctrl_nc12, tot_ctrl_nc13, tot_ctrl_vol, tot_ctrl_ves, tot_ctrl_teth = 0, 0, 0, 0, 0, 0
 tot_stim_nc, tot_stim_nc12, tot_stim_nc13, tot_stim_vol, tot_stim_ves, tot_stim_teth = 0, 0, 0, 0, 0, 0
 tot_ctrl_occ, tot_stim_occ, nc_a12_ctrl, nc_a12_stim, tot_ctrl_areas, tot_stim_areas = 0, 0, 0, 0, 0, 0
-ncs_ctrl_sims, ncs_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-den_ctrl_sims, den_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-denv_ctrl_sims, denv_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-dent_ctrl_sims, dent_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-occ_ctrl_sims, occ_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
+ncs_ctrl_sims, ncs_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+den_ctrl_sims, den_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+denv_ctrl_sims, denv_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+dent_ctrl_sims, dent_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+occ_ctrl_sims, occ_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
 for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     tkey_hold = os.path.split(tkey)[1].split('_')
     tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]

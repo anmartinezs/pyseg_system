@@ -159,12 +159,12 @@ class NetFilaments(object):
     def store_fils_in_graph(self):
 
         # Compute filament properties
-        len_a = np.zeros(shape=len(self.__fils), dtype=np.float)
-        ct_a = np.zeros(shape=len(self.__fils), dtype=np.float)
-        sin_a = np.zeros(shape=len(self.__fils), dtype=np.float)
-        fness_a = np.zeros(shape=len(self.__fils), dtype=np.float)
-        smo_a = np.zeros(shape=len(self.__fils), dtype=np.float)
-        mc_a = np.zeros(shape=len(self.__fils), dtype=np.float)
+        len_a = np.zeros(shape=len(self.__fils), dtype=float)
+        ct_a = np.zeros(shape=len(self.__fils), dtype=float)
+        sin_a = np.zeros(shape=len(self.__fils), dtype=float)
+        fness_a = np.zeros(shape=len(self.__fils), dtype=float)
+        smo_a = np.zeros(shape=len(self.__fils), dtype=float)
+        mc_a = np.zeros(shape=len(self.__fils), dtype=float)
         for i, f in enumerate(self.__fils):
             len_a[i] = f.get_length()
             ct_a[i] = f.get_total_curvature()
@@ -178,32 +178,32 @@ class NetFilaments(object):
         if s_len > 0:
             len_a /= s_len
         else:
-            len_a = (-1) * np.ones(shape=len(self.__fils), dtype=np.float)
+            len_a = (-1) * np.ones(shape=len(self.__fils), dtype=float)
         s_ct = ct_a.sum()
         if s_len > 0:
             ct_a = 1 - (ct_a/s_ct)
         else:
-            ct_a = (-1) * np.ones(shape=len(self.__fils), dtype=np.float)
+            ct_a = (-1) * np.ones(shape=len(self.__fils), dtype=float)
         s_sin = sin_a.sum()
         if s_sin > 0:
             sin_a = 1 - (sin_a/s_sin)
         else:
-            sin_a = (-1) * np.ones(shape=len(self.__fils), dtype=np.float)
+            sin_a = (-1) * np.ones(shape=len(self.__fils), dtype=float)
         s_fness = fness_a.sum()
         if s_fness > 0:
             fness_a = 1 - (fness_a/s_fness)
         else:
-            fness_a = (-1) * np.ones(shape=len(self.__fils), dtype=np.float)
+            fness_a = (-1) * np.ones(shape=len(self.__fils), dtype=float)
         s_smo = smo_a.sum()
         if s_smo > 0:
             smo_a /= s_smo
         else:
-            smo_a = (-1) * np.ones(shape=len(self.__fils), dtype=np.float)
+            smo_a = (-1) * np.ones(shape=len(self.__fils), dtype=float)
         s_mc = mc_a.sum()
         if s_mc > 0:
             mc_a = 1 - (mc_a / s_mc)
         else:
-            mc_a = (-1) * np.ones(shape=len(self.__fils), dtype=np.float)
+            mc_a = (-1) * np.ones(shape=len(self.__fils), dtype=float)
 
         # Insert the new properties
         len_id = self.__graph.add_prop(STR_FIL_LEN, 'float', 1, def_val=0.)
@@ -214,48 +214,48 @@ class NetFilaments(object):
         mc_id = self.__graph.add_prop(STR_FIL_MC, 'float', 1, def_val=0.)
 
         # Accumulate property into vertices and edges
-        n_lut = np.zeros(shape=self.__graph.get_nid(), dtype=np.float)
+        n_lut = np.zeros(shape=self.__graph.get_nid(), dtype=float)
         for i, fil in enumerate(self.__fils):
             for v in fil.get_vertices():
                 v_id = v.get_id()
                 n_lut[v_id] += 1.
-                hold_t = self.__graph.get_prop_entry_fast(len_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(len_id, v_id, 1, float)
                 hold = hold_t[0] + len_a[i]
                 self.__graph.set_prop_entry_fast(len_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(ct_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(ct_id, v_id, 1, float)
                 hold = hold_t[0] + ct_a[i]
                 self.__graph.set_prop_entry_fast(ct_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(sin_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(sin_id, v_id, 1, float)
                 hold = hold_t[0] + sin_a[i]
                 self.__graph.set_prop_entry_fast(sin_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(fness_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(fness_id, v_id, 1, float)
                 hold = hold_t[0] + fness_a[i]
                 self.__graph.set_prop_entry_fast(fness_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(smo_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(smo_id, v_id, 1, float)
                 hold = hold_t[0] + smo_a[i]
                 self.__graph.set_prop_entry_fast(smo_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(mc_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(mc_id, v_id, 1, float)
                 hold = hold_t[0] + mc_a[i]
                 self.__graph.set_prop_entry_fast(mc_id, (hold,), v_id, 1)
             for e in fil.get_edges():
                 e_id = e.get_id()
                 n_lut[e_id] += 1.
-                hold_t = self.__graph.get_prop_entry_fast(len_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(len_id, e_id, 1, float)
                 hold = hold_t[0] + len_a[i]
                 self.__graph.set_prop_entry_fast(len_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(ct_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(ct_id, e_id, 1, float)
                 hold = hold_t[0] + ct_a[i]
                 self.__graph.set_prop_entry_fast(ct_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(sin_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(sin_id, e_id, 1, float)
                 hold = hold_t[0] + sin_a[i]
                 self.__graph.set_prop_entry_fast(sin_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(fness_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(fness_id, e_id, 1, float)
                 hold = hold_t[0] + fness_a[i]
                 self.__graph.set_prop_entry_fast(fness_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(smo_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(smo_id, e_id, 1, float)
                 hold = hold_t[0] + smo_a[i]
                 self.__graph.set_prop_entry_fast(smo_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(mc_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(mc_id, e_id, 1, float)
                 hold = hold_t[0] + mc_a[i]
                 self.__graph.set_prop_entry_fast(mc_id, (hold,), e_id, 1)
 
@@ -264,44 +264,44 @@ class NetFilaments(object):
             v_id = v.get_id()
             n_val = n_lut[v_id]
             if n_val > 0.:
-                hold_t = self.__graph.get_prop_entry_fast(len_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(len_id, v_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(len_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(ct_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(ct_id, v_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(ct_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(sin_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(sin_id, v_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(sin_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(fness_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(fness_id, v_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(fness_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(smo_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(smo_id, v_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(smo_id, (hold,), v_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(mc_id, v_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(mc_id, v_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(mc_id, (hold,), v_id, 1)
         for e in self.__graph.get_edges_list():
             e_id = e.get_id()
             n_val = n_lut[e_id]
             if n_val > 0.:
-                hold_t = self.__graph.get_prop_entry_fast(len_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(len_id, e_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(len_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(ct_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(ct_id, e_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(ct_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(sin_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(sin_id, e_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(sin_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(fness_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(fness_id, e_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(fness_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(smo_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(smo_id, e_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(smo_id, (hold,), e_id, 1)
-                hold_t = self.__graph.get_prop_entry_fast(mc_id, e_id, 1, np.float)
+                hold_t = self.__graph.get_prop_entry_fast(mc_id, e_id, 1, float)
                 hold = hold_t[0] / n_val
                 self.__graph.set_prop_entry_fast(mc_id, (hold,), e_id, 1)
 
@@ -318,7 +318,7 @@ class NetFilaments(object):
 
         # Visiting procedure initialization
         n_vertices = graph_gt.num_vertices()
-        connt = np.zeros(shape=(n_vertices, n_vertices), dtype=np.bool)
+        connt = np.zeros(shape=(n_vertices, n_vertices), dtype=bool)
 
         # Main loop for finding filaments at every vertex
         for source in graph_gt.vertices():
@@ -492,7 +492,7 @@ class NetFilamentsSyn(object):
     def filter_graph_mcf(self, graph, mode='in'):
 
         # Build network vertices LUT
-        lut = np.zeros(shape=graph.get_nid(), dtype=np.bool)
+        lut = np.zeros(shape=graph.get_nid(), dtype=bool)
         for f in self.__fils:
             for v_id in f.get_vertex_ids():
                 try:

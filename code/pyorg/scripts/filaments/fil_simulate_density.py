@@ -137,7 +137,7 @@ if in_star is not None:
         short_key = fkey[:short_key_idx]
         lists_dic_rows[short_key] = row
 else:
-    htomo = TomoFilaments('void_t1', lbl=1, voi=np.ones(shape=in_tomo_sz, dtype=np.bool),
+    htomo = TomoFilaments('void_t1', lbl=1, voi=np.ones(shape=in_tomo_sz, dtype=bool),
                           res=in_tomo_res, rad=in_tomo_frad)
     hltomo = ListTomoFilaments()
     hltomo.add_tomo(htomo)

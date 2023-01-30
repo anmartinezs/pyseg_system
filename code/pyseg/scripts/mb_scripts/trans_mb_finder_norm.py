@@ -206,9 +206,9 @@ for lbl in lbls:
 
         print('\t\tComputing mask...')
         tomod = ps.disperse_io.seg_dist_trans(sseg == lbl) * res
-        mask = np.asarray(tomod <= (mb_dst_off/res), dtype=np.bool)
+        mask = np.asarray(tomod <= (mb_dst_off/res), dtype=bool)
         input_msk = output_dir + '/' + stem + '_lbl_' + str(lbl) + '_mask.fits'
-        ps.disperse_io.save_numpy(np.asarray(~mask, dtype=np.float).transpose(), input_msk)
+        ps.disperse_io.save_numpy(np.asarray(~mask, dtype=float).transpose(), input_msk)
         tomoo = somb > 0
         ps.disperse_io.save_numpy(somb, output_dir+'/'+stem + '_lbl_' + str(lbl) + '_orient.vti')
 
@@ -216,7 +216,7 @@ for lbl in lbls:
         if s_sig > 0:
             density = sp.ndimage.filters.gaussian_filter(stomo, s_sig)
         else:
-            density = np.asarray(stomo, dtype=np.float)
+            density = np.asarray(stomo, dtype=float)
         density = ps.globals.cont_en_std(density, nstd=nstd, lb=0, ub=1, mask=mask)
         ps.disperse_io.save_numpy(density, output_dir + '/' + stem_pkl + '_lbl_' + str(lbl) + '.vti')
         ps.disperse_io.save_numpy(density.transpose(), input_file)

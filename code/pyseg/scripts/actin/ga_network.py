@@ -187,7 +187,7 @@ for (in_tomo, in_mask, in_mask_st, in_pkl, in_field, csig, nstd, th_field) in \
     if in_pkl is None:
 
         print('\tLoading mask: ' + in_mask)
-        mask = ps.disperse_io.load_tomo(in_mask).astype(np.bool)
+        mask = ps.disperse_io.load_tomo(in_mask).astype(bool)
 
         if in_mask_st is not None:
             print('\tAdding structures mask: ' + in_mask_st)
@@ -289,7 +289,7 @@ for (in_tomo, in_mask, in_mask_st, in_pkl, in_field, csig, nstd, th_field) in \
         graph = ps.factory.unpickle_obj(in_pkl)
 
     print('\tLoading mask: ' + in_mask)
-    mask = ps.disperse_io.load_tomo(in_mask).astype(np.bool)
+    mask = ps.disperse_io.load_tomo(in_mask).astype(bool)
 
     if in_mask_st is not None:
         print('\tAdding structures mask: ' + in_mask_st)
@@ -313,10 +313,10 @@ for (in_tomo, in_mask, in_mask_st, in_pkl, in_field, csig, nstd, th_field) in \
         graph.set_pair_prop(prop_topo)
         try:
             if prop_topo is not None:
-                graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=np.int), v_den=v_den,
+                graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=int), v_den=v_den,
 		                                     v_prop=None, v_mode=v_mode)
             else:
-                graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=np.int), v_den=v_den,
+                graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=int), v_den=v_den,
 		                                     v_prop=v_prop, v_mode=v_mode)
         except ps.pexceptions.PySegInputWarning as e:
             print('WARNING: graph density simplification failed:')
@@ -327,7 +327,7 @@ for (in_tomo, in_mask, in_mask_st, in_pkl, in_field, csig, nstd, th_field) in \
         if nepv > ve_ratio:
             e_den = nvv * ve_ratio
             hold_e_prop = e_prop
-            graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=np.int), e_den=e_den, e_prop=hold_e_prop, e_mode=e_mode, fit=True)
+            graph.graph_density_simp_ref(mask=np.asarray(mask, dtype=int), e_den=e_den, e_prop=hold_e_prop, e_mode=e_mode, fit=True)
         else:
             print('\tWARNING: demanded ratio ' + str(ve_ratio) + ' could not be achieved (current is ' + str(nepv))
 

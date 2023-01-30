@@ -41,7 +41,7 @@ eps_comp = 0.001
 #         self.__prop_e_l = graph.edge_properties[STR_2GT_EL]
 #         self.__prop_v_d = graph.new_vertex_property('float')
 #         self.__prop_v_d.get_array()[:] = MAX_FLOAT * np.ones(shape=(self.__graph.num_vertices()),
-#                                                              dtype=np.float)
+#                                                              dtype=float)
 #         self.__prop_v_p = graph.new_vertex_property('int')
 #         self.__prop_v_e = np.zeros(shape=self.__graph.num_vertices(), dtype=object)
 #         self.__min_len = min_len
@@ -137,8 +137,8 @@ class FuncComparator(object):
 
         # Insertion
         self.__names.append(name)
-        self.__xs.append(np.asarray(x_arr, dtype=np.float))
-        self.__ys.append(np.asarray(y_arr, dtype=np.float))
+        self.__xs.append(np.asarray(x_arr, dtype=float))
+        self.__ys.append(np.asarray(y_arr, dtype=float))
 
     # Plots comparison among already inserted functions
     # block: if True (default False) waits for closing windows for finishing the execution
@@ -149,8 +149,8 @@ class FuncComparator(object):
     def plot_comparison(self, block=False, plot_inserted=True, leg_num=False, leg_loc=4):
 
         # Computing statistics
-        ys = np.array(self.__ys, dtype=np.float)
-        xs = np.array(self.__xs, dtype=np.float)
+        ys = np.array(self.__ys, dtype=float)
+        xs = np.array(self.__xs, dtype=float)
         means = ys.mean(axis=0)
         medians = np.median(ys, axis=0)
         variances = ys.var(axis=0)
@@ -232,8 +232,8 @@ class FuncComparator(object):
     def store_figs(self, path, plot_inserted=True, leg_num=False, leg_loc=4):
 
         # Computing statistics
-        ys = np.array(self.__ys, dtype=np.float)
-        xs = np.array(self.__xs, dtype=np.float)
+        ys = np.array(self.__ys, dtype=float)
+        xs = np.array(self.__xs, dtype=float)
         means = ys.mean(axis=0)
         medians = np.median(ys, axis=0)
         variances = ys.var(axis=0)

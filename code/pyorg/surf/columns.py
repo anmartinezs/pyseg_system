@@ -111,7 +111,7 @@ class Cluster(object):
         coords_2 = clst.get_coords()
         for coord_1 in self.__coords:
             for coord_2 in coords_2:
-                hold = np.asarray(coord_1, dtype=np.float) - np.asarray(coord_2, dtype=np.float)
+                hold = np.asarray(coord_1, dtype=float) - np.asarray(coord_2, dtype=float)
                 hold_dst = math.sqrt((hold * hold).sum())
                 if hold_dst <= dst:
                     count_aln += 1
@@ -262,7 +262,7 @@ class ColumnsFinder(object):
             min_y, max_y = voi_ids[1].min(), voi_ids[1].max()
             min_z, max_z = voi_ids[2].min(), voi_ids[2].max()
             lx, ly, lz = max_x - min_x, max_y - min_y, max_z - min_z
-            sorted = np.sort(np.asarray((lx, ly, lz), dtype=np.int))[::-1]
+            sorted = np.sort(np.asarray((lx, ly, lz), dtype=int))[::-1]
             return sorted[0] * sorted[1]
         else:
             return .0
@@ -293,7 +293,7 @@ class ColumnsFinder(object):
             min_y, max_y = voi_ids[1].min(), voi_ids[1].max()
             min_z, max_z = voi_ids[2].min(), voi_ids[2].max()
             lx, ly, lz = max_x - min_x, max_y - min_y, max_z - min_z
-            ids_sorted = np.argsort(np.asarray((lx, ly, lz), dtype=np.int))
+            ids_sorted = np.argsort(np.asarray((lx, ly, lz), dtype=int))
         else:
             error_msg = 'Non-valid VOI type: ' + str(voi.__class__)
             raise PySegInputError(expr='get_area_columns (ColumnsFinder)', msg=error_msg)
@@ -319,21 +319,21 @@ class ColumnsFinder(object):
 
                 # Compute areas by adding cylinders to the coordinate particles
                 elif mode == 'cyl':
-                    coords = np.asarray(col_coords).round().astype(np.int)
+                    coords = np.asarray(col_coords).round().astype(int)
                     if ids_sorted[0] == 0:
-                        off = np.asarray((min_y, min_z), dtype=np.int)
+                        off = np.asarray((min_y, min_z), dtype=int)
                         coords -= off
-                        flat_voi = np.ones(shape=(int(math.ceil(max_y-min_y))+1, int(math.ceil(max_z-min_z))+1), dtype=np.bool)
+                        flat_voi = np.ones(shape=(int(math.ceil(max_y-min_y))+1, int(math.ceil(max_z-min_z))+1), dtype=bool)
                     elif ids_sorted[0] == 1:
-                        off = np.asarray((min_x, min_z), dtype=np.int)
+                        off = np.asarray((min_x, min_z), dtype=int)
                         coords -= off
                         flat_voi = np.ones(shape=(int(math.floor(max_x - min_x))+1, int(math.ceil(max_z - min_z))+1),
-                                               dtype=np.bool)
+                                               dtype=bool)
                     else:
-                        off = np.asarray((min_x, min_y), dtype=np.int)
+                        off = np.asarray((min_x, min_y), dtype=int)
                         coords -= off
                         flat_voi = np.ones(shape=(int(math.floor(max_x - min_x))+1, int(math.ceil(max_y - min_y))+1),
-                                               dtype=np.bool)
+                                               dtype=bool)
                     for coord in coords:
                         try:
                             flat_voi[coord[0], coord[1]] = False
@@ -363,7 +363,7 @@ class ColumnsFinder(object):
 
         voi = self.__tl1.get_voi()
         if isinstance(voi, vtk.vtkPolyData):
-            return np.asarray(self.get_area_columns(mode=mode, rad=rad), dtype=np.float).sum() \
+            return np.asarray(self.get_area_columns(mode=mode, rad=rad), dtype=float).sum() \
                    / float(self.get_area_tomo())
         elif isinstance(voi, np.ndarray):
             # Flattern the VOI
@@ -372,7 +372,7 @@ class ColumnsFinder(object):
             min_y, max_y = voi_ids[1].min(), voi_ids[1].max()
             min_z, max_z = voi_ids[2].min(), voi_ids[2].max()
             lx, ly, lz = max_x - min_x, max_y - min_y, max_z - min_z
-            ids_sorted = np.argsort(np.asarray((lx, ly, lz), dtype=np.int))
+            ids_sorted = np.argsort(np.asarray((lx, ly, lz), dtype=int))
         else:
             error_msg = 'Non-valid VOI type: ' + str(voi.__class__)
             raise PySegInputError(expr='get_area_columns (ColumnsFinder)', msg=error_msg)
@@ -408,19 +408,19 @@ class ColumnsFinder(object):
 
         if mode == 'cyl':
             if len(col_coords) > 0:
-                coords = np.asarray(col_coords).round().astype(np.int)
+                coords = np.asarray(col_coords).round().astype(int)
                 if ids_sorted[0] == 0:
-                    off = np.asarray((min_y, min_z), dtype=np.int)
+                    off = np.asarray((min_y, min_z), dtype=int)
                     coords -= off
-                    flat_voi = np.ones(shape=(int(math.ceil(max_y-min_y))+1, int(math.ceil(max_z-min_z))+1), dtype=np.bool)
+                    flat_voi = np.ones(shape=(int(math.ceil(max_y-min_y))+1, int(math.ceil(max_z-min_z))+1), dtype=bool)
                 elif ids_sorted[0] == 1:
-                    off = np.asarray((min_x, min_z), dtype=np.int)
+                    off = np.asarray((min_x, min_z), dtype=int)
                     coords -= off
-                    flat_voi = np.ones(shape=(int(math.floor(max_x - min_x))+1, int(math.ceil(max_z - min_z))+1), dtype=np.bool)
+                    flat_voi = np.ones(shape=(int(math.floor(max_x - min_x))+1, int(math.ceil(max_z - min_z))+1), dtype=bool)
                 else:
-                    off = np.asarray((min_x, min_y), dtype=np.int)
+                    off = np.asarray((min_x, min_y), dtype=int)
                     coords -= off
-                    flat_voi = np.ones(shape=(int(math.floor(max_x - min_x))+1, int(math.ceil(max_y - min_y))+1), dtype=np.bool)
+                    flat_voi = np.ones(shape=(int(math.floor(max_x - min_x))+1, int(math.ceil(max_y - min_y))+1), dtype=bool)
                 for coord in coords:
                     try:
                         flat_voi[coord[0], coord[1]] = False
@@ -431,9 +431,9 @@ class ColumnsFinder(object):
 
         if mode == 'hull':
             if area:
-                return np.asarray(areas, dtype=np.float).sum()
+                return np.asarray(areas, dtype=float).sum()
             else:
-                return np.asarray(areas, dtype=np.float).sum() / float(self.get_area_tomo())
+                return np.asarray(areas, dtype=float).sum() / float(self.get_area_tomo())
         elif mode == 'cyl':
             dst_field = sp.ndimage.morphology.distance_transform_edt(flat_voi, return_distances=True, return_indices=False)
             if area:
@@ -501,8 +501,8 @@ class ColumnsFinder(object):
         lyr1, lyr2, lyr3 = self.__cool_clst[0], self.__cool_clst[1], self.__cool_clst[2]
 
         # Build the LUT with the number of aligned particles respect the reference layer
-        lut_clsts_2 = np.zeros(shape=(len(lyr1), len(lyr2)), dtype=np.int)
-        lut_clsts_3 = np.zeros(shape=(len(lyr1), len(lyr3)), dtype=np.int)
+        lut_clsts_2 = np.zeros(shape=(len(lyr1), len(lyr2)), dtype=int)
+        lut_clsts_3 = np.zeros(shape=(len(lyr1), len(lyr3)), dtype=int)
         for i, clst_i in enumerate(lyr1):
             for j, clst_j in enumerate(lyr2):
                 lut_clsts_2[i, j] = clst_i.find_num_aligned(clst_j, col_rad)
@@ -548,8 +548,8 @@ class ColumnsFinder(object):
         lyr1, lyr2, lyr3 = self.__cool_clst[0], self.__cool_clst[1], self.__cool_clst[2]
 
         # Build the LUT with the number of aligned particles respect the reference layer
-        lut_clsts_2 = np.zeros(shape=(len(lyr1), len(lyr2)), dtype=np.int)
-        lut_clsts_3 = np.zeros(shape=(len(lyr1), len(lyr3)), dtype=np.int)
+        lut_clsts_2 = np.zeros(shape=(len(lyr1), len(lyr2)), dtype=int)
+        lut_clsts_3 = np.zeros(shape=(len(lyr1), len(lyr3)), dtype=int)
         for i, clst_i in enumerate(lyr1):
             for j, clst_j in enumerate(lyr2):
                 lut_clsts_2[i, j] = clst_i.find_num_aligned(clst_j, col_rad)
@@ -574,7 +574,7 @@ class ColumnsFinder(object):
 
         # # Inserting points in the surroundings of sub-columns for layer 1
         # l1_coords = self.__tl1.get_particle_coords()
-        # lut_points_1 = -1 * np.ones(shape=l1_coords.shape[0], dtype=np.int)
+        # lut_points_1 = -1 * np.ones(shape=l1_coords.shape[0], dtype=int)
         # for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
         #     for clst in scol[0]:
         #         for idx in clst.get_ids():
@@ -583,7 +583,7 @@ class ColumnsFinder(object):
         # for i in range(len(lut_points_1)):
         #     if lut_points_1[i] < 0:
         #         pt_coord = l1_coords[i, :]
-        #         min_dst, min_key = np.finfo(np.float).max, None
+        #         min_dst, min_key = np.finfo(float).max, None
         #         for key, scol in zip(self.__scols.iterkeys(), self.__scols.itervalues()):
         #             for clst in scol[0]:
         #                 for coord in clst.get_coords():
@@ -608,8 +608,8 @@ class ColumnsFinder(object):
         lyr1, lyr2, lyr3 = self.__cool_clst[0], self.__cool_clst[1], self.__cool_clst[2]
 
         # Build the LUT with the number of aligned particles respect the reference layer
-        lut_clsts_2 = np.zeros(shape=(len(lyr1), len(lyr2)), dtype=np.int)
-        lut_clsts_3 = np.zeros(shape=(len(lyr1), len(lyr3)), dtype=np.int)
+        lut_clsts_2 = np.zeros(shape=(len(lyr1), len(lyr2)), dtype=int)
+        lut_clsts_3 = np.zeros(shape=(len(lyr1), len(lyr3)), dtype=int)
         for i, clst_i in enumerate(lyr1):
             for j, clst_j in enumerate(lyr2):
                 lut_clsts_2[i, j] = clst_i.find_num_aligned(clst_j, col_rad)
@@ -652,8 +652,8 @@ class ColumnsFinder(object):
         # Initialization
         np_lyr1, np_lyr2, np_lyr3 = self.__tl1.get_num_particles(), self.__tl2.get_num_particles(), \
                                     self.__tl3.get_num_particles()
-        del_ids_1, del_ids_2, del_ids_3 = np.ones(shape=np_lyr1, dtype=np.bool), np.ones(shape=np_lyr2, dtype=np.bool), \
-                                          np.ones(shape=np_lyr3, dtype=np.bool)
+        del_ids_1, del_ids_2, del_ids_3 = np.ones(shape=np_lyr1, dtype=bool), np.ones(shape=np_lyr2, dtype=bool), \
+                                          np.ones(shape=np_lyr3, dtype=bool)
 
         # Loop for finding the particle to filter
         for col in self.__cols.values():
@@ -1099,7 +1099,7 @@ class ColumnsFinder(object):
 
         # Loop for particles within subcolumns
         X, lut_lyr, lut_cid = list(), list(), list()
-        lut1_cid = np.zeros(shape=self.__tl1.get_num_particles(), dtype=np.bool)
+        lut1_cid = np.zeros(shape=self.__tl1.get_num_particles(), dtype=bool)
         for scol in self.__scols.values():
             for clst in scol[0]:
                 c_ids, coords = clst.get_ids(), clst.get_coords()
@@ -1109,8 +1109,8 @@ class ColumnsFinder(object):
                         lut_lyr.append(0)
                         lut_cid.append(c_id)
                         lut1_cid[c_id] = True
-        X, lut_lyr, lut_cid = np.asarray(X, dtype=np.float32), np.asarray(lut_lyr, dtype=np.int), \
-                              np.asarray(lut_cid, dtype=np.int)
+        X, lut_lyr, lut_cid = np.asarray(X, dtype=np.float32), np.asarray(lut_lyr, dtype=int), \
+                              np.asarray(lut_cid, dtype=int)
 
         # Clustering algorithm just for layer 1
         hold_clsts_1, hold_cols_2, hold_cols_3, hold_cols = list(), list(), list(), dict()
@@ -1137,8 +1137,8 @@ class ColumnsFinder(object):
                     coords.append(X[i, :])
             if len(c_ids) > 0:
                 hold_clsts_1.append(Cluster(c_ids, coords))
-        lut2_cid = np.zeros(shape=self.__tl2.get_num_particles(), dtype=np.bool)
-        lut3_cid = np.zeros(shape=self.__tl3.get_num_particles(), dtype=np.bool)
+        lut2_cid = np.zeros(shape=self.__tl2.get_num_particles(), dtype=bool)
+        lut3_cid = np.zeros(shape=self.__tl3.get_num_particles(), dtype=bool)
         for scol in self.__scols.values():
             for clst in scol[1]:
                 c_ids, c_coords = clst.get_ids(), clst.get_coords()

@@ -92,7 +92,7 @@ if groups is None:
     print('\t-WARNING: No tomograms found!.')
     print('Terminated. (' + time.strftime("%c") + ')')
 print('\t-Number of tomograms found: ' + str(len(groups)))
-groups = list(np.sort(np.asarray(list(groups), dtype=np.int)))
+groups = list(np.sort(np.asarray(list(groups), dtype=int)))
 
 print('\tFinding micrographs name per group...')
 for group in groups:
@@ -172,7 +172,7 @@ plt.show(block=False)
 
 if meta_groups is None:
     print('\tComputing class proportions by group...')
-    groups_p = np.zeros(shape=(len(groups), len(classes)), dtype=np.float)
+    groups_p = np.zeros(shape=(len(groups), len(classes)), dtype=float)
     for i in range(len(groups)):
         if vals_g[i] > 0:
             for j in range(len(classes)):
@@ -181,7 +181,7 @@ if meta_groups is None:
                     groups_p[i][j] = float(val) / vals_g[i]
 else:
     print('\tComputing class proportions by meta-group...')
-    groups_p = np.zeros(shape=(len(meta_groups), len(classes)), dtype=np.float)
+    groups_p = np.zeros(shape=(len(meta_groups), len(classes)), dtype=float)
     for i in range(len(meta_groups)):
         if vals_g[i] > 0:
             for j in range(len(classes)):
@@ -195,11 +195,11 @@ plt.ylabel('Prop. of particles')
 if meta_groups is None:
     plt.xlabel('Group')
     plt.title('Proportion of classes by group')
-    offset = np.zeros(shape=len(groups), dtype=np.float)
+    offset = np.zeros(shape=len(groups), dtype=float)
 else:
     plt.xlabel('Meta Group')
     plt.title('Proportion of classes by meta-group')
-    offset = np.zeros(shape=len(meta_groups), dtype=np.float)
+    offset = np.zeros(shape=len(meta_groups), dtype=float)
 index = np.arange(len(groups_p))
 colors = cm.rainbow(np.linspace(0, 1, len(classes)))
 for j in range(len(classes)):

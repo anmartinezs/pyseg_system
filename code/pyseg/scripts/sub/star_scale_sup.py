@@ -120,7 +120,7 @@ if in_ref is not None:
                                          star_tab.get_element('_psSegTilt', seg_row), \
                                          star_tab.get_element('_psSegPsi', seg_row)
             M = rot_mat_relion(seg_rot, seg_tilt, seg_psi, deg=True)
-            hold_coords = np.asarray(M.T * np.asarray((cx, cy, cz), dtype=np.float).reshape(3, 1)).reshape(3)
+            hold_coords = np.asarray(M.T * np.asarray((cx, cy, cz), dtype=float).reshape(3, 1)).reshape(3)
             # Un-centering
             cx, cy, cz = hold_coords[0]+mic_cx, hold_coords[1]+mic_cy, hold_coords[2]+mic_cz
             # Update STAR file entry
@@ -159,8 +159,8 @@ if in_ref is None:
     print('\tScale suppression by micrograph (Auto)...')
     for mic in mics_set:
         print('\t\t-Processing micrograph: ' + str(mic))
-        coords, rows = np.asarray(coords_dic[mic], dtype=np.float), np.asarray(rows_dic[mic], dtype=np.int)
-        ids_lut = np.zeros(shape=len(rows), dtype=np.bool)
+        coords, rows = np.asarray(coords_dic[mic], dtype=float), np.asarray(rows_dic[mic], dtype=int)
+        ids_lut = np.zeros(shape=len(rows), dtype=bool)
         for i in range(len(rows)):
             coord, row = coords[i, :], rows[i]
             if not ids_lut[i]:
@@ -186,8 +186,8 @@ else:
     for mic in mics_set:
         print('\t\t-Processing micrograph: ' + str(mic))
         count = 0
-        coords, rows = np.asarray(coords_dic[mic], dtype=np.float), np.asarray(rows_dic[mic], dtype=np.int)
-        coords_ref = np.asarray(coords_ref_dic[mic], dtype=np.float)
+        coords, rows = np.asarray(coords_dic[mic], dtype=float), np.asarray(rows_dic[mic], dtype=int)
+        coords_ref = np.asarray(coords_ref_dic[mic], dtype=float)
         for i in range(len(rows)):
             coord, row = coords[i, :], rows[i]
             hold = coords_ref - coord

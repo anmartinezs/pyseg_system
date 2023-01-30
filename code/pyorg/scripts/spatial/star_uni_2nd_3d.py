@@ -97,7 +97,7 @@ print('\tLoading input data...')
 ltomos = sd.globals.unpickle_obj(in_pkl)
 
 if sim_model is not None:
-    mat = np.zeros(shape=(ltomos.get_num_particles(), len(nh_rad_rg)), dtype=np.float)
+    mat = np.zeros(shape=(ltomos.get_num_particles(), len(nh_rad_rg)), dtype=float)
     for i in range(sim_nins):
         htomos = ltomos.gen_model_instance(sim_model, sim_part_surf, mode=sim_emb_mode)
         mat += ltomos.compute_uni_2nd_order(nh_rad_rg, nh_res_arc, thick=nh_thick, border=nh_border,

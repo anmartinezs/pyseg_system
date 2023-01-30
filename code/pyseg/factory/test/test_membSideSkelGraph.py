@@ -50,7 +50,7 @@ class TestMembSideSkelGraph(TestCase):
         # Read the segmented membrane
         print('Loading membrane segmentation...')
         hold = fits.getdata(DATA_DIR + '/mb_seg.fits')
-        seg = np.zeros(hold.shape, dtype=np.int)
+        seg = np.zeros(hold.shape, dtype=int)
         # Keep as foreground just the postsynaptic membrane
         seg[hold == 1] = 1
 

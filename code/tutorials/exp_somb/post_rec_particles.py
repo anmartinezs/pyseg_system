@@ -150,7 +150,7 @@ def _processParticles(pr_id, star, sh_star, rows, settings):
             psi_prior = psi
         if ANGLE_NAMES[2] in do_ang_rnd:
             psi = 180. * random.random()
-        angs = np.asarray((rot, tilt, psi), dtype=np.float)
+        angs = np.asarray((rot, tilt, psi), dtype=float)
 
         # Sub-volumes post-processing
         # Forward transformation
@@ -160,7 +160,7 @@ def _processParticles(pr_id, star, sh_star, rows, settings):
             r3d.q = r3d.make_r_euler(angles=np.radians(angs), mode='zyz_in_active')
             if (shift_x != 0) or (shift_y != 0) or (shift_z != 0):
                 svol = tomo_shift(svol, (shift_y, shift_x, shift_z))
-            svol_sp = np.asarray(svol.shape, dtype=np.int)
+            svol_sp = np.asarray(svol.shape, dtype=int)
             svol_cent = np.asarray((int(.5 * svol_sp[0]), int(.5 * svol_sp[1]), int(.5 * svol_sp[2])), dtype=np.float32)
             svol = r3d.transformArray(svol, center=svol_cent, order=3, prefilter=True)
             # Membrane suppression

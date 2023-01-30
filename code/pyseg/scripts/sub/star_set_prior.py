@@ -74,7 +74,7 @@ import numpy as np
 ########## Helper fucntions
 
 def inv_vals(vals):
-    vals_arr = np.asarray(vals, dtype=np.float)
+    vals_arr = np.asarray(vals, dtype=float)
     return (-1.*vals_arr).tolist()
 
 ########## Print initial message
@@ -127,9 +127,9 @@ except ps.pexceptions.PySegInputError as e:
 
 if do_inv:
     print('\tInverting rotations...')
-    hold_rot = np.array(star.get_column_data('_rlnAngleRot'), dtype=np.float)
-    hold_tilt = np.array(star.get_column_data('_rlnAngleTilt'), dtype=np.float)
-    hold_psi = np.array(star.get_column_data('_rlnAnglePsi'), dtype=np.float)
+    hold_rot = np.array(star.get_column_data('_rlnAngleRot'), dtype=float)
+    hold_tilt = np.array(star.get_column_data('_rlnAngleTilt'), dtype=float)
+    hold_psi = np.array(star.get_column_data('_rlnAnglePsi'), dtype=float)
     star.add_column('_rlnAngleRot', -1.*hold_psi)
     star.add_column('_rlnAngleTilt', -1.*hold_tilt)
     star.add_column('_rlnAnglePsi', -1.*hold_rot)

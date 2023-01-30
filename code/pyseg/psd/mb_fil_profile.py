@@ -258,7 +258,7 @@ for i in range(0, len(pent_samp)-1):
             print('of side B...')
         cloud, cloud_cids = net.get_cloud_clst_slice(side, slice_samp)
         cloud = make_plane(cloud, coord=del_coord) * net.get_resolution()
-        clst = ConnDom(cloud, cloud_cids, np.asarray(box, dtype=np.float))
+        clst = ConnDom(cloud, cloud_cids, np.asarray(box, dtype=float))
         print('\t\t\tApplying threshold to clusters...')
         clst.threshold(th_npoints=cnp_th, th_areas=ca_th, th_den=cd_th, th_round=cr_th)
         print('\t\t\tGetting clusters centers of gravity...')
@@ -280,7 +280,7 @@ for i in range(0, len(pent_samp)-1):
     if clstring:
         mask = clst.get_del_mask()
         if not del_mask:
-            mask = np.ones(shape=mask.shape, dtype=np.bool)
+            mask = np.ones(shape=mask.shape, dtype=bool)
         set_clouds.insert_cloud(cloud, box, slice_samp, clst.get_clsts_list(), mask)
     else:
         set_clouds.insert_cloud(cloud, box, slice_samp, cards)

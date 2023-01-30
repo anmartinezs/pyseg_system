@@ -41,7 +41,7 @@ class Phantom(object, metaclass=ABCMeta):
         self.__tomo = None
         self.__mask = None
         self.__resolution = 1
-        self.__snr = np.finfo(np.float).max
+        self.__snr = np.finfo(float).max
 
     #### Set/Get functions area
 
@@ -153,7 +153,7 @@ class Phantom(object, metaclass=ABCMeta):
         if dem != 0:
             ratio = num / dem
         else:
-            ratio = np.finfo(np.float).max
+            ratio = np.finfo(float).max
 
         if mode == 'linear':
             return ratio
@@ -220,7 +220,7 @@ class Torus(Phantom, metaclass=ABCMeta):
         self._Phantom__gtruth = np.zeros(shape=X.shape, dtype=np.float32)
 
         # Building the mask
-        self._Phantom__mask = np.ones(shape=X.shape, dtype=np.int)
+        self._Phantom__mask = np.ones(shape=X.shape, dtype=int)
         offset_xy = dim_xy - (self.__R+self.__r+self.__range_s[1])
         offset_xy = int(math.ceil(offset_xy * 0.25))
         if offset_xy < 1:
@@ -233,7 +233,7 @@ class Torus(Phantom, metaclass=ABCMeta):
                             offset_z:X.shape[2]-offset_z] = 0
 
         # Feature coordinates (by using Torus equation)
-        self.__points = np.zeros(shape=(self.__n_feat, 3), dtype=np.float)
+        self.__points = np.zeros(shape=(self.__n_feat, 3), dtype=float)
         self.__points[:, 0] = (self.__R + self.__r*cos_t) * cos_p
         self.__points[:, 1] = (self.__R + self.__r*cos_t) * sin_p
         self.__points[:, 2] = self.__r * sin_t
@@ -274,8 +274,8 @@ class Torus(Phantom, metaclass=ABCMeta):
             error_msg = 'Ground truth has not been generated yet, call build() before.'
             raise pexceptions.PySegInputError(expr='check_feat_localization (Phantom)',
                                               msg=error_msg)
-        true_negatives = np.zeros(shape=self.__n_feat, dtype=np.bool)
-        false_positives = np.zeros(shape=points.shape[0], dtype=np.bool)
+        true_negatives = np.zeros(shape=self.__n_feat, dtype=bool)
+        false_positives = np.zeros(shape=points.shape[0], dtype=bool)
         # If no features
         if (self.__points.shape[0]) <= 0 or (points.shape[0] <= 0):
             return true_negatives, false_positives
@@ -406,12 +406,12 @@ class Grid3D(Phantom, metaclass=ABCMeta):
             off = 10
         nx, ny, nz = int(math.ceil(npx + 2*off)), int(math.ceil(npy + 2*off)), \
                      int(math.ceil(npz + 2*off))
-        self._Phantom__gtruth = np.zeros(shape=(nx, ny, nz), dtype=np.float)
-        self.__skel = np.zeros(shape=(nx, ny, nz), dtype=np.bool)
+        self._Phantom__gtruth = np.zeros(shape=(nx, ny, nz), dtype=float)
+        self.__skel = np.zeros(shape=(nx, ny, nz), dtype=bool)
         offx, offy, offz = off_xy * npx, off_xy * npy, off_xy * npz
         self.__points = np.empty(shape=(self.__L[0], self.__L[1], self.__L[2]),
                                  dtype=object)
-        self.__degree = np.zeros(shape=self.__points.shape, dtype=np.int)
+        self.__degree = np.zeros(shape=self.__points.shape, dtype=int)
         # n_feat = self.__points.shape[0] * self.__points.shape[1] * self.__points.shape[2]
         rx_arr = np.linspace(self.__thick[0], self.__thick[1], self.__L[0])
         ry_arr = np.linspace(self.__thick[0], self.__thick[1], self.__L[1])
@@ -423,7 +423,7 @@ class Grid3D(Phantom, metaclass=ABCMeta):
         for rx in range(self.__L[0]):
             for ry in range(self.__L[1]):
                 for rz in range(self.__L[2]):
-                    hold = np.zeros(shape=3, dtype=np.float)
+                    hold = np.zeros(shape=3, dtype=float)
                     hold[0] = off + sp2 + rx*self.__spacing
                     hold[1] = off + sp2 + ry*self.__spacing
                     hold[2] = off + sp2 + rz*self.__spacing
@@ -470,7 +470,7 @@ class Grid3D(Phantom, metaclass=ABCMeta):
 
 
         # Building the mask
-        self._Phantom__mask = np.ones(shape=self._Phantom__gtruth.shape, dtype=np.int)
+        self._Phantom__mask = np.ones(shape=self._Phantom__gtruth.shape, dtype=int)
         off_x = int(math.floor(nx - npx) * 0.15)
         if off_x < 1:
             off_x = int(1)
@@ -558,8 +558,8 @@ class Grid3D(Phantom, metaclass=ABCMeta):
 
         # Reshape feature points array
         count = 0
-        feat_points = np.zeros(shape=(n_feat, 3), dtype=np.float)
-        feat_deg = np.zeros(shape=n_feat, dtype=np.int)
+        feat_points = np.zeros(shape=(n_feat, 3), dtype=float)
+        feat_deg = np.zeros(shape=n_feat, dtype=int)
         for x in range(self.__points.shape[0]):
             for y in range(self.__points.shape[1]):
                 for z in range(self.__points.shape[2]):
@@ -597,7 +597,7 @@ class Grid3D(Phantom, metaclass=ABCMeta):
     def soft_test(self, skel):
 
         # Create a tomogram with the input skeleton points
-        tomo_in = np.zeros(shape=self.__skel.shape, dtype=np.bool)
+        tomo_in = np.zeros(shape=self.__skel.shape, dtype=bool)
         for i in range(skel.GetNumberOfPoints()):
             x, y, z = skel.GetPoint(i)
             tomo_in[int(round(x)), int(round(y)), int(round(z))] = True
@@ -655,7 +655,7 @@ class Grid3D(Phantom, metaclass=ABCMeta):
     # eps: maximum distance to feature center
     # Returns True if the coordinate specified is within the feature
     def in_grid(self, point):
-        int_point = np.round(point).astype(np.int)
+        int_point = np.round(point).astype(int)
         try:
             if self._Phantom__gtruth[int_point[0], int_point[1], int_point[2]] != 1:
                 return True
@@ -676,8 +676,8 @@ class Grid3D(Phantom, metaclass=ABCMeta):
         nx2, ny2, nz2 = nx * 0.5, ny * 0.5, nz * 0.5
         hold = np.zeros(shape=(nx, ny, nz), dtype=self._Phantom__gtruth.dtype)
         p1, p2 = np.round(row[0]), np.round(row[-1])
-        p1 = p1.astype(np.int)
-        p2 = p2.astype(np.int)
+        p1 = p1.astype(int)
+        p2 = p2.astype(int)
 
         # Line skeleton
         if axis == 0:
@@ -703,8 +703,8 @@ class Grid3D(Phantom, metaclass=ABCMeta):
         nx, ny, nz = self._Phantom__gtruth.shape
         hold = np.zeros(shape=(nx, ny, nz), dtype=self._Phantom__gtruth.dtype)
         p1, p2 = np.round(row[0]), np.round(row[-1])
-        p1 = p1.astype(np.int)
-        p2 = p2.astype(np.int)
+        p1 = p1.astype(int)
+        p2 = p2.astype(int)
         thick = int(math.ceil(r))
 
         # Line skeleton
@@ -732,8 +732,8 @@ class Grid3D(Phantom, metaclass=ABCMeta):
         nx, ny, nz = self._Phantom__gtruth.shape
         hold = np.zeros(shape=(nx, ny, nz), dtype=self._Phantom__gtruth.dtype)
         p1, p2 = np.round(row[0]), np.round(row[-1])
-        p1 = p1.astype(np.int)
-        p2 = p2.astype(np.int)
+        p1 = p1.astype(int)
+        p2 = p2.astype(int)
         # thick = int(math.ceil(r))
         thick = 1
 

@@ -129,7 +129,7 @@ class Affine(object):
         else:
             self.gl = None
         #self.d = d
-        #if (d is None) or (isinstance(d, numpy.int) and (d == 0)): 
+        #if (d is None) or (isinstance(d, int) and (d == 0)): 
         #    if (self.gl is not None):
         #        self.d = numpy.zeros(gl.shape[0], dtype='int')
         self.d = self.makeD(d, ndim=self.ndim)

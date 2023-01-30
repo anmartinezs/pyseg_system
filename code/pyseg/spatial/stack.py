@@ -51,12 +51,12 @@ def purge_stack(tomo, mask=None, axis=1, ratio=1):
             error_msg = 'Input tomogram and mask must be the same class and have the same dimensions.'
             raise ps.pexceptions.PySegInputError(expr='purge_stack', msg=error_msg)
     if ratio <= 1:
-        return tomo, mask, np.ones(shape=tomo.shape[axis], dtype=np.float)
+        return tomo, mask, np.ones(shape=tomo.shape[axis], dtype=float)
 
     # Index array
     ids = np.arange(0, tomo.shape[axis], step=ratio)
     p = len(ids)
-    ids_p = np.zeros(shape=p, dtype=np.float)
+    ids_p = np.zeros(shape=p, dtype=float)
 
     # Purging loop
     if axis == 0:
@@ -129,7 +129,7 @@ class TomoUni(object):
             error_msg = 'Input tomogram must be a ndarray with tree dimensions.'
             raise ps.pexceptions.PySegInputError(expr='__init__ (TomoUni)', msg=error_msg)
         if mask is None:
-            mask = np.ones(shape=tomo.shape, dtype=np.bool)
+            mask = np.ones(shape=tomo.shape, dtype=bool)
         elif (not isinstance(mask, np.ndarray)) or (mask.shape[0] != mask.shape[0]) or \
                 (mask.shape[1] != mask.shape[1]) or (mask.shape[2] != mask.shape[2]):
             error_msg = 'Input mas must have the same dimension of the tomogram.'
@@ -199,7 +199,7 @@ class TomoUni(object):
 
     # Creates a 3D numpy array for holding the mask
     def get_mask_stack(self):
-        mask = np.zeros(shape=(self.__m, self.__n, len(self.__stack_m)), dtype=np.bool)
+        mask = np.zeros(shape=(self.__m, self.__n, len(self.__stack_m)), dtype=bool)
         for i in range(mask.shape[2]):
             mask[:, :, i] = self.__stack_m[i]
         return mask
@@ -209,7 +209,7 @@ class TomoUni(object):
         coords = list()
         for i, s_coords in enumerate(self.__stack_c):
             for coord in s_coords:
-                coords.append(np.asarray((coord[0], coord[1], i), dtype=np.float))
+                coords.append(np.asarray((coord[0], coord[1], i), dtype=float))
         return np.asarray(coords)
 
     ###### External functionality
@@ -254,14 +254,14 @@ class TomoUni(object):
 
         # Getting stack with points
         tomo = self.generate_tomo_stack()
-        tomo = (tomo == 2).astype(np.float)
+        tomo = (tomo == 2).astype(float)
 
         if mode_3d:
             homo = ps.globals.tomo_butter_low(tomo, freq, n=5)
         else:
-            homo = np.zeros(shape=tomo.shape, dtype=np.float)
+            homo = np.zeros(shape=tomo.shape, dtype=float)
             for z in range(tomo.shape[2]):
-                hold_tomo = np.zeros(shape=(tomo.shape[0], tomo.shape[1], 1), dtype=np.float)
+                hold_tomo = np.zeros(shape=(tomo.shape[0], tomo.shape[1], 1), dtype=float)
                 hold_tomo[:, :, 0] = tomo[:, :, z]
                 flt = ps.globals.tomo_butter_low(hold_tomo, freq, n=5)
                 # ps.disperse_io.save_numpy(flt, '/home/martinez/workspace/disperse/data/marion/cluster/out/flt.mrc')
@@ -313,7 +313,7 @@ class TomoUni(object):
                     hold_st_c.append(np.asarray((idx, idy), dtype=np.float32))
             if len(hold_st_c) > 0:
                 self.__stack.append(img)
-                self.__stack_c.append(np.asarray(hold_st_c, dtype=np.int))
+                self.__stack_c.append(np.asarray(hold_st_c, dtype=int))
                 self.__spacing.append(sp)
                 self.__stack_m.append(mask)
 

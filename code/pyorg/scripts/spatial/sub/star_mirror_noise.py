@@ -127,7 +127,7 @@ except ps.pexceptions.PySegInputError as e:
     print('ERROR: input mask file could not be loaded because of "' + e.get_message() + '"')
     print('Terminated. (' + time.strftime("%c") + ')')
     sys.exit(-1)
-svol_sp = np.asarray(mask.shape, dtype=np.int)
+svol_sp = np.asarray(mask.shape, dtype=int)
 svol_sp2 = int(.5 * svol_sp[0])
 svol_cent = np.asarray((svol_sp2, svol_sp2, svol_sp2), dtype=np.float32)
 

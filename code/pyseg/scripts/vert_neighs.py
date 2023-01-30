@@ -76,7 +76,7 @@ def gen_vertices_graph(graph, vertices, prop_key=None, prop_val=None, prop_field
     poly = vtk.vtkPolyData()
     points = vtk.vtkPoints()
     cells = vtk.vtkCellArray()
-    not_visited_neighs = np.ones(shape=graph.get_nid(), dtype=np.bool)
+    not_visited_neighs = np.ones(shape=graph.get_nid(), dtype=bool)
     key_id = graph.get_prop_id(STR_CLOUD_NORMALS)
     data_type = graph.get_prop_type(key_id=key_id)
     data_type = disperse_io.TypesConverter().gt_to_numpy(data_type)
@@ -98,7 +98,7 @@ def gen_vertices_graph(graph, vertices, prop_key=None, prop_val=None, prop_field
     for v in vertices:
         v_coord = graph.get_vertex_coords(v)
         norm = graph.get_prop_entry_fast(key_id, v.get_id(), 3, data_type)
-        norm = np.asarray(norm, dtype=np.float)
+        norm = np.asarray(norm, dtype=float)
         v_id = v.get_id()
         neighs, _ = graph.get_vertex_neighbours(v_id)
         for n in neighs:
@@ -135,7 +135,7 @@ def gen_arcs_graph(graph, vertices, prop_key=None, prop_val=None, prop_field=Non
     points = vtk.vtkPoints()
     cells = vtk.vtkCellArray()
     skel = graph.get_skel()
-    not_visited_neighs = np.ones(shape=skel.GetNumberOfPoints(), dtype=np.bool)
+    not_visited_neighs = np.ones(shape=skel.GetNumberOfPoints(), dtype=bool)
     key_id = graph.get_prop_id(STR_CLOUD_NORMALS)
     data_type = graph.get_prop_type(key_id=key_id)
     data_type = disperse_io.TypesConverter().gt_to_numpy(data_type)
@@ -158,7 +158,7 @@ def gen_arcs_graph(graph, vertices, prop_key=None, prop_val=None, prop_field=Non
         v_coord = graph.get_vertex_coords(v)
         v_id = v.get_id()
         norm = graph.get_prop_entry_fast(key_id, v.get_id(), 3, data_type)
-        norm = np.asarray(norm, dtype=np.float)
+        norm = np.asarray(norm, dtype=float)
         for a in v.get_arcs():
             # Getting neighbour
             edge = graph.get_edge(a.get_sad_id())

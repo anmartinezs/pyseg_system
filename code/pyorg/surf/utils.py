@@ -241,12 +241,12 @@ def vtp_to_vtp_closest_point(vtp_1, vtp_2):
     point_tree = vtk.vtkKdTreePointLocator()
     point_tree.SetDataSet(vtp_2)
     point_tree.BuildLocator()
-    point_id, point_dst = -1, np.finfo(np.float).max
+    point_id, point_dst = -1, np.finfo(float).max
     for i in range(vtp_1.GetNumberOfPoints()):
         point_1 = vtp_1.GetPoint(i)
         point_2_id = point_tree.FindClosestPoint(point_1)
         point_2 = vtp_2.GetPoint(point_2_id)
-        hold = np.asarray(point_1, dtype=np.float) - np.asarray(point_2, dtype=np.float)
+        hold = np.asarray(point_1, dtype=float) - np.asarray(point_2, dtype=float)
         hold_dst = np.sqrt((hold * hold).sum())
         if hold_dst < point_dst:
             point_id, point_dst = i, hold_dst
@@ -268,7 +268,7 @@ def stat_dict_to_mat(dict_in, list_in):
         for i in range(tomo.get_num_particles()):
             hold_mat.append(arr)
 
-    return np.asarray(hold_mat, dtype=np.float)
+    return np.asarray(hold_mat, dtype=float)
 
 # Computes p-values from experimental data and simulations dictionaries
 # rads: range of radius

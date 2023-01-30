@@ -163,7 +163,7 @@ def build_gt_agraph(arc_graph, weight=None):
     graph = gt.Graph(directed=False)
     verts = arc_graph.get_vertices_list()
     v_lut = np.empty(shape=len(verts), dtype=object)
-    vid_lut = np.zeros(shape=len(verts), dtype=np.int)
+    vid_lut = np.zeros(shape=len(verts), dtype=int)
     arcs = arc_graph.get_arcs_list()
     a_lut = np.empty(shape=len(arcs), dtype=object)
 
@@ -291,9 +291,9 @@ def short_path_accum(graph_mcf, set_start, set_target, key_prop, weight_key=None
                         e_id = e_prop[e]
                         v_s_id = vertices_hold[int(e.source())].get_id()
                         v_t_id = vertices_hold[int(e.target())].get_id()
-                        a_e = graph_mcf.get_prop_entry_fast(new_key_id, e_id, 1, np.int)
-                        s_e = graph_mcf.get_prop_entry_fast(new_key_id, v_s_id, 1, np.int)
-                        t_e = graph_mcf.get_prop_entry_fast(new_key_id, v_t_id, 1, np.int)
+                        a_e = graph_mcf.get_prop_entry_fast(new_key_id, e_id, 1, int)
+                        s_e = graph_mcf.get_prop_entry_fast(new_key_id, v_s_id, 1, int)
+                        t_e = graph_mcf.get_prop_entry_fast(new_key_id, v_t_id, 1, int)
                         hold_a = a_e[0] + 1
                         hold_s = s_e[0] + 1
                         hold_t = t_e[0] + 1

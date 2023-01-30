@@ -99,10 +99,10 @@ def pr_2nd_tomo(pr_id, part_ids, part_centers_1, part_centers_2, distances, thic
     voi_surf, selector_voi = None, None
     if border:
         if voi_fname is None:
-            voi = np.frombuffer(voi_shared, dtype=np.bool).view()
+            voi = np.frombuffer(voi_shared, dtype=bool).view()
             voi.shape = voi_shape
-            part_centers_1_int = np.round(part_centers_1).astype(np.int)
-            part_centers_2_int = np.round(part_centers_2).astype(np.int)
+            part_centers_1_int = np.round(part_centers_1).astype(int)
+            part_centers_2_int = np.round(part_centers_2).astype(int)
         else:
             voi = disperse_io.load_poly(voi_fname)
             selector_voi = vtk.vtkSelectEnclosedPoints()
@@ -138,7 +138,7 @@ def pr_2nd_tomo(pr_id, part_ids, part_centers_1, part_centers_2, distances, thic
                 particle_high[2] = voi.shape[2]
             voi_surf = np.copy(voi[int(particle_low[0]):int(particle_high[0]),
                                    int(particle_low[1]):int(particle_high[1]),
-                                   int(particle_low[2]):int(particle_high[2])]).astype(np.bool)
+                                   int(particle_low[2]):int(particle_high[2])]).astype(bool)
             particle -= particle_low
             particles_2 = part_centers_2_int - particle_low
         else:
@@ -264,8 +264,8 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
             part_centers_1 = sim_tomo.get_particle_coords()
             part_centers_2 = part_centers_1
         if voi_fname is None:
-            part_centers_1_int = np.round(part_centers_1).astype(np.int)
-            part_centers_2_int = np.round(part_centers_2).astype(np.int)
+            part_centers_1_int = np.round(part_centers_1).astype(int)
+            part_centers_2_int = np.round(part_centers_2).astype(int)
 
         # Loop for particles
         n_parts_1, n_parts_2 = len(part_centers_1), len(part_centers_2)
@@ -291,7 +291,7 @@ def pr_sim_2nd_tomo(pr_id, sim_ids, part_centers_1, part_centers_2, distances, t
                     particle_high[2] = voi.shape[2]
                 voi_surf = np.copy(voi[int(particle_low[0]):int(particle_high[0]),
                                    int(particle_low[1]):int(particle_high[1]),
-                                   int(particle_low[2]):int(particle_high[2])]).astype(dtype=np.bool)
+                                   int(particle_low[2]):int(particle_high[2])]).astype(dtype=bool)
                 particle -= particle_low
                 particles_2 = part_centers_2_int - particle_low
             else:
@@ -976,7 +976,7 @@ class Particle(object):
         self.__vtp = tr_rot.GetOutput()
 
         # Update center
-        hold_center = np.asarray(self.get_center(), dtype=np.float)
+        hold_center = np.asarray(self.get_center(), dtype=float)
         rot_tr = vtk.vtkTransform()
         rot_tr.SetMatrix(mat_rot)
         tr_rot = vtk.vtkTransformPolyDataFilter()
@@ -986,9 +986,9 @@ class Particle(object):
         self.__center = tr_rot.GetOutput()
 
         # Normal rotation
-        hold_normal = np.asarray(self.get_normal(), dtype=np.float) + hold_center
+        hold_normal = np.asarray(self.get_normal(), dtype=float) + hold_center
         rot_center, rot_normal = M*hold_center.reshape(3, 1), M*hold_normal.reshape(3, 1)
-        hold_normal = np.asarray((rot_normal - rot_center), dtype=np.float).reshape(3)
+        hold_normal = np.asarray((rot_normal - rot_center), dtype=float).reshape(3)
         # Re-normalization
         norm_normal = math.sqrt((hold_normal*hold_normal).sum())
         if norm_normal > 0:
@@ -1135,7 +1135,7 @@ class Particle(object):
             center = np.asarray(self.__centers.GetTuple(i), dtype=np.float32)
 
             # Finding the closest distance
-            c_dst, c_point = np.inf, np.inf*np.ones(shape=3, dtype=np.float)
+            c_dst, c_point = np.inf, np.inf*np.ones(shape=3, dtype=float)
             locator.FindClosestPointWithinRadius(center, max_dst, c_point, None, None, c_dst)
             if c_dst < np.inf:
                 loc_vect = c_point - center
@@ -1638,7 +1638,7 @@ class TomoParticles(object):
         if ex_l is None:
             surfs_l = list(self.__parts)
         else:
-            lut_ex = np.ones(shape=len(self.__parts), dtype=np.bool)
+            lut_ex = np.ones(shape=len(self.__parts), dtype=bool)
             for ex_id in ex_l:
                 try:
                     lut_ex[ex_id] = False
@@ -1833,7 +1833,7 @@ class TomoParticles(object):
             voi_fname = tmp_folder + '/gen_tlist_voi.vtp'
             disperse_io.save_vtp(hold_voi, voi_fname)
         else:
-            hold_voi = np.asarray(hold_voi, dtype=np.bool)
+            hold_voi = np.asarray(hold_voi, dtype=bool)
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
@@ -1955,7 +1955,7 @@ class TomoParticles(object):
             voi_fname = tmp_folder + '/gen_tlist_voi.vtp'
             disperse_io.save_vtp(hold_voi, voi_fname)
         else:
-            hold_voi = np.asarray(hold_voi, dtype=np.bool)
+            hold_voi = np.asarray(hold_voi, dtype=bool)
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
@@ -2076,7 +2076,7 @@ class TomoParticles(object):
             voi_fname = tmp_folder + '/gen_tlist_voi.vtp'
             disperse_io.save_vtp(hold_voi, voi_fname)
         else:
-            hold_voi = np.asarray(hold_voi, dtype=np.bool)
+            hold_voi = np.asarray(hold_voi, dtype=bool)
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
@@ -2202,7 +2202,7 @@ class TomoParticles(object):
             voi_fname = tmp_folder + '/gen_tlist_voi.vtp'
             disperse_io.save_vtp(hold_voi, voi_fname)
         else:
-            hold_voi = np.asarray(hold_voi, dtype=np.bool)
+            hold_voi = np.asarray(hold_voi, dtype=bool)
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
@@ -2331,7 +2331,7 @@ class TomoParticles(object):
             voi_fname = tmp_folder + '/gen_tlist_voi.vtp'
             disperse_io.save_vtp(hold_voi, voi_fname)
         else:
-            hold_voi = np.asarray(hold_voi, dtype=np.bool)
+            hold_voi = np.asarray(hold_voi, dtype=bool)
             voi_shape = hold_voi.shape
             # voi_shared = mp.RawArray(ctypes.c_bool, hold_voi.reshape(np.array(voi_shape).prod()))
             voi_len = np.array(voi_shape).prod()
@@ -2542,7 +2542,7 @@ class TomoParticles(object):
         if ext_coords is None:
             ext_coords = coords
             is_ext = False
-        lut = np.ones(shape=len(self.__parts), dtype=np.bool)
+        lut = np.ones(shape=len(self.__parts), dtype=bool)
         for i, coord in enumerate(ext_coords):
             if is_ext or lut[i]:
                 hold = coords - coord
@@ -2709,7 +2709,7 @@ class TomoParticles(object):
             for ii, point_1 in enumerate(points_1):
                 hold_pairs, hold_dsts, hold_codes = list(), list(), list()
 
-                # min_dst, min_id = np.finfo(np.float).max, -1
+                # min_dst, min_id = np.finfo(float).max, -1
                 for jj, point_2 in enumerate(points_2):
                     hold = (point_1 - point_2).astype(np.double)
                     dst = np.sqrt((hold * hold).sum())
@@ -3251,9 +3251,9 @@ class ListTomoParticles(object):
     #                                           msg=error_msg)
     #
     #     # Initialization
-    #     dsts = np.asarray(distances, dtype=np.float)
-    #     mat_nums = np.zeros(shape=(self.get_num_particles(), len(dsts)), dtype=np.float)
-    #     mat_vols = np.zeros(shape=(self.get_num_particles(), len(dsts)), dtype=np.float)
+    #     dsts = np.asarray(distances, dtype=float)
+    #     mat_nums = np.zeros(shape=(self.get_num_particles(), len(dsts)), dtype=float)
+    #     mat_vols = np.zeros(shape=(self.get_num_particles(), len(dsts)), dtype=float)
     #
     #     # Call the counter within every tomogram
     #     lb, ub = 0, 0
@@ -3289,7 +3289,7 @@ class ListTomoParticles(object):
                                               msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         mat = dict()
 
         # Call the counter within every tomogram
@@ -3325,13 +3325,13 @@ class ListTomoParticles(object):
             raise pexceptions.PySegInputError(expr='compute_uni_2nd_order (ListTomoParticles)', msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         if dens_gl:
-            mat_num, mat_dem = np.zeros(shape=dsts.shape[0], dtype=np.float), \
-                               np.zeros(shape=dsts.shape[0], dtype=np.float)
+            mat_num, mat_dem = np.zeros(shape=dsts.shape[0], dtype=float), \
+                               np.zeros(shape=dsts.shape[0], dtype=float)
             dens = self.compute_global_density()
         else:
-            mat_arr = np.zeros(shape=dsts.shape[0], dtype=np.float)
+            mat_arr = np.zeros(shape=dsts.shape[0], dtype=float)
             t_nparts = 0
 
         # Call the counter within every tomogram
@@ -3397,7 +3397,7 @@ class ListTomoParticles(object):
                                               msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         mat = dict()
 
         # Loop for tomograms
@@ -3419,7 +3419,7 @@ class ListTomoParticles(object):
                             n_real_sims += 1
                 # Average simulations
                 if n_real_sims > 0:
-                    mat[tomo.get_tomo_fname()] = (1./n_real_sims) * np.asarray(sim_mat, dtype=np.float).sum(axis=0)
+                    mat[tomo.get_tomo_fname()] = (1./n_real_sims) * np.asarray(sim_mat, dtype=float).sum(axis=0)
 
         return mat
 
@@ -3455,7 +3455,7 @@ class ListTomoParticles(object):
                                               msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         mat = np.zeros(shape=(n_sims*n_parts_list, len(distances)), dtype=np.float32)
         hold_dens = None
         if dens_gl:
@@ -3508,7 +3508,7 @@ class ListTomoParticles(object):
                                               msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         mat = dict()
 
         # Call the counter within every tomogram
@@ -3567,14 +3567,14 @@ class ListTomoParticles(object):
                                                   msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         n_parts_tomo_2_t = 0
         if dens_gl:
-            mat_num, mat_dem = np.zeros(shape=dsts.shape[0], dtype=np.float), \
-                               np.zeros(shape=dsts.shape[0], dtype=np.float)
+            mat_num, mat_dem = np.zeros(shape=dsts.shape[0], dtype=float), \
+                               np.zeros(shape=dsts.shape[0], dtype=float)
             dens = self.compute_global_density()
         else:
-            mat_arr = np.zeros(shape=dsts.shape[0], dtype=np.float)
+            mat_arr = np.zeros(shape=dsts.shape[0], dtype=float)
             t_nparts = 0
 
         # Call the counter within every tomogram
@@ -3658,7 +3658,7 @@ class ListTomoParticles(object):
                                               msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         mat = dict()
 
         # Loop for tomograms
@@ -3685,7 +3685,7 @@ class ListTomoParticles(object):
                     # Average simulations
                     if n_real_sims > 0:
                         mat[tomo_1.get_tomo_fname()] = (1. / n_real_sims) * \
-                                                           np.asarray(sim_mat, dtype=np.float).sum(axis=0)
+                                                           np.asarray(sim_mat, dtype=float).sum(axis=0)
             except KeyError:
                 print('WARNING simulate_bi_2nd_order (ListTomoParticles): tomogram ' + str(key) + ' did ' + \
                             'not have counterpart on input list of tomograms')
@@ -3726,7 +3726,7 @@ class ListTomoParticles(object):
                                               msg=error_msg)
 
         # Initialization
-        dsts = np.asarray(distances, dtype=np.float)
+        dsts = np.asarray(distances, dtype=float)
         mat = np.zeros(shape=(n_sims * n_parts_list, len(distances)), dtype=np.float32)
         hold_dens = None
         if dens_gl:
@@ -4486,7 +4486,7 @@ class SetListTomoParticles(object):
                 else:
                     tomo_fname = seg_mic_dir[tomo.get_tomo_fname()]
                 shape = shapes_tomo[ltomos_key]
-                off_svol = np.ceil(.5 * np.asarray(shape.shape, dtype=np.float32)).astype(np.int)
+                off_svol = np.ceil(.5 * np.asarray(shape.shape, dtype=np.float32)).astype(int)
                 out_stem = os.path.split(tomo_fname)[0].replace('/', '_')
                 out_path_tomo = out_dir + '/' + out_stem + '.vti'
                 if os.path.exists(out_path_tomo):
@@ -4495,7 +4495,7 @@ class SetListTomoParticles(object):
                         hold_field = tomo_vti.GetPointData().GetArray(PARTS_LBL_FIELD)
                     else:
                         hold_field = numpy_support.numpy_to_vtk(
-                            num_array=(-1) * np.ones(shape=np.prod(hold_tomo.shape), dtype=np.int),
+                            num_array=(-1) * np.ones(shape=np.prod(hold_tomo.shape), dtype=int),
                             deep=True, array_type=vtk.VTK_INT)
                         hold_field.SetName(PARTS_LBL_FIELD + '_' + lbl)
                         tomo_vti.GetPointData().AddArray(hold_field)
@@ -4511,7 +4511,7 @@ class SetListTomoParticles(object):
                     hold_field = numpy_support.numpy_to_vtk(num_array=hold_tomo.ravel(order='F'),
                                                             deep=True, array_type=vtk.VTK_FLOAT)
                     tomo_vti.GetPointData().SetScalars(hold_field)
-                    hold_field = numpy_support.numpy_to_vtk(num_array=(-1)*np.ones(shape=np.prod(hold_tomo.shape), dtype=np.int),
+                    hold_field = numpy_support.numpy_to_vtk(num_array=(-1)*np.ones(shape=np.prod(hold_tomo.shape), dtype=int),
                                                             deep=True, array_type=vtk.VTK_INT)
                     if over:
                         hold_field.SetName(PARTS_LBL_FIELD)
@@ -4534,7 +4534,7 @@ class SetListTomoParticles(object):
                             if (coord[0] >= 0) and (coord[0] < nx) and \
                                 (coord[1] >= 0) and (coord[1] < ny) and \
                                 (coord[2] >= 0) and (coord[2] < nz):
-                                p_id = tomo_vti.ComputePointId(coord.astype(np.int))
+                                p_id = tomo_vti.ComputePointId(coord.astype(int))
                                 if over:
                                     hold_field.InsertTuple(p_id, (lbl,))
                                 else:
@@ -4568,7 +4568,7 @@ class Nhood(object, metaclass=abc.ABCMeta):
         if (voi is not None) and not(isinstance(voi, vtk.vtkPolyData) or isinstance(voi, np.ndarray)):
             error_msg = 'Input VOI must be an vtkPolyData object or a numpy array.'
             raise pexceptions.PySegInputError(expr='__init__ (Nhood)', msg=error_msg)
-        self.__center = np.asarray(center, dtype=np.float)
+        self.__center = np.asarray(center, dtype=float)
         if rad < 0:
             self.__rad = 0.
         else:
@@ -4688,7 +4688,7 @@ class SphereNhood(Nhood):
             if voi is None:
                 voi = (self._Nhood__dst_field >= 0) & (self._Nhood__dst_field <= self._Nhood__rad)
             for coord in coords:
-                x, y, z = np.round(coord).astype(np.int)
+                x, y, z = np.round(coord).astype(int)
                 if (x >= 0) and (y >= 0) and (z >= 0) and (x < self._Nhood__voi.shape[0]) \
                         and (y < self._Nhood__voi.shape[1]) and (z < self._Nhood__voi.shape[2]):
                     if voi[x, y, z]:
@@ -4866,7 +4866,7 @@ class ShellNhood(Nhood):
                     count += 1
         else:
             for coord in coords:
-                x, y, z = np.round(coord).astype(np.int)
+                x, y, z = np.round(coord).astype(int)
                 if (x >= 0) and (y >= 0) and (z >= 0) and (x < self._Nhood__voi.shape[0]) \
                         and (y < self._Nhood__voi.shape[1]) and (z < self._Nhood__voi.shape[2]):
                     if self._Nhood__voi[x, y, z]:

@@ -62,7 +62,7 @@ def gen_rect_voi_array(shape):
     :param shape: 3-tuple with the length of the three rectangle sides
     :return: a binary ndarray object
     """
-    seg = np.zeros(shape=np.asarray(shape) + 1, dtype=np.bool)
+    seg = np.zeros(shape=np.asarray(shape) + 1, dtype=bool)
     seg[1:shape[0], 1:shape[1], 1:shape[2]] = True
     return seg
 
@@ -168,7 +168,7 @@ print('\tPlotting: ')
 # plt.close()
 
 # Speed up fitting:
-processes = np.asarray(ana_npr_rg, dtype=np.float)
+processes = np.asarray(ana_npr_rg, dtype=float)
 processes_ex = np.logspace(0, np.log2(cpus), num=50, base=2)
 sup_comp = comp_times[0] / comp_times
 sup_sim = sim_times[0] / sim_times

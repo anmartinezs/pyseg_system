@@ -251,7 +251,7 @@ for (input_pkl, in_tomo_ref, in_seg, in_img, in_off, in_rot) in \
                     h_cloud.append(coord)
                     h_cloud_cc.append(cloud_cc[i])
             print('\t\t\t-Peaks thresholded: ' + str(len(h_cloud)) + ' of ' + str(len(cloud)))
-            cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=np.int), np.asarray(h_cloud, dtype=np.float32)
+            cloud_ids, cloud = np.asarray(h_cloud_ids, dtype=int), np.asarray(h_cloud, dtype=np.float32)
             cloud_cc = np.asarray(h_cloud_cc, dtype=np.float32)
         elif del_v_sl:
             graph.threshold_vertices_list(cloud_ids, in_mode=True)
@@ -303,7 +303,7 @@ for (input_pkl, in_tomo_ref, in_seg, in_img, in_off, in_rot) in \
         gcrop_off_rln = np.asarray((gcrop_off[1], gcrop_off[0], gcrop_off[2]), dtype=np.float32)
         coords, coords_pt = tomo_peaks.get_prop_vals(ps.sub.PK_COORDS), tomo_peaks.get_prop_vals(peak_prop_pt)
         tomo_ref = ps.disperse_io.load_tomo(in_tomo_ref, mmap=True)
-        tomo_center = np.asarray((tomo_ref.shape[0]*.5, tomo_ref.shape[1]*.5, tomo_ref.shape[2]*.5), dtype=np.float)
+        tomo_center = np.asarray((tomo_ref.shape[0]*.5, tomo_ref.shape[1]*.5, tomo_ref.shape[2]*.5), dtype=float)
         for coord, pt_coord in zip(coords, coords_pt):
 
             # Initialization

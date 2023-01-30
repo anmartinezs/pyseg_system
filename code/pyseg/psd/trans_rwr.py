@@ -77,10 +77,10 @@ def seg_trans(graph, graph_c, graph_a, graph_b, per):
     vertices = graph.get_vertices_list()
     for v in vertices:
         v_id = v.get_id()
-        prop_t = graph.get_prop_entry_fast(prop_t_id, v_id, 1, np.float)[0]
-        prop_c = graph.get_prop_entry_fast(prop_c_id, v_id, 1, np.float)[0]
-        prop_a = graph.get_prop_entry_fast(prop_a_id, v_id, 1, np.float)[0]
-        prop_b = graph.get_prop_entry_fast(prop_b_id, v_id, 1, np.float)[0]
+        prop_t = graph.get_prop_entry_fast(prop_t_id, v_id, 1, float)[0]
+        prop_c = graph.get_prop_entry_fast(prop_c_id, v_id, 1, float)[0]
+        prop_a = graph.get_prop_entry_fast(prop_a_id, v_id, 1, float)[0]
+        prop_b = graph.get_prop_entry_fast(prop_b_id, v_id, 1, float)[0]
         if prop_t > 0:
             arr_t.append(prop_t)
         if prop_c > 0:
@@ -95,10 +95,10 @@ def seg_trans(graph, graph_c, graph_a, graph_b, per):
     # Main loop for doing the comparisons
     for v in vertices:
         v_id = v.get_id()
-        prop_t = graph.get_prop_entry_fast(prop_t_id, v_id, 1, np.float)[0]
-        prop_c = graph.get_prop_entry_fast(prop_c_id, v_id, 1, np.float)[0]
-        prop_a = graph.get_prop_entry_fast(prop_a_id, v_id, 1, np.float)[0]
-        prop_b = graph.get_prop_entry_fast(prop_b_id, v_id, 1, np.float)[0]
+        prop_t = graph.get_prop_entry_fast(prop_t_id, v_id, 1, float)[0]
+        prop_c = graph.get_prop_entry_fast(prop_c_id, v_id, 1, float)[0]
+        prop_a = graph.get_prop_entry_fast(prop_a_id, v_id, 1, float)[0]
+        prop_b = graph.get_prop_entry_fast(prop_b_id, v_id, 1, float)[0]
         # Set label (1-trans, 2-C, 3-A and 4-B)
         lbl = 0
         if prop_t > per_t:

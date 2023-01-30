@@ -189,7 +189,7 @@ for in_mic in mic_dic.keys():
     if n_peaks < hold_peaks:
         hold_peaks = n_peaks
     print('\t\t\t-Number of peaks found ' + str(n_peaks) + ', ' + str(hold_peaks) + ' are going to be picked.')
-    peaks_cc = np.zeros(shape=n_peaks, dtype=np.float)
+    peaks_cc = np.zeros(shape=n_peaks, dtype=float)
     for i in range(n_peaks):
         peaks_cc[i] = tomo_cc[peaks[0][i], peaks[1][i], peaks[2][i]]
     peaks_sorted = np.argsort(peaks_cc)[::-1]

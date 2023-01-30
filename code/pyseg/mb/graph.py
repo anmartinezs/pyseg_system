@@ -52,7 +52,7 @@ class MbGraphMCF(GraphMCF):
         verts_mb = list()
         prop_seg_id = self.get_prop_id(MB_SEG)
         for v in self.get_vertices_list():
-            if self.get_prop_entry_fast(prop_seg_id, v.get_id(), 1, np.int)[0] == MB_LBL:
+            if self.get_prop_entry_fast(prop_seg_id, v.get_id(), 1, int)[0] == MB_LBL:
                 verts_mb.append(v)
         return verts_mb
 
@@ -123,8 +123,8 @@ class MbGraphMCF(GraphMCF):
             elif seg_lbl == MB_LBL:
                 lut_in.append(int(v))
                 lut_out.append(int(v))
-        lut_in = np.asarray(lut_in, dtype=np.int)
-        lut_out = np.asarray(lut_out, dtype=np.int)
+        lut_in = np.asarray(lut_in, dtype=int)
+        lut_out = np.asarray(lut_out, dtype=int)
 
         # Loop for all vertices
         for v in graph_gt.vertices():
@@ -166,8 +166,8 @@ class MbGraphMCF(GraphMCF):
                             fil_p_ids += p_ids[1::]
                         edge = self.get_edge(prop_eid[e_path[-1]])
                         e_ids = self.get_edge_ids(edge)
-                        e_coords = np.asarray(self.get_edge_arcs_coords(edge), dtype=np.float)
-                        e_coords_int = np.asarray(e_coords.round(), dtype=np.int)
+                        e_coords = np.asarray(self.get_edge_arcs_coords(edge), dtype=float)
+                        e_coords_int = np.asarray(e_coords.round(), dtype=int)
                         try:
                             xi, yi, zi = e_coords_int[0, :]
                             mb_i = self.__mb_seg[xi, yi, zi]
@@ -184,7 +184,7 @@ class MbGraphMCF(GraphMCF):
                                 x, y, z = e_coords_int[i, :]
                                 if self.__mb_seg[x, y, z] == seg_lbl:
                                     x, y, z = e_coords[i, :]
-                                    hold_len = np.asarray((x-xh, y-yh, z-zh), dtype=np.float)
+                                    hold_len = np.asarray((x-xh, y-yh, z-zh), dtype=float)
                                     path_len += (math.sqrt((hold_len*hold_len).sum()) * self.get_resolution())
                                     xh, yh, zh = x, y, z
                                     contact = e_coords[i, :]
@@ -248,7 +248,7 @@ class MbGraphMCF(GraphMCF):
         prop_elen = graph_gt.edge_properties[SGT_EDGE_LENGTH]
 
         # Find tail vertices within slice
-        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=np.int)
+        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=int)
         cont = 0
         v_ids = list()
         for v in graph_gt.vertices():
@@ -309,8 +309,8 @@ class MbGraphMCF(GraphMCF):
         visitor = SubGraphVisitor(sgraph_id)
 
         # Find subgraphs
-        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=np.float)
-        rids = np.zeros(shape=vertices_gt.shape[0], dtype=np.int)
+        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=float)
+        rids = np.zeros(shape=vertices_gt.shape[0], dtype=int)
         for i, v in enumerate(vertices_gt):
             if sgraph_id[v] == 0:
                 gt.dfs_search(graph, v, visitor)
@@ -322,7 +322,7 @@ class MbGraphMCF(GraphMCF):
         # Clusters filtering
         ids = sgraph_id.get_array()
         max_id = ids.max() + 1
-        lut_counts = np.zeros(shape=max_id, dtype=np.int)
+        lut_counts = np.zeros(shape=max_id, dtype=int)
         for idy in ids:
             lut_counts[idy] += 1
         hold_coords = list()
@@ -341,7 +341,7 @@ class MbGraphMCF(GraphMCF):
         mask_out = (self.__mb_seg == slice.get_side())
         mask_out *= ((self.__mb_dst >= slice.get_eu_dst_low()) * (self.__mb_dst <= slice.get_eu_dst_high()))
 
-        return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int), mask_out
+        return np.asarray(hold_coords, dtype=float), np.asarray(hold_ids, dtype=int), mask_out
 
     # Cloud of points in a slice
     # slices: Slice object with the membrane slice information
@@ -397,7 +397,7 @@ class MbGraphMCF(GraphMCF):
         # Creating vertices LUT
         v_ids = list()
         cont = 0
-        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=np.int)
+        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=int)
         for v_id in h_v_ids:
             if lut_ver[v_id] == -1:
                 lut_ver[v_id] = cont
@@ -425,10 +425,10 @@ class MbGraphMCF(GraphMCF):
         visitor = SubGraphVisitor(sgraph_id)
 
         # Find subgraphs
-        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=np.float)
-        rids = np.zeros(shape=vertices_gt.shape[0], dtype=np.int)
+        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=float)
+        rids = np.zeros(shape=vertices_gt.shape[0], dtype=int)
         if cont_fus == 'max':
-            cont_p = (-np.inf) * np.ones(shape=vertices_gt.shape[0], dtype=np.int)
+            cont_p = (-np.inf) * np.ones(shape=vertices_gt.shape[0], dtype=int)
         for i, v in enumerate(vertices_gt):
             if sgraph_id[v] == 0:
                 gt.dfs_search(graph, v, visitor)
@@ -447,7 +447,7 @@ class MbGraphMCF(GraphMCF):
         # Clusters filtering
         ids = sgraph_id.get_array()
         max_id = ids.max()
-        lut_counts = np.zeros(shape=max_id + 1, dtype=np.int)
+        lut_counts = np.zeros(shape=max_id + 1, dtype=int)
         for idy in ids:
             lut_counts[idy] += 1
         hold_coords = list()
@@ -468,9 +468,9 @@ class MbGraphMCF(GraphMCF):
         else:
             mask_out *= ((self.__mb_dst >= slice.get_eu_dst_low()) * (self.__mb_dst <= slice.get_eu_dst_high()))
         if cont_mode:
-            return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int), mask_out, cont_p
+            return np.asarray(hold_coords, dtype=float), np.asarray(hold_ids, dtype=int), mask_out, cont_p
         else:
-            return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int), mask_out
+            return np.asarray(hold_coords, dtype=float), np.asarray(hold_ids, dtype=int), mask_out
 
     def get_cloud_mb_slice_pick(self, slice, cont_mode=False, graph_gt=None, cont_prop=STR_FIELD_VALUE_INV, cont_fus='max'):
         """
@@ -529,7 +529,7 @@ class MbGraphMCF(GraphMCF):
         # Creating vertices LUT
         v_ids = list()
         cont = 0
-        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=np.int)
+        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=int)
         for v_id in h_v_ids:
             if lut_ver[v_id] == -1:
                 lut_ver[v_id] = cont
@@ -566,10 +566,10 @@ class MbGraphMCF(GraphMCF):
         else:
             mask_out *= ((self.__mb_dst >= slice.get_eu_dst_low()) * (self.__mb_dst <= slice.get_eu_dst_high()))
         if cont_mode:
-            return np.asarray(coords, dtype=np.float), np.asarray(ids, dtype=np.int), mask_out, \
-                   np.asarray(cont_p, dtype=np.float)
+            return np.asarray(coords, dtype=float), np.asarray(ids, dtype=int), mask_out, \
+                   np.asarray(cont_p, dtype=float)
         else:
-            return np.asarray(coords, dtype=np.float), np.asarray(ids, dtype=np.int), mask_out
+            return np.asarray(coords, dtype=float), np.asarray(ids, dtype=int), mask_out
 
     # Filters a cloud of points from a slice by applying linker restrictions
     def filter_linker_cloud(self, c_s, c_id_s, c_t, c_id_t, linker):
@@ -594,13 +594,13 @@ class MbGraphMCF(GraphMCF):
 
         # Building neighbours array for sources
         mat_geo = gt.shortest_distance(graph_gt, weights=prop_el)
-        neighs = np.zeros(shape=len(sources), dtype=np.int)
+        neighs = np.zeros(shape=len(sources), dtype=int)
         for i, s in enumerate(sources):
             for j, t in enumerate(targets):
                 geo_dst = mat_geo[s][t]
                 x_s, y_s, z_s = self._GraphMCF__skel.GetPoint(prop_vid[s])
                 x_t, y_t, z_t = self._GraphMCF__skel.GetPoint(prop_vid[t])
-                hold = np.asarray((x_s-x_t, y_s-y_t, z_s-z_t), dtype=np.float)
+                hold = np.asarray((x_s-x_t, y_s-y_t, z_s-z_t), dtype=float)
                 eu_dst = math.sqrt((hold*hold).sum()) * self.get_resolution()
                 if eu_dst <= 0:
                     sin = 1.
@@ -617,7 +617,7 @@ class MbGraphMCF(GraphMCF):
                 hold_cloud.append(c_s[i])
                 hold_ids.append(c_id_s[i])
 
-        return np.asarray(hold_cloud, dtype=np.float), np.asarray(hold_ids, dtype=np.int)
+        return np.asarray(hold_cloud, dtype=float), np.asarray(hold_ids, dtype=int)
 
     # Generates a VTK poly data from a cloud of vertices a membrane slice
     # v_ids: vertices id which represent a membrane slice
@@ -671,19 +671,19 @@ class MbGraphMCF(GraphMCF):
 
         # VTK Topology
         # Vertices
-        lut_ver = np.zeros(shape=self.get_nid(), dtype=np.bool)
+        lut_ver = np.zeros(shape=self.get_nid(), dtype=bool)
         for v_id in v_ids:
             verts.InsertNextCell(1)
             struct.InsertNextTuple((MB_VTP_STR_E,))
-            eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, np.float))
-            geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, np.float))
-            geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, np.float))
-            sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, np.float))
-            kt.InsertNextTuple(self.get_prop_entry_fast(prop_kt, v_id, 1, np.float))
-            tt.InsertNextTuple(self.get_prop_entry_fast(prop_tt, v_id, 1, np.float))
-            ns.InsertNextTuple(self.get_prop_entry_fast(prop_ns, v_id, 1, np.float))
-            bs.InsertNextTuple(self.get_prop_entry_fast(prop_bs, v_id, 1, np.float))
-            apl.InsertNextTuple(self.get_prop_entry_fast(prop_apl, v_id, 1, np.float))
+            eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, float))
+            geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, float))
+            geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, float))
+            sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, float))
+            kt.InsertNextTuple(self.get_prop_entry_fast(prop_kt, v_id, 1, float))
+            tt.InsertNextTuple(self.get_prop_entry_fast(prop_tt, v_id, 1, float))
+            ns.InsertNextTuple(self.get_prop_entry_fast(prop_ns, v_id, 1, float))
+            bs.InsertNextTuple(self.get_prop_entry_fast(prop_bs, v_id, 1, float))
+            apl.InsertNextTuple(self.get_prop_entry_fast(prop_apl, v_id, 1, float))
             verts.InsertCellPoint(v_id)
             lut_ver[v_id] = True
         # Contact points
@@ -692,15 +692,15 @@ class MbGraphMCF(GraphMCF):
             if isinstance(fil, FilamentLDG):
                 verts.InsertNextCell(1)
                 struct.InsertNextTuple((MB_VTP_STR_C,))
-                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, np.float))
-                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, np.float))
-                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, np.float))
-                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, np.float))
-                kt.InsertNextTuple(self.get_prop_entry_fast(prop_kt, v_id, 1, np.float))
-                tt.InsertNextTuple(self.get_prop_entry_fast(prop_tt, v_id, 1, np.float))
-                ns.InsertNextTuple(self.get_prop_entry_fast(prop_ns, v_id, 1, np.float))
-                bs.InsertNextTuple(self.get_prop_entry_fast(prop_bs, v_id, 1, np.float))
-                apl.InsertNextTuple(self.get_prop_entry_fast(prop_apl, v_id, 1, np.float))
+                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, float))
+                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, float))
+                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, float))
+                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, float))
+                kt.InsertNextTuple(self.get_prop_entry_fast(prop_kt, v_id, 1, float))
+                tt.InsertNextTuple(self.get_prop_entry_fast(prop_tt, v_id, 1, float))
+                ns.InsertNextTuple(self.get_prop_entry_fast(prop_ns, v_id, 1, float))
+                bs.InsertNextTuple(self.get_prop_entry_fast(prop_bs, v_id, 1, float))
+                apl.InsertNextTuple(self.get_prop_entry_fast(prop_apl, v_id, 1, float))
                 verts.InsertCellPoint(self.get_mb_fil(v_id).get_point_ids()[-1])
         # Filament paths
         for v_id in v_ids:
@@ -710,15 +710,15 @@ class MbGraphMCF(GraphMCF):
                 n_points = len(p_ids)
                 lines.InsertNextCell(n_points)
                 struct.InsertNextTuple((MB_VTP_STR_F,))
-                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, np.float))
-                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, np.float))
-                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, np.float))
-                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, np.float))
-                kt.InsertNextTuple(self.get_prop_entry_fast(prop_kt, v_id, 1, np.float))
-                tt.InsertNextTuple(self.get_prop_entry_fast(prop_tt, v_id, 1, np.float))
-                ns.InsertNextTuple(self.get_prop_entry_fast(prop_ns, v_id, 1, np.float))
-                bs.InsertNextTuple(self.get_prop_entry_fast(prop_bs, v_id, 1, np.float))
-                apl.InsertNextTuple(self.get_prop_entry_fast(prop_apl, v_id, 1, np.float))
+                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, float))
+                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, float))
+                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, float))
+                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, float))
+                kt.InsertNextTuple(self.get_prop_entry_fast(prop_kt, v_id, 1, float))
+                tt.InsertNextTuple(self.get_prop_entry_fast(prop_tt, v_id, 1, float))
+                ns.InsertNextTuple(self.get_prop_entry_fast(prop_ns, v_id, 1, float))
+                bs.InsertNextTuple(self.get_prop_entry_fast(prop_bs, v_id, 1, float))
+                apl.InsertNextTuple(self.get_prop_entry_fast(prop_apl, v_id, 1, float))
                 for i in range(n_points):
                     lines.InsertCellPoint(p_ids[i])
         # Edges
@@ -777,7 +777,7 @@ class MbGraphMCF(GraphMCF):
     def print_slice(self, v_ids, th_den=None, slc=False):
 
         # Initialization
-        img = np.zeros(shape=self._GraphMCF__density.shape, dtype=np.bool)
+        img = np.zeros(shape=self._GraphMCF__density.shape, dtype=bool)
 
         if slc:
             for v_id in v_ids:
@@ -907,7 +907,7 @@ class MbGraphMCF(GraphMCF):
                 hold_coords.append(coord)
                 hold_ids.append(v_id)
 
-        return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int)
+        return np.asarray(hold_coords, dtype=float), np.asarray(hold_ids, dtype=int)
 
 
     # Compute angle between a vector (3 components property) and the normal to a membrane (only vertices)
@@ -1044,14 +1044,14 @@ class MbGraphMCF(GraphMCF):
         # Vertices lut
         nv = graph_gt.num_vertices()
         nids = self.get_nid()
-        s_lut, t_lut = np.zeros(shape=nids, dtype=np.bool), np.zeros(shape=nids, dtype=np.bool)
+        s_lut, t_lut = np.zeros(shape=nids, dtype=bool), np.zeros(shape=nids, dtype=bool)
         for i, s_id in enumerate(s_ids):
             s_lut[s_id] = True
         for t_id in t_ids:
             t_lut[t_id] = True
         len_s, len_t = len(s_ids), len(t_ids)
         sg_ids = np.zeros(shape=len_s, dtype=object)
-        sg_lut, tg_lut = np.zeros(shape=nv, dtype=np.bool), np.zeros(shape=nv, dtype=np.bool)
+        sg_lut, tg_lut = np.zeros(shape=nv, dtype=bool), np.zeros(shape=nv, dtype=bool)
         count_s = 0
         for v in graph_gt.vertices():
             v_id = prop_id[v]
@@ -1172,7 +1172,7 @@ class SynGraphMCF(GraphMCF):
         verts_mb = list()
         prop_seg_id = self.get_prop_id(SYN_SEG)
         for v in self.get_vertices_list():
-            if self.get_prop_entry_fast(prop_seg_id, v.get_id(), 1, np.int)[0] == mb_lbl:
+            if self.get_prop_entry_fast(prop_seg_id, v.get_id(), 1, int)[0] == mb_lbl:
                 verts_mb.append(v)
         return verts_mb
 
@@ -1245,8 +1245,8 @@ class SynGraphMCF(GraphMCF):
             elif seg_lbl == SYN_PRE_LBL:
                 lut_az.append(i_v)
                 lut_clf_pre.append(i_v)
-        lut_psd, lut_clf_pst = np.asarray(lut_psd, dtype=np.int), np.asarray(lut_clf_pst, dtype=np.int)
-        lut_az, lut_clf_pre = np.asarray(lut_az, dtype=np.int), np.asarray(lut_clf_pre, dtype=np.int)
+        lut_psd, lut_clf_pst = np.asarray(lut_psd, dtype=int), np.asarray(lut_clf_pst, dtype=int)
+        lut_az, lut_clf_pre = np.asarray(lut_az, dtype=int), np.asarray(lut_clf_pre, dtype=int)
 
         # Loop for all vertices
         for v in graph_gt.vertices():
@@ -1300,8 +1300,8 @@ class SynGraphMCF(GraphMCF):
                             fil_p_ids += p_ids[1::]
                         edge = self.get_edge(prop_eid[e_path[-1]])
                         e_ids = self.get_edge_ids(edge)
-                        e_coords = np.asarray(self.get_edge_arcs_coords(edge), dtype=np.float)
-                        e_coords_int = np.asarray(e_coords.round(), dtype=np.int)
+                        e_coords = np.asarray(self.get_edge_arcs_coords(edge), dtype=float)
+                        e_coords_int = np.asarray(e_coords.round(), dtype=int)
                         try:
                             xi, yi, zi = e_coords_int[0, :]
                             # Reverse for ending with vertex through membrane
@@ -1317,7 +1317,7 @@ class SynGraphMCF(GraphMCF):
                                 x, y, z = e_coords_int[i, :]
                                 if self.__syn_seg[x, y, z] == seg_lbl:
                                     x, y, z = e_coords[i, :]
-                                    hold_len = np.asarray((x-xh, y-yh, z-zh), dtype=np.float)
+                                    hold_len = np.asarray((x-xh, y-yh, z-zh), dtype=float)
                                     path_len += (math.sqrt((hold_len*hold_len).sum()) * self.get_resolution())
                                     xh, yh, zh = x, y, z
                                     contact = e_coords[i, :]
@@ -1451,7 +1451,7 @@ class SynGraphMCF(GraphMCF):
         # Creating vertices LUT
         v_ids = list()
         cont = 0
-        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=np.int)
+        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=int)
         for v_id in h_v_ids:
             if lut_ver[v_id] == -1:
                 lut_ver[v_id] = cont
@@ -1479,10 +1479,10 @@ class SynGraphMCF(GraphMCF):
         visitor = SubGraphVisitor(sgraph_id)
 
         # Find subgraphs
-        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=np.float)
-        rids = np.zeros(shape=vertices_gt.shape[0], dtype=np.int)
+        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=float)
+        rids = np.zeros(shape=vertices_gt.shape[0], dtype=int)
         if cont_fus == 'max':
-            cont_p = (-np.inf) * np.ones(shape=vertices_gt.shape[0], dtype=np.int)
+            cont_p = (-np.inf) * np.ones(shape=vertices_gt.shape[0], dtype=int)
         for i, v in enumerate(vertices_gt):
             if sgraph_id[v] == 0:
                 gt.dfs_search(graph, v, visitor)
@@ -1501,7 +1501,7 @@ class SynGraphMCF(GraphMCF):
         # Clusters filtering
         ids = sgraph_id.get_array()
         max_id = ids.max()
-        lut_counts = np.zeros(shape=max_id+1, dtype=np.int)
+        lut_counts = np.zeros(shape=max_id+1, dtype=int)
         for idy in ids:
             lut_counts[idy] += 1
         hold_coords = list()
@@ -1532,9 +1532,9 @@ class SynGraphMCF(GraphMCF):
                              (self.__mb_dst_pre <= slice.get_eu_dst_high()))
                 # disperse_io.save_numpy(mask_out, '/fs/pool/pool-ruben/antonio/nuc_mito/hold_1.mrc')
         if cont_mode:
-            return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int), mask_out, cont_p
+            return np.asarray(hold_coords, dtype=float), np.asarray(hold_ids, dtype=int), mask_out, cont_p
         else:
-            return np.asarray(hold_coords, dtype=np.float), np.asarray(hold_ids, dtype=np.int), mask_out
+            return np.asarray(hold_coords, dtype=float), np.asarray(hold_ids, dtype=int), mask_out
 
     # Generates a VTK poly data from a cloud of vertices of a synapse slice
     # v_ids: vertices id which represent a membrane slice
@@ -1590,14 +1590,14 @@ class SynGraphMCF(GraphMCF):
 
         # VTK Topology
         # Vertices
-        lut_ver = np.zeros(shape=self.get_nid(), dtype=np.bool)
+        lut_ver = np.zeros(shape=self.get_nid(), dtype=bool)
         for v_id in v_ids:
             verts.InsertNextCell(1)
             struct.InsertNextTuple((MB_VTP_STR_E,))
-            eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, np.float))
-            geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, np.float))
-            geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, np.float))
-            sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, np.float))
+            eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, float))
+            geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, float))
+            geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, float))
+            sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, float))
             kt.InsertNextTuple((-1,))
             tt.InsertNextTuple((-1,))
             ns.InsertNextTuple((-1,))
@@ -1611,10 +1611,10 @@ class SynGraphMCF(GraphMCF):
             if isinstance(fil, FilamentLDG):
                 verts.InsertNextCell(1)
                 struct.InsertNextTuple((MB_VTP_STR_C,))
-                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, np.float))
-                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, np.float))
-                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, np.float))
-                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, np.float))
+                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, float))
+                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, float))
+                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, float))
+                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, float))
                 kt.InsertNextTuple((fil.get_total_k(),))
                 tt.InsertNextTuple((fil.get_total_t(),))
                 ns.InsertNextTuple((fil.get_total_ns(),))
@@ -1629,10 +1629,10 @@ class SynGraphMCF(GraphMCF):
                 n_points = len(p_ids)
                 lines.InsertNextCell(n_points)
                 struct.InsertNextTuple((MB_VTP_STR_F,))
-                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, np.float))
-                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, np.float))
-                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, np.float))
-                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, np.float))
+                eu_dst.InsertNextTuple(self.get_prop_entry_fast(prop_eu, v_id, 1, float))
+                geo_dst.InsertNextTuple(self.get_prop_entry_fast(prop_geo, v_id, 1, float))
+                geo_len.InsertNextTuple(self.get_prop_entry_fast(prop_gl, v_id, 1, float))
+                sin.InsertNextTuple(self.get_prop_entry_fast(prop_sin, v_id, 1, float))
                 kt.InsertNextTuple((fil.get_total_k(),))
                 tt.InsertNextTuple((fil.get_total_t(),))
                 ns.InsertNextTuple((fil.get_total_ns(),))
@@ -1878,14 +1878,14 @@ class SynGraphMCF(GraphMCF):
         # Vertices lut
         nv = graph_gt.num_vertices()
         nids = self.get_nid()
-        s_lut, t_lut = np.zeros(shape=nids, dtype=np.bool), np.zeros(shape=nids, dtype=np.bool)
+        s_lut, t_lut = np.zeros(shape=nids, dtype=bool), np.zeros(shape=nids, dtype=bool)
         for i, s_id in enumerate(s_ids):
             s_lut[s_id] = True
         for t_id in t_ids:
             t_lut[t_id] = True
         len_s, len_t = len(s_ids), len(t_ids)
         sg_ids = np.zeros(shape=len_s, dtype=object)
-        sg_lut, tg_lut = np.zeros(shape=nv, dtype=np.bool), np.zeros(shape=nv, dtype=np.bool)
+        sg_lut, tg_lut = np.zeros(shape=nv, dtype=bool), np.zeros(shape=nv, dtype=bool)
         count_s = 0
         for v in graph_gt.vertices():
             v_id = prop_id[v]

@@ -8,7 +8,7 @@ __author__ = 'martinez'
 
 import numpy as np
 
-MAX_FLOAT = np.finfo(np.float).max
+MAX_FLOAT = np.finfo(float).max
 NO_CONNECTION = -1
 
 STR_CELL = 'cell_id'

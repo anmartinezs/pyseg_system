@@ -200,10 +200,10 @@ def gen_ccsrv_msome(tot_locs, shape, n_parts, mic_rad, c_rad, min_ip_dst, c_jump
     count = 0
     min_ip_dst_2 = float(min_ip_dst)**2
     locs_out, rots_out = list(), list()
-    mic_cent = .5 * np.asarray(shape, dtype=np.float)
+    mic_cent = .5 * np.asarray(shape, dtype=float)
     mic_rad_f = float(mic_rad)
-    max_n_tries = np.prod(np.asarray(shape, dtype=np.int))
-    locs_a = np.asarray(tot_locs, dtype=np.float)
+    max_n_tries = np.prod(np.asarray(shape, dtype=int))
+    locs_a = np.asarray(tot_locs, dtype=float)
 
     # Loop for clusters
     mic_end, n_try = False, 0
@@ -242,7 +242,7 @@ def gen_ccsrv_msome(tot_locs, shape, n_parts, mic_rad, c_rad, min_ip_dst, c_jump
                     if nover_p:
                         if len(locs_out) > 0:
                             # Check that the new particle does not overlap with other already inserted
-                            hold_dst_2 = c_part - np.asarray(locs_out, dtype=np.float)
+                            hold_dst_2 = c_part - np.asarray(locs_out, dtype=float)
                             if np.min(np.sum(hold_dst_2 * hold_dst_2, axis=1)) >= min_ip_dst_2:
                                 locs_out.append(c_part)
                                 tilt, psi = vect_to_zrelion(c_part - mic_cent, mode='active')[1:]
@@ -288,9 +288,9 @@ def gen_2ccsrv_msome(tot_locs, locs, shape, n_parts, mic_rad, avg_dst, min_ip_ds
     count = 0
     min_ip_dst_2 = float(min_ip_dst) ** 2
     locs_out, rots_out = list(), list()
-    mic_cent = .5 * np.asarray(shape, dtype=np.float)
-    max_n_tries = np.prod(np.asarray(shape, dtype=np.int))
-    locs_a = np.asarray(tot_locs + locs, dtype=np.float)
+    mic_cent = .5 * np.asarray(shape, dtype=float)
+    max_n_tries = np.prod(np.asarray(shape, dtype=int))
+    locs_a = np.asarray(tot_locs + locs, dtype=float)
 
     # Loop for particles
     mic_end, n_try = False, 0
@@ -311,7 +311,7 @@ def gen_2ccsrv_msome(tot_locs, locs, shape, n_parts, mic_rad, avg_dst, min_ip_ds
                 nover_p = np.min(np.sum(hold_dst * hold_dst, axis=1)) >= min_ip_dst_2
             if nover_p:
                 if len(locs_out) > 0:
-                    hold_dst_2 = p_cent - np.asarray(locs_out, dtype=np.float)
+                    hold_dst_2 = p_cent - np.asarray(locs_out, dtype=float)
                     if np.min(np.sum(hold_dst_2 * hold_dst_2, axis=1)) >= min_ip_dst_2:
                         locs_out.append(p_cent)
                         tilt, psi = vect_to_zrelion(p_cent - mic_cent, mode='active')[1:]
@@ -347,10 +347,10 @@ def gen_csrv_msome(tot_locs, shape, n_parts, mic_rad, min_ip_dst):
     count = 0
     min_ip_dst_2 = float(min_ip_dst) ** 2
     locs_out, rots_out = list(), list()
-    mic_cent = .5 * np.asarray(shape, dtype=np.float)
+    mic_cent = .5 * np.asarray(shape, dtype=float)
     mic_rad_f = float(mic_rad)
-    max_n_tries = np.prod(np.asarray(shape, dtype=np.int))
-    locs_a = np.asarray(tot_locs, dtype=np.float)
+    max_n_tries = np.prod(np.asarray(shape, dtype=int))
+    locs_a = np.asarray(tot_locs, dtype=float)
 
     # Loop for particles
     mic_end, n_try = False, 0
@@ -372,7 +372,7 @@ def gen_csrv_msome(tot_locs, shape, n_parts, mic_rad, min_ip_dst):
             if nover_p:
                 if len(locs_out) > 0:
                     # Check that the new particle does not overlap with other already inserted
-                    hold_dst_2 = p_cent - np.asarray(locs_out, dtype=np.float)
+                    hold_dst_2 = p_cent - np.asarray(locs_out, dtype=float)
                     if np.min(np.sum(hold_dst_2 * hold_dst_2, axis=1)) >= min_ip_dst_2:
                         locs_out.append(p_cent)
                         tilt, psi = vect_to_zrelion(p_cent - mic_cent, mode='active')[1:]
@@ -405,7 +405,7 @@ def insert_particles(tomo, model, cent, cent_v, locs, angs):
     for loc, ang in zip(locs, angs):
         svol = tomo_rot(model, ang, conv='relion', active=True, deg=True, center=cent)
         point = loc + cent_v
-        spatial.over_sub_tomo(tomo, np.round(point).astype(np.int), svol, np.maximum)
+        spatial.over_sub_tomo(tomo, np.round(point).astype(int), svol, np.maximum)
     return tomo
 
 
@@ -415,7 +415,7 @@ def pr_routine(pr_id, tomo_ids, settings):
 
         snr = settings.snrs[i]
         print('\t\t-M[' + str(pr_id) + '/' + str(i) + '] Generating microsome ' + str(i) + ' with SNR=' + str(snr) + ':')
-        tm_size_hz = np.asarray(settings.tm_size, dtype=np.int)
+        tm_size_hz = np.asarray(settings.tm_size, dtype=int)
         tm_size_hz[2] -= (2 * settings.mc_halo_z)
         tomo = np.zeros(shape=settings.tm_size, dtype=np.float16)
 
@@ -532,7 +532,7 @@ print('')
 # Initialization of global variables
 max_svol_dim = 0
 svol_refs = dict()
-nparts, snrs = np.zeros(shape=(tm_nt, len(mc_avg_nparts)), dtype=np.int), np.zeros(shape=tm_nt, dtype=np.float)
+nparts, snrs = np.zeros(shape=(tm_nt, len(mc_avg_nparts)), dtype=int), np.zeros(shape=tm_nt, dtype=float)
 for i in range(tm_nt):
     snrs[i] = (tm_snr_rg[1] - tm_snr_rg[0]) * np.random.random() + tm_snr_rg[0]
     for j, avg_parts in enumerate(mc_avg_nparts):
@@ -547,9 +547,9 @@ for in_model in mc_in_models:
         print('ERROR: All input density subvolume models must have the same size.')
         print('Terminated. (' + time.strftime("%c") + ')')
         sys.exit(-1)
-    hold_ref_sz = np.asarray(hold_ref.shape, dtype=np.int)
+    hold_ref_sz = np.asarray(hold_ref.shape, dtype=int)
     temp = np.zeros(shape=tm_rsz, dtype=hold_ref.dtype)
-    off = np.asarray((np.asarray(tm_rsz, dtype=np.int) / 2) - (hold_ref_sz / 2), dtype=np.int)
+    off = np.asarray((np.asarray(tm_rsz, dtype=int) / 2) - (hold_ref_sz / 2), dtype=int)
     temp[off[0]:off[0] + hold_ref_sz[0],
          off[1]:off[1] + hold_ref_sz[1],
          off[2]:off[2] + hold_ref_sz[2]] = hold_ref
@@ -559,8 +559,8 @@ max_tm_size, max_svol_dim = max(tm_size[0:1]), max(hold_ref_0.shape[0:1])
 mic_rad = .75 * (max_tm_size/2)
 if (mic_rad + max_svol_dim) > max_tm_size:
     mic_rad = max_tm_size - max_svol_dim
-cent_p = np.asarray((.5*hold_ref_0.shape[0], .5*hold_ref_0.shape[1], mc_zh), dtype=np.float)
-cent_v = .5*np.asarray(hold_ref_0.shape, dtype=np.float) - cent_p
+cent_p = np.asarray((.5*hold_ref_0.shape[0], .5*hold_ref_0.shape[1], mc_zh), dtype=float)
+cent_v = .5*np.asarray(hold_ref_0.shape, dtype=float) - cent_p
 mc_ip_min_dst_v, mc_1st_crad_v, mc_4th_dst_v = float(mc_ip_min_dst)/tm_res, float(mc_1st_crad)/tm_res, \
                                                float(mc_4th_dst)/tm_res
 

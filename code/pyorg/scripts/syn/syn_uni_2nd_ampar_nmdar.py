@@ -600,11 +600,11 @@ for tkey in tomos_den.keys():
             l_wden_1.append(1.)
         else:
             l_wden_1.append(0.)
-l_ves, l_den_0, l_den_1, l_wden_0, l_wden_1 = np.asarray(l_ves, dtype=np.float).reshape(-1, 1), \
-                                              np.asarray(l_den_0, dtype=np.float).reshape(-1, 1), \
-                                              np.asarray(l_den_1, dtype=np.float).reshape(-1, 1), \
-                                              np.asarray(l_wden_0, dtype=np.float), \
-                                              np.asarray(l_wden_1, dtype=np.float)
+l_ves, l_den_0, l_den_1, l_wden_0, l_wden_1 = np.asarray(l_ves, dtype=float).reshape(-1, 1), \
+                                              np.asarray(l_den_0, dtype=float).reshape(-1, 1), \
+                                              np.asarray(l_den_1, dtype=float).reshape(-1, 1), \
+                                              np.asarray(l_wden_0, dtype=float), \
+                                              np.asarray(l_wden_1, dtype=float)
 l_wden_0 /= l_wden_0.sum()
 l_wden_1 /= l_wden_1.sum()
 regr_0, regr_1 = linear_model.LinearRegression(), linear_model.LinearRegression()
@@ -647,11 +647,11 @@ for tkey in tomos_den.keys():
         l_wden_1.append(1.)
     else:
         l_wden_1.append(0.)
-l_vols, l_np_0, l_np_1, l_wden_0, l_wden_1 = np.asarray(l_vols, dtype=np.float).reshape(-1, 1), \
-                                             np.asarray(l_np_0, dtype=np.float).reshape(-1, 1), \
-                                             np.asarray(l_np_1, dtype=np.float).reshape(-1, 1), \
-                                             np.asarray(l_wden_0, dtype=np.float), \
-                                             np.asarray(l_wden_1, dtype=np.float)
+l_vols, l_np_0, l_np_1, l_wden_0, l_wden_1 = np.asarray(l_vols, dtype=float).reshape(-1, 1), \
+                                             np.asarray(l_np_0, dtype=float).reshape(-1, 1), \
+                                             np.asarray(l_np_1, dtype=float).reshape(-1, 1), \
+                                             np.asarray(l_wden_0, dtype=float), \
+                                             np.asarray(l_wden_1, dtype=float)
 l_wden_0 /= l_wden_0.sum()
 l_wden_1 /= l_wden_1.sum()
 regr_0, regr_1 = linear_model.LinearRegression(), linear_model.LinearRegression()

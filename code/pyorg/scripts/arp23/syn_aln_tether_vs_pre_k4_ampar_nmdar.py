@@ -134,7 +134,7 @@ def compute_pvals(exp_med, sims):
 
 # Check if a set of particles (rows) are aligned from the number of neighbours
 def are_aligned(neighs, mask):
-    aligns = np.zeros(shape=len(neighs), dtype=np.bool)
+    aligns = np.zeros(shape=len(neighs), dtype=bool)
     for i, p_neigh in enumerate(neighs):
         if ((p_neigh[mask]>0).sum()) > 0:
             aligns[i] = True

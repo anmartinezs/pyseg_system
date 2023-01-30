@@ -84,8 +84,8 @@ for i, in_wspace in enumerate(in_wspaces):
         # Loading the values
         wspace = pickle.load(pkl)
         tomos_nc, tomos_nc_sims, tomos_nc_sims2 = wspace[39], wspace[40], wspace[41]
-        nc, nc_sims, nc_sims2 = 0, np.zeros(shape=len(list(tomos_nc_sims.values())[0]), dtype=np.int), \
-                                np.zeros(shape=len(list(tomos_nc_sims2.values())[0]), dtype=np.int)
+        nc, nc_sims, nc_sims2 = 0, np.zeros(shape=len(list(tomos_nc_sims.values())[0]), dtype=int), \
+                                np.zeros(shape=len(list(tomos_nc_sims2.values())[0]), dtype=int)
         for tkey, tomo_nc in zip(iter(tomos_nc.keys()), iter(tomos_nc.values())):
             nc += tomo_nc
             for j in range(len(nc_sims)):

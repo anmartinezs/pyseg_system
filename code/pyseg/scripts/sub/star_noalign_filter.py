@@ -233,7 +233,7 @@ def tomo_poly_swapxy(ref_poly):
 def tomo_smooth_surf(seg, sg, th):
 
     # Smoothing
-    seg_s = sp.ndimage.filters.gaussian_filter(seg.astype(np.float), sg)
+    seg_s = sp.ndimage.filters.gaussian_filter(seg.astype(float), sg)
     seg_vti = ps.disperse_io.numpy_to_vti(seg_s)
 
     # Iso-surface
@@ -258,7 +258,7 @@ def tomo_smooth_surf(seg, sg, th):
 def tomo_2poly_dst(poly_ref, poly):
 
     # Initialization
-    points = np.zeros(shape=(poly.GetNumberOfPoints(),3), dtype=np.float)
+    points = np.zeros(shape=(poly.GetNumberOfPoints(),3), dtype=float)
     dst_filter = ps.vtk_ext.vtkClosestPointAlgorithm()
     dst_filter.SetInputData(poly_ref)
     dst_filter.initialize()
@@ -269,7 +269,7 @@ def tomo_2poly_dst(poly_ref, poly):
     for i in range(poly.GetNumberOfPoints()):
         x, y, z = poly.GetPoint(i)
         dst_pid = dst_filter.evaluate_id(x, y, z)
-        points[i, :] = np.asarray(poly_ref.GetPoint(int(dst_pid)), dtype=np.float)
+        points[i, :] = np.asarray(poly_ref.GetPoint(int(dst_pid)), dtype=float)
 
     # ps.disperse_io.save_vtp(poly, out_dir+'/hold.vtp')
 
@@ -332,7 +332,7 @@ except ps.pexceptions.PySegInputError as e:
 
 print('\tCreating the poly data...')
 nrows = star.get_nrows()
-ref_vect = np.asarray(ref_vect, dtype=np.float)
+ref_vect = np.asarray(ref_vect, dtype=float)
 points = np.zeros(shape=len(in_segs), dtype=object)
 cells = np.zeros(shape=len(in_segs), dtype=object)
 vects = np.zeros(shape=len(in_segs), dtype=object)
@@ -340,7 +340,7 @@ vects_r = np.zeros(shape=len(in_segs), dtype=object)
 pangs = np.zeros(shape=len(in_segs), dtype=object)
 pdsts = np.zeros(shape=len(in_segs), dtype=object)
 row_ids = np.zeros(shape=len(in_segs), dtype=object)
-curr_pts = np.zeros(shape=len(in_segs), dtype=np.int)
+curr_pts = np.zeros(shape=len(in_segs), dtype=int)
 for row in range(nrows):
     mic = star.get_element(MIC_NAME, row)
     try:
@@ -392,11 +392,11 @@ for row in range(nrows):
     # Rotate vector from STAR file angles
     mat_r = ps.globals.rot_mat_relion(rot, tilt, psi, deg=True)
     rot_v = mat_r.T * ref_vect.reshape(3, 1)
-    rot_v = np.asarray((rot_v[1, 0], rot_v[0, 0], rot_v[2, 0]), dtype=np.float)
+    rot_v = np.asarray((rot_v[1, 0], rot_v[0, 0], rot_v[2, 0]), dtype=float)
     # Rotate to fit reference tomogram
     mat_r = ps.globals.rot_mat(in_rots[mic_idx][0], -1.*in_rots[mic_idx][2], in_rots[mic_idx][1])
     rot_v = mat_r * rot_v.reshape(3, 1)
-    rot_v = np.asarray((rot_v[0, 0], rot_v[1, 0], rot_v[2, 0]), dtype=np.float)
+    rot_v = np.asarray((rot_v[0, 0], rot_v[1, 0], rot_v[2, 0]), dtype=float)
     vects[mic_idx].InsertNextTuple(tuple(rot_v))
     pangs[mic_idx].InsertNextTuple((-1.,))
     pdsts[mic_idx].InsertNextTuple((-1.,))
@@ -404,7 +404,7 @@ for row in range(nrows):
     curr_pts[mic_idx] += 1
 
 print('\tComputing miss-alignment:')
-el_to_del = np.ones(shape=nrows, dtype=np.bool)
+el_to_del = np.ones(shape=nrows, dtype=bool)
 dsts, angs = list(), list()
 for mic_idx, mic in enumerate(in_mics):
     print('\t\t-Processing micrograph: ' + str(mic))
@@ -420,7 +420,7 @@ for mic_idx, mic in enumerate(in_mics):
         # Rigid body transformations
         poly = tomo_poly_swapxy(poly)
         poly = tomo_ref_poly_rotation(poly, mic, in_rots[mic_idx])
-        poly = tomo_ref_poly_trans(poly, -1.*np.asarray(in_offs[mic_idx], dtype=np.float))
+        poly = tomo_ref_poly_trans(poly, -1.*np.asarray(in_offs[mic_idx], dtype=float))
         # Estimate reference surface
         surf = tomo_smooth_surf(ps.disperse_io.load_tomo(in_segs[mic_idx])==seg_lbl, seg_sg, seg_th)
         # Find closest point on surface
@@ -431,8 +431,8 @@ for mic_idx, mic in enumerate(in_mics):
             del_parts += 1
             row = int(row_id.GetTuple(i)[0])
             coord = poly.GetPoint(i)
-            coord = np.round(coord).astype(np.int)
-            hold_vect = coord.astype(np.float) - hold_pt
+            coord = np.round(coord).astype(int)
+            hold_vect = coord.astype(float) - hold_pt
             vect_r.SetTuple(i, (hold_vect[0], hold_vect[1], hold_vect[2]))
             dst = math.sqrt((hold_vect*hold_vect).sum())
             # print 'DEBUG: dst= ' + str(dst) + ' nm'
@@ -463,7 +463,7 @@ print('\tPlotting statistics...')
 if (len(dsts) == 0) or (len(angs) == 0):
     print('\tWARNING: Nothing to plot')
     print('Successfully terminated. (' + time.strftime("%c") + ')')
-dsts, angs = np.asarray(dsts, dtype=np.float), np.asarray(angs, dtype=np.float)
+dsts, angs = np.asarray(dsts, dtype=float), np.asarray(angs, dtype=float)
 plt.hist(angs, normed=1)
 plt.xlabel('Degrees')
 plt.ylabel('Probability')

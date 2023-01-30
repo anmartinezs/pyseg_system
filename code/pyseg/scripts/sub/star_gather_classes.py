@@ -96,7 +96,7 @@ for row in range(nrows):
         sys.exit(-1)
 
     if in_star_ext == '':
-        klass = (row+1) * np.ones(shape=hold_star.get_nrows(), dtype=np.int)
+        klass = (row+1) * np.ones(shape=hold_star.get_nrows(), dtype=int)
     else:
         klass = star_l.get_element('_rlnClassNumber', row)
     print('\t\t-Setting class number...')

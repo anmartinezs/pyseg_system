@@ -29,7 +29,7 @@ from pyseg.filament.globals import FilamentUDG
 ##### File global variables
 C_AP_CMD = 'Concurrent_AP'
 DEBUG = True
-MAX_FLOAT = np.finfo(np.float).max
+MAX_FLOAT = np.finfo(float).max
 
 ###### Package functions
 
@@ -41,7 +41,7 @@ def norm_vector_2pts(v0, v1):
     vect = v1 - v0
     norm = math.sqrt((vect * vect).sum())
     if norm <= 0:
-        return np.zeros(shape=3, dtype=np.float), 0.
+        return np.zeros(shape=3, dtype=float), 0.
     else:
         return vect / norm, norm
 
@@ -151,8 +151,8 @@ def find_prop_peaks(graph, prop_key_v, prop_key_e, th, ns, nn, prop_key_a=None, 
     # Get vertices ordered by the input property
     v_vals = prop_v.get_array()
     n_vertices = len(v_vals)
-    p_lut = np.zeros(shape=n_vertices, dtype=np.bool)
-    p_lut_i = np.ones(shape=n_vertices, dtype=np.bool)
+    p_lut = np.zeros(shape=n_vertices, dtype=bool)
+    p_lut_i = np.ones(shape=n_vertices, dtype=bool)
     try:
         mn = np.iinfo(v_vals.dtype).min
     except ValueError:
@@ -618,7 +618,7 @@ class GraphGT(object):
         else:
             self.__graph.vertex_properties[STR_AFF_CLUST].get_array()[:] = aff.labels_
         # Centers
-        centers = (-1) * np.ones(shape=self.__graph.num_vertices(), dtype=np.int)
+        centers = (-1) * np.ones(shape=self.__graph.num_vertices(), dtype=int)
         for i in range(len(aff.cluster_centers_indices_)):
             v = aff.cluster_centers_indices_[i]
             centers[v] = aff.labels_[v]
@@ -717,7 +717,7 @@ class GraphGT(object):
         id_max = aff_mat == d_max
         aff_mat[id_max] = np.sum(aff_mat[np.invert(id_max)])
         # Invert affinity
-        aff_mat = lin_map(aff_mat, lb=1., ub=np.finfo(np.float).eps)
+        aff_mat = lin_map(aff_mat, lb=1., ub=np.finfo(float).eps)
         spc.fit(aff_mat)
 
         # Store the result
@@ -749,7 +749,7 @@ class GraphGT(object):
 
         # Get vertices coordinates
         n_samples = self.__graph.num_vertices()
-        X = np.zeros(shape=(n_samples, 3), dtype=np.float)
+        X = np.zeros(shape=(n_samples, 3), dtype=float)
         for i, v in enumerate(self.__graph.vertices()):
             X[i, :] = skel.GetPoint(i_prop[v])
 
@@ -758,7 +758,7 @@ class GraphGT(object):
         conn_mat = None
         if conn:
             # Connectivity matrix based on neighbours
-            conn_mat = sp.sparse.lil_matrix((n_samples, n_samples), dtype=np.float)
+            conn_mat = sp.sparse.lil_matrix((n_samples, n_samples), dtype=float)
             for v in self.__graph.vertices():
                 i = int(v)
                 conn_mat[i, i] = 1
@@ -890,7 +890,7 @@ class GraphGT(object):
         n_edges = 0
         self.__graph.vertex_properties[STR_FLOW_SS] = self.__graph.new_vertex_property('int')
         self.__graph.vertex_properties[STR_FLOW_SS].get_array()[:] = (-1) * np.ones(shape=n_vertices,
-                                                                                    dtype=np.int)
+                                                                                    dtype=int)
         for v in self.__graph.vertices():
             v_id = self.__graph.vertex_properties[DPSTR_CELL][v]
             if v_id != -1:
@@ -964,7 +964,7 @@ class GraphGT(object):
             if vinv:
                 field_v = lin_map(field_v, lb=field_v.max(), ub=field_v.min())
         else:
-            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=np.float)
+            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=float)
         prop_e_d = self.__graph.edge_properties[SGT_EDGE_LENGTH]
         prop_scc = self.__graph.new_vertex_property('float')
         scale = float(scale)
@@ -1164,7 +1164,7 @@ class GraphGT(object):
             elif vnorm:
                 field_v = pyseg.globals.lin_map(field_v, lb=0, ub=1)
         else:
-            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=np.float)
+            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=float)
         prop_e_p = None
         if prop_e is not None:
             prop_e_p = self.__graph.edge_properties[prop_e]
@@ -1189,8 +1189,8 @@ class GraphGT(object):
                                             max_dist=s3)
             ids = np.where(dist_map.get_array() < s3)[0]
             # Computing energy preserving coefficients
-            fields = np.zeros(shape=ids.shape[0], dtype=np.float)
-            coeffs = np.zeros(shape=ids.shape[0], dtype=np.float)
+            fields = np.zeros(shape=ids.shape[0], dtype=float)
+            coeffs = np.zeros(shape=ids.shape[0], dtype=float)
             hold_sum = 0
             for i in range(ids.shape[0]):
                 v = self.__graph.vertex(ids[i])
@@ -1231,7 +1231,7 @@ class GraphGT(object):
             if vinv:
                 field_v = pyseg.globals.lin_map(field_v, lb=field_v.max(), ub=field_v.min())
         else:
-            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=np.float)
+            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=float)
         if v_dst:
             prop_e_p = self.__graph.edge_properties[STR_VERT_DST]
         else:
@@ -1348,7 +1348,7 @@ class GraphGT(object):
             # Getting neighbours
             pt_s = np.asarray(skel.GetPoint(prop_id_v[s]), dtype=np.float32)
             per, x_per = 0., 0.
-            n_lut = np.ones(shape=nv, dtype=np.bool)
+            n_lut = np.ones(shape=nv, dtype=bool)
             n_lut[int(s)] = False
             dist_map, pred_map = gt.shortest_distance(self.__graph, source=s, weights=prop_e, max_dist=mx_len,
                                                       pred_map=True)
@@ -1445,7 +1445,7 @@ class GraphGT(object):
             if vinv:
                 field_v = lin_map(field_v, lb=field_v.max(), ub=field_v.min())
         else:
-            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=np.float)
+            field_v = np.ones(shape=self.__graph.num_vertices(), dtype=float)
         prop_e_d = self.__graph.edge_properties[SGT_EDGE_LENGTH]
         prop_e_r = self.__graph.edge_properties[STR_EDGE_FNESS]
         # field_r = prop_e_r.get_array()
@@ -1464,8 +1464,8 @@ class GraphGT(object):
                                             max_dist=s3)
             ids = np.where(dist_map.get_array() < s3)[0]
             # Computing energy preserving coefficients
-            fields = np.zeros(shape=ids.shape[0], dtype=np.float)
-            coeffs = np.zeros(shape=ids.shape[0], dtype=np.float)
+            fields = np.zeros(shape=ids.shape[0], dtype=float)
+            coeffs = np.zeros(shape=ids.shape[0], dtype=float)
             hold_sum = 0
             for i in range(ids.shape[0]):
                 v = self.__graph.vertex(ids[i])
@@ -1513,7 +1513,7 @@ class GraphGT(object):
         # Initialization
         if prop_s is None:
             prop_s = self.__graph.new_vertex_property('int')
-            prop_s.get_array()[:] = np.ones(shape=self.__graph.num_vertices(), dtype=np.int)
+            prop_s.get_array()[:] = np.ones(shape=self.__graph.num_vertices(), dtype=int)
         source_ids = list()
         for s in self.__graph.vertices():
             source_ids.append(int(s))
@@ -1723,7 +1723,7 @@ class GraphGT(object):
         prop_v_c = self.__graph.new_vertex_property('int')
         prop_e_c = self.__graph.new_edge_property('int')
         prop_v_t = self.__graph.new_vertex_property('bool')
-        prop_v_t.get_array()[:] = np.zeros(shape=self.__graph.num_vertices(), dtype=np.bool)
+        prop_v_t.get_array()[:] = np.zeros(shape=self.__graph.num_vertices(), dtype=bool)
 
         # Getting sources and targets
         sources = list()
@@ -1783,9 +1783,9 @@ class GraphGT(object):
         # v_list_max = np.asarray(v_list).max() + 1
         prop_old_id = self.__graph.vertex_properties[DPSTR_CELL]
         id_max = prop_old_id.get_array().max() + 1
-        lut_v = -1 * np.ones(shape=id_max, dtype=np.int)
-        lut_v_id = -1 * np.ones(shape=id_max, dtype=np.int)
-        lut_v_inv = -1 * np.ones(shape=id_max, dtype=np.int)
+        lut_v = -1 * np.ones(shape=id_max, dtype=int)
+        lut_v_id = -1 * np.ones(shape=id_max, dtype=int)
+        lut_v_inv = -1 * np.ones(shape=id_max, dtype=int)
         for v in self.__graph.vertices():
             lut_v_id[prop_old_id[v]] = int(v)
 
@@ -1904,7 +1904,7 @@ class GraphGT(object):
             error_msg = 'Property ' + key_v + ' does not exist for vertices.'
             raise pexceptions.PySegInputError(expr='vertex_scale_supression (GraphGT)', msg=error_msg)
         sort_ids = np.argsort(prop_v.get_array())[::-1]
-        free_lut = np.ones(shape=self.__graph.num_vertices(), dtype=np.bool)
+        free_lut = np.ones(shape=self.__graph.num_vertices(), dtype=bool)
         del_l = list()
         prop_id = self.__graph.vp[DPSTR_CELL]
 
@@ -2032,8 +2032,8 @@ class GraphGT(object):
                     if sd_cte <= 0:
                         hold = 1. * len(v_path)
                     else:
-                        v_ids = np.zeros(shape=len(v_path), dtype=np.int)
-                        e_ids = np.zeros(shape=len(e_path), dtype=np.int)
+                        v_ids = np.zeros(shape=len(v_path), dtype=int)
+                        e_ids = np.zeros(shape=len(e_path), dtype=int)
                         for j, v in enumerate(v_path):
                             v_ids[j] = prop_v_id[v]
                         for j, e in enumerate(e_path):
@@ -2092,10 +2092,10 @@ class GraphGT(object):
                 visitor.update_sgraphs_id()
         n_sgraphs = visitor.get_num_sgraphs()
         n_samples = X.shape[0]
-        mx = np.finfo(np.float).max
-        sources = np.zeros(shape=(n_sgraphs, n_sgraphs), dtype=np.float)
-        targets = np.zeros(shape=(n_sgraphs, n_sgraphs), dtype=np.float)
-        dists = mx * np.ones(shape=(n_sgraphs, n_sgraphs), dtype=np.float)
+        mx = np.finfo(float).max
+        sources = np.zeros(shape=(n_sgraphs, n_sgraphs), dtype=float)
+        targets = np.zeros(shape=(n_sgraphs, n_sgraphs), dtype=float)
+        dists = mx * np.ones(shape=(n_sgraphs, n_sgraphs), dtype=float)
         sgraph_id_arr = sgraph_id.get_array()
 
         # Measuring distances among all points (FORCE BRUTE, O(Nxlog(N)))
@@ -2118,9 +2118,9 @@ class GraphGT(object):
         hold_graph = gt.Graph(directed=False)
         hold_graph.add_vertex(n_sgraphs)
         n_edges = int((n_sgraphs * (n_sgraphs - 1)) * 0.5)
-        s_prop_arr = np.zeros(shape=n_edges, dtype=np.int)
-        t_prop_arr = np.zeros(shape=n_edges, dtype=np.int)
-        d_prop_arr = np.zeros(shape=n_edges, dtype=np.float)
+        s_prop_arr = np.zeros(shape=n_edges, dtype=int)
+        t_prop_arr = np.zeros(shape=n_edges, dtype=int)
+        d_prop_arr = np.zeros(shape=n_edges, dtype=float)
         count = 0
         for i in range(n_sgraphs):
             for j in range(i+1, n_sgraphs):
@@ -2142,7 +2142,7 @@ class GraphGT(object):
         #               output='/home/martinez/workspace/temp/hold_tree.pdf')
 
         # Set the new edges to conectivity matrix
-        mn = np.finfo(np.float).eps
+        mn = np.finfo(float).eps
         for i, e in enumerate(hold_graph.edges()):
             if tree_map[e] == 1:
                 s = s_prop_arr[i]

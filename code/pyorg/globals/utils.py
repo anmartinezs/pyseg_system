@@ -97,7 +97,7 @@ def cont_en_std(array, nstd=3, lb=0, ub=1, mask=None):
     if mask is None:
         hold_array = array
     else:
-        m_ids = np.asarray(mask > 0, dtype=np.bool)
+        m_ids = np.asarray(mask > 0, dtype=bool)
         hold_array = array[m_ids]
 
     # Remapping parameters estimation
@@ -184,7 +184,7 @@ def crop_cube(vol, x_dims, y_dims, z_dims, value_border=0):
         z_dims[1] = vol.shape[2]
 
     # Cropping
-    hold_vol = value_border * np.ones(shape=vol.shape, dtype=np.float)
+    hold_vol = value_border * np.ones(shape=vol.shape, dtype=float)
     hold_vol[x_dims[0]:x_dims[1], y_dims[0]:y_dims[1], z_dims[0]:z_dims[1]] = \
         vol[x_dims[0]:x_dims[1], y_dims[0]:y_dims[1], z_dims[0]:z_dims[1]]
 
@@ -279,7 +279,7 @@ def wedge(in_shape, wr_ang, tilt_ang=90.):
 
     # Wedge criteria
     Id = np.logical_and(P > phi, P < phi2)
-    W = np.zeros(shape=W.shape, dtype=np.float)
+    W = np.zeros(shape=W.shape, dtype=float)
     W[Id] = 1
 
     return W
@@ -331,13 +331,13 @@ def ann_vol(vol, mask=None):
         msk_vol = vol
     else:
         est_vol = float(mask.sum())
-        msk_vol = (vol * mask).astype(np.bool)
+        msk_vol = (vol * mask).astype(bool)
     n_points = msk_vol.sum()
     if (est_vol == 0) or (n_points == 0):
         return 0, 0, 0
     d_e = 1. / math.pow(n_points/est_vol, 1./3.)
     cloud = get_cloud_coords(msk_vol)
-    dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+    dists = np.zeros(shape=cloud.shape[0], dtype=float)
 
     # Shortest distance loop
     for i in range(len(dists)):
@@ -363,7 +363,7 @@ def get_cloud_coords(cloud):
     for i in range(len(ids[0])):
         coords.append(np.asarray((ids[0][i], ids[1][i], ids[2][i])))
 
-    return np.asarray(coords, dtype=np.float)
+    return np.asarray(coords, dtype=float)
 
 # Computes local curvature of a curve in space
 # curve: array of n points in a 3D space
@@ -373,8 +373,8 @@ def compute_space_k(curve):
     # Initialization
     n_p = curve.shape[0]
     if n_p <= 2:
-        return np.zeros(shape=1, dtype=np.float)
-    curvatures = np.zeros(shape=n_p-2, dtype=np.float)
+        return np.zeros(shape=1, dtype=float)
+    curvatures = np.zeros(shape=n_p-2, dtype=float)
 
     # Loop for computing the curvatures
     cont = 0
@@ -418,8 +418,8 @@ def compute_plane_k(curve):
     # Initialization
     n_p = curve.shape[0]
     if n_p <= 2:
-        return np.zeros(shape=1, dtype=np.float)
-    curvatures = np.zeros(shape=n_p-2, dtype=np.float)
+        return np.zeros(shape=1, dtype=float)
+    curvatures = np.zeros(shape=n_p-2, dtype=float)
 
     # Loop for computing the curvatures
     cont = 0
@@ -538,13 +538,13 @@ def normal3d_point_cloud(cloud, weights=None):
     pc = k_inv * np.sum(cloud, axis=0)
     pm_00, pm_11, pm_22 = pc[0]*pc[0], pc[1]*pc[1], pc[2]*pc[2]
     pm_01, pm_02, pm_12 = pc[0]*pc[1], pc[0]*pc[2], pc[1]*pc[2]
-    P = np.zeros(shape=(3, 3), dtype=np.float)
+    P = np.zeros(shape=(3, 3), dtype=float)
     P[0][0], P[0][1], P[0][2] = pm_00, pm_01, pm_02
     P[1][0], P[1][1], P[1][2] = pm_01, pm_11, pm_12
     P[2][0], P[2][1], P[2][2] = pm_02, pm_12, pm_22
 
     # Covariance matrix
-    M = np.zeros(shape=(3, 3), dtype=np.float)
+    M = np.zeros(shape=(3, 3), dtype=float)
     if weights is None:
         for i in range(k):
             p = cloud[i, :]
@@ -561,7 +561,7 @@ def normal3d_point_cloud(cloud, weights=None):
             M[2][2] += p_22
         M = k_inv*M - P
     else:
-        H = np.zeros(shape=(3, 3), dtype=np.float)
+        H = np.zeros(shape=(3, 3), dtype=float)
         for i in range(k):
             p = cloud[i, :]
             p_00, p_11, p_22 = p[0]*p[0], p[1]*p[1], p[2]*p[2]
@@ -1409,7 +1409,7 @@ def coords_scale_supression(coords, scale, weights=None):
 
     # Initialization
     del_l = list()
-    del_lut = np.zeros(shape=len(coords), dtype=np.bool)
+    del_lut = np.zeros(shape=len(coords), dtype=bool)
 
     coords = np.asarray(coords, dtype=np.float32)
     if weights is None:
@@ -1472,13 +1472,13 @@ def sort_dict(dict1, dict2, reverse=False):
     return s_keys, s_values
 
 
-def gen_wedge_vol(shape, semi_ang, rot_ang, dtype=np.bool):
+def gen_wedge_vol(shape, semi_ang, rot_ang, dtype=bool):
     """
     Generates an volume with a wedge
     :param shape: 3-tuple with the input sizes
     :param semi_ang: wedge semi-angle in degrees
     :param rot_ang: rotation angle (around Z axis) for the wedge in degrees
-    :param dtype: data type (default np.bool)
+    :param dtype: data type (default bool)
     :return: a volume with the specified shape and wedge with semi-angle 'ang'
     """
 
@@ -1542,7 +1542,7 @@ def geo_point_dst_sphere(point, samples, s_cent, s_rad):
     ns_2 /= np.linalg.norm(ns_2)
 
     # Computing the distances
-    dsts = np.zeros(shape=len(ns_2), dtype=np.float)
+    dsts = np.zeros(shape=len(ns_2), dtype=float)
     for i in range(len(ns_2)):
         dsts[i] = s_rad * np.arctan2(np.linalg.norm(np.cross(ns_1, ns_2[i, :])),
                                      np.dot(ns_1, ns_2[i, :]))
@@ -1575,7 +1575,7 @@ def gen_urnd_sphere_cap(s_rad, c_rad, a_cap=None):
         vect = rotate_3d_vector((x, y, z), (rot, tilt, psi), deg=True, conv='relion')
         return vect
 
-    return np.asarray((x, y, z), dtype=np.float)
+    return np.asarray((x, y, z), dtype=float)
 
 
 def vect_to_zrelion(v_in, mode='active'):
@@ -1621,7 +1621,7 @@ def relion_norm(tomo, mask=None, inv=True):
 
     # Input parsing
     if mask is None:
-        mask = np.ones(shape=tomo.shape, dtype=np.bool)
+        mask = np.ones(shape=tomo.shape, dtype=bool)
 
     # Inversion
     if inv:

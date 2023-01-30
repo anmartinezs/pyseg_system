@@ -76,7 +76,7 @@ class FilVisitor(gt.DijkstraVisitor):
         self.__prop_e_l = graph.edge_properties[ps.globals.SGT_EDGE_LENGTH]
         self.__prop_v_d = graph.new_vertex_property('float')
         self.__prop_v_d.get_array()[:] = MAX_FLOAT * np.ones(shape=(self.__graph.num_vertices()),
-                                                             dtype=np.float)
+                                                             dtype=float)
         self.__prop_v_p = graph.new_vertex_property('int')
         self.__prop_v_e = np.zeros(shape=self.__graph.num_vertices(), dtype=object)
         self.__min_len = min_len
@@ -218,9 +218,9 @@ class FilPerVisitor(object):
 
         # Initialize all vertices
         dsts = np.inf * np.ones(shape=self.__graph.get_nid(), dtype=np.float32)
-        pred_e = (-1) * np.ones(shape=self.__graph.get_nid(), dtype=np.int)
-        pred = self.__s_id * np.ones(shape=self.__graph.get_nid(), dtype=np.int)
-        disc = np.zeros(shape=self.__graph.get_nid(), dtype=np.bool)
+        pred_e = (-1) * np.ones(shape=self.__graph.get_nid(), dtype=int)
+        pred = self.__s_id * np.ones(shape=self.__graph.get_nid(), dtype=int)
+        disc = np.zeros(shape=self.__graph.get_nid(), dtype=bool)
         dsts[self.__s_id] = 0.
 
         # Discover vertex source
@@ -321,12 +321,12 @@ class FilPerVisitor(object):
         skel = self.__graph.get_skel()
         c_id = v_id
         while c_id != self.__s_id:
-            p_ids.insert(0, np.asarray(skel.GetPoint(c_id), dtype=np.float)*self.__graph.get_resolution())
+            p_ids.insert(0, np.asarray(skel.GetPoint(c_id), dtype=float)*self.__graph.get_resolution())
             v_ids.insert(0, self.__graph.get_vertex(c_id))
-            p_ids.insert(0, np.asarray(skel.GetPoint(pred_e[c_id]), dtype=np.float)*self.__graph.get_resolution())
+            p_ids.insert(0, np.asarray(skel.GetPoint(pred_e[c_id]), dtype=float)*self.__graph.get_resolution())
             e_ids.insert(0, self.__graph.get_edge(pred_e[c_id]))
             c_id = pred_v[c_id]
-        p_ids.insert(0, np.asarray(skel.GetPoint(self.__s_id), dtype=np.float)*self.__graph.get_resolution())
+        p_ids.insert(0, np.asarray(skel.GetPoint(self.__s_id), dtype=float)*self.__graph.get_resolution())
         v_ids.insert(0, self.__graph.get_vertex(self.__s_id))
         return ps.diff_geom.SpaceCurve(p_ids, do_geom=False), FilamentU(self.__graph, v_ids, e_ids, geom=False)
 
@@ -386,7 +386,7 @@ class Filament(object):
             except ValueError:
                 print('WARNING (Filament.get_path_coords): starting id ' + start_id \
                       + ' is not found.')
-            coords = np.zeros(shape=(len(ids)-s_id, 3), dtype=np.float)
+            coords = np.zeros(shape=(len(ids)-s_id, 3), dtype=float)
             skel = self.__graph.get_skel()
             for i, idx in enumerate(ids[s_id::]):
                 coords[i, :] = skel.GetPoint(ids[i])
@@ -399,7 +399,7 @@ class Filament(object):
     # Return vertices coordinates in a numpy array
     def get_vertex_coords(self):
         skel = self.__graph.get_skel()
-        coords = np.zeros(shape=(self.get_num_vertices(), 3), dtype=np.float)
+        coords = np.zeros(shape=(self.get_num_vertices(), 3), dtype=float)
         for i, v in enumerate(self.__vertices):
             coords[i, :] = skel.GetPoint(v.get_id())
         return coords
@@ -424,7 +424,7 @@ class Filament(object):
             for i in range(s_id, len(ids)-1):
                 x1, y1, z1 = skel.GetPoint(ids[i])
                 x2, y2, z2 = skel.GetPoint(ids[i+1])
-                hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=np.float)
+                hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=float)
                 length += math.sqrt(np.sum(hold*hold))
             return length * self.__graph.get_resolution()
 
@@ -448,7 +448,7 @@ class Filament(object):
         for i in range(s_id, t_id):
             x1, y1, z1 = skel.GetPoint(ids[i])
             x2, y2, z2 = skel.GetPoint(ids[i+1])
-            hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=np.float)
+            hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=float)
             length += math.sqrt(np.sum(hold*hold))
         return length * self.__graph.get_resolution()
 
@@ -460,7 +460,7 @@ class Filament(object):
         else:
             x_h, y_h, z_h = skel.GetPoint(cont)
         x_t, y_t, z_t = skel.GetPoint(self.__vertices[-1].get_id())
-        hold = np.asarray((x_h-x_t, y_h-y_t, z_h-z_t), dtype=np.float)
+        hold = np.asarray((x_h-x_t, y_h-y_t, z_h-z_t), dtype=float)
         return math.sqrt(np.sum(hold*hold))
 
     def get_penetration(self):
@@ -582,7 +582,7 @@ class Filament(object):
         skel = self.__graph.get_skel()
         ids = self.get_path_ids()
         density = self.__graph.get_density()
-        dens = np.zeros(shape=len(ids), dtype=np.float)
+        dens = np.zeros(shape=len(ids), dtype=float)
         for i, idx in enumerate(ids):
             x, y, z = skel.GetPoint(idx)
             dens[i] = ps.globals.trilin3d(density, (x, y, z))
@@ -604,7 +604,7 @@ class Filament(object):
     def __get_path_coords(self):
         skel = self.__graph.get_skel()
         ids = self.get_path_ids()
-        coords = np.zeros(shape=(len(ids), 3), dtype=np.float)
+        coords = np.zeros(shape=(len(ids), 3), dtype=float)
         for i in range(coords.shape[0]):
             coords[i, :] = skel.GetPoint(ids[i])
         return coords
@@ -660,7 +660,7 @@ class Filament(object):
         hold = 0.
         key_id = self.__graph.get_prop_id(ps.globals.STR_FIELD_VALUE)
         for e in self.__edges:
-            t = self.__graph.get_prop_entry_fast(key_id, e.get_id(), 1, np.float)[0]
+            t = self.__graph.get_prop_entry_fast(key_id, e.get_id(), 1, float)[0]
             hold += (1-t)
         n_edges = float(len(self.__edges))
         return 1. - (hold / n_edges)
@@ -669,7 +669,7 @@ class Filament(object):
         hold = 0.
         key_id = self.__graph.get_prop_id(ps.globals.STR_FIELD_VALUE)
         for e in self.__edges:
-            t = self.__graph.get_prop_entry_fast(key_id, e.get_id(), 1, np.float)[0]
+            t = self.__graph.get_prop_entry_fast(key_id, e.get_id(), 1, float)[0]
             if t > hold:
                 hold = t
         return 1. - hold
@@ -721,7 +721,7 @@ class FilamentU(object):
     # Return vertices coordinates in a numpy array
     def get_vertex_coords(self):
         skel = self.__graph.get_skel()
-        coords = np.zeros(shape=(self.get_num_vertices(), 3), dtype=np.float)
+        coords = np.zeros(shape=(self.get_num_vertices(), 3), dtype=float)
         for i, v in enumerate(self.__vertices):
             coords[i, :] = skel.GetPoint(v.get_id())
         return coords
@@ -735,7 +735,7 @@ class FilamentU(object):
             for i in range(coords.shape[0] - 1):
                 x1, y1, z1 = coords[i, 0], coords[i, 1], coords[i, 2]
                 x2, y2, z2 = coords[i+1, 0], coords[i+1, 1], coords[i+1, 2]
-                hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=np.float)
+                hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=float)
                 length += math.sqrt(np.sum(hold*hold))
             return length * self.__graph.get_resolution()
         else:
@@ -757,7 +757,7 @@ class FilamentU(object):
                 for i in range(s_id, len(ids)-1):
                     x1, y1, z1 = skel.GetPoint(ids[i])
                     x2, y2, z2 = skel.GetPoint(ids[i+1])
-                    hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=np.float)
+                    hold = np.asarray((x1-x2, y1-y2, z1-z2), dtype=float)
                     length += math.sqrt(np.sum(hold*hold))
                 return length * self.__graph.get_resolution()
 
@@ -769,7 +769,7 @@ class FilamentU(object):
         else:
             x_h, y_h, z_h = skel.GetPoint(cont)
         x_t, y_t, z_t = skel.GetPoint(self.__vertices[-1].get_id())
-        hold = np.asarray((x_h-x_t, y_h-y_t, z_h-z_t), dtype=np.float)
+        hold = np.asarray((x_h-x_t, y_h-y_t, z_h-z_t), dtype=float)
         return math.sqrt(np.sum(hold*hold)) * self.__graph.get_resolution()
 
     # This metric is the product of int and 1/sim
@@ -871,7 +871,7 @@ class FilamentU(object):
         skel = self.__graph.get_skel()
         ids = self.get_path_ids()
         density = self.__graph.get_density()
-        dens = np.zeros(shape=len(ids), dtype=np.float)
+        dens = np.zeros(shape=len(ids), dtype=float)
         for i, idx in enumerate(ids):
             x, y, z = skel.GetPoint(idx)
             dens[i] = ps.globals.trilin3d(density, (x, y, z))
@@ -893,7 +893,7 @@ class FilamentU(object):
     def __get_path_coords(self):
         skel = self.__graph.get_skel()
         ids = self.get_path_ids()
-        coords = np.zeros(shape=(len(ids), 3), dtype=np.float)
+        coords = np.zeros(shape=(len(ids), 3), dtype=float)
         for i in range(coords.shape[0]):
             coords[i, :] = skel.GetPoint(ids[i])
         return coords
@@ -972,7 +972,7 @@ class FilamentLDG(FilamentL):
         for i in p_ids[1:]:
             curr_pt = skel.GetPoint(i)
             if (hold_pt[0] != curr_pt[0]) or (hold_pt[1] != curr_pt[1]) or (hold_pt[2] != curr_pt[2]):
-                coords.append(np.asarray(curr_pt, dtype=np.float))
+                coords.append(np.asarray(curr_pt, dtype=float))
                 hold_pt = curr_pt
         self.__curve = ps.diff_geom.SpaceCurve(coords)
 
@@ -989,7 +989,7 @@ class FilamentLDG(FilamentL):
         coords = list()
         for v_id in self.get_vertex_ids():
             coords.append(skel.GetPoint(v_id))
-        return np.asarray(coords, dtype=np.float)
+        return np.asarray(coords, dtype=float)
 
     def get_curve_coords(self):
         return self.__curve.get_samples()
@@ -1103,7 +1103,7 @@ class FilamentLDG(FilamentL):
             return None
         else:
             out_coords.append(coords[-1, :])
-            return np.asarray(out_coords, dtype=np.float)
+            return np.asarray(out_coords, dtype=float)
 
 ###########################################################################################
 # Class derived from FilamentLDG but here the curve is automatically inferred from an input sequence

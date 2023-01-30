@@ -111,7 +111,7 @@ except pexceptions.PySegInputError as e:
     sys.exit(-1)
 part_dsts, part_end = dict().fromkeys(list(range(star.get_nrows()))), dict().fromkeys(list(range(star.get_nrows())))
 for key in part_dsts.keys():
-    part_dsts[key] = np.finfo(np.float).max
+    part_dsts[key] = np.finfo(float).max
     part_end[key] = np.asarray((0., 0., 0.), dtype=float)
 
 if p_bin > 0:

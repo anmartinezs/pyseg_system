@@ -60,7 +60,7 @@ help_msg = '    -p <string>: path to parent GraphMCF pickle file. \n' + \
 def get_seed_ids(graph):
 
     vertices = graph.get_vertices_list()
-    seed_ids = np.zeros(shape=len(vertices), dtype=np.int)
+    seed_ids = np.zeros(shape=len(vertices), dtype=int)
 
     for i, v in enumerate(vertices):
         v_id = v.get_id()
@@ -116,7 +116,7 @@ def get_filaments(graph, seed_ids, prop_e_key, min_len, max_len):
         for i in range(nv):
             print('Processed ' + str(i+1) + ' of ' + str(nv))
             for j in range(i+1, nv):
-                c_s, c_t = np.asarray(coords[i], dtype=np.float), np.asarray(coords[j], dtype=np.float)
+                c_s, c_t = np.asarray(coords[i], dtype=float), np.asarray(coords[j], dtype=float)
                 hold = c_s - c_t
                 dist = math.sqrt((hold * hold).sum()) * graph.get_resolution()
                 # continue
@@ -144,7 +144,7 @@ def get_filaments(graph, seed_ids, prop_e_key, min_len, max_len):
 def thres_no_filaments(graph, net):
 
     prop_v_id = graph.add_prop(prop_v_key, 'int', 1)
-    lut_v_ids = np.zeros(shape=graph.get_nid(), dtype=np.int)
+    lut_v_ids = np.zeros(shape=graph.get_nid(), dtype=int)
     for fil in net:
         fverts = fil.get_vertices()
         nv = len(fverts)

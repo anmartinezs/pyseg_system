@@ -135,7 +135,7 @@ for ves_lbl in sg_ves_lbls:
 
     print('\t\t\t+Generating vesicle segmentation (1-mb, 2-lumen and 3-pre-cyto)...')
     sub_dst = sp.ndimage.morphology.distance_transform_edt(sub_seg != ves_lbl)
-    tomo_seg_ves = np.zeros(shape=sub_dst.shape, dtype=np.int)
+    tomo_seg_ves = np.zeros(shape=sub_dst.shape, dtype=int)
     dst_mask, cyto_mask, ves_mask = sub_dst<=cp_dst_v, sub_seg==sg_cyto_lbl, sub_seg==ves_lbl
     tomo_seg_ves[dst_mask * cyto_mask] = 3
     tomo_seg_ves[ves_mask] = 1

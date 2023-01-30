@@ -56,7 +56,7 @@ def gen_pb_normal(temp, bind, sg, rm, cutoff=3):
     X, Y, Z = X*X, Y*Y, Z*Z
     R = np.sqrt(X + Y + Z) - rm
     # Cutoff mask
-    M = np.ones(shape=temp.shape, dtype=np.bool)
+    M = np.ones(shape=temp.shape, dtype=bool)
     M[R<=(cutoff*sg)] = False
     P = (1./np.sqrt(2.*sg*sg*np.pi)) * np.exp((-1.*(1./(2.*sg))) * R * R)
     # Applying mask
@@ -311,7 +311,7 @@ def over_sub_tomo(tomo, point, sub_tomo, op):
 def coords_to_dense_mask(coords, mask, rots=None):
 
     # Initialize the dense array
-    dense = np.zeros(shape=mask.shape, dtype=np.bool)
+    dense = np.zeros(shape=mask.shape, dtype=bool)
 
     # Set samples in the dense array
     out_coords = list()
@@ -322,13 +322,13 @@ def coords_to_dense_mask(coords, mask, rots=None):
                 try:
                     if mask[x, y, z]:
                         dense[x, y, z] = True
-                        out_coords.append(np.asarray((x, y, z), dtype=np.float))
+                        out_coords.append(np.asarray((x, y, z), dtype=float))
                 except IndexError:
                     pass
         except TypeError:
             pass
 
-        return dense, np.asarray(out_coords, dtype=np.float)
+        return dense, np.asarray(out_coords, dtype=float)
 
     else:
         out_rots = list()
@@ -338,19 +338,19 @@ def coords_to_dense_mask(coords, mask, rots=None):
                 try:
                     if mask[x, y, z]:
                         dense[x, y, z] = True
-                        out_coords.append(np.asarray((x, y, z), dtype=np.float))
-                        out_rots.append(np.asarray(rot, dtype=np.float))
+                        out_coords.append(np.asarray((x, y, z), dtype=float))
+                        out_rots.append(np.asarray(rot, dtype=float))
                 except IndexError:
                     pass
         except TypeError:
             pass
 
-        return dense, np.asarray(out_coords, dtype=np.float), np.asarray(out_rots, dtype=np.float)
+        return dense, np.asarray(out_coords, dtype=float), np.asarray(out_rots, dtype=float)
 
 # Computes Nearest Neighbour Distance of a cloud of points in a Euclidean space
 # cloud: array with point coordinates
 def nnde(cloud):
-    dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+    dists = np.zeros(shape=cloud.shape[0], dtype=float)
     for i in range(len(dists)):
         hold = cloud[i] - cloud
         hold = np.sum(hold*hold, axis=1)
@@ -363,7 +363,7 @@ def nnde(cloud):
 # cloud: array with point coordinates
 # cloud_ref: reference array with point coordinates
 def cnnde(cloud, cloud_ref):
-    dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+    dists = np.zeros(shape=cloud.shape[0], dtype=float)
     for i in range(len(dists)):
         hold = cloud[i] - cloud_ref
         hold = np.sum(hold*hold, axis=1)
@@ -411,7 +411,7 @@ def gen_sin_points(n, cycles, mask, std=0, phase=(0, 0, 0)):
     ids = np.argsort(sin, axis=None)
     for idx in ids[-n:]:
         x, y, z = np.unravel_index(idx, mask.shape)
-        coords.append(np.asarray((x, y, z), dtype=np.float))
+        coords.append(np.asarray((x, y, z), dtype=float))
 
     return np.asarray(coords)
 
@@ -443,7 +443,7 @@ def gen_rand_in_mask(n, mask, temp=None):
     coords = -1. * np.ones(shape=(n, 3), dtype=np.float32)
     if isinstance(temp, np.ndarray) and (len(temp.shape) == 3):
 
-        quats = np.zeros(shape=(n, 4), dtype=np.float)
+        quats = np.zeros(shape=(n, 4), dtype=float)
         hold_mask = np.copy(np.invert(mask))
         nx, ny, nz = temp.shape[0], temp.shape[1], temp.shape[2]
         mx, my, mz = mask.shape[0], mask.shape[1], mask.shape[2]
@@ -772,7 +772,7 @@ class CSRTSimulator(Simulator):
             error_msg = 'The number or random rotation must be greater than zero!'
             raise ps.pexceptions.PySegInputError(expr='__init__ (CSRTSimulator)', msg=error_msg)
         nx, ny, nz = self.__temp.shape
-        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=np.bool)
+        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=bool)
         self.__rnd_count = 0
         self.__gen_rnd_rots()
 
@@ -1142,7 +1142,7 @@ class LinkerSimulator(Simulator):
             rad = .5 * self.__leng
         else:
             rad = .5 * np.random.normal(self.__leng, self.__len_sg)
-        linker_temp = np.zeros(shape=(ld, ld, ld), dtype=np.bool)
+        linker_temp = np.zeros(shape=(ld, ld, ld), dtype=bool)
         sx_l, sy_l, sz_l = list(), list(), list()
 
         # Equally spaced circle sampling
@@ -1163,7 +1163,7 @@ class LinkerSimulator(Simulator):
             x, y, z = int(round(md+vr[0]-.5)), int(round(md+vr[1]-.5)), int(round(md+vr[2]-.5))
             off_l_x, off_l_y, off_l_z = x-hl_x+1, y-hl_y+1, z-hl_z+1
             off_h_x, off_h_y, off_h_z = x+hl_x+1, y+hl_y+1, z+hl_z+1
-            hold_linker = np.zeros(shape=(ld, ld, ld), dtype=np.bool)
+            hold_linker = np.zeros(shape=(ld, ld, ld), dtype=bool)
             # Random template rotation
             quat = rand_quat()
             mat = quat_to_rot(quat)
@@ -1211,7 +1211,7 @@ class LinkerSimulator(Simulator):
             print('WARNING: overlapping templates after ' + str(n) + ' tries!!!')
             raise Exception
         nx, ny, nz = self.__l_temp.shape
-        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=np.bool)
+        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=bool)
         self.__rnd_sx = np.zeros(shape=self.__nrots, dtype=object)
         self.__rnd_sy = np.zeros(shape=self.__nrots, dtype=object)
         self.__rnd_sz = np.zeros(shape=self.__nrots, dtype=object)
@@ -1407,10 +1407,10 @@ class RubCSimulation(Simulator):
 
         # Cell unit reference data
         ref_res = 0.1368 # nm/pixel
-        pos_a = np.asarray((86, 136, 150), dtype=np.float) * ref_res # nm
-        pos_b = np.asarray((137, 136, 73), dtype=np.float) * ref_res
-        pos_c = np.asarray((78, 85, 73), dtype=np.float) * ref_res
-        pos_d = np.asarray((148, 85, 148), dtype=np.float) * ref_res
+        pos_a = np.asarray((86, 136, 150), dtype=float) * ref_res # nm
+        pos_b = np.asarray((137, 136, 73), dtype=float) * ref_res
+        pos_c = np.asarray((78, 85, 73), dtype=float) * ref_res
+        pos_d = np.asarray((148, 85, 148), dtype=float) * ref_res
         sx = 17.1375 # nm
         sy = 14.2638
         sz = 17.3212
@@ -1615,7 +1615,7 @@ class AggSimulator(object):
             error_msg = 'The number or random rotation must be greater than zero!'
             raise ps.pexceptions.PySegInputError(expr='__init__ (CSRTSimulator)', msg=error_msg)
         nx, ny, nz = self.__temp.shape
-        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=np.bool)
+        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=bool)
         self.__rnd_count = 0
         self.__l_len_lv = int(round(l_len_l))
         if self.__l_len_lv <= 0:
@@ -1643,7 +1643,7 @@ class AggSimulator(object):
             ptemp_shape[1] += 1
         if (ptemp_shape[2]%2) != 0:
             ptemp_shape[2] += 1
-        hold_ptemp = np.zeros(shape=ptemp_shape, dtype=np.bool)
+        hold_ptemp = np.zeros(shape=ptemp_shape, dtype=bool)
         insert_sub_tomo_bin(hold_ptemp, .5*ptemp_shape-1, self.__temp>ROT_TMP_TH)
         self.__ptemp = hold_ptemp
         self.__rnd_prots = np.ones(shape=(self.__ptemp.shape[0], self.__ptemp.shape[1], self.__ptemp.shape[2],
@@ -1653,7 +1653,7 @@ class AggSimulator(object):
         self.__agg_mask = None
         self.__agg_pot = None
         self.__agg_pot2 = None
-        self.__agg_voi = (-1.) * np.ones(shape=6, dtype=np.int)
+        self.__agg_voi = (-1.) * np.ones(shape=6, dtype=int)
         self.__agg_coords = None
 
     ######## External area
@@ -1945,7 +1945,7 @@ class AggSimulator2(object):
         if sh_sg < 0:
             error_msg = 'Subvolume for neighbourhood must be greater than zero!'
             raise ps.pexceptions.PySegInputError(expr='__init__ (AggSimulator)', msg=error_msg)
-        self.__neigh_shape = int(sh_sg) * np.asarray(self.__temp.shape, dtype=np.int)
+        self.__neigh_shape = int(sh_sg) * np.asarray(self.__temp.shape, dtype=int)
         self.__nrots = int(nrots)
         if self.__nrots <= 0:
             error_msg = 'The number or random rotation must be greater than zero!'
@@ -1970,7 +1970,7 @@ class AggSimulator2(object):
                 error_msg = 'Input binds must a 3-tuple.'
                 raise ps.pexceptions.PySegInputError(expr='__init__ (AggSimulator)', msg=error_msg)
         # Generate particles potentials and their rotations
-        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=np.bool)
+        self.__rnd_rots = np.zeros(shape=(nx, ny, nz, self.__nrots), dtype=bool)
         self.__rnd_count = 0
         self.__rnd_prots = np.ones(shape=(nx, ny, nz, self.__nrots), dtype=np.float32)
         self.__pt = None
@@ -2161,7 +2161,7 @@ class AggSimulator2(object):
         nx2, ny2, nz2 = .5 * (self.__neigh_shape + 1)
         X, Y, Z = np.meshgrid(np.arange(1,nx), np.arange(1,ny), np.arange(1,nz), indexing='ij')
         X, Y, Z = X-nx2, Y-ny2, Z-nz2
-        md = np.asarray(self.__temp.shape, dtype=np.int).max()
+        md = np.asarray(self.__temp.shape, dtype=int).max()
         self.__mask_sph = np.sqrt(X*X + Y*Y + Z*Z) > (0.5*md)
 
 
@@ -2184,11 +2184,11 @@ class UniStat(object):
         self.__name = name
         self.__mode_2D = False
         if coords.shape[1] == 3:
-            hold_coords = coords.astype(np.float)
+            hold_coords = coords.astype(float)
             if hold_coords[:, 2].max() <= 1:
                 self.__mode_2D = True
         elif coords.shape[1] == 2:
-            hold_coords = np.zeros(shape=(coords.shape[0], 3), dtype=np.float)
+            hold_coords = np.zeros(shape=(coords.shape[0], 3), dtype=float)
             hold_coords[:, 0] = coords[:, 0]
             hold_coords[:, 1] = coords[:, 1]
             self.__mode_2D = True
@@ -2196,9 +2196,9 @@ class UniStat(object):
             error_msg = 'Input coords must be 2D or 3D!'
             raise ps.pexceptions.PySegInputError(expr='__init__ (UniStat)', msg=error_msg)
         if len(mask.shape) == 3:
-            self.__mask = mask.astype(np.bool)
+            self.__mask = mask.astype(bool)
         elif len(mask.shape) == 2:
-            self.__mask = np.zeros(shape=(mask.shape[0], mask.shape[1], 1), dtype=np.bool)
+            self.__mask = np.zeros(shape=(mask.shape[0], mask.shape[1], 1), dtype=bool)
             self.__mask[:, :, 0] = mask
         else:
             error_msg = 'Input coords must be 2D or 3D!'
@@ -2322,7 +2322,7 @@ class UniStat(object):
         # Compressing the mask
         self.__z = float(self.__res * self.__res)
         mask_2d = (self.__mask.sum(axis=del_coord) > 0)
-        self.__mask = np.zeros(shape=(mask_2d.shape[0], mask_2d.shape[1], 1), dtype=np.bool)
+        self.__mask = np.zeros(shape=(mask_2d.shape[0], mask_2d.shape[1], 1), dtype=bool)
         self.__mask[:, :, 0] = mask_2d
         self.__mask_sum = self.__mask.sum()
 
@@ -2420,7 +2420,7 @@ class UniStat(object):
     # Store a tomogram (dtype=int) where bg=0, mask=1, points=2
     # file_name: full path to the stored tomogram
     def save_dense(self, file_name):
-        ps.disperse_io.save_numpy(self.__mask.astype(np.int)+self.__dense.astype(np.int), file_name)
+        ps.disperse_io.save_numpy(self.__mask.astype(int)+self.__dense.astype(int), file_name)
 
     # Stores a random instance
     # file_name: full path to the stored tomogram
@@ -2528,7 +2528,7 @@ class UniStat(object):
         #     raise ps.pexceptions.PySegInputWarning(expr='simulate_G (UniStat)', msg=error_msg)
 
         # Initialization
-        sims = np.zeros(shape=(bins, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(bins, n_sim), dtype=float)
 
         # Multi-threading
         n_th = mp.cpu_count()
@@ -2546,7 +2546,7 @@ class UniStat(object):
         # Compute results
         sp, _ = self.compute_G(max_d, bins)
         if get_sim:
-            return sp, np.asarray(sims, dtype=np.float)
+            return sp, np.asarray(sims, dtype=float)
         else:
             env_05 = func_envelope(sims, per=50)
             if p is None:
@@ -2576,7 +2576,7 @@ class UniStat(object):
         # Initialization
         if f_npts < 0:
             f_npts = self.__coords.shape[0]
-        sims = np.zeros(shape=(bins, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(bins, n_sim), dtype=float)
 
         # Multi-threading
         n_th = mp.cpu_count()
@@ -2594,7 +2594,7 @@ class UniStat(object):
         # Compute results
         sp, _ = self.compute_F(max_d, bins, f_npts=f_npts)
         if get_sim:
-            return sp, np.asarray(sims, dtype=np.float)
+            return sp, np.asarray(sims, dtype=float)
         else:
             env_05 = func_envelope(sims, per=50)
             if p is None:
@@ -2616,8 +2616,8 @@ class UniStat(object):
         r2 = r * r
         rc = r / self.__res
         r2c = rc * rc
-        num = np.zeros(shape=r.shape, dtype=np.float)
-        dem = np.zeros(shape=r.shape, dtype=np.float)
+        num = np.zeros(shape=r.shape, dtype=float)
+        dem = np.zeros(shape=r.shape, dtype=float)
 
         # Multi-threading
         tlock = mt.Lock()
@@ -2672,8 +2672,8 @@ class UniStat(object):
             if h_l < 0:
                 h_l = 0
             bin_s.append((h_l, rc[i]+thick_h))
-        num = np.zeros(shape=r.shape, dtype=np.float)
-        dem = np.zeros(shape=r.shape, dtype=np.float)
+        num = np.zeros(shape=r.shape, dtype=float)
+        dem = np.zeros(shape=r.shape, dtype=float)
 
         # Multi-threading
         tlock = mt.Lock()
@@ -2711,8 +2711,8 @@ class UniStat(object):
 
         # Initializing
         rs = np.linspace(0, max_d, n_samp)
-        num = np.zeros(shape=rs.shape, dtype=np.float)
-        dem = np.zeros(shape=rs.shape, dtype=np.float)
+        num = np.zeros(shape=rs.shape, dtype=float)
+        dem = np.zeros(shape=rs.shape, dtype=float)
         bin_s = list()
         thick_h = .5 * float(thick)
         bin_s.append((rs[0], thick_h))
@@ -2771,7 +2771,7 @@ class UniStat(object):
         K_d = np.gradient(f_K, r[1]-r[0])
 
         # Packing output
-        o_ring = np.ones(shape=K_d.shape, dtype=np.float)
+        o_ring = np.ones(shape=K_d.shape, dtype=float)
         # TODO: (review) 2D-circle has perimeter 2*pi*r then 3D-shpere has surface 4*pi*r*r
         if self.__mode_2D:
             o_ring[1:] = (1./(2*np.pi*r[1:])) * K_d[1:] - 1.
@@ -2818,8 +2818,8 @@ class UniStat(object):
         # Initializing
         ids_x, ids_y, ids_z = self.__X[self.__mask], self.__Y[self.__mask], self.__Z[self.__mask]
         ids_i = np.arange(self.__mask_sum)
-        arr = np.zeros(shape=self.__mask_sum, dtype=np.float)
-        img = np.zeros(shape=self.__mask.shape, dtype=np.float)
+        arr = np.zeros(shape=self.__mask_sum, dtype=float)
+        img = np.zeros(shape=self.__mask.shape, dtype=float)
 
         # Multi-threading
         n_th, s_z = mp.cpu_count(), self.__mask.shape[2]
@@ -2849,7 +2849,7 @@ class UniStat(object):
         # Final computations (histogram)
         bins = np.linspace(0, arr.max(), n_samp+1)
         hist, _ = np.histogram(arr, bins=bins)
-        return .5*bins[1] + bins[:-1], hist.astype(np.float)/float(hist.sum()), img_r
+        return .5*bins[1] + bins[:-1], hist.astype(float)/float(hist.sum()), img_r
 
     # Radial Averaged Fourier Transform
     # max_d: maximum distance (nm)
@@ -2859,13 +2859,13 @@ class UniStat(object):
 
         # Initializing
         max_d_v = math.ceil(max_d / self.__res)
-        rs = (np.arange(max_d_v, dtype=np.float) * self.__res) / max_d
+        rs = (np.arange(max_d_v, dtype=float) * self.__res) / max_d
         if (tr is None) or (tr <= 0):
             tr = self.__res
         tr = float(tr)
 
         # Getting dense tomogram
-        dense = self.__dense.astype(np.float)
+        dense = self.__dense.astype(float)
         if self.__temp is not None:
             temp = self.temp_rot_avg(tr)
             dense = sp.signal.fftconvolve(dense, temp, mode='same')
@@ -2885,7 +2885,7 @@ class UniStat(object):
         if n_pr > self.__n_coords:
             n_pr = self.__n_coords
         processes = list()
-        num = np.zeros(shape=len(mpa), dtype=np.float)
+        num = np.zeros(shape=len(mpa), dtype=float)
         manager = mp.Manager()
         mpa = manager.list()
         for pr_id in n_pr:
@@ -2926,9 +2926,9 @@ class UniStat(object):
         r2 = r * r
         rc = r / self.__res
         r2c = rc * rc
-        sims = np.zeros(shape=(r.shape[0], n_sim), dtype=np.float)
-        nums = np.zeros(shape=(r.shape[0], n_sim), dtype=np.float)
-        dems = np.zeros(shape=(r.shape[0], n_sim), dtype=np.float)
+        sims = np.zeros(shape=(r.shape[0], n_sim), dtype=float)
+        nums = np.zeros(shape=(r.shape[0], n_sim), dtype=float)
+        dems = np.zeros(shape=(r.shape[0], n_sim), dtype=float)
 
         # Multi-threading
         tlock = mt.Lock()
@@ -2942,8 +2942,8 @@ class UniStat(object):
             # Generate a new random pattern
             hold_coords = self.__simulator.gen_rand_in_mask(self.__n_coords, self.__mask)
             dense, coords = coords_to_dense_mask(hold_coords, self.__mask)
-            num = np.zeros(shape=r.shape, dtype=np.float)
-            dem = np.zeros(shape=r.shape, dtype=np.float)
+            num = np.zeros(shape=r.shape, dtype=float)
+            dem = np.zeros(shape=r.shape, dtype=float)
 
             # Static division in threads by points
             if len(coords) > 0:
@@ -2970,7 +2970,7 @@ class UniStat(object):
 
         # Compute results
         if get_sim:
-            return r, np.asarray(sims, dtype=np.float), nums, dems
+            return r, np.asarray(sims, dtype=float), nums, dems
         else:
             env_05 = func_envelope(sims, per=50)
             if p is None:
@@ -3006,7 +3006,7 @@ class UniStat(object):
             if h_l < 0:
                 h_l = 0
             bin_s.append((h_l, rc[i]+thick_h))
-        sims = np.zeros(shape=(r.shape[0], n_sim), dtype=np.float)
+        sims = np.zeros(shape=(r.shape[0], n_sim), dtype=float)
 
         # Multi-threading
         tlock = mt.Lock()
@@ -3020,8 +3020,8 @@ class UniStat(object):
             # Generate a new random pattern
             hold_coords = self.__simulator.gen_rand_in_mask(self.__n_coords, self.__mask)
             dense, coords = coords_to_dense_mask(hold_coords, self.__mask)
-            num = np.zeros(shape=r.shape, dtype=np.float)
-            dem = np.zeros(shape=r.shape, dtype=np.float)
+            num = np.zeros(shape=r.shape, dtype=float)
+            dem = np.zeros(shape=r.shape, dtype=float)
 
             # Static division in threads by points
             if len(coords) > 0:
@@ -3188,8 +3188,8 @@ class UniStat(object):
         # Initializing
         ids_x, ids_y, ids_z = self.__X[self.__mask], self.__Y[self.__mask], self.__Z[self.__mask]
         ids_i = np.arange(self.__mask_sum)
-        arr = np.zeros(shape=self.__mask_sum, dtype=np.float)
-        img = np.zeros(shape=self.__mask.shape, dtype=np.float)
+        arr = np.zeros(shape=self.__mask_sum, dtype=float)
+        img = np.zeros(shape=self.__mask.shape, dtype=float)
 
         # Multi-threading
         n_th, s_z = mp.cpu_count(), self.__mask.shape[2]
@@ -3352,8 +3352,8 @@ class UniStat(object):
             # Count num of particles in the shell and shell volume
             point_dists = np.sqrt(sub_dists[dense_ids])
             shell_dist = np.sqrt(sub_dists[sub_mask])
-            hold_num = np.zeros(shape=len(bin_s), dtype=np.float)
-            hold_dem = np.zeros(shape=len(bin_s), dtype=np.float)
+            hold_num = np.zeros(shape=len(bin_s), dtype=float)
+            hold_dem = np.zeros(shape=len(bin_s), dtype=float)
             for i in range(1, len(bin_s)):
                 hold_num[i] = float(((point_dists>=bin_s[i][0]) & (point_dists<bin_s[i][1])).sum())
                 hold_dem[i] = float(((shell_dist>=bin_s[i][0]) & (shell_dist<bin_s[i][1])).sum())
@@ -3378,7 +3378,7 @@ class UniStat(object):
             dsts = np.sqrt((hold * hold).sum(axis=1))
 
             # Count num of particles in the shell and shell volume
-            hold_num = np.zeros(shape=len(bin_s), dtype=np.float)
+            hold_num = np.zeros(shape=len(bin_s), dtype=float)
             for i in range(1, len(bin_s)):
                 hold_num[i] = float(((dsts>=bin_s[i][0]) & (dsts<bin_s[i][1])).sum())
 
@@ -3436,8 +3436,8 @@ class UniStat(object):
             # Count num of particles in the shell and shell volume
             point_dists = np.sqrt(sub_dists[dense_ids])
             shell_dist = np.sqrt(sub_dists[sub_mask])
-            hold_num = np.zeros(shape=len(bin_s), dtype=np.float)
-            hold_dem = np.zeros(shape=len(bin_s), dtype=np.float)
+            hold_num = np.zeros(shape=len(bin_s), dtype=float)
+            hold_dem = np.zeros(shape=len(bin_s), dtype=float)
             for i in range(1, len(bin_s)):
                 hold_num[i] = float(((point_dists>=bin_s[i][0]) & (point_dists<bin_s[i][1])).sum())
                 hold_dem[i] = float(((shell_dist>=bin_s[i][0]) & (shell_dist<bin_s[i][1])).sum())
@@ -3486,8 +3486,8 @@ class UniStat(object):
         # Initializing
         ids_x, ids_y, ids_z = self.__X[self.__mask], self.__Y[self.__mask], self.__Z[self.__mask]
         ids_i = np.arange(self.__mask_sum)
-        arr = np.zeros(shape=self.__mask_sum, dtype=np.float)
-        img = np.zeros(shape=self.__mask.shape, dtype=np.float)
+        arr = np.zeros(shape=self.__mask_sum, dtype=float)
+        img = np.zeros(shape=self.__mask.shape, dtype=float)
 
         # Multi-threading
         n_th, s_z = mp.cpu_count(), self.__mask.shape[2]
@@ -3515,7 +3515,7 @@ class UniStat(object):
         bins = np.linspace(0, arr.max(), n_samp+1)
         hist, _ = np.histogram(arr, bins=bins)
         q.put(.5*bins[1] + bins[:-1])
-        q.put(hist.astype(np.float)/float(hist.sum()))
+        q.put(hist.astype(float)/float(hist.sum()))
         q.put(img_r)
 
 ##############################################################################################
@@ -3537,14 +3537,14 @@ class BiStat(object):
             error_msg = 'Input coords must have the same dimensions'
             raise ps.pexceptions.PySegInputError(expr='__init__ (BiStat)', msg=error_msg)
         if coords_1.shape[1] == 3:
-            hold_coords_1, hold_coords_2 = coords_1.astype(np.float), coords_2.astype(np.float)
+            hold_coords_1, hold_coords_2 = coords_1.astype(float), coords_2.astype(float)
             if (hold_coords_1[:, 2].max() <= 1) and (hold_coords_2[:, 2].max() <= 1):
                 self.__mode_2D = True
         elif coords_1.shape[1] == 2:
-            hold_coords_1 = np.zeros(shape=(coords_1.shape[0], 3), dtype=np.float)
+            hold_coords_1 = np.zeros(shape=(coords_1.shape[0], 3), dtype=float)
             hold_coords_1[:, 0] = coords_1[:, 0]
             hold_coords_1[:, 1] = coords_1[:, 1]
-            hold_coords_2 = np.zeros(shape=(coords_2.shape[0], 3), dtype=np.float)
+            hold_coords_2 = np.zeros(shape=(coords_2.shape[0], 3), dtype=float)
             hold_coords_2[:, 0] = coords_2[:, 0]
             hold_coords_2[:, 1] = coords_2[:, 1]
             self.__mode_2D = True
@@ -3552,9 +3552,9 @@ class BiStat(object):
             error_msg = 'Input coords must be 2D or 3D!'
             raise ps.pexceptions.PySegInputError(expr='__init__ (BiStat)', msg=error_msg)
         if len(mask.shape) == 3:
-            self.__mask = mask.astype(np.bool)
+            self.__mask = mask.astype(bool)
         elif len(mask.shape) == 2:
-            self.__mask = np.zeros(shape=(mask.shape[0], 3), dtype=np.bool)
+            self.__mask = np.zeros(shape=(mask.shape[0], 3), dtype=bool)
             self.__mask[:, 0] = mask[:, 0]
             self.__mask[:, 1] = mask[:, 1]
         else:
@@ -3654,7 +3654,7 @@ class BiStat(object):
             raise ps.pexceptions.PySegInputError(expr='simulate_G (BiStat)', msg=error_msg)
 
         # Initialization
-        sims = np.zeros(shape=(bins, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(bins, n_sim), dtype=float)
 
         # Multi-threading
         n_th = mp.cpu_count()
@@ -3672,7 +3672,7 @@ class BiStat(object):
         # Compute results
         sp, _ = self.compute_G(max_d, bins)
         if get_sim:
-            return sp, np.asarray(sims, dtype=np.float)
+            return sp, np.asarray(sims, dtype=float)
         else:
             env_05 = func_envelope(sims, per=50)
             if p is None:
@@ -3695,8 +3695,8 @@ class BiStat(object):
         r2 = r * r
         rc = r / self.__res
         r2c = rc * rc
-        num = np.zeros(shape=r.shape, dtype=np.float)
-        dem = np.zeros(shape=r.shape, dtype=np.float)
+        num = np.zeros(shape=r.shape, dtype=float)
+        dem = np.zeros(shape=r.shape, dtype=float)
 
         # Multi-threading
         tlock = mt.Lock()
@@ -3748,7 +3748,7 @@ class BiStat(object):
         K_d = np.gradient(f_K, r[1]-r[0])
 
         # Packing output
-        o_ring = np.ones(shape=K_d.shape, dtype=np.float)
+        o_ring = np.ones(shape=K_d.shape, dtype=float)
         # TODO: (review) 2D-circle has perimeter 2*pi*r then 3D-sphere has surface 4*pi*r*r
         if self.__mode_2D:
             o_ring[1:] = (1./(2*np.pi*r[1:])) * K_d[1:] - 1.
@@ -3802,7 +3802,7 @@ class BiStat(object):
         r2 = r * r
         rc = r / self.__res
         r2c = rc * rc
-        sims = np.zeros(shape=(r.shape[0], n_sim), dtype=np.float)
+        sims = np.zeros(shape=(r.shape[0], n_sim), dtype=float)
 
         # Multi-threading
         tlock = mt.Lock()
@@ -3816,8 +3816,8 @@ class BiStat(object):
             # Generate a new random pattern
             hold_coords = self.__simulator.gen_rand_in_mask(self.__n_coords_2, self.__mask)
             dense, coords = coords_to_dense_mask(hold_coords, self.__mask)
-            num = np.zeros(shape=r.shape, dtype=np.float)
-            dem = np.zeros(shape=r.shape, dtype=np.float)
+            num = np.zeros(shape=r.shape, dtype=float)
+            dem = np.zeros(shape=r.shape, dtype=float)
 
             # Static division in threads by points
             spl_ids = np.array_split(np.arange(self.__coords_1.shape[0]), n_th)
@@ -3844,7 +3844,7 @@ class BiStat(object):
 
         # Compute results
         if get_sim:
-            return r, np.asarray(sims, dtype=np.float)
+            return r, np.asarray(sims, dtype=float)
         else:
             env_05 = func_envelope(sims, per=50)
             if p is None:
@@ -4052,8 +4052,8 @@ class BiStat(object):
         for idx in ids:
 
             # Access to shared variable which control global status
-            num = np.zeros(shape=r2.shape, dtype=np.float)
-            dem = np.zeros(shape=r2.shape, dtype=np.float)
+            num = np.zeros(shape=r2.shape, dtype=float)
+            dem = np.zeros(shape=r2.shape, dtype=float)
             dem[0] = self.__z
 
             # Generate a new random pattern
@@ -4218,10 +4218,10 @@ class PlotUni(object):
             raise ps.pexceptions.PySegInputError(expr='analyze_intensity (PlotUni)', msg=error_msg)
 
         # Data pre-processing
-        lambdas = np.zeros(shape=len(self.__unis), dtype=np.float)
+        lambdas = np.zeros(shape=len(self.__unis), dtype=float)
         for i, uni in enumerate(self.__unis):
             lambdas[i] = uni.get_intensity()
-        zs = np.asarray(self.__zs, dtype=np.float)
+        zs = np.asarray(self.__zs, dtype=float)
 
         # Initialization
         fig = plt.figure()
@@ -4470,11 +4470,11 @@ class PlotUni(object):
         lines = list()
         if gather:
             k_dst = self.__Ks[0][0]
-            wk = np.zeros(shape=k_dst.shape[0], dtype=np.float)
+            wk = np.zeros(shape=k_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             for (w, k) in zip(weights, self.__Ks[:][1]):
                 wk += (k*w)
@@ -4563,11 +4563,11 @@ class PlotUni(object):
         lines = list()
         if gather:
             n_dst = self.__NLDs[0][0]
-            wn = np.zeros(shape=n_dst.shape[0], dtype=np.float)
+            wn = np.zeros(shape=n_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Ns = list()
             for (w, n) in zip(weights, self.__NLDs[:][1]):
@@ -4679,11 +4679,11 @@ class PlotUni(object):
         lines = list()
         if gather:
             n_dst = self.__RBFs[0][0]
-            wr = np.zeros(shape=n_dst.shape[0], dtype=np.float)
+            wr = np.zeros(shape=n_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Nr = list()
             for (w, n) in zip(weights, self.__RBFs[:][1]):
@@ -4766,11 +4766,11 @@ class PlotUni(object):
         mode_2D = self.__unis[0].is_2D()
         if gather:
             l_dst = self.__Ks[0][0]
-            wl = np.zeros(shape=l_dst.shape[0], dtype=np.float)
+            wl = np.zeros(shape=l_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Ls = list()
             for (w, k) in zip(weights, self.__Ks[:][1]):
@@ -4853,11 +4853,11 @@ class PlotUni(object):
         lines = list()
         if gather:
             i_dst = self.__Ks[0][0]
-            wi = np.zeros(shape=i_dst.shape[0], dtype=np.float)
+            wi = np.zeros(shape=i_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Is = list()
             for (w, k_num, k_dem) in zip(weights, self.__K_nums, self.__K_dems):
@@ -4937,11 +4937,11 @@ class PlotUni(object):
         mode_2D = self.__unis[0].is_2D()
         if gather:
             o_dst = self.__Ks[0][0]
-            wo = np.zeros(shape=o_dst.shape[0], dtype=np.float)
+            wo = np.zeros(shape=o_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Os = list()
             for (ww, k) in zip(weights, self.__Ks[:][1]):
@@ -5021,11 +5021,11 @@ class PlotUni(object):
         lines = list()
         if gather:
             d_dst = self.__Ks[0][0]
-            wd = np.zeros(shape=d_dst.shape[0], dtype=np.float)
+            wd = np.zeros(shape=d_dst.shape[0], dtype=float)
             weights = list()
             for uni in self.__unis:
                 weights.append(uni.get_intensity())
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Ds = list()
             for (w, k_num, k_dem) in zip(weights, self.__K_nums, self.__K_dems):
@@ -5212,7 +5212,7 @@ class PlotUni(object):
     def __compute_L_env(self, r, Ks, mode_2D, p=None):
 
         # Compute L from K
-        Ls = np.zeros(shape=Ks.shape, dtype=np.float)
+        Ls = np.zeros(shape=Ks.shape, dtype=float)
         if mode_2D:
             for i in range(Ks.shape[1]):
                 Ls[:, i] = np.sqrt(Ks[:, i]/np.pi) - r
@@ -5232,7 +5232,7 @@ class PlotUni(object):
     def __compute_I_env(self, r, Ks_num, Ks_dem, p=None):
 
         # Compute L from K
-        Is = np.zeros(shape=Ks_num.shape, dtype=np.float)
+        Is = np.zeros(shape=Ks_num.shape, dtype=float)
         for i in range(Ks_num.shape[1]):
             Is[:, i] = Ks_num[:, i] / Ks_dem[:, i]
 
@@ -5263,7 +5263,7 @@ class PlotUni(object):
         K_d = np.gradient(f_K, r[1]-r[0])
 
         # Packing output
-        o_ring = np.zeros(shape=K_d.shape, dtype=np.float)
+        o_ring = np.zeros(shape=K_d.shape, dtype=float)
         if mode_2D:
             o_ring[1:] = (1./(2*np.pi*r[1:])) * K_d[1:] - 1.
         else:
@@ -5290,7 +5290,7 @@ class PlotUni(object):
         I_d = np.gradient(f_I, r[1]-r[0])
 
         # Packing output
-        d_arr = np.zeros(shape=I_d.shape, dtype=np.float)
+        d_arr = np.zeros(shape=I_d.shape, dtype=float)
         d_arr[1:] = I_d[1:]
 
         return d_arr
@@ -5307,7 +5307,7 @@ class PlotUni(object):
         elif wn > 1:
             wn = 1.
         b, a = butter(LP_ORDER, wn, btype='low', analog=False)
-        Os = np.zeros(shape=Ks.shape, dtype=np.float)
+        Os = np.zeros(shape=Ks.shape, dtype=float)
 
         # Computing O from K
         for i in range(Ks.shape[1]):
@@ -5343,7 +5343,7 @@ class PlotUni(object):
         elif wn > 1:
             wn = 1.
         b, a = butter(LP_ORDER, wn, btype='low', analog=False)
-        Is = np.zeros(shape=Ks_num.shape, dtype=np.float)
+        Is = np.zeros(shape=Ks_num.shape, dtype=float)
 
         # Computing O from K
         for i in range(Ks_num.shape[1]):
@@ -5376,7 +5376,7 @@ class PlotUni(object):
         # Loop for computations
         count = 0
         sims = list()
-        # sims = np.zeros(shape=(bins, n_sim), dtype=np.float)
+        # sims = np.zeros(shape=(bins, n_sim), dtype=float)
         for (uni, ids) in zip(self.__unis, spl_ids):
             h_n_sim = len(ids)
             if uni.get_n_points() >= bins:
@@ -5386,11 +5386,11 @@ class PlotUni(object):
                     sims.append(hold_sims[:, j])
                     count += 1
             else:
-                sims.append(np.zeros(shape=bins, dtype=np.float))
+                sims.append(np.zeros(shape=bins, dtype=float))
         if len(sims) == 0:
-            sims = np.zeros(shape=(bins, 1), dtype=np.float)
+            sims = np.zeros(shape=(bins, 1), dtype=float)
         else:
-            sims = np.asarray(sims, dtype=np.float).transpose()
+            sims = np.asarray(sims, dtype=float).transpose()
 
         # Updating class simulations variable
         self.__sims_G = sims
@@ -5414,7 +5414,7 @@ class PlotUni(object):
         # Loop for computations
         count = 0
         sims = list()
-        # sims = np.zeros(shape=(bins, n_sim), dtype=np.float)
+        # sims = np.zeros(shape=(bins, n_sim), dtype=float)
         for (uni, ids) in zip(self.__unis, spl_ids):
             h_n_sim = len(ids)
             if uni.get_n_points() >= bins:
@@ -5424,11 +5424,11 @@ class PlotUni(object):
                     sims.append(hold_sims[:, j])
                     count += 1
             else:
-                sims.append(np.zeros(shape=bins, dtype=np.float))
+                sims.append(np.zeros(shape=bins, dtype=float))
         if len(sims) == 0:
-            sims = np.zeros(shape=(bins, 1), dtype=np.float)
+            sims = np.zeros(shape=(bins, 1), dtype=float)
         else:
-            sims = np.asarray(sims, dtype=np.float).transpose()
+            sims = np.asarray(sims, dtype=float).transpose()
 
         # Updating class simulations variable
         self.__sims_F = sims
@@ -5451,9 +5451,9 @@ class PlotUni(object):
 
         # Loop for computations
         count = 0
-        sims = np.zeros(shape=(n_samp, n_sim), dtype=np.float)
-        sims_K_num = np.zeros(shape=(n_samp, n_sim), dtype=np.float)
-        sims_K_dem = np.zeros(shape=(n_samp, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(n_samp, n_sim), dtype=float)
+        sims_K_num = np.zeros(shape=(n_samp, n_sim), dtype=float)
+        sims_K_dem = np.zeros(shape=(n_samp, n_sim), dtype=float)
         for (uni, ids) in zip(self.__unis, spl_ids):
             h_n_sim = len(ids)
             dst, hold_sims, hold_K_nums, hold_K_dems = uni.simulate_K(max_d, n_samp, h_n_sim, get_sim=True)
@@ -5486,7 +5486,7 @@ class PlotUni(object):
 
         # Loop for computations
         count = 0
-        sims = np.zeros(shape=(n_samp, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(n_samp, n_sim), dtype=float)
         for (uni, ids) in zip(self.__unis, spl_ids):
             h_n_sim = len(ids)
             dst, hold_sims = uni.simulate_NLD(shell_th, max_d, n_samp, h_n_sim, get_sim=True, gnorm=gnorm)
@@ -5515,7 +5515,7 @@ class PlotUni(object):
     def __compute_J_env(self, Gs, Fs, p=None):
 
         # Compute L from K
-        Js = np.inf * np.ones(shape=Gs.shape, dtype=np.float)
+        Js = np.inf * np.ones(shape=Gs.shape, dtype=float)
         for i in range(Gs.shape[1]):
             hold = self.__compute_J(Gs[:, i], Fs[:, i])
             Js[:hold.shape[0], i] = hold
@@ -5684,11 +5684,11 @@ class PlotBi(object):
         lines = list()
         if gather:
             k_dst = self.__Ks[0][0]
-            wk = np.zeros(shape=k_dst.shape[0], dtype=np.float)
+            wk = np.zeros(shape=k_dst.shape[0], dtype=float)
             weights = list()
             for bi in self.__bis:
                 weights.append(bi.get_intensities()[0])
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             for (w, k) in zip(weights, self.__Ks[:][1]):
                 wk += (k*w)
@@ -5751,11 +5751,11 @@ class PlotBi(object):
         lines = list()
         if gather:
             l_dst = self.__Ks[0][0]
-            wl = np.zeros(shape=l_dst.shape[0], dtype=np.float)
+            wl = np.zeros(shape=l_dst.shape[0], dtype=float)
             weights = list()
             for bi in self.__bis:
                 weights.append(bi.get_intensities()[0])
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Ls = list()
             for (w, k) in zip(weights, self.__Ks[:][1]):
@@ -5834,11 +5834,11 @@ class PlotBi(object):
         lines = list()
         if gather:
             o_dst = self.__Ks[0][0]
-            wo = np.zeros(shape=o_dst.shape[0], dtype=np.float)
+            wo = np.zeros(shape=o_dst.shape[0], dtype=float)
             weights = list()
             for bi in self.__bis:
                 weights.append(bi.get_intensities()[0])
-            weights = np.asarray(weights, dtype=np.float)
+            weights = np.asarray(weights, dtype=float)
             weights /= weights.sum()
             Os = list()
             for (ww, k) in zip(weights, self.__Ks[:][1]):
@@ -5953,7 +5953,7 @@ class PlotBi(object):
     def __compute_L_env(self, r, Ks, mode_2D, p=None):
 
         # Compute L from K
-        Ls = np.zeros(shape=Ks.shape, dtype=np.float)
+        Ls = np.zeros(shape=Ks.shape, dtype=float)
         if mode_2D:
             for i in range(Ks.shape[1]):
                 Ls[:, i] = np.sqrt(Ks[:, i]/np.pi) - r
@@ -5988,7 +5988,7 @@ class PlotBi(object):
         K_d = np.gradient(f_K, r[1]-r[0])
 
         # Packing output
-        o_ring = np.zeros(shape=K_d.shape, dtype=np.float)
+        o_ring = np.zeros(shape=K_d.shape, dtype=float)
         if mode_2D:
             o_ring[1:] = (1./(2*np.pi*r[1:])) * K_d[1:] - 1.
         else:
@@ -6008,7 +6008,7 @@ class PlotBi(object):
         elif wn > 1:
             wn = 1.
         b, a = butter(LP_ORDER, wn, btype='low', analog=False)
-        Os = np.zeros(shape=Ks.shape, dtype=np.float)
+        Os = np.zeros(shape=Ks.shape, dtype=float)
 
         # Computing O from K
         for i in range(Ks.shape[1]):
@@ -6041,7 +6041,7 @@ class PlotBi(object):
 
         # Loop for computations
         count = 0
-        sims = np.zeros(shape=(bins, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(bins, n_sim), dtype=float)
         for (bi, ids) in zip(self.__bis, spl_ids):
             h_n_sim = len(ids)
             dst, hold_sims = bi.simulate_G(max_d, bins, h_n_sim, get_sim=True)
@@ -6070,7 +6070,7 @@ class PlotBi(object):
 
         # Loop for computations
         count = 0
-        sims = np.zeros(shape=(n_samp, n_sim), dtype=np.float)
+        sims = np.zeros(shape=(n_samp, n_sim), dtype=float)
         for (bi, ids) in zip(self.__bis, spl_ids):
             h_n_sim = len(ids)
             dst, hold_sims = bi.simulate_K(max_d, n_samp, h_n_sim, get_sim=True)

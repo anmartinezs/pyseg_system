@@ -49,7 +49,7 @@ class TestListNhoodVol(TestCase):
         r_m_h = 5
         rad_max = RAD_RG.max()
         max_size = int(math.ceil(2 * rad_max + SHELL_THICKS[3]))
-        seg = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        seg = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = np.asarray((.5 * seg.shape[0], .5 * seg.shape[1], .5 * seg.shape[2]))
         X = np.meshgrid(np.arange(seg.shape[0]), np.arange(seg.shape[1]), np.arange(seg.shape[2]))[0]
         seg[X > voi_center[0] + r_m_h] = False
@@ -162,7 +162,7 @@ class TestListNhoodVol(TestCase):
         # VOI array creation
         rad_max = RAD_RG.max()
         max_size = int(math.ceil(2 * rad_max + SHELL_THICKS[3]))
-        voi = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        voi = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = (.5 * voi.shape[0], .5 * voi.shape[1], .5 * voi.shape[2])
         X = np.meshgrid(np.arange(voi.shape[0]), np.arange(voi.shape[1]), np.arange(voi.shape[2]))[0]
         voi[X > voi_center[0]] = False
@@ -264,7 +264,7 @@ class TestListNhoodVol(TestCase):
         r_m_h = 5
         rad_max = RAD_RG.max()
         max_size = int(math.ceil(2 * rad_max + SHELL_THICKS[2]))
-        voi = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        voi = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = (.5 * voi.shape[0], .5 * voi.shape[1], .5 * voi.shape[2])
         X = np.meshgrid(np.arange(voi.shape[0]), np.arange(voi.shape[1]), np.arange(voi.shape[2]))[0]
         # voi[X > voi_center[0]] = False
@@ -348,7 +348,7 @@ class TestListNhoodVol(TestCase):
         N_SIMS = 1
         rad_max = RAD_RG.max()
         max_size = int(math.ceil(2 * 200 + SHELL_THICKS[2]))
-        voi = np.ones(shape=(max_size, max_size, max_size), dtype=np.bool)
+        voi = np.ones(shape=(max_size, max_size, max_size), dtype=bool)
         voi_center = (.5 * voi.shape[0], .5 * voi.shape[1], .5 * voi.shape[2])
         X = np.meshgrid(np.arange(voi.shape[0]), np.arange(voi.shape[1]), np.arange(voi.shape[2]))[0]
         voi[X > voi_center[0]] = False

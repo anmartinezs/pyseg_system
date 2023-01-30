@@ -123,15 +123,15 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
 
     print('\tComputing mask for DisPerSe...')
     maskh = (seg == PST_MB_LBL) + (seg == PRE_MB_LBL) + (seg == CLEFT_LBL)
-    tomod = ps.disperse_io.seg_dist_trans(maskh.astype(np.bool)) * res
-    maskh = np.ones(shape=seg.shape, dtype=np.int)
+    tomod = ps.disperse_io.seg_dist_trans(maskh.astype(bool)) * res
+    maskh = np.ones(shape=seg.shape, dtype=int)
     maskh[DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER] = 0
-    mask = np.asarray(tomod > (max_len + 2*DILATE_NITER*res), dtype=np.int)
+    mask = np.asarray(tomod > (max_len + 2*DILATE_NITER*res), dtype=int)
     maskh += mask
-    mask = np.asarray(maskh > 0, dtype=np.float)
+    mask = np.asarray(maskh > 0, dtype=float)
     input_msk = output_dir + '/' + stem + '_mask.fits'
     ps.disperse_io.save_numpy(mask.transpose(), input_msk)
-    mask_mbs = ((seg == PST_MB_LBL) + (seg == PRE_MB_LBL)).astype(np.bool)
+    mask_mbs = ((seg == PST_MB_LBL) + (seg == PRE_MB_LBL)).astype(bool)
 
     print('\tSmoothing input tomogram (s=' + str(s_sig) + ')...')
     density = sp.ndimage.filters.gaussian_filter(tomo, s_sig)
@@ -148,7 +148,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
     # Down skeleton
     disperse.set_dump_arcs(-1)
     # disperse.set_nsig_cut(nsig)
-    rcut = round(density[mask.astype(np.bool)].std()*csig, 4)
+    rcut = round(density[mask.astype(bool)].std()*csig, 4)
     print('\tPersistence cut thereshold set to: ' + str(rcut) + ' grey level')
     disperse.set_cut(rcut)
     disperse.set_mask(input_msk)
@@ -202,7 +202,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
         print('\t\tProperty used: ' + prop_topo)
         graph.set_pair_prop(prop_topo)
     try:
-        graph.graph_density_simp_ref(mask=np.asarray(mask_mbs, dtype=np.int), v_den=v_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_mbs, dtype=int), v_den=v_den,
                                      v_prop=v_prop, v_mode=v_mode)
     except ps.pexceptions.PySegInputWarning as e:
         print('WARNING: graph density simplification failed:')
@@ -214,7 +214,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
 
     print('\tGraph density simplification for edges in pre membrane...')
@@ -223,7 +223,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
 
     print('\tGraph density simplification for edges in the PSD...')
@@ -232,7 +232,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + \
@@ -244,7 +244,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + \
@@ -256,7 +256,7 @@ for (in_tomo, in_seg) in zip(input_tomo_l, input_seg_l):
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_clft, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_clft, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + \

@@ -130,7 +130,7 @@ class vtkClosestCellAlgorithm(vtk.vtkPolyDataAlgorithm):
 
             # Array for increasing processing speed
             rncells = reference.GetNumberOfCells()
-            cpolyp = np.zeros([rncells, 3], dtype=np.float)
+            cpolyp = np.zeros([rncells, 3], dtype=float)
 
             # Get center of mass for all cells
             for i in range(rncells):
@@ -138,7 +138,7 @@ class vtkClosestCellAlgorithm(vtk.vtkPolyDataAlgorithm):
                 reference.GetCell(i, cell)
                 npoints = cell.GetNumberOfPoints()
                 pts = cell.GetPoints()
-                coords = np.zeros([npoints, 3], dtype=np.float)
+                coords = np.zeros([npoints, 3], dtype=float)
                 for k in range(npoints):
                     coords[k][:] = pts.GetPoint(k)
                 mcoord = np.mean(coords, 0)
@@ -153,7 +153,7 @@ class vtkClosestCellAlgorithm(vtk.vtkPolyDataAlgorithm):
                 input_polys.GetCell(i, cell)
                 npoints = cell.GetNumberOfPoints()
                 pts = cell.GetPoints()
-                coords = np.zeros([npoints, 3], dtype=np.float)
+                coords = np.zeros([npoints, 3], dtype=float)
                 for k in range(npoints):
                     coords[k][:] = pts.GetPoint(k)
                 mcoord = np.mean(coords, 0)
@@ -331,7 +331,7 @@ class vtkFilterSurfBorderAlgorithm(vtk.vtkPolyDataAlgorithm):
             # In keep geometry is disabled
             else:
                 npatt = len(attp_arrays)
-                points_f = np.zeros(closest_poly.GetNumberOfPoints(), dtype=np.bool)
+                points_f = np.zeros(closest_poly.GetNumberOfPoints(), dtype=bool)
                 cells_f = list()
                 cells_f_att = list()
                 for i in range(ccell_array.GetNumberOfTuples()):
@@ -349,7 +349,7 @@ class vtkFilterSurfBorderAlgorithm(vtk.vtkPolyDataAlgorithm):
 
                 # Creating Geometry
                 count = 0
-                lut = (-1) * np.ones(points_f.size, dtype=np.int)
+                lut = (-1) * np.ones(points_f.size, dtype=int)
                 out_points = vtk.vtkPoints()
                 for i in range(lut.size):
                     if points_f[i]:
@@ -431,7 +431,7 @@ class vtkClosestPointAlgorithm(vtk.vtkPolyDataAlgorithm):
         self.__points_x = np.asarray(hold_points_x, dtype=np.float32)
         self.__points_y = np.asarray(hold_points_y, dtype=np.float32)
         self.__points_z = np.asarray(hold_points_z, dtype=np.float32)
-        self.__points_id = np.asarray(hold_points_id, dtype=np.int)
+        self.__points_id = np.asarray(hold_points_id, dtype=int)
 
     # normal_field: must contain a vector field or a the string name to the attribute with the
     # point normals. If no valid normal field is addressed this property will stay to None so
@@ -658,11 +658,11 @@ class vtkFilterRedundacyAlgorithm(vtk.vtkPolyDataAlgorithm):
         m_x += 1
         m_y += 1
         m_z += 1
-        mask = (-1) * np.ones(shape=(m_x, m_y, m_z), dtype=np.int)
+        mask = (-1) * np.ones(shape=(m_x, m_y, m_z), dtype=int)
 
         # Loop for detecting the redundant points and creating the new geometry
         new_points = vtk.vtkPoints()
-        nred_points = (-1) * np.ones(npoints, dtype=np.int)
+        nred_points = (-1) * np.ones(npoints, dtype=int)
         p_count = 0
         for i in range(npoints):
             x, y, z = input_poly.GetPoint(i)
@@ -740,7 +740,7 @@ class vtkFilterRedundacyAlgorithm(vtk.vtkPolyDataAlgorithm):
         list_coords = list()
         list_ids = list()
         npoints = input_poly.GetNumberOfPoints()
-        lut = (-1) * np.ones(npoints, dtype=np.int)
+        lut = (-1) * np.ones(npoints, dtype=int)
         x1, y1, z1 = input_poly.GetPoint(0)
         output_points.InsertNextPoint(x1, y1, z1)
         nattp = len(attp_arrays)

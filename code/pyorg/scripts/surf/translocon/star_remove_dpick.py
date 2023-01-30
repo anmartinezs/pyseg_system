@@ -89,7 +89,7 @@ def main():
         sx = star.get_element('_rlnOriginX', row)
         sy = star.get_element('_rlnOriginY', row)
         sz = star.get_element('_rlnOriginZ', row)
-        shifts = np.asarray((sx, sy, sz), dtype=np.float)
+        shifts = np.asarray((sx, sy, sz), dtype=float)
         dst = math.sqrt((shifts * shifts).sum())
         if dst > max_shift_v:
             del_l.append(row)
@@ -147,7 +147,7 @@ def main():
         mic_dst = sp.ndimage.morphology.distance_transform_edt(mic!=seg_lbl)
         num_err = 0
         for row in rows:
-            coord = np.round(part_coords[row, :]).astype(np.int)
+            coord = np.round(part_coords[row, :]).astype(int)
             hold_dst = mic_dst[coord[1], coord[0], coord[2]]
             tot_dst += hold_dst
             if hold_dst > err_dst_v:
@@ -204,8 +204,8 @@ def main():
     if log_crit:
         for mic, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
             mic_coords = np.zeros(shape=(len(rows), 3), dtype=np.float32)
-            mic_lut = np.ones(shape=len(rows), dtype=np.bool)
-            mic_logs = np.zeros(shape=len(rows), dtype=np.bool)
+            mic_lut = np.ones(shape=len(rows), dtype=bool)
+            mic_logs = np.zeros(shape=len(rows), dtype=bool)
             for i, row in enumerate(rows):
                 mic_coords[i, :] = part_coords[row, :]
                 mic_logs[i] = star.get_element('_rlnLogLikeliContribution', row)
@@ -224,7 +224,7 @@ def main():
         # Particle suppression on output STAR file (first found criterium)
         for mic, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
             mic_coords = np.zeros(shape=(len(rows), 3), dtype=np.float32)
-            mic_lut = np.ones(shape=len(rows), dtype=np.bool)
+            mic_lut = np.ones(shape=len(rows), dtype=bool)
             for i, row in enumerate(rows):
                 mic_coords[i, :] = part_coords[row, :]
             for i, coord in enumerate(mic_coords):

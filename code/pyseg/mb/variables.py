@@ -8,7 +8,7 @@ __author__ = 'martinez'
 
 import numpy as np
 
-MAX_FLOAT = np.finfo(np.float).max
+MAX_FLOAT = np.finfo(float).max
 MB_SEG = 'mb_seg'
 MB_LBL = 1
 MB_IN_LBL = 2

@@ -320,7 +320,7 @@ if in_mats_lists is None:
         props_dic = set_lists.proportions_by_list()
         set_tomos_name= set_lists.get_set_tomos()
         set_ntomos = len(set_tomos_name)
-        index, offset = np.arange(set_ntomos), np.zeros(shape=set_ntomos, dtype=np.float)
+        index, offset = np.arange(set_ntomos), np.zeros(shape=set_ntomos, dtype=float)
         for key_1, props in zip(iter(props_dic.keys()), iter(props_dic.values())):
             plt.bar(index+.5*BAR_WIDTH, props, BAR_WIDTH, color=color_lists[key_1], bottom=offset,
                     label=klass_lbls[key_1])

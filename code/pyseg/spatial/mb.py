@@ -80,7 +80,7 @@ class CMCAnalyzer(object):
             x_m, x_M, y_m, y_M = self.__plane_bounds()
             X, Y = np.meshgrid(list(range(x_m, x_M)), list(range(y_m, y_M)))
             n = X.shape.sum()
-            cloud = np.zeros(shape=(n, 2), dtype=np.float)
+            cloud = np.zeros(shape=(n, 2), dtype=float)
             cloud[:, 0] = np.reshape(X, n)
             cloud[:, 1] = np.reshape(Y, n)
             return cloud
@@ -151,7 +151,7 @@ class CMCAnalyzer(object):
         # Initialization
         d_max = np.max(self.fnde(self.__cloud))
         samples = np.linspace(0, d_max*0.1, n)
-        fraction = np.zeros(shape=n, dtype=np.float)
+        fraction = np.zeros(shape=n, dtype=float)
         n_points_inv = 1.0 / float(len(self.__nnde))
 
         # Computation
@@ -279,7 +279,7 @@ class CMCAnalyzer(object):
         else:
             cloud_r = analyzer.get_cloud_coords(cloud_2d=False, coord=coord)
             cloud = self.__cloud
-        dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+        dists = np.zeros(shape=cloud.shape[0], dtype=float)
 
         # Shortest distance loop
         for i in range(len(dists)):
@@ -302,7 +302,7 @@ class CMCAnalyzer(object):
         else:
             cloud_r = analyzer.get_cloud_coords(cloud_2d=False, coord=coord)
             cloud = self.__cloud
-        dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+        dists = np.zeros(shape=cloud.shape[0], dtype=float)
 
         # Shortest distance loop
         for i in range(len(dists)):
@@ -345,7 +345,7 @@ class CMCAnalyzer(object):
         else:
             cloud_r = analyzer.get_cloud_coords(cloud_2d=False, coord=coord)
             cloud = self.__cloud
-        dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+        dists = np.zeros(shape=cloud.shape[0], dtype=float)
 
         # Computing crossed distances
         for i in range(len(dists)):
@@ -386,7 +386,7 @@ class CMCAnalyzer(object):
         x_min, x_max, y_min, y_max = self.__plane_bounds()
         N_p = cloud_2d_p.shape[0]
         N = cloud_2d_r.shape[0]
-        L_acc = np.zeros(shape=n, dtype=np.float)
+        L_acc = np.zeros(shape=n, dtype=float)
         # D = 1.0 / float(math.pi * N * (N-1))
         D = 1.0 / float(N*N)
 
@@ -536,7 +536,7 @@ class CMCAnalyzer(object):
 
             # Build coordinates
             ids = as_rand[0:n]
-            hold = np.zeros(shape=(n, 3), dtype=np.float)
+            hold = np.zeros(shape=(n, 3), dtype=float)
             hold[:, 0] = mb_ids[0][ids]
             hold[:, 1] = mb_ids[1][ids]
             hold[:, 2] = mb_ids[2][ids]
@@ -546,7 +546,7 @@ class CMCAnalyzer(object):
         elif mode == 'uniform-2d':
 
             x_m, x_M, y_m, y_M = self.__plane_bounds()
-            hold = np.zeros(shape=(n, 2), dtype=np.float)
+            hold = np.zeros(shape=(n, 2), dtype=float)
             hold[:, 0] = np.random.randint(x_m, x_M, n)
             hold[:, 1] = np.random.randint(y_m, y_M, n)
 
@@ -572,7 +572,7 @@ class CMCAnalyzer(object):
             w_cloud = self.compress_plane_2d(cloud, coord=coord)
         else:
             w_cloud = cloud
-        dists = np.zeros(shape=w_cloud.shape[0], dtype=np.float)
+        dists = np.zeros(shape=w_cloud.shape[0], dtype=float)
 
         # Shortest distance loop
         for i in range(len(dists)):
@@ -601,7 +601,7 @@ class CMCAnalyzer(object):
         else:
             w_cloud = cloud
         s_cloud = self.get_seg_cloud(comp_2d)
-        dists = np.zeros(shape=s_cloud.shape[0], dtype=np.float)
+        dists = np.zeros(shape=s_cloud.shape[0], dtype=float)
 
         # Shortest distance loop
         for i in range(len(dists)):
@@ -626,7 +626,7 @@ class CMCAnalyzer(object):
             w_cloud = self.compress_plane_2d(cloud, coord=coord)
         else:
             w_cloud = cloud
-        dists = np.zeros(shape=cloud.shape[0], dtype=np.float)
+        dists = np.zeros(shape=cloud.shape[0], dtype=float)
 
         # Farthest distance loop
         for i in range(len(dists)):
@@ -650,7 +650,7 @@ class CMCAnalyzer(object):
             return cloud
 
         if coord is not None:
-            cloud_2d = np.zeros(shape=(cloud.shape[0], 2), dtype=np.float)
+            cloud_2d = np.zeros(shape=(cloud.shape[0], 2), dtype=float)
             if coord == 0:
                 cloud_2d[:, 0] = cloud[:, 1]
                 cloud_2d[:, 1] = cloud[:, 2]
@@ -666,7 +666,7 @@ class CMCAnalyzer(object):
             b = np.max(mb_ids[1][:]) - np.min(mb_ids[1][:])
             c = np.max(mb_ids[2][:]) - np.min(mb_ids[2][:])
             ids = np.argsort(np.asarray((a, b, c)))
-            cloud_2d = np.zeros(shape=(cloud.shape[0], 2), dtype=np.float)
+            cloud_2d = np.zeros(shape=(cloud.shape[0], 2), dtype=float)
             cloud_2d[:, 0] = cloud[:, ids[2]]
             cloud_2d[:, 1] = cloud[:, ids[1]]
 
@@ -691,7 +691,7 @@ class CMCAnalyzer(object):
     # Interface for updating point cluster id lists from the cluster ser returned by Pyto
     def __set_ids(self, clust_set, list_key='kmeans'):
 
-        hl = np.zeros(shape=self.__cloud.shape[0], dtype=np.int)
+        hl = np.zeros(shape=self.__cloud.shape[0], dtype=int)
 
         for i, set in enumerate(clust_set):
             if set is not None:
@@ -720,7 +720,7 @@ class CMCAnalyzer(object):
         # c = np.max(mb_ids[2][:]) - np.min(mb_ids[2][:])
         # ids = np.argsort(np.asarray((a, b, c)))
         #
-        # cloud_2d = np.zeros(shape=(cloud.shape[0], 2), dtype=np.float)
+        # cloud_2d = np.zeros(shape=(cloud.shape[0], 2), dtype=float)
         # cloud_2d[:, 0] = cloud[:, ids[2]]
         # cloud_2d[:, 1] = cloud[:, ids[1]]
 

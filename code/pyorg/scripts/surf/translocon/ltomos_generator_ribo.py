@@ -197,7 +197,7 @@ for star_row in range(star.get_nrows()):
         sys.exit(-1)
 
     print('\t\tParticles loop..')
-    part_lut = np.zeros(shape=star_part.get_nrows(), dtype=np.bool)
+    part_lut = np.zeros(shape=star_part.get_nrows(), dtype=bool)
     part_coords = np.zeros(shape=(star_part.get_nrows(), 3), dtype=np.float32)
     for part_row in range(star_part.get_nrows()):
 
@@ -271,7 +271,7 @@ for star_row in range(star.get_nrows()):
         # Particle suppression on output STAR file
         for mic, rows in zip(iter(parts_mic.keys()), iter(parts_mic.values())):
             mic_coords = np.zeros(shape=(len(rows), 3), dtype=np.float32)
-            mic_lut = np.ones(shape=len(rows), dtype=np.bool)
+            mic_lut = np.ones(shape=len(rows), dtype=bool)
             for i, row in enumerate(rows):
                 mic_coords[i, :] = part_coords[row, :]
             for i, coord in enumerate(mic_coords):

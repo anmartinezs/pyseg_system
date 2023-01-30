@@ -149,12 +149,12 @@ class GraphsScalarMask(object):
         vertices = self.__ext_graph.get_vertices_list()
         vertices_gt = np.empty(shape=self.__ext_graph.get_nid(), dtype=object)
         n_verts = len(vertices)
-        ids_arr = (-2) * np.ones(shape=n_verts, dtype=np.int)
-        dists_arr = float('inf') * np.ones(shape=n_verts, dtype=np.float)
+        ids_arr = (-2) * np.ones(shape=n_verts, dtype=int)
+        dists_arr = float('inf') * np.ones(shape=n_verts, dtype=float)
         for v in vertices:
             vertices_gt[v.get_id()] = graph.add_vertex()
         edges = self.__ext_graph.get_edges_list()
-        weigths_arr = float('inf') * np.ones(shape=len(edges), dtype=np.float)
+        weigths_arr = float('inf') * np.ones(shape=len(edges), dtype=float)
         for i, e in enumerate(edges):
             graph.add_edge(vertices_gt[e.get_source_id()], vertices_gt[e.get_target_id()])
             weigths_arr[i] = self.__ext_graph.get_edge_length(e)
@@ -176,10 +176,10 @@ class GraphsScalarMask(object):
 
         # Filter extended graph according the result of the searches
         self.__ext_graph.add_prop(key=STR_EXT_ID,
-                                  type=disperse_io.TypesConverter.numpy_to_gt(np.int),
+                                  type=disperse_io.TypesConverter.numpy_to_gt(int),
                                   ncomp=1, def_val=0)
         self.__ext_graph.add_prop(key=STR_EXT_DIST,
-                                  type=disperse_io.TypesConverter.numpy_to_gt(np.float),
+                                  type=disperse_io.TypesConverter.numpy_to_gt(float),
                                   ncomp=1, def_val=0)
         key_id_id = self.__ext_graph.get_prop_id(STR_EXT_ID)
         key_id_dist = self.__ext_graph.get_prop_id(STR_EXT_DIST)
@@ -232,7 +232,7 @@ class GraphsScalarMask(object):
 #             error_msg = "Core graph does net exist, call gen_core_graph first."
 #             raise pexceptions.PySegInputError(expr='get_anchor_vertices (GraphsSurfMask)',
 #                                               msg=error_msg)
-#         lut = np.zeros(shape=self.__core_graph.get_nid(), dtype=np.bool)
+#         lut = np.zeros(shape=self.__core_graph.get_nid(), dtype=bool)
 #         anchors = list()
 #         for v in self.__core_graph.get_vertices_list():
 #             v_id = v.get_id()
@@ -260,13 +260,13 @@ class GraphsScalarMask(object):
 #                                               msg=error_msg)
 #
 #         # LUT initialization
-#         lut = np.ones(shape=self.__base_graph.get_nid(), dtype=np.bool)
+#         lut = np.ones(shape=self.__base_graph.get_nid(), dtype=bool)
 #         for v in self.__core_graph.get_vertices_list():
 #             lut[v.get_id()] = False
 #         vertices = self.__ext_graph.get_vertices_list()
 #         for v in vertices:
 #             lut[v.get_id()] = False
-#         lut_anchors = np.ones(shape=self.__base_graph.get_nid(), dtype=np.bool)
+#         lut_anchors = np.ones(shape=self.__base_graph.get_nid(), dtype=bool)
 #         if anchors is None:
 #             anchors = self.get_anchor_vertices()
 #         for a in anchors:
@@ -361,7 +361,7 @@ class GraphsScalarMask(object):
 #         ext_dist_key_id = self.__ext_graph.get_prop_id(STR_EXT_DIST)
 #         for v in self.__ext_graph.get_vertices_list():
 #             dist = self.__ext_graph.get_prop_entry_fast(ext_dist_key_id, v.get_id(),
-#                                                         1, np.float)[0]
+#                                                         1, float)[0]
 #             if dist > max_dist:
 #                 self.__ext_graph.remove_vertex(v)
 #
@@ -385,7 +385,7 @@ class GraphsScalarMask(object):
 #
 #         # Get GraphGT and anchors LUT
 #         graph = gp.GraphGT(graph_mcf).get_gt()
-#         lut = np.zeros(shape=graph_mcf.get_nid(), dtype=np.bool)
+#         lut = np.zeros(shape=graph_mcf.get_nid(), dtype=bool)
 #         rand_table = np.random.randint(0, len(anchors), graph_mcf.get_nid())
 #         for a in anchors:
 #             lut[a.get_id()] = True

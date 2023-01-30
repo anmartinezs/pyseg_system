@@ -113,7 +113,7 @@ rt_rot =  (0,0,-19)# (0,0,2),
 # Computes 4x4 rotation and translation matrix from the 3 Eulers angles (degrees) in Relion's convention
 # a translation vector
 def rot_trans_mat_relion(eu_angs, tr_vec):
-    mat = np.zeros(shape=(4, 4), dtype=np.float)
+    mat = np.zeros(shape=(4, 4), dtype=float)
     rot_mat = ps.globals.rot_mat_relion(eu_angs[0], eu_angs[1], eu_angs[2], deg=True)
     mat[:3, :3] = rot_mat
     mat[:3, 3] = tr_vec
@@ -156,7 +156,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True):
     cmas_computer = vtk.vtkCenterOfMass()
 
     # Box compensation
-    # box_orig = np.asarray((-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2]), dtype=np.float)
+    # box_orig = np.asarray((-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2]), dtype=float)
     box_tr = vtk.vtkTransform()
     box_tr.Translate(-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2])
 
@@ -222,7 +222,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True):
                 orig_x, orig_y, orig_z = peak.get_prop_val(XO_COL), peak.get_prop_val(YO_COL), peak.get_prop_val(ZO_COL)
             except KeyError:
                 orig_x, orig_y, orig_z = 0, 0, 0
-            tra_tr.Translate(coords+np.asarray((orig_x, orig_y, orig_z), dtype=np.float))
+            tra_tr.Translate(coords+np.asarray((orig_x, orig_y, orig_z), dtype=float))
         else:
             tra_tr.Translate(coords)
         tr_tra = vtk.vtkTransformPolyDataFilter()
@@ -238,7 +238,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True):
         cmas_computer.SetInputData(hold_poly)
         cmas_computer.SetUseScalarsAsWeights(False)
         cmas_computer.Update()
-        cmass.append(np.asarray(cmas_computer.GetCenter(), dtype=np.float))
+        cmass.append(np.asarray(cmas_computer.GetCenter(), dtype=float))
 
     # Apply changes
     appender.Update()
@@ -403,7 +403,7 @@ temp_poly = tomo_poly_iso(temp, tp_th, rt_flip)
 ps.disperse_io.save_vtp(temp_poly, out_dir+'/'+out_stem+'_temp.vtp')
 
 print('\tRender templates in the reference tomogram...')
-temp_rss = np.asarray(temp.shape, dtype=np.float) * tp_rsc
+temp_rss = np.asarray(temp.shape, dtype=float) * tp_rsc
 ref_poly, cmass = tomo_poly_peaks(tpeaks, temp_poly, (ROT_COL, TILT_COL, PSI_COL), temp_rss, rt_orig)
 cmass_poly = cloud_point_to_poly(cmass)
 

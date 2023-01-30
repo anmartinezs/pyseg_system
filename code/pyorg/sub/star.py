@@ -30,7 +30,7 @@ def relion_norm(tomo, mask=None):
 
     # Input parsing
     if mask is None:
-        mask = np.ones(shape=tomo.shape, dtype=np.bool)
+        mask = np.ones(shape=tomo.shape, dtype=bool)
 
     # Inversion
     hold_tomo = -1. * tomo
@@ -359,11 +359,11 @@ class Star(object):
                 x -= o_x
                 y -= o_y
                 z -= o_z
-            coords.append(np.asarray((x, y, z), dtype=np.float))
+            coords.append(np.asarray((x, y, z), dtype=float))
             if rots:
                 rho, tilt, psi = self.get_element('_rlnAngleRot', row), self.get_element('_rlnAngleTilt', row), \
                                  self.get_element('_rlnAnglePsi', row)
-                angs.append(np.asarray((rho, tilt, psi), dtype=np.float))
+                angs.append(np.asarray((rho, tilt, psi), dtype=float))
         if rots:
             return coords, angs
         else:
@@ -397,17 +397,17 @@ class Star(object):
     # sf: scale factor
     def scale_coords(self, sf):
         fsf = float(sf)
-        hold = np.asarray(self.get_column_data('_rlnCoordinateX'), dtype=np.float) * fsf
+        hold = np.asarray(self.get_column_data('_rlnCoordinateX'), dtype=float) * fsf
         self.set_column_data('_rlnCoordinateX', hold)
-        hold = np.asarray(self.get_column_data('_rlnCoordinateY'), dtype=np.float) * fsf
+        hold = np.asarray(self.get_column_data('_rlnCoordinateY'), dtype=float) * fsf
         self.set_column_data('_rlnCoordinateY', hold)
-        hold = np.asarray(self.get_column_data('_rlnCoordinateZ'), dtype=np.float) * fsf
+        hold = np.asarray(self.get_column_data('_rlnCoordinateZ'), dtype=float) * fsf
         self.set_column_data('_rlnCoordinateZ', hold)
-        hold = np.asarray(self.get_column_data('_rlnOriginX'), dtype=np.float) * fsf
+        hold = np.asarray(self.get_column_data('_rlnOriginX'), dtype=float) * fsf
         self.set_column_data('_rlnOriginX', hold)
-        hold = np.asarray(self.get_column_data('_rlnOriginY'), dtype=np.float) * fsf
+        hold = np.asarray(self.get_column_data('_rlnOriginY'), dtype=float) * fsf
         self.set_column_data('_rlnOriginY', hold)
-        hold = np.asarray(self.get_column_data('_rlnOriginZ'), dtype=np.float) * fsf
+        hold = np.asarray(self.get_column_data('_rlnOriginZ'), dtype=float) * fsf
         self.set_column_data('_rlnOriginZ', hold)
 
     # Checks if a column already exist
@@ -531,7 +531,7 @@ class Star(object):
         self.__rows = 0
         for key in hold_data:
             self.__data[key] = list()
-        ids_lut = np.zeros(shape=hold_rows, dtype=np.bool)
+        ids_lut = np.zeros(shape=hold_rows, dtype=bool)
         for idx in ids:
             try:
                 ids_lut[idx] = True
@@ -914,7 +914,7 @@ class Star(object):
         try:
             curr_gp = list(set(self.get_column_data('_rlnGroupNumber')))
             # print str(curr_gp)
-            nparts_gp = np.zeros(shape=len(curr_gp), dtype=np.int).tolist()
+            nparts_gp = np.zeros(shape=len(curr_gp), dtype=int).tolist()
             for row in range(self.get_nrows()):
                 gp = self.get_element('_rlnGroupNumber', row)
                 idx = curr_gp.index(gp)
@@ -923,7 +923,7 @@ class Star(object):
             try:
                 mics = self.get_column_data('_rlnImageName')
                 curr_gp = np.arange(len(mics)).tolist()
-                nparts_gp = np.zeros(shape=len(curr_gp), dtype=np.int).tolist()
+                nparts_gp = np.zeros(shape=len(curr_gp), dtype=int).tolist()
                 for row in range(self.get_nrows()):
                     mic = self.get_element('_rlnImageName', row)
                     nparts_gp[mics.index(mic)] += 1
@@ -933,10 +933,10 @@ class Star(object):
             self.add_column('_rlnGroupNumber', val=curr_gp[0])
 
         # Loop until the gathering is finished
-        lut_gp = np.arange(0, np.asarray(curr_gp, dtype=np.int).max()+1)
+        lut_gp = np.arange(0, np.asarray(curr_gp, dtype=int).max()+1)
         while len(set(curr_gp)) > 1:
             # Find the smallest group
-            min_ids = np.argsort(np.asarray(nparts_gp, dtype=np.int))
+            min_ids = np.argsort(np.asarray(nparts_gp, dtype=int))
             if (nparts_gp[min_ids[0]] > min_gp) or (len(min_ids) <= 1):
                 break
             # Find the pair to gather
@@ -950,7 +950,7 @@ class Star(object):
             nparts_gp.pop(min_ids[0])
 
         # Setting the groups
-        new_gp = np.zeros(shape=self.get_nrows(), dtype=np.int)
+        new_gp = np.zeros(shape=self.get_nrows(), dtype=int)
         for row in range(self.get_nrows()):
             old_gp = self.get_element('_rlnGroupNumber', row)
             new_gp[row] =  lut_gp[old_gp]
@@ -976,7 +976,7 @@ class Star(object):
         else:
             classes = self.get_column_data('_rlnClassNumber')
             class_ids = set(classes)
-            stars, classes = list(), np.asarray(classes, dtype=np.int)
+            stars, classes = list(), np.asarray(classes, dtype=int)
             keys = self.get_column_keys()
             for class_id in class_ids:
                 star = Star()
@@ -1115,7 +1115,7 @@ class Star(object):
                     if keep_pytom:
                         svol = rotate3d_pytom(svol_ref, phi=rot, psi=psi, the=tilt, center=ref_cent, order=2)
                     else:
-                        r3d_a.q = r3d_a.make_r_euler(angles=np.radians(np.asarray((rot, tilt, psi), dtype=np.float)),
+                        r3d_a.q = r3d_a.make_r_euler(angles=np.radians(np.asarray((rot, tilt, psi), dtype=float)),
                                                      mode='zyz_in_passive')
                         try:
                             svol = r3d_a.transformArray(svol_ref, origin=ref_cent, order=3, prefilter=True, mode='reflect')
@@ -1169,7 +1169,7 @@ class Star(object):
         if n_rows <= 0:
             return None
         svol = disperse_io.load_tomo(self.get_element('_rlnImageName', 0))
-        avg = np.zeros(shape=svol.shape, dtype=np.float)
+        avg = np.zeros(shape=svol.shape, dtype=float)
 
         # Particles loop
         count = 0
@@ -1212,7 +1212,7 @@ class Star(object):
             if pytom:
                 svol = rotate3d_pytom(svol, phi=-psi, psi=-rot, the=-tilt, center=svol_cent, order=2)
             else:
-                r3d_a.q = r3d_a.make_r_euler(angles=np.radians(np.asarray((rot, tilt, psi), dtype=np.float)),
+                r3d_a.q = r3d_a.make_r_euler(angles=np.radians(np.asarray((rot, tilt, psi), dtype=float)),
                                              mode='zyz_in_active')
                 # print(str(row) + ': ' + str((rot, tilt, psi)) + ' => ' + str(r3d_a.q))
                 try:

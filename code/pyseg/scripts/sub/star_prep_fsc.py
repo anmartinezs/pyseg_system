@@ -94,7 +94,7 @@ if set_groups:
     if set_halves:
         if not star.has_column('_rlnGroupNumber'):
             star.add_column('_rlnGroupNumber')
-        star.set_column_data('_rlnGroupNumber', np.ones(shape=star.get_nrows(), dtype=np.int))
+        star.set_column_data('_rlnGroupNumber', np.ones(shape=star.get_nrows(), dtype=int))
     else:
         if star.has_column('_rlnGroupNumber'):
             star.del_column('_rlnGroupNumber')

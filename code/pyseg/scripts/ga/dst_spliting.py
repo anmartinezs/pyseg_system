@@ -185,7 +185,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True, do_
     cmas_computer = vtk.vtkCenterOfMass()
 
     # Box compensation
-    # box_orig = np.asarray((-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2]), dtype=np.float)
+    # box_orig = np.asarray((-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2]), dtype=float)
     box_tr = vtk.vtkTransform()
     box_tr.Translate(-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2])
 
@@ -245,7 +245,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True, do_
         tra_tr = vtk.vtkTransform()
         if do_origin:
             orig_x, orig_y, orig_z = peak.get_prop_val(XO_COL), peak.get_prop_val(YO_COL), peak.get_prop_val(ZO_COL)
-            tra_tr.Translate(coords+np.asarray((orig_x, orig_y, orig_z), dtype=np.float))
+            tra_tr.Translate(coords+np.asarray((orig_x, orig_y, orig_z), dtype=float))
         else:
             tra_tr.Translate(coords)
         tr_tra = vtk.vtkTransformPolyDataFilter()
@@ -262,10 +262,10 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True, do_
             cmas_computer.SetInputData(hold_poly)
             cmas_computer.SetUseScalarsAsWeights(False)
             cmas_computer.Update()
-            cmass.append(np.asarray(cmas_computer.GetCenter(), dtype=np.float))
+            cmass.append(np.asarray(cmas_computer.GetCenter(), dtype=float))
         else:
             if do_origin:
-                cmass.append(coords+np.asarray((orig_x, orig_y, orig_z), dtype=np.float))
+                cmass.append(coords+np.asarray((orig_x, orig_y, orig_z), dtype=float))
             else:
                 cmass.append(coords)
 
@@ -384,7 +384,7 @@ def cmass_poly_dst(cmass, seg_poly):
         points.InsertNextPoint(p)
         verts.InsertNextCell(1)
         verts.InsertCellPoint(count)
-        dst = np.asarray(hold_p, dtype=np.float) - np.asarray(p, dtype=np.float)
+        dst = np.asarray(hold_p, dtype=float) - np.asarray(p, dtype=float)
         dst = np.sqrt((dst*dst).sum())
         dsts.InsertNextTuple((dst,))
         dsts_l.append(dst)
@@ -395,7 +395,7 @@ def cmass_poly_dst(cmass, seg_poly):
     poly.SetVerts(verts)
     poly.GetPointData().AddArray(dsts)
 
-    return poly, np.asarray(dsts_l, dtype=np.float)
+    return poly, np.asarray(dsts_l, dtype=float)
 
 ########################################################################################
 # MAIN ROUTINE
@@ -452,7 +452,7 @@ for (in_star, in_temp, in_mask, in_tomo) in zip(in_stars, in_temps, in_masks, in
 
 
     print('\tRender templates in the reference tomogram...')
-    temp_rss = np.asarray(temp.shape, dtype=np.float)
+    temp_rss = np.asarray(temp.shape, dtype=float)
     ref_poly, cmass = tomo_poly_peaks(tpeaks, temp_poly, (ROT_COL, TILT_COL, PSI_COL), temp_rss, rt_orig,
                                       do_cmass=tp_cmass)
     gc.collect()

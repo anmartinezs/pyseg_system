@@ -445,9 +445,9 @@ class ArcGraph(Graph):
 
         # Computing
         arcs = self.get_arcs_list()
-        l_max = np.zeros(shape=len(arcs), dtype=np.float)
+        l_max = np.zeros(shape=len(arcs), dtype=float)
         for i, a in enumerate(arcs):
-            hold = np.finfo(np.float).min
+            hold = np.finfo(float).min
             for v in a.get_vertices():
                 v_den = v.get_property(STR_DENSITY_VERTEX)
                 if v_den > hold:
@@ -459,7 +459,7 @@ class ArcGraph(Graph):
 
         # Adding/setting the property
         if self.__a_prop_info.is_already(STR_ARC_MAX_DENSITY) is None:
-            self.add_arc_property(STR_ARC_MAX_DENSITY, disperse_io.TypesConverter().numpy_to_gt(np.float))
+            self.add_arc_property(STR_ARC_MAX_DENSITY, disperse_io.TypesConverter().numpy_to_gt(float))
         if len(arcs) > 0:
             idx = arcs[0].is_property(STR_ARC_MAX_DENSITY)
             for i, a in enumerate(arcs):
@@ -561,7 +561,7 @@ class ArcGraph(Graph):
         densities /= densities.sum()
         arg = np.argsort(densities)
         densities_sort = densities[arg]
-        cdf = np.zeros(shape=densities.shape, dtype=np.float)
+        cdf = np.zeros(shape=densities.shape, dtype=float)
         for i in range(1, densities_sort.shape):
             cdf[i] = cdf[i-1] + densities_sort[i]
 

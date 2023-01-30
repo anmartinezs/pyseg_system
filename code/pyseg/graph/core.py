@@ -415,8 +415,8 @@ class Graph(metaclass=ABCMeta):
         self.__density = None
         # Edges are expressed in a Sparse Matrix
         npoints = self.__skel.GetNumberOfPoints()
-        self.__edges_c = sp.dok_matrix((npoints, npoints), dtype=np.int)
-        self.__edges_m = sp.dok_matrix((npoints, npoints), dtype=np.bool)
+        self.__edges_c = sp.dok_matrix((npoints, npoints), dtype=int)
+        self.__edges_m = sp.dok_matrix((npoints, npoints), dtype=bool)
         self.__edges = list()
         self.__vertices = np.empty(shape=npoints, dtype=object)
         # For graph properties
@@ -880,7 +880,7 @@ class Graph(metaclass=ABCMeta):
         graph = gt.Graph(directed=False)
         for v in self.__vertices:
             graph.add_vertex(v)
-        weights = np.zeros(shape=len(self.__edges), dtype=np.float)
+        weights = np.zeros(shape=len(self.__edges), dtype=float)
         for i, e in enumerate(self.__edges):
             graph.add_edge(e.get_start(), e.get_end())
             weights[i] = e.get_length() * resolution

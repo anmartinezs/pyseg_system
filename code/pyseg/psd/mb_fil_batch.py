@@ -137,11 +137,11 @@ for (input_tomo, input_seg, nsig) in zip(input_tomo_l, input_seg_l, disp_nsig):
 
     print('\tComputing distance, mask and segmentation tomograms...')
     tomod = ps.disperse_io.seg_dist_trans(segh == SEG_MB) * res
-    maskh = np.ones(shape=segh.shape, dtype=np.int)
+    maskh = np.ones(shape=segh.shape, dtype=int)
     maskh[DILATE_NITER:-DILATE_NITER, DILATE_NITER:-DILATE_NITER, DILATE_NITER: -DILATE_NITER] = 0
-    mask = np.asarray(tomod > (max_len + mb_dst_off + 2*DILATE_NITER*res), dtype=np.int)
+    mask = np.asarray(tomod > (max_len + mb_dst_off + 2*DILATE_NITER*res), dtype=int)
     maskh += mask
-    mask = np.asarray(maskh > 0, dtype=np.float)
+    mask = np.asarray(maskh > 0, dtype=float)
     input_msk = output_dir + '/' + stem + '_mask.fits'
     ps.disperse_io.save_numpy(mask.transpose(), input_msk)
     if mb_dst_off > 0:

@@ -244,7 +244,7 @@ for in_plist_xml, in_ref in zip(in_plist_xml_l, in_ref_l):
         mask = disperse_io.load_tomo(in_ref)
     else:
         print('\t\tGenerating the mask...')
-        mask = np.ones(shape=in_ref, dtype=np.bool)
+        mask = np.ones(shape=in_ref, dtype=bool)
 
 
     if in_plist_xml is None:
@@ -285,7 +285,7 @@ for in_plist_xml, in_ref in zip(in_plist_xml_l, in_ref_l):
     # uni.save_sparse(out_dir+'/'+out_stem+'_'+pl_stem+'_dense.mrc', mask=True)
     # ps.disperse_io.save_numpy(uni.get_mask(), out_dir+'/'+out_stem+'_'+pl_stem+'_mask.mrc')
     uni.save_random_instance(out_dir+'/'+out_stem+'_'+pl_stem+'_rnd.mrc')
-    # hold_iso = simulator.gen_rand_in_mask_tomo(1, np.ones(shape=(400,400,400), dtype=np.bool))
+    # hold_iso = simulator.gen_rand_in_mask_tomo(1, np.ones(shape=(400,400,400), dtype=bool))
     # ps.disperse_io.save_numpy(hold_iso, out_dir+'/'+out_stem+'_'+pl_stem+'_rnd_iso.mrc')
     uni.save_random_instance(out_dir+'/'+out_stem+'_'+pl_stem+'_rnd_pts.mrc', pts=True)
 

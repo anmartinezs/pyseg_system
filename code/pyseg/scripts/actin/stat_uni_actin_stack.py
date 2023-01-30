@@ -158,7 +158,7 @@ for (in_tomo, th) in zip(in_tomos, in_ths):
         mask = tomo > 0
     else:
         tomo_bin = tomo > 0
-        mask = np.ones(shape=tomo_bin.shape, dtype=np.bool)
+        mask = np.ones(shape=tomo_bin.shape, dtype=bool)
     out_dir = output_dir + '/' + f_stem
     os.system('mkdir ' + out_dir)
 

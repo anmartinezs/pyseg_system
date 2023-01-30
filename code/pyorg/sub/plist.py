@@ -352,12 +352,12 @@ class TomoPeaks(object):
             error_msg = 'Input tomgram must have 3 dimensions.'
             raise pexceptions.PySegInputError(expr='__init__ (TomoPeaks)', msg=error_msg)
         if mask is None:
-            self.__mask = np.ones(shape=shape, dtype=np.bool)
+            self.__mask = np.ones(shape=shape, dtype=bool)
         else:
             if (not isinstance(mask, np.ndarray)) or (mask.shape != shape):
                 error_msg = 'Input tomgram must have 3 dimensions.'
                 raise pexceptions.PySegInputError(expr='__init__ (TomoPeaks)', msg=error_msg)
-            self.__mask = mask.astype(np.bool)
+            self.__mask = mask.astype(bool)
         self.__name = str(name)
         self.__peaks = list()
 
@@ -731,7 +731,7 @@ class TomoPeaks(object):
             peak.set_prop_val(key_r, (rot, tilt, psi))
             # Checking the rotation angles are correctly estimated in Relion format
             M = rot_mat_relion(rot, tilt, psi, deg=True)
-            v_h = np.asarray(M * n.reshape(3, 1), dtype=np.float).reshape(3)
+            v_h = np.asarray(M * n.reshape(3, 1), dtype=float).reshape(3)
             err = math.sqrt(((v_h - zv)*(v_h - zv)).sum())
             if err > V_EPS:
                 print('WARNING (vect_rotation_ref): (2) rotated vector ' + str(v_h) +' does not fit reference vector ' + str(zv) + ' (EPS=' + str(err) + ')')
@@ -1541,7 +1541,7 @@ class ParticleList(object):
                     tpeaks.add_prop('Shift', 3, dtype=np.float32)
                     tpeaks.add_prop('Wedge', 2, dtype=np.float32)
                     tpeaks.add_prop('Score', 1, dtype=np.float32)
-                    tpeaks.add_prop('Class', 1, dtype=np.int)
+                    tpeaks.add_prop('Class', 1, dtype=int)
                     tpeaks.add_prop('Tomogram', 1, dtype=str)
                 tpeaks.set_peak_prop(pid, 'Filename', fname)
                 tpeaks.set_peak_prop(pid, 'Rotation', (phi, psi, the))
@@ -1823,7 +1823,7 @@ class ParticleList(object):
                         tpeaks.add_prop('Shift', 3, dtype=np.float32)
                         tpeaks.add_prop('Wedge', 2, dtype=np.float32)
                         tpeaks.add_prop('Score', 1, dtype=np.float32)
-                        tpeaks.add_prop('Class', 1, dtype=np.int)
+                        tpeaks.add_prop('Class', 1, dtype=int)
                         tpeaks.add_prop('Tomogram', 1, dtype=str)
                     tpeaks.set_peak_prop(pid, 'Filename', fname)
                     tpeaks.set_peak_prop(pid, 'Rotation', (phi, psi, the))

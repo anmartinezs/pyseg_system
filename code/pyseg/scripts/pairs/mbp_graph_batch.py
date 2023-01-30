@@ -123,9 +123,9 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
     print('\tComputing masks and segmentation tomograms...')
     tomod_pst = (ps.disperse_io.seg_dist_trans(seg==SYN_PST_LBL)*res) < (max_len_psd + 2*MSK_OFF*res)
     tomod_pre = (ps.disperse_io.seg_dist_trans(seg==SYN_PRE_LBL)*res) < (max_len_az + 2*MSK_OFF*res)
-    tomoh = np.zeros(shape=seg.shape, dtype=np.bool)
+    tomoh = np.zeros(shape=seg.shape, dtype=bool)
     tomoh[MSK_OFF:-MSK_OFF, MSK_OFF:-MSK_OFF, MSK_OFF:-MSK_OFF] = True
-    mask = ((tomoh & (tomod_pst | tomod_pre)) == False).astype(np.float)
+    mask = ((tomoh & (tomod_pst | tomod_pre)) == False).astype(float)
     input_msk = output_dir + '/' + f_stem_pkl + '_mask.fits'
     ps.disperse_io.save_numpy(mask.transpose(), input_msk)
     mask = mask == False
@@ -209,7 +209,7 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
         print('\t\tProperty used: ' + prop_topo)
         graph.set_pair_prop(prop_topo)
     try:
-        graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=np.int), v_den=v_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_den, dtype=int), v_den=v_den,
                                      v_prop=v_prop, v_mode=v_mode)
     except ps.pexceptions.PySegInputWarning as e:
         print('WARNING: graph density simplification failed:')
@@ -221,7 +221,7 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_pst, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -232,7 +232,7 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_pre, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -243,7 +243,7 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_psd, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -254,7 +254,7 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_az, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))
@@ -265,7 +265,7 @@ for (row, in_tomor, in_seg) in zip(list(range(star.get_ncols())), in_tomor_l, in
     if nepv > ve_ratio:
         e_den = nvv * ve_ratio
         hold_e_prop = e_prop
-        graph.graph_density_simp_ref(mask=np.asarray(mask_clf, dtype=np.int), e_den=e_den,
+        graph.graph_density_simp_ref(mask=np.asarray(mask_clf, dtype=int), e_den=e_den,
                                      e_prop=hold_e_prop, e_mode=e_mode, fit=True)
     else:
         print('\tWARNING: demanded ratio ' + str(nepv) + ' could not be achieved (current is ' + str(nepv))

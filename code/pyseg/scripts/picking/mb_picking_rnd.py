@@ -139,7 +139,7 @@ for in_mic in mic_dic.keys():
     if len(mb_ids[0]) > 1:
         ids_rnd = np.random.randint(0, len(mb_ids[0])-1, n_samp)
     else:
-        ids_rnd = np.asarray((0,), dtype=np.int)
+        ids_rnd = np.asarray((0,), dtype=int)
 
     print('\t-Random sampling with the membrane...')
     coords = list()

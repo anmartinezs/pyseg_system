@@ -60,7 +60,7 @@ def do_tree_gen(input_dir, output_dir, w_prop=None, av_mode=False, ed_mode=True,
     if verbose:
         print('\tGetting the patches')
     ext_id_p = graph_gt.vertex_properties[STR_EXT_ID].get_array()
-    lut = np.zeros(shape=graph_mcf.get_nid(), type=np.int)
+    lut = np.zeros(shape=graph_mcf.get_nid(), type=int)
     rand_arr = np.random.randint(1, graph_mcf.get_nid()+1, ext_id_p.shape[0])
     rand_id_p = np.zeros
 

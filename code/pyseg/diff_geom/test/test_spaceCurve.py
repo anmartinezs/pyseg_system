@@ -21,7 +21,7 @@ class TestSpaceCurve(TestCase):
 
         # Curve initialization (cos(t), sin(t), sqrt(t))
         t = np.linspace(L_BOUND, U_BOUND, N_SAMPLES)
-        samp_3d = np.zeros(shape=(len(t), 3), dtype=np.float)
+        samp_3d = np.zeros(shape=(len(t), 3), dtype=float)
         # samp_3d[:, 0], samp_3d[:, 1], samp_3d[:, 2] = np.cos(t), np.sin(t), np.sqrt(t)
         # samp_3d[:, 0], samp_3d[:, 1], samp_3d[:, 2] = 3*np.cos(3*t)+2, 3*np.sin(t)+2, np.sqrt(t+1.)
         samp_3d[:, 0], samp_3d[:, 1], samp_3d[:, 2] = np.cos(t), np.sin(t), np.ones(shape=len(t))

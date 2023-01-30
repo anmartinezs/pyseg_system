@@ -68,7 +68,7 @@ class GraphCluster(object):
         # Initialization
         nid = self.__graph_mcf.get_nid()
         self.__vertices = np.zeros(shape=nid, dtype=gt.Vertex)
-        self.__labels = (-1) * np.ones(shape=nid, dtype=np.int)
+        self.__labels = (-1) * np.ones(shape=nid, dtype=int)
         self.__edges = np.zeros(shape=nid, dtype=gt.Edge)
         self.__arcs = np.zeros(shape=nid, dtype=list)
         self.__geometries = np.zeros(shape=nid, dtype=geometry.GeometryMCF)
@@ -111,13 +111,13 @@ class GraphCluster(object):
                 self.__geometries[v_id] = vertex.get_geometry()
         self.__graph_gt.vertex_properties[DPSTR_CELL] = self.__graph_gt.new_vertex_property('int')
         self.__graph_gt.vertex_properties[DPSTR_CELL].get_array()[:] = np.asarray(v_id_arr,
-                                                                                  dtype=np.int)
+                                                                                  dtype=int)
         self.__graph_gt.vertex_properties[self.__vw_prop] = self.__graph_gt.new_vertex_property(vw_prop_dtype)
         self.__graph_gt.vertex_properties[self.__vw_prop].get_array()[:] = np.asarray(vw_prop_arr,
-                                                                                      dtype=np.int)
+                                                                                      dtype=int)
 
         # Label's lut
-        self.__lbl_lut = np.ones(shape=self.__labels.max(), dtype=np.int)
+        self.__lbl_lut = np.ones(shape=self.__labels.max(), dtype=int)
         for i, v in enumerate(self.__graph_gt.vertices()):
             v_id = graph_gt.vertex_properties[DPSTR_CELL][v]
             self.__lbl_lut[self.__labels[v_id]] = v_id

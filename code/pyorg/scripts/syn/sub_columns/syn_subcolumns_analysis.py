@@ -125,7 +125,7 @@ def compute_pvals(exp_med, sims):
 
 # Check if a set of particles (rows) are aligned from the number of neighbours
 def are_aligned(neighs, mask):
-    aligns = np.zeros(shape=len(neighs), dtype=np.bool)
+    aligns = np.zeros(shape=len(neighs), dtype=bool)
     for i, p_neigh in enumerate(neighs):
         if ((p_neigh[mask]>0).sum()) > 0:
             aligns[i] = True
@@ -650,11 +650,11 @@ os.makedirs(out_lists_dir)
 print('\t\t-Gathering tomogram simulations: ')
 tot_nc, tot_nc12, tot_nc13, tot_vol, tot_ves, tot_teth = 0, 0, 0, 0, 0, 0
 tot_occ, tot_nc_a12, tot_areas = 0, 0, 0
-ncs_sims = np.zeros(shape=p_nsims, dtype=np.float)
-den_sims = np.zeros(shape=p_nsims, dtype=np.float)
-denv_sims = np.zeros(shape=p_nsims, dtype=np.float)
-dent_sims = np.zeros(shape=p_nsims, dtype=np.float)
-occ_sims = np.zeros(shape=p_nsims, dtype=np.float)
+ncs_sims = np.zeros(shape=p_nsims, dtype=float)
+den_sims = np.zeros(shape=p_nsims, dtype=float)
+denv_sims = np.zeros(shape=p_nsims, dtype=float)
+dent_sims = np.zeros(shape=p_nsims, dtype=float)
+occ_sims = np.zeros(shape=p_nsims, dtype=float)
 for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     for i in range(p_nsims):
         ncs_sims[i] += nc_sim[i]
@@ -759,11 +759,11 @@ print('\t\t-Gathering tomogram simulations: ')
 tot_ctrl_nc, tot_ctrl_nc12, tot_ctrl_nc13, tot_ctrl_vol, tot_ctrl_ves, tot_ctrl_teth = 0, 0, 0, 0, 0, 0
 tot_stim_nc, tot_stim_nc12, tot_stim_nc13, tot_stim_vol, tot_stim_ves, tot_stim_teth = 0, 0, 0, 0, 0, 0
 tot_ctrl_occ, tot_stim_occ, nc_a12_ctrl, nc_a12_stim, tot_ctrl_areas, tot_stim_areas = 0, 0, 0, 0, 0, 0
-ncs_ctrl_sims, ncs_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-den_ctrl_sims, den_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-denv_ctrl_sims, denv_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-dent_ctrl_sims, dent_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
-occ_ctrl_sims, occ_stim_sims = np.zeros(shape=p_nsims, dtype=np.float), np.zeros(shape=p_nsims, dtype=np.float)
+ncs_ctrl_sims, ncs_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+den_ctrl_sims, den_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+denv_ctrl_sims, denv_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+dent_ctrl_sims, dent_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
+occ_ctrl_sims, occ_stim_sims = np.zeros(shape=p_nsims, dtype=float), np.zeros(shape=p_nsims, dtype=float)
 for tkey, nc_sim in zip(iter(tomos_nc_sims.keys()), iter(tomos_nc_sims.values())):
     tkey_hold = os.path.split(tkey)[1].split('_')
     tkey_stem = tkey_hold[1] + '_' + tkey_hold[2]

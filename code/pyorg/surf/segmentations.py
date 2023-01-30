@@ -460,7 +460,7 @@ class TomoOMSegmentations(object):
         Compute the volume of the whole tomogram (um**3)
         :return: a float value
         """
-        return np.asarray(self.__lbl_voi_mb.shape, dtype=np.float).prod() \
+        return np.asarray(self.__lbl_voi_mb.shape, dtype=float).prod() \
                * self.__res * self.__res * self.__res * NM3_TO_UM3
 
     # EXTERNAL FUNCTIONALITY AREA

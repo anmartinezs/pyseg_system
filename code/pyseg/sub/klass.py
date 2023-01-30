@@ -224,7 +224,7 @@ def pr_load_parts(pr_id, p_ids, mask, star, low_sg, rln_norm, avg_norm, rad_3D, 
         low_sg_f = ibin * float(low_sg)
     else:
         low_sg_f = float(low_sg)
-    svol_sp = np.asarray(mask.shape, dtype=np.int)
+    svol_sp = np.asarray(mask.shape, dtype=int)
     svol_sp2 = int(.5 * svol_sp[0])
     svol_cent = np.asarray((svol_sp2, svol_sp2, svol_sp2), dtype=np.float32)
     averager = RadialAvg3D(svol_sp, axis='z')
@@ -397,7 +397,7 @@ def pr_exemplars_cc(pr_id, p_ids, ex_temps, mask, star, low_sg, rln_norm, avg_no
                     out_dir, exs_cc):
 
     # Initialization
-    svol_sp = np.asarray(mask.shape, dtype=np.int)
+    svol_sp = np.asarray(mask.shape, dtype=int)
     svol_sp2 = int(.5 * svol_sp[0])
     svol_cent = np.asarray((svol_sp2, svol_sp2, svol_sp2), dtype=np.float32)
     low_sg_f = float(low_sg)
@@ -678,7 +678,7 @@ class ClassStar(object):
             raise pexceptions.PySegInputError(expr='load_particles (ClassStar)', msg=error_msg)
         if binf is not None:
             mask = sp.ndimage.zoom(mask, ibin, order=3, mode='constant', cval=0.0, prefilter=True)
-        svol_sp = np.asarray(mask.shape, dtype=np.int)
+        svol_sp = np.asarray(mask.shape, dtype=int)
         if (len(svol_sp) != 3) or (svol_sp[0] != svol_sp[1]) or (svol_sp[1] != svol_sp[2]) or (svol_sp[0]%2 != 0):
             error_msg = 'Input mask must be a 3D cube with even dimension!'
             raise pexceptions.PySegInputError(expr='load_particles (ClassStar)', msg=error_msg)
@@ -705,11 +705,11 @@ class ClassStar(object):
 
         # Loading particles loop (Parallel)
         if npr <= 1:
-            pr_load_parts(-1, np.arange(npart, dtype=np.int), mask, self.__star, float(low_sg), rln_norm,  avg_norm, rad_3D,
+            pr_load_parts(-1, np.arange(npart, dtype=int), mask, self.__star, float(low_sg), rln_norm,  avg_norm, rad_3D,
                           debug_dir, ref_dir, direct_rec,
                           particles_sh, masks_sh, binf)
         else:
-            spl_ids = np.array_split(np.arange(npart, dtype=np.int), npr)
+            spl_ids = np.array_split(np.arange(npart, dtype=int), npr)
             for pr_id in range(npr):
                 pr = mp.Process(target=pr_load_parts, args=(pr_id, spl_ids[pr_id], mask, self.__star, float(low_sg),
                                                             rln_norm, avg_norm, rad_3D, debug_dir, ref_dir, direct_rec,
@@ -727,7 +727,7 @@ class ClassStar(object):
             gc.collect()
 
         # Set class variables from multiprocess shared objects
-        self.__mask_gl = np.ones(shape=(part_h, part_r), dtype=np.bool)
+        self.__mask_gl = np.ones(shape=(part_h, part_r), dtype=bool)
         for row in range(npart):
             hold_particle, hold_mask = np.zeros(shape=(part_h, part_r), dtype=np.float32), \
                                        np.zeros(shape=(part_h, part_r), dtype=np.float32)
@@ -854,7 +854,7 @@ class ClassStar(object):
         # Set class variable for moments
         self.__momes = np.ones(shape=npart, dtype=object)
         for i in range(npart):
-            self.__momes[i] = np.asarray(shared_mat[i:i+nfeat], dtype=np.float)
+            self.__momes[i] = np.asarray(shared_mat[i:i+nfeat], dtype=float)
         # self.__momes = np.frombuffer(shared_mat.get_obj(), dtype=np.float32).reshape(nfeat, npart)
 
     def build_vectors(self):
@@ -907,9 +907,9 @@ class ClassStar(object):
                                         method='ltsa')
 
         # Training
-        X = np.zeros(shape=(self.__momes.shape[0], self.__momes[0].shape[0]), dtype=np.float)
+        X = np.zeros(shape=(self.__momes.shape[0], self.__momes[0].shape[0]), dtype=float)
         for i in range(self.__momes.shape[0]):
-            X[i, :] = np.asarray(self.__momes[i], dtype=np.float)
+            X[i, :] = np.asarray(self.__momes[i], dtype=float)
         ml.fit(X)
 
         # Transformation
@@ -1031,9 +1031,9 @@ class ClassStar(object):
                                   max_iter=max_iter,
                                   affinity='euclidean',
                                   preference=preference)
-            X = np.zeros(shape=(self.__momes.shape[0], self.__momes[0].shape[0]), dtype=np.float)
+            X = np.zeros(shape=(self.__momes.shape[0], self.__momes[0].shape[0]), dtype=float)
             for i in range(self.__momes.shape[0]):
-                X[i, :] = np.asarray(self.__momes[i], dtype=np.float)
+                X[i, :] = np.asarray(self.__momes[i], dtype=float)
             aff.fit(X)
         elif mode_in == 'vectors':
             aff = AffinityPropagation(damping=damping,
@@ -1045,7 +1045,7 @@ class ClassStar(object):
         if aff.n_iter_ >= max_iter:
             print('WARNING: affinity_propagation (ClassStar): AP reached the maximum iterations (' + str(max_iter) + \
                 ') without converging, its results might be meaningless!')
-        lbls, centers = np.asarray(aff.labels_, dtype=np.int), np.asarray(aff.cluster_centers_indices_, dtype=np.int)
+        lbls, centers = np.asarray(aff.labels_, dtype=int), np.asarray(aff.cluster_centers_indices_, dtype=int)
         class_ids = np.asarray(list(set(lbls)))
         n_classes = len(class_ids)
 
@@ -1188,9 +1188,9 @@ class ClassStar(object):
         if mode_in == 'ncc_2dz':
             X = lin_map(self.__cc, lb=1., ub=0.)
         elif mode_in == 'moments':
-            X = np.zeros(shape=(self.__momes.shape[0], self.__momes[0].shape[0]), dtype=np.float)
+            X = np.zeros(shape=(self.__momes.shape[0], self.__momes[0].shape[0]), dtype=float)
             for i in range(self.__momes.shape[0]):
-                X[i, :] = np.asarray(self.__momes[i], dtype=np.float)
+                X[i, :] = np.asarray(self.__momes[i], dtype=float)
         else:
             X = self.__vectors
         conn = None
@@ -1204,7 +1204,7 @@ class ClassStar(object):
             else:
                 agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage, affinity='precomputed')
         agg.fit(X)
-        lbls = np.asarray(agg.labels_, dtype=np.int)
+        lbls = np.asarray(agg.labels_, dtype=int)
         class_ids = np.asarray(list(set(lbls)))
         n_classes = len(class_ids)
 
@@ -1246,7 +1246,7 @@ class ClassStar(object):
         klass_cent = self.__star.get_column_data('_psAPCenter')
         klass_ids = set(klass_col)
         hold_particles = np.zeros(shape=len(klass_ids), dtype=object)
-        hold_row_ids = np.zeros(shape=len(klass_ids), dtype=np.int)
+        hold_row_ids = np.zeros(shape=len(klass_ids), dtype=int)
         d_parts, d_count = dict(), dict()
         for k_id in klass_ids:
             d_parts[k_id] = np.zeros(shape=self.__particles[0].shape, dtype=self.__particles[0].dtype)
@@ -1289,7 +1289,7 @@ class ClassStar(object):
         # AG algorithm
         agg = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage, affinity='euclidean')
         agg.fit(vectors)
-        lbls = np.asarray(agg.labels_, dtype=np.int)
+        lbls = np.asarray(agg.labels_, dtype=int)
         class_ids = np.asarray(list(set(lbls)))
         n_classes = len(class_ids)
 
@@ -1324,7 +1324,7 @@ class ClassStar(object):
         # Kmeans algorithm
         kms = KMeans(n_clusters=n_clusters)
         kms.fit(self.__vectors)
-        lbls = np.asarray(kms.labels_, dtype=np.int)
+        lbls = np.asarray(kms.labels_, dtype=int)
         class_ids = np.asarray(list(set(lbls)))
         n_classes = len(class_ids)
 
@@ -1381,7 +1381,7 @@ class ClassStar(object):
             for k_id in list(self.__ap_classes.keys()):
                 d_parts[k_id] = np.zeros(shape=self.__particles[0].shape, dtype=self.__particles[0].dtype)
                 d_count[k_id] = 0
-                d_mask[k_id] = np.ones(shape=self.__masks[0].shape, dtype=np.bool)
+                d_mask[k_id] = np.ones(shape=self.__masks[0].shape, dtype=bool)
             for i, k_id in enumerate(klass_col):
                 d_parts[k_id] += self.__particles[i]
                 d_count[k_id] += 1
@@ -1401,7 +1401,7 @@ class ClassStar(object):
         self.__ap_ref_cc = dict()
         for k_id in list(self.__ap_classes.keys()):
             particle_ref, mask_ref = particles_ref[k_id], masks_ref[k_id]
-            hold_ccs = np.zeros(shape=len(self.__ap_classes[k_id]), dtype=np.float)
+            hold_ccs = np.zeros(shape=len(self.__ap_classes[k_id]), dtype=float)
             for i, row in enumerate(self.__ap_classes[k_id]):
                 # Extract the particle information
                 hold_particle, hold_mask = self.__particles[row], self.__masks[row]
@@ -1445,7 +1445,7 @@ class ClassStar(object):
             for k_id in list(self.__ap_classes.keys()):
                 d_parts[k_id] = np.zeros(shape=img_zero.shape, dtype=imgs_dir.dtype)
                 d_count[k_id] = 0
-                d_mask[k_id] = np.ones(shape=mask_2d.shape, dtype=np.bool)
+                d_mask[k_id] = np.ones(shape=mask_2d.shape, dtype=bool)
             for i, k_id in enumerate(klass_col):
                 in_fname = imgs_dir + '/particle_' + str(i) + '.npy'
                 hold_particle = np.load(in_fname)
@@ -1469,7 +1469,7 @@ class ClassStar(object):
         self.__ap_ref_cc = dict()
         for k_id in list(self.__ap_classes.keys()):
             particle_ref, mask_ref = particles_ref[k_id], masks_ref[k_id]
-            hold_ccs = np.zeros(shape=len(self.__ap_classes[k_id]), dtype=np.float)
+            hold_ccs = np.zeros(shape=len(self.__ap_classes[k_id]), dtype=float)
             for i, row in enumerate(self.__ap_classes[k_id]):
                 # Extract the particle information
                 in_fname = imgs_dir + '/particle_' + str(row) + '.npy'
@@ -1576,7 +1576,7 @@ class ClassStar(object):
             for row, k_id in enumerate(klass_col):
                 d_rows[k_id].append(row)
                 d_nparts[k_id] += 1
-            rows_to_del, d_fnparts, del_mask = list(), dict(), np.ones(shape=len(self.__particles), dtype=np.bool)
+            rows_to_del, d_fnparts, del_mask = list(), dict(), np.ones(shape=len(self.__particles), dtype=bool)
             for k_id in klass_ids:
                 if d_nparts[k_id] < th:
                     rows_to_del += d_rows[k_id]
@@ -1621,7 +1621,7 @@ class ClassStar(object):
             for row, k_id in enumerate(klass_col):
                 d_rows[k_id].append(row)
                 d_nparts[k_id] += 1
-            rows_to_del, d_fnparts, del_mask = list(), dict(), np.ones(shape=len(self.__particles), dtype=np.bool)
+            rows_to_del, d_fnparts, del_mask = list(), dict(), np.ones(shape=len(self.__particles), dtype=bool)
             for k_id, klass in zip(list(self.__ap_classes.keys()), list(self.__ap_classes.values())):
                 d_fnparts[k_id] = 0
                 for j, row in enumerate(klass):
@@ -1728,7 +1728,7 @@ class ClassStar(object):
             klass_ids = set(klass_col)
             d_parts, d_count = dict(), dict()
             for k_id in klass_ids:
-                d_parts[k_id] = np.zeros(shape=img_zero.shape, dtype=np.float)
+                d_parts[k_id] = np.zeros(shape=img_zero.shape, dtype=float)
                 d_count[k_id] = 0
             for row, k_id in enumerate(klass_col):
                 in_fname = imgs_dir + '/particle_' + str(row) + '.npy'
@@ -1895,7 +1895,7 @@ class ClassStar(object):
         if not isinstance(mask, np.ndarray):
             error_msg = 'Input mask must a ndarray!'
             raise pexceptions.PySegInputError(expr='load_particles (ClassStar)', msg=error_msg)
-        svol_sp = np.asarray(mask.shape, dtype=np.int)
+        svol_sp = np.asarray(mask.shape, dtype=int)
         if (len(svol_sp) != 3) or (svol_sp[0] != svol_sp[1]) or (svol_sp[1] != svol_sp[2]) or (svol_sp[0]%2 != 0):
             error_msg = 'Input mask must be a 3D cube with even dimension!'
             raise pexceptions.PySegInputError(expr='load_particles (ClassStar)', msg=error_msg)
@@ -1966,7 +1966,7 @@ class ClassStar(object):
         if not isinstance(mask, np.ndarray):
             error_msg = 'Input mask must a ndarray!'
             raise pexceptions.PySegInputError(expr='load_particles (ClassStar)', msg=error_msg)
-        svol_sp = np.asarray(mask.shape, dtype=np.int)
+        svol_sp = np.asarray(mask.shape, dtype=int)
         if (len(svol_sp) != 3) or (svol_sp[0] != svol_sp[1]) or (svol_sp[1] != svol_sp[2]) or (svol_sp[0]%2 != 0):
             error_msg = 'Input mask must be a 3D cube with even dimension!'
             raise pexceptions.PySegInputError(expr='load_particles (ClassStar)', msg=error_msg)
@@ -1994,7 +1994,7 @@ class ClassStar(object):
                           debug_dir, ref_dir, direct_rec,
                           particles_sh, masks_sh)
         else:
-            spl_ids = np.array_split(np.arange(row_ids, dtype=np.int), npr)
+            spl_ids = np.array_split(np.arange(row_ids, dtype=int), npr)
             for pr_id in range(npr):
                 pr = mp.Process(target=pr_load_parts, args=(pr_id, spl_ids[pr_id], mask, self.__star, float(low_sg),
                                                             rln_norm, avg_norm, rad_3D, debug_dir, ref_dir, direct_rec,

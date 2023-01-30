@@ -150,7 +150,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True, do_
     cmas_computer = vtk.vtkCenterOfMass()
 
     # Box compensation
-    # box_orig = np.asarray((-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2]), dtype=np.float)
+    # box_orig = np.asarray((-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2]), dtype=float)
     box_tr = vtk.vtkTransform()
     box_tr.Translate(-.5*temp_shape[0], -.5*temp_shape[1], -.5*temp_shape[2])
 
@@ -210,7 +210,7 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True, do_
         tra_tr = vtk.vtkTransform()
         if do_origin:
             orig_x, orig_y, orig_z = peak.get_prop_val(XO_COL), peak.get_prop_val(YO_COL), peak.get_prop_val(ZO_COL)
-            tra_tr.Translate(coords+np.asarray((orig_x, orig_y, orig_z), dtype=np.float))
+            tra_tr.Translate(coords+np.asarray((orig_x, orig_y, orig_z), dtype=float))
         else:
             tra_tr.Translate(coords)
         tr_tra = vtk.vtkTransformPolyDataFilter()
@@ -227,10 +227,10 @@ def tomo_poly_peaks(tpeaks, temp_poly, rot_cols, temp_shape, do_origin=True, do_
             cmas_computer.SetInputData(hold_poly)
             cmas_computer.SetUseScalarsAsWeights(False)
             cmas_computer.Update()
-            cmass.append(np.asarray(cmas_computer.GetCenter(), dtype=np.float))
+            cmass.append(np.asarray(cmas_computer.GetCenter(), dtype=float))
         else:
             if do_origin:
-                cmass.append(coords+np.asarray((orig_x, orig_y, orig_z), dtype=np.float))
+                cmass.append(coords+np.asarray((orig_x, orig_y, orig_z), dtype=float))
             else:
                 cmass.append(coords)
 
@@ -408,7 +408,7 @@ temp_poly = poly_scale(temp_poly, tp_rsc)
 ps.disperse_io.save_vtp(temp_poly, out_dir+'/'+out_stem+'_temp.vtp')
 
 print('\tRender templates in the reference tomogram...')
-temp_rss = np.asarray(temp.shape, dtype=np.float) * tp_rsc
+temp_rss = np.asarray(temp.shape, dtype=float) * tp_rsc
 ref_poly, cmass = tomo_poly_peaks(tpeaks, temp_poly, (ROT_COL, TILT_COL, PSI_COL), temp_rss, rt_orig,
                                   do_cmass=tp_cmass)
 
@@ -422,7 +422,7 @@ tomo = ps.disperse_io.load_tomo(in_tomo, mmap=True)
 tomo_dst = None
 if in_mask is None:
     print('\t\t-Creating the trivial mask...')
-    mask = np.ones(shape=tomo.shape, dtype=np.bool)
+    mask = np.ones(shape=tomo.shape, dtype=bool)
 else:
     print('\t\t-Loading input mask...')
     mask = ps.disperse_io.load_tomo(in_mask) > 0

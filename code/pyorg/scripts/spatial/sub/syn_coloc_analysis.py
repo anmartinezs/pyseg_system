@@ -506,7 +506,7 @@ for i, lkey in enumerate(high_pvals.keys()):
     for tkey in high_pvals[lkey].keys():
         l_vols.append(vols[tkey])
         l_pvals.append(high_pvals[lkey][tkey])
-    l_vols, l_pvals = np.asarray(l_vols, dtype=np.float), np.asarray(l_pvals, dtype=np.float)
+    l_vols, l_pvals = np.asarray(l_vols, dtype=float), np.asarray(l_pvals, dtype=float)
     if lkey == 'tet':
         plt.plot(10**(-6)*(l_vols + i*hold_off), l_pvals, color='green', marker='o', markersize=10, label=lkey, linestyle='')
     elif lkey == 'nrt':
@@ -537,7 +537,7 @@ for i, lkey in enumerate(high_pvals.keys()):
         tkey_short = os.path.splitext(os.path.split(tkey)[1])[0]
         l_ves.append(vesicles[tkey_short])
         l_pvals.append(high_pvals[lkey][tkey])
-    l_ves, l_pvals = np.asarray(l_ves, dtype=np.float), np.asarray(l_pvals, dtype=np.float)
+    l_ves, l_pvals = np.asarray(l_ves, dtype=float), np.asarray(l_pvals, dtype=float)
     if lkey == 'tet':
         plt.plot(l_ves + i*hold_off, l_pvals, color='green', marker='o', markersize=10, label=lkey, linestyle='')
     elif lkey == 'nrt':

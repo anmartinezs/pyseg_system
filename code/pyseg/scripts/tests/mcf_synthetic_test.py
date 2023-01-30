@@ -231,12 +231,12 @@ for j in range(len(G3_STD_NOISE)):
         # g3_dog_peaks = find_region_peaks_by_num(g3_tomo_dog, n_points_dog)
         # labels_dog, v_tps_dog = list(), list()
         # gxs, gys, gzs = grid.get_grid_points()
-        # grid_vs = -1 * np.ones(shape=gxs.shape, dtype=np.int)
+        # grid_vs = -1 * np.ones(shape=gxs.shape, dtype=int)
         # good_picks_dog, bad_picks_dog, fp_picks_dog, tot_picks_dog = 0., 0., 0., float(np.asarray(gxs.shape).prod())
         # for x in range(gxs.shape[0]):
         #     for y in range(gys.shape[1]):
         #         for z in range(gzs.shape[2]):
-        #             hold_min = np.finfo(np.float).max
+        #             hold_min = np.finfo(float).max
         #             g_point = np.asarray((gxs[x, y, z], gys[x, y, z], gzs[x, y, z]), dtype=np.float32)
         #             pick_found = False
         #             for point in g3_dog_peaks:
@@ -265,7 +265,7 @@ for j in range(len(G3_STD_NOISE)):
         n_points = float(len(vertices))
         # points = np.zeros(shape=(n_points, 3), dtype=float)
         gxs, gys, gzs = grid.get_grid_points()
-        grid_vs = -1 * np.ones(shape=gxs.shape, dtype=np.int)
+        grid_vs = -1 * np.ones(shape=gxs.shape, dtype=int)
         good_picks, bad_picks, fp_picks, tot_picks = 0., 0., 0., float(np.asarray(gxs.shape).prod())
         for x in range(gxs.shape[0]):
             for y in range(gys.shape[1]):

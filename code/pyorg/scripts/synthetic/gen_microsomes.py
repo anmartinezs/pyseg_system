@@ -150,9 +150,9 @@ def gen_ccsrv_msome(shape, n_parts, mic_rad, c_rad, min_ip_dst, c_jump_prob):
     count = 0
     min_ip_dst_2 = float(min_ip_dst)**2
     locs, rots = list(), list()
-    mic_cent = .5 * np.asarray(shape, dtype=np.float)
+    mic_cent = .5 * np.asarray(shape, dtype=float)
     mic_rad_f = float(mic_rad)
-    max_n_tries = np.prod(np.asarray(shape, dtype=np.int))
+    max_n_tries = np.prod(np.asarray(shape, dtype=int))
 
     # Generate all possible the uniformly distributed particle seeds at 2x pixel precision
     n_seeds = 8. * np.pi * mic_rad * mic_rad
@@ -192,7 +192,7 @@ def gen_ccsrv_msome(shape, n_parts, mic_rad, c_rad, min_ip_dst, c_jump_prob):
                 idx = (np.abs(dsts - rnd_dst)).argmin()
                 c_part = seeds[idx]
                 # Check that the new particle does not overlap with other already inserted
-                hold_dst = c_part - np.asarray(locs, dtype=np.float)
+                hold_dst = c_part - np.asarray(locs, dtype=float)
                 if np.sum(hold_dst*hold_dst, axis=1) >= min_ip_dst_2:
                     locs.append(c_part)
                     tilt, psi = vect_to_zrelion(c_part - mic_cent, mode='active')[1:]
@@ -226,10 +226,10 @@ def gen_2ccsrv_msome(locs, rots, shape, n_parts, mic_rad, avg_dst, min_ip_dst):
     count = 0
     min_ip_dst_2 = float(min_ip_dst) ** 2
     locs_out, rots_out = list(), list()
-    mic_cent = .5 * np.asarray(shape, dtype=np.float)
+    mic_cent = .5 * np.asarray(shape, dtype=float)
     mic_rad_f = float(mic_rad)
-    max_n_tries = np.prod(np.asarray(shape, dtype=np.int))
-    locs_a, rots_a = np.asarray(locs, dtype=np.float), np.asarray(rots, dtype=np.float)
+    max_n_tries = np.prod(np.asarray(shape, dtype=int))
+    locs_a, rots_a = np.asarray(locs, dtype=float), np.asarray(rots, dtype=float)
 
     # Generate all possible the uniformly distributed particle seeds at 2x pixel precision
     n_seeds = 8. * np.pi * mic_rad * mic_rad
@@ -288,9 +288,9 @@ def gen_csrv_msome(shape, n_parts, mic_rad, min_ip_dst):
     count = 0
     min_ip_dst_2 = float(min_ip_dst) ** 2
     locs, rots = list(), list()
-    mic_cent = .5 * np.asarray(shape, dtype=np.float)
+    mic_cent = .5 * np.asarray(shape, dtype=float)
     mic_rad_f = float(mic_rad)
-    max_n_tries = np.prod(np.asarray(shape, dtype=np.int))
+    max_n_tries = np.prod(np.asarray(shape, dtype=int))
 
     # Loop for particles
     mic_end, n_try = False, 0
@@ -306,7 +306,7 @@ def gen_csrv_msome(shape, n_parts, mic_rad, min_ip_dst):
                 and (p_cent[2] >= 0) and (p_cent[2] < shape[2]):
             if len(locs) > 0:
                 # Check that the new particle does not overlap with other already inserted
-                hold_dst = p_cent - np.asarray(locs, dtype=np.float)
+                hold_dst = p_cent - np.asarray(locs, dtype=float)
                 if np.sum(hold_dst * hold_dst, axis=1) >= min_ip_dst_2:
                     locs.append(p_cent)
                     tilt, psi = vect_to_zrelion(p_cent - mic_cent, mode='active')[1:]
@@ -364,7 +364,7 @@ print('')
 # Initialization of global variables
 max_svol_dim = 0
 svol_refs = dict()
-nparts, snrs = np.zeros(shape=(tm_nt, len(mc_avg_nparts)), dtype=np.int), np.zeros(shape=tm_nt, dtype=np.float)
+nparts, snrs = np.zeros(shape=(tm_nt, len(mc_avg_nparts)), dtype=int), np.zeros(shape=tm_nt, dtype=float)
 for i in range(tm_nt):
     snrs[i] = (tm_snr_rg[1] - tm_snr_rg[0]) * np.random.random() + tm_snr_rg[0]
     for j, avg_parts in enumerate(mc_avg_nparts):
@@ -384,7 +384,7 @@ max_tm_size, max_svol_dim = max(tm_size[0:1]), max(hold_ref_0.shape[0:1])
 mic_rad = .75 * max_tm_size
 if (mic_rad + max_svol_dim) > max_tm_size:
     mic_rad = max_tm_size - max_svol_dim
-cent_v = .5*np.asarray(hold_ref_0.shape, dtype=np.float) - np.asarray((0, 0, mc_zh), dtype=np.float)
+cent_v = .5*np.asarray(hold_ref_0.shape, dtype=float) - np.asarray((0, 0, mc_zh), dtype=float)
 mc_ip_min_dst_v, mc_1st_crad_v, mc_4th_dst_v = float(mc_ip_min_dst)/tm_res, float(mc_1st_crad)/tm_res, \
                                                float(mc_4th_dst)/tm_res
 

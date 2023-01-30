@@ -68,7 +68,7 @@ def get_sub_copy(tomo, sub_pt, sub_shape):
         off_h_z = mz1
 
     # Make the subvolume copy
-    hold_sv = np.zeros(shape=np.asarray(sub_shape, dtype=np.int), dtype=tomo.dtype)
+    hold_sv = np.zeros(shape=np.asarray(sub_shape, dtype=int), dtype=tomo.dtype)
     hold_sv[dif_l_x:dif_h_x, dif_l_y:dif_h_y, dif_l_z:dif_h_z] = tomo[off_l_x:off_h_x, off_l_y:off_h_y, off_l_z:off_h_z]
 
     return hold_sv
@@ -92,7 +92,7 @@ def read_csv_mts(fname, coords_cols, id_col):
         for row in reader:
             x, y, z, idx = float(row[coords_cols[0]]), float(row[coords_cols[1]]), float(row[coords_cols[2]]),\
                            int(row[id_col])
-            coords.append(np.asarray((x, y, z), dtype=np.float))
+            coords.append(np.asarray((x, y, z), dtype=float))
             ids.append(idx)
 
         # Dictionary creation
@@ -111,7 +111,7 @@ def read_csv_mts(fname, coords_cols, id_col):
 # inv: if False (default) then True-fg and False-bg, otherwise these values are inverted
 # Returns: a 3D numpy binray array
 def points_to_mask(points, mask_shape, inv=False):
-    mask = np.zeros(shape=mask_shape, dtype=np.bool)
+    mask = np.zeros(shape=mask_shape, dtype=bool)
     for point in points:
         i, j, k = int(round(point[0])), int(round(point[1])), int(round(point[2]))
         if (i < 0) or (j < 0) or (k < 0) or \
@@ -178,7 +178,7 @@ def clusters_cg(coords, labels):
     n_points_lut = dict.fromkeys(u_labels)
     cgs = dict.fromkeys(u_labels)
     for lbl in u_labels:
-        cgs[lbl] = np.zeros(shape=3, dtype=np.float)
+        cgs[lbl] = np.zeros(shape=3, dtype=float)
         n_points_lut[lbl] = 0
     for point, lbl in zip(coords, labels):
         cgs[lbl] += point
@@ -187,7 +187,7 @@ def clusters_cg(coords, labels):
     for lbl in u_labels:
         cgs[lbl] *= (1./float(n_points_lut[lbl]))
 
-    return np.asarray(list(cgs.values()), dtype=np.float)
+    return np.asarray(list(cgs.values()), dtype=float)
 
 
 # Converts cluster of points int a vtkPolyData

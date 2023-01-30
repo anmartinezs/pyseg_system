@@ -101,7 +101,7 @@ except pexceptions.PySegInputError as e:
     sys.exit(-1)
 part_dsts= dict().fromkeys(list(range(star.get_nrows())))
 for key in part_dsts.keys():
-    part_dsts[key] = np.finfo(np.float).max
+    part_dsts[key] = np.finfo(float).max
 
 if p_bin > 0:
     print('\t\t-Binning the input coordinates: ')

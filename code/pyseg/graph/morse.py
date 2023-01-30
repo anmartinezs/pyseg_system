@@ -96,7 +96,7 @@ class SubVolDtrans(object):
 
     # mask: input binary mask
     def __init__(self, mask):
-        self.__mask = mask.astype(np.bool)
+        self.__mask = mask.astype(bool)
         sap = self.__mask.shape
         self.__mx_b, self.__my_b, self.__mz_b = sap[0], sap[1], sap[2]
         self.__Y, self.__X, self.__Z = np.meshgrid(np.arange(sap[1]).astype(np.int16),
@@ -159,8 +159,8 @@ def pr_graph_rdf(pr_id, max_r, bin_s, ids, coords, dsts_vec, mask, res, verts_rd
         # Count num of particles in the shell and shell volume
         point_dists = dsts_vec[i]
         shell_dist = np.sqrt(sub_dists[sub_mask])
-        hold_num = np.zeros(shape=len_b, dtype=np.float)
-        hold_dem = np.zeros(shape=len_b, dtype=np.float)
+        hold_num = np.zeros(shape=len_b, dtype=float)
+        hold_dem = np.zeros(shape=len_b, dtype=float)
         for j in range(1, len(bin_s)):
             hold_num[j] = float(((point_dists>=bin_s[j][0]) & (point_dists<bin_s[j][1])).sum())
             hold_dem[j] = float(((shell_dist>=bin_s[j][0]) & (shell_dist<bin_s[j][1])).sum())
@@ -592,7 +592,7 @@ class TableProps(object):
 
 #########################################################################################################
 # Class for holding the information and value of the properties based on a sparse matrix
-# All entries will be casted to np.float for being stored, so all bigger formats will be
+# All entries will be casted to float for being stored, so all bigger formats will be
 # truncated
 #
 class TablePropsTest(object):
@@ -608,8 +608,8 @@ class TablePropsTest(object):
         self.__key = np.empty(shape=nmax_props, dtype=object)
         self.__type = np.empty(shape=nmax_props, dtype=object)
         self.__ncomp = np.empty(shape=nmax_props, dtype=np.int8)
-        self.__values = sparse.lil_matrix((nmax_props, entries), dtype=np.float)
-        self.__entries = sparse.lil_matrix((1, entries), dtype=np.bool)
+        self.__values = sparse.lil_matrix((nmax_props, entries), dtype=float)
+        self.__entries = sparse.lil_matrix((1, entries), dtype=bool)
         # Properties counter
         self.__props_count = 0
 
@@ -980,7 +980,7 @@ class SubGraphMCF(object):
             lut[v_id] = self.__graph.add_vertex()
         self.__graph.vertex_properties[STR_SGM_VID] = self.__graph.new_vertex_property('int')
         self.__graph.vertex_properties[STR_SGM_VID].get_array()[:] = np.asarray(v_ids,
-                                                                                dtype=np.int)
+                                                                                dtype=int)
 
         # Adding edges
         for e_id in e_ids:
@@ -989,7 +989,7 @@ class SubGraphMCF(object):
             self.__graph.add_edge(lut[s_id], lut[t_id])
         self.__graph.edge_properties[STR_SGM_EID] = self.__graph.new_edge_property('int')
         self.__graph.edge_properties[STR_SGM_EID].get_array()[:] = np.asarray(e_ids,
-                                                                              dtype=np.int)
+                                                                              dtype=int)
 
 ##################################################################################################
 # Class for a graph of MCFs (now vertices, edges and arcs are indexed by cell_id)
@@ -1161,7 +1161,7 @@ class GraphMCF(object):
                     pass
         else:
             vals = f_mx * np.ones(shape=f_len, dtype=np.float32)
-            for i, idx in enumerate(np.linspace(0, len(coords)-1, f_len).astype(np.int)):
+            for i, idx in enumerate(np.linspace(0, len(coords)-1, f_len).astype(int)):
                 try:
                     vals[i] = trilin3d(self.__density, coords[idx, :])
                 except IndexError:
@@ -1738,7 +1738,7 @@ class GraphMCF(object):
 
         # Filter vertices and edges to stores
         seg_vertices, seg_edges, seg_arcs = list(), list(), list()
-        lut_v = np.zeros(shape=self.get_nid(), dtype=np.bool)
+        lut_v = np.zeros(shape=self.get_nid(), dtype=bool)
         if edges:
             for v_id in v_ids:
                 seg_vertices.append(self.get_vertex(v_id))
@@ -1882,7 +1882,7 @@ class GraphMCF(object):
 
         # Geometry
         vertices = self.get_vertices_list()
-        lut = np.zeros(shape=self.get_nid(), dtype=np.int)
+        lut = np.zeros(shape=self.get_nid(), dtype=int)
         for i, v in enumerate(vertices):
             x, y, z = v.get_coordinates(self.__skel)
             points.InsertPoint(i, x, y, z)
@@ -1950,7 +1950,7 @@ class GraphMCF(object):
             arrays_out.append(hold)
 
         # Generating geometry and topology
-        lut = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=np.bool)
+        lut = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=bool)
         if mode == 'node':
             # Geometry and topology
             vertices = self.get_vertices_list()
@@ -2003,7 +2003,7 @@ class GraphMCF(object):
         array.SetNumberOfComponents(1)
 
         # Generating geometry and topology
-        lut = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=np.bool)
+        lut = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=bool)
         # Geometry and topology
         arcs = self.get_arcs_list()
         verts = vtk.vtkCellArray()
@@ -2058,7 +2058,7 @@ class GraphMCF(object):
             t = self.__props_info.get_prop_entry_fast(key_id, v.get_id(), n_comp, data_type)
             t = sum(t) / len(t)
             if op(t, th):
-                idx = self.__props_info.get_prop_entry_fast(prop_ids_key, v.get_id(), 1, np.int)
+                idx = self.__props_info.get_prop_entry_fast(prop_ids_key, v.get_id(), 1, int)
                 ids.append(idx)
 
         return ids
@@ -2074,7 +2074,7 @@ class GraphMCF(object):
         data_type = disperse_io.TypesConverter().gt_to_numpy(self.get_prop_type(key_id=key_id))
 
         # Find vertices within slice
-        lut_ver = np.zeros(shape=self.get_nid(), dtype=np.int)
+        lut_ver = np.zeros(shape=self.get_nid(), dtype=int)
         v_ids = list()
         for v in self.get_vertices_list():
             v_id = v.get_id()
@@ -2085,7 +2085,7 @@ class GraphMCF(object):
                 lut_ver[v_id] += 1
 
         # Finding coordinates
-        coords = np.zeros(shape=(len(v_ids), 3), dtype=np.float)
+        coords = np.zeros(shape=(len(v_ids), 3), dtype=float)
         for i, v_id in enumerate(v_ids):
             coords[i, :] = self.__skel.GetPoint(v_id)
         return coords
@@ -2101,7 +2101,7 @@ class GraphMCF(object):
         data_type = disperse_io.TypesConverter().gt_to_numpy(self.get_prop_type(key_id=key_id))
 
         # Find tail vertices within slice
-        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=np.int)
+        lut_ver = (-1) * np.ones(shape=self.get_nid(), dtype=int)
         cont = 0
         v_ids = list()
         for v in self.get_vertices_list():
@@ -2134,14 +2134,14 @@ class GraphMCF(object):
         visitor = SubGraphVisitor(sgraph_id)
 
         # Find subgraphs
-        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=np.float)
+        coords = np.zeros(shape=(vertices_gt.shape[0], 3), dtype=float)
         for i, v in enumerate(vertices_gt):
             if sgraph_id[v] == 0:
                 gt.dfs_search(graph, v, visitor)
                 visitor.update_sgraphs_id()
             coords[i, :] = self.__skel.GetPoint(v_ids[i])
 
-        return coords, np.asarray(sgraph_id.get_array(), dtype=np.int)
+        return coords, np.asarray(sgraph_id.get_array(), dtype=int)
 
     # Find contact points in a segmentation border
     # seg: tomogram with the segmentation
@@ -2153,7 +2153,7 @@ class GraphMCF(object):
         # Initialization
         edges_list = self.get_edges_list()
         coords = list()
-        lut_ids = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=np.bool)
+        lut_ids = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=bool)
 
         # Loop for finding the edge which contains a connector point
         x_E, y_E, z_E = seg.shape
@@ -2220,7 +2220,7 @@ class GraphMCF(object):
                         error_msg = 'Unexpected event.'
                         print('WARNING (GraphMCF:get_cont_seg) :' + error_msg)
 
-        return np.asarray(coords, dtype=np.float)
+        return np.asarray(coords, dtype=float)
 
     def set_prop(self, key, values):
         self.__props_info.set_prop(key, values)
@@ -2349,11 +2349,11 @@ class GraphMCF(object):
 
         # Insert the arcs
         line_id = 0
-        sa_lut = (-1) * np.ones(shape=(self.__skel.GetNumberOfPoints(), 2), dtype=np.int)
+        sa_lut = (-1) * np.ones(shape=(self.__skel.GetNumberOfPoints(), 2), dtype=int)
         for i in range(lines.GetNumberOfCells()):
             pts = vtk.vtkIdList()
             lines.GetCell(line_id, pts)
-            line = np.zeros(shape=pts.GetNumberOfIds(), dtype=np.int)
+            line = np.zeros(shape=pts.GetNumberOfIds(), dtype=int)
             for j in range(len(line)):
                 line[j] = pts.GetId(j)
             if critical_index.GetTuple1(line[0]) == DPID_CRITICAL_SAD:
@@ -2491,13 +2491,13 @@ class GraphMCF(object):
 
         per = 0
         v_id = vertex.get_id()
-        hold = self.__props_info.get_prop_entry_fast(key_field_id, v_id, 1, np.float)
+        hold = self.__props_info.get_prop_entry_fast(key_field_id, v_id, 1, float)
         v_field = hold[0]
         arcs = vertex.get_arcs()
         for a in arcs:
             a_id = a.get_sad_id()
             if a_id is not None:
-                hold = self.__props_info.get_prop_entry_fast(key_field_id, a_id, 1, np.float)
+                hold = self.__props_info.get_prop_entry_fast(key_field_id, a_id, 1, float)
                 fval = hold[0]
                 # Update persistence
                 hold_per = math.fabs(v_field - fval)
@@ -2516,14 +2516,14 @@ class GraphMCF(object):
         pair = None
         e_pair = None
         a_pair = None
-        h_fval = np.finfo(np.float).max
+        h_fval = np.finfo(float).max
         arcs = vertex.get_arcs()
         for a in arcs:
             a_id = a.get_sad_id()
             if a_id is not None:
                 edge = self.get_edge(a_id)
                 if edge is not None:
-                    hold = self.__props_info.get_prop_entry_fast(key_prop_id, a_id, 1, np.float)
+                    hold = self.__props_info.get_prop_entry_fast(key_prop_id, a_id, 1, float)
                     fval = hold[0]
                     if fval < h_fval:
                         h_fval = fval
@@ -2544,7 +2544,7 @@ class GraphMCF(object):
     # Return: the pair vertex and the edge which joins both vertices
     def get_vertex_pair(self, vertex, key_pair_id):
         v_id = vertex.get_id()
-        hold = self.__props_info.get_prop_entry_fast(key_pair_id, v_id, 1, np.float)
+        hold = self.__props_info.get_prop_entry_fast(key_pair_id, v_id, 1, float)
         p_vertex = self.get_vertex(int(hold[0]))
         if p_vertex is not None:
             p_id = p_vertex.get_id()
@@ -2577,12 +2577,12 @@ class GraphMCF(object):
         key_hid_id = self.__props_info.add_prop(STR_HID, 'int', 1, def_val=0)
         self.__per_lst = list()
         for i, v in enumerate(self.__v_lst):
-            hold = self.__props_info.get_prop_entry_fast(key_per_id, v.get_id(), 1, np.float)
+            hold = self.__props_info.get_prop_entry_fast(key_per_id, v.get_id(), 1, float)
             self.__per_lst.append(hold[0])
             self.__props_info.set_prop_entry_fast(key_hid_id, (i,), v.get_id(), 1)
         self.__per_lst = np.asarray(self.__per_lst)
         self.__v_lst = np.asarray(self.__v_lst)
-        mx = np.finfo(np.float).max
+        mx = np.finfo(float).max
 
         if n is None:
             # Cancel vertices until emptying the list or reaching the threshold
@@ -2594,7 +2594,7 @@ class GraphMCF(object):
                     vertex = self.__v_lst[ind]
                     self.__per_lst[ind] = mx
                     hold = self.__props_info.get_prop_entry_fast(key_per_id, vertex.get_id(),
-                                                                 1, np.float)
+                                                                 1, float)
                     # Threshold persistence condition
                     if hold[0] > th_per:
                         break
@@ -2617,7 +2617,7 @@ class GraphMCF(object):
                         count -= 1
             else:
                 # Get lut of references
-                lut_ref = np.zeros(shape=self.get_nid(), dtype=np.bool)
+                lut_ref = np.zeros(shape=self.get_nid(), dtype=bool)
                 prop_ref_id = self.get_prop_id(prop_ref)
                 ref_n_comp = self.get_prop_ncomp(key=prop_ref)
                 if (prop_ref_id is None) or (ref_n_comp != 1):
@@ -2665,12 +2665,12 @@ class GraphMCF(object):
         key_hid_id = graph_copy.__props_info.add_prop(STR_HID, 'int', 1, def_val=0)
         graph_copy.__per_lst = list()
         for i, v in enumerate(graph_copy.__v_lst):
-            hold = graph_copy.__props_info.get_prop_entry_fast(key_per_id, v.get_id(), 1, np.float)
+            hold = graph_copy.__props_info.get_prop_entry_fast(key_per_id, v.get_id(), 1, float)
             graph_copy.__per_lst.append(hold[0])
             graph_copy.__props_info.set_prop_entry_fast(key_hid_id, (i,), v.get_id(), 1)
         graph_copy.__per_lst = np.asarray(graph_copy.__per_lst)
         graph_copy.__v_lst = np.asarray(graph_copy.__v_lst)
-        mx = np.finfo(np.float).max
+        mx = np.finfo(float).max
 
         # Cancel vertices until emptying the list or reaching the threshold
         count = 0
@@ -2682,7 +2682,7 @@ class GraphMCF(object):
                 graph_copy.__per_lst[ind] = mx
                 v_id = vertex.get_id()
                 hold = graph_copy.__props_info.get_prop_entry_fast(key_per_id, v_id,
-                                                                   1, np.float)
+                                                                   1, float)
                 # Threshold persistence condition
                 if (th_per is not None) and (hold[0] > th_per):
                     break
@@ -2712,7 +2712,7 @@ class GraphMCF(object):
     def edge_simp(self, n_neighs=1):
 
         # Edges to delete LUT
-        lut = np.ones(shape=self.__skel.GetVerts().GetNumberOfCells(), dtype=np.bool)
+        lut = np.ones(shape=self.__skel.GetVerts().GetNumberOfCells(), dtype=bool)
 
         # Look edges which are not going to be deleted
         for v in self.get_vertices_list():
@@ -2720,8 +2720,8 @@ class GraphMCF(object):
             neighs, edges = self.get_vertex_neighbours(v_id)
             l_edges = len(edges)
             if l_edges > n_neighs:
-                lengths = np.zeros(shape=l_edges, dtype=np.float)
-                ids = np.zeros(shape=l_edges, dtype=np.int)
+                lengths = np.zeros(shape=l_edges, dtype=float)
+                ids = np.zeros(shape=l_edges, dtype=int)
                 for i in range(l_edges):
                     lengths[i] = self.get_edge_length(edges[i])
                     ids[i] = edges[i].get_id()
@@ -2875,7 +2875,7 @@ class GraphMCF(object):
             for v_id in v_list:
                 self.remove_vertex(self.get_vertex(v_id))
         else:
-            prev_lut = np.zeros(shape=self.get_nid(), dtype=np.bool)
+            prev_lut = np.zeros(shape=self.get_nid(), dtype=bool)
             for v_id in v_list:
                 prev_lut[v_id] = True
             for v in self.get_vertices_list():
@@ -2898,9 +2898,9 @@ class GraphMCF(object):
         if winv:
             prop_w.get_array()[:] = lin_map(prop_w.get_array(), lb=1, ub=0)
         prop_s = graph_gt.vertex_properties[key_s]
-        prop_s_arr = prop_s.get_array().astype(np.bool)
+        prop_s_arr = prop_s.get_array().astype(bool)
         prop_i = graph_gt.vertex_properties[DPSTR_CELL]
-        lut_th = np.ones(shape=self.get_nid(), dtype=np.bool)
+        lut_th = np.ones(shape=self.get_nid(), dtype=bool)
 
         # Measuring geodesic distances
         dists_map = gt.shortest_distance(graph_gt, weights=prop_w)
@@ -3154,13 +3154,13 @@ class GraphMCF(object):
         densities /= densities.sum()
         arg = np.argsort(densities)
         densities_sort = densities[arg]
-        cdf = np.zeros(shape=densities_sort.shape, dtype=np.float)
+        cdf = np.zeros(shape=densities_sort.shape, dtype=float)
         for i in range(1, len(densities_sort)):
             cdf[i] = cdf[i - 1] + densities_sort[i]
 
         # Set the new property to all arcs
         self.__props_info.add_prop(STR_VERTEX_RELEVANCE,
-                                   disperse_io.TypesConverter().numpy_to_gt(np.float), 1, 0)
+                                   disperse_io.TypesConverter().numpy_to_gt(float), 1, 0)
         key_id = self.__props_info.is_already(STR_VERTEX_RELEVANCE)
         n_comp = self.__props_info.get_ncomp(index=key_id)
         for i, v in enumerate(vertices):
@@ -3174,7 +3174,7 @@ class GraphMCF(object):
         if (sgraphs is None) or (len(sgraphs) < 1):
             if self.__props_info.is_already(STR_GRAPH_RELEVANCE) is None:
                 self.__props_info.add_prop(STR_GRAPH_RELEVANCE,
-                                           disperse_io.TypesConverter().numpy_to_gt(np.float),
+                                           disperse_io.TypesConverter().numpy_to_gt(float),
                                            1, -1)
             return
         densities = np.zeros(shape=len(sgraphs), dtype=np.float64)
@@ -3190,7 +3190,7 @@ class GraphMCF(object):
         densities /= densities.sum()
         arg = np.argsort(densities)
         densities_sort = densities[arg]
-        cdf = np.zeros(shape=len(densities_sort), dtype=np.float)
+        cdf = np.zeros(shape=len(densities_sort), dtype=float)
         for i in range(1, len(densities_sort)):
             cdf[i] = cdf[i - 1] + densities_sort[i]
 
@@ -3203,7 +3203,7 @@ class GraphMCF(object):
         key_id = self.__props_info.is_already(STR_GRAPH_RELEVANCE)
         if key_id is None:
             self.__props_info.add_prop(STR_GRAPH_RELEVANCE,
-                                       disperse_io.TypesConverter().numpy_to_gt(np.float), 1, 0)
+                                       disperse_io.TypesConverter().numpy_to_gt(float), 1, 0)
             key_id = self.__props_info.is_already(STR_GRAPH_RELEVANCE)
         n_comp = self.__props_info.get_ncomp(index=key_id)
         for i, g in enumerate(sgraphs):
@@ -3240,7 +3240,7 @@ class GraphMCF(object):
             t = self.get_vertex(e.get_target_id())
             x_s, y_s, z_s = self.get_vertex_coords(s)
             x_t, y_t, z_t = self.get_vertex_coords(t)
-            hold = np.asarray((x_s-x_t, y_s-y_t, z_s-z_t), dtype=np.float)
+            hold = np.asarray((x_s-x_t, y_s-y_t, z_s-z_t), dtype=float)
             dst = math.sqrt(np.sum(hold * hold)) * self.get_resolution()
             self.__props_info.set_prop_entry_fast(key_id, (dst,), e.get_id(), 1)
 
@@ -3256,8 +3256,8 @@ class GraphMCF(object):
         key_f = self.__props_info.is_already(STR_FIELD_VALUE)
         for e in self.get_edges_list():
             e_id = e.get_id()
-            dst = self.get_prop_entry_fast(key_vd, e_id, 1, np.float)[0]
-            field = self.get_prop_entry_fast(key_f, e_id, 1, np.float)[0]
+            dst = self.get_prop_entry_fast(key_vd, e_id, 1, float)[0]
+            field = self.get_prop_entry_fast(key_f, e_id, 1, float)[0]
             self.__props_info.set_prop_entry_fast(key_id, (dst*field,), e.get_id(), 1)
 
     # Integrates density information along edges
@@ -3297,7 +3297,7 @@ class GraphMCF(object):
                             # Get points id
                             a_s_np = a_s.get_npoints()
                             a_t_np = a_t.get_npoints()
-                            points = np.zeros(shape=a_s_np+a_t_np-1, dtype=np.int)
+                            points = np.zeros(shape=a_s_np+a_t_np-1, dtype=int)
                             for i in range(a_t_np):
                                 points[i] = a_t.get_point_id(i)
                             for i in range(a_s_np-1):
@@ -3327,14 +3327,14 @@ class GraphMCF(object):
         if field:
             edges = self.get_edges_list()
             n_edges = len(edges)
-            field = np.zeros(shape=n_edges, dtype=np.float)
+            field = np.zeros(shape=n_edges, dtype=float)
             for i, e in enumerate(edges):
                 x, y, z = self.get_edge_coords(e)
                 field[i] = trilin3d(self.__density, (x, y, z))
             field = lin_map(field, lb=1, ub=0)
             for i, e in enumerate(edges):
                 e_id = e.get_id()
-                t = self.get_prop_entry_fast(key_id, e_id, 1, np.float)
+                t = self.get_prop_entry_fast(key_id, e_id, 1, float)
                 self.set_prop_entry_fast(key_id, (t[0]*field[i],), e_id, 1)
 
     # Computes vertices similitude for edges (min(d_v1,d_v2)/d_e) )
@@ -3427,7 +3427,7 @@ class GraphMCF(object):
                             # Get points id
                             a_s_np = a_s.get_npoints()
                             a_t_np = a_t.get_npoints()
-                            points = np.zeros(shape=a_s_np+a_t_np-1, dtype=np.int)
+                            points = np.zeros(shape=a_s_np+a_t_np-1, dtype=int)
                             for i in range(a_t_np):
                                 points[i] = a_t.get_point_id(i)
                             for i in range(a_s_np-1):
@@ -3585,14 +3585,14 @@ class GraphMCF(object):
             w_props[i] = w_prop
 
         # Measure diameters
-        diam = np.zeros(shape=len(graphs), dtype=np.float)
+        diam = np.zeros(shape=len(graphs), dtype=float)
         for i, g in enumerate(graphs):
             t_diam, ends = gt.pseudo_diameter(g)
             diam[i] = gt.shortest_distance(g, ends[0], ends[1], w_props[i])
 
         # Add STR_GRAPH_DIAM property
         self.__props_info.add_prop(STR_GRAPH_DIAM,
-                                   disperse_io.TypesConverter().numpy_to_gt(np.float), 1, 0)
+                                   disperse_io.TypesConverter().numpy_to_gt(float), 1, 0)
         key_id2 = self.__props_info.is_already(STR_GRAPH_DIAM)
         n_comp = self.__props_info.get_ncomp(index=key_id2)
         for v in vertices:
@@ -3610,7 +3610,7 @@ class GraphMCF(object):
             if self.__density is None:
                 error_msg = 'The graph does not have geometry so image size cannot be estimated.'
                 raise pexceptions.PySegInputError(expr='print_vertices (GraphMCF)', msg=error_msg)
-            img = np.zeros(shape=self.__density.shape, dtype=np.float)
+            img = np.zeros(shape=self.__density.shape, dtype=float)
 
         if property == DPSTR_CELL:
             for v in self.get_vertices_list():
@@ -3683,7 +3683,7 @@ class GraphMCF(object):
             if neigh <= 0:
                 neigh = None
             else:
-                odtype = np.int
+                odtype = int
         if offset is None:
             offset = np.zeros(shape=3, dtype=odtype)
         else:
@@ -3756,7 +3756,7 @@ class GraphMCF(object):
                         point = np.asarray(self.__skel.GetPoint(v_id), dtype=np.float32) * ibin
                         point_f, point_c = np.floor(point).astype(odtype)+offset, np.ceil(point).astype(odtype)+offset
                         hold_field = field[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]]
-                        point = np.round(point).astype(np.int)
+                        point = np.round(point).astype(int)
                         try:
                             sval = seg[point[0], point[1], point[2]]
                         except IndexError:
@@ -3774,7 +3774,7 @@ class GraphMCF(object):
                         point = np.asarray(self.__skel.GetPoint(e_id), dtype=np.float32) * ibin
                         point_f, point_c = np.floor(point).astype(odtype)+offset, np.ceil(point).astype(odtype)+offset
                         hold_field = field[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]]
-                        point = np.round(point).astype(np.int)
+                        point = np.round(point).astype(int)
                         try:
                             sval = seg[point[0], point[1], point[2]]
                         except IndexError:
@@ -3846,7 +3846,7 @@ class GraphMCF(object):
     def add_tm_field(self, key_prop, scores, angles, ang_lut, t_normal, d_nhood, offset=(0, 0, 0), bin=1.):
 
         # Input parsing
-        offset = np.asarray(offset, dtype=np.int)
+        offset = np.asarray(offset, dtype=int)
         if bin <= 0:
             error_msg = 'Input bin must be greater than zero, current %s.' % str(bin)
             raise pexceptions.PySegInputError(expr='add_scalar_field (GraphMCF)', msg=error_msg)
@@ -3862,7 +3862,7 @@ class GraphMCF(object):
         for v in self.get_vertices_list():
             v_id = v.get_id()
             point = np.asarray(self.__skel.GetPoint(v_id), dtype=np.float32) * ibin
-            point_f, point_c = np.floor(point-rad).astype(np.int)+offset, np.ceil(point+rad).astype(np.int)+offset
+            point_f, point_c = np.floor(point-rad).astype(int)+offset, np.ceil(point+rad).astype(int)+offset
             hold_scores = scores[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             hold_angles = angles[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             try:
@@ -3881,7 +3881,7 @@ class GraphMCF(object):
         for e in self.get_edges_list():
             e_id = e.get_id()
             point = np.asarray(self.__skel.GetPoint(e_id), dtype=np.float32) * ibin
-            point_f, point_c = np.floor(point+rad).astype(np.int)+offset, np.ceil(point+rad).astype(np.int)+offset
+            point_f, point_c = np.floor(point+rad).astype(int)+offset, np.ceil(point+rad).astype(int)+offset
             hold_scores = scores[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             hold_angles = angles[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             try:
@@ -3918,7 +3918,7 @@ class GraphMCF(object):
         for v in self.get_vertices_list():
             v_id = v.get_id()
             point = np.asarray(self.__skel.GetPoint(v_id), dtype=np.float32)
-            point_f, point_c = np.floor(point-rad).astype(np.int), np.ceil(point+rad).astype(np.int)
+            point_f, point_c = np.floor(point-rad).astype(int), np.ceil(point+rad).astype(int)
             hold_scores = scores[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             hold_phi = phi[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             hold_psi = psi[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
@@ -3939,7 +3939,7 @@ class GraphMCF(object):
         for e in self.get_edges_list():
             e_id = e.get_id()
             point = np.asarray(self.__skel.GetPoint(e_id), dtype=np.float32)
-            point_f, point_c = np.floor(point+rad).astype(np.int), np.ceil(point+rad).astype(np.int)
+            point_f, point_c = np.floor(point+rad).astype(int), np.ceil(point+rad).astype(int)
             hold_scores = scores[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             hold_phi = phi[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
             hold_psi = psi[point_f[0]:point_c[0], point_f[1]:point_c[1], point_f[2]:point_c[2]].flatten()
@@ -4139,8 +4139,8 @@ class GraphMCF(object):
     def compute_bbox(self):
 
         # Initialization
-        MAX_F = np.finfo(np.float).max
-        MIN_F = np.finfo(np.float).min
+        MAX_F = np.finfo(float).max
+        MIN_F = np.finfo(float).min
         x_min, y_min, z_min = MAX_F, MAX_F, MAX_F
         x_max, y_max, z_max = MIN_F, MIN_F, MIN_F
 
@@ -4213,7 +4213,7 @@ class GraphMCF(object):
                         edges.append(e)
                 except IndexError:
                     pass
-            bin_mask = np.asarray(mask, dtype=np.bool)
+            bin_mask = np.asarray(mask, dtype=bool)
             vol = float(bin_mask.sum())
             vol *= (self.get_resolution() * self.get_resolution() * self.get_resolution())
 
@@ -4256,7 +4256,7 @@ class GraphMCF(object):
                 else:
                     vol = (x_max-x_min) * (y_max-y_min) * self.get_resolution() * self.get_resolution()
             else:
-                bin_mask = np.asarray(mask, dtype=np.bool)
+                bin_mask = np.asarray(mask, dtype=bool)
                 vol = float(bin_mask.sum()) * res3
                 # Remove vertices and edges out of the mask
                 for v in self.get_vertices_list():
@@ -4348,7 +4348,7 @@ class GraphMCF(object):
                                v_mode='high', e_mode='high', fit=False):
 
         # Compute valid region volume (nm^3)
-        bin_mask = np.asarray(mask, dtype=np.bool)
+        bin_mask = np.asarray(mask, dtype=bool)
         res3 = float(self.get_resolution() * self.get_resolution() * self.get_resolution())
         vol = float(bin_mask.sum()) * res3
         if vol == 0:
@@ -4422,12 +4422,12 @@ class GraphMCF(object):
     def compute_edge_curvatures(self):
 
         # Create the new properties
-        key_id_uk = self.add_prop(STR_EDGE_UK, disperse_io.TypesConverter().numpy_to_gt(np.float), 1)
-        key_id_ns = self.add_prop(STR_EDGE_NS, disperse_io.TypesConverter().numpy_to_gt(np.float), 1)
-        key_id_ut = self.add_prop(STR_EDGE_UT, disperse_io.TypesConverter().numpy_to_gt(np.float), 1)
-        key_id_bs = self.add_prop(STR_EDGE_BNS, disperse_io.TypesConverter().numpy_to_gt(np.float), 1)
-        key_id_sin = self.add_prop(STR_EDGE_SIN, disperse_io.TypesConverter().numpy_to_gt(np.float), 1)
-        key_id_al = self.add_prop(STR_EDGE_APL, disperse_io.TypesConverter().numpy_to_gt(np.float), 1)
+        key_id_uk = self.add_prop(STR_EDGE_UK, disperse_io.TypesConverter().numpy_to_gt(float), 1)
+        key_id_ns = self.add_prop(STR_EDGE_NS, disperse_io.TypesConverter().numpy_to_gt(float), 1)
+        key_id_ut = self.add_prop(STR_EDGE_UT, disperse_io.TypesConverter().numpy_to_gt(float), 1)
+        key_id_bs = self.add_prop(STR_EDGE_BNS, disperse_io.TypesConverter().numpy_to_gt(float), 1)
+        key_id_sin = self.add_prop(STR_EDGE_SIN, disperse_io.TypesConverter().numpy_to_gt(float), 1)
+        key_id_al = self.add_prop(STR_EDGE_APL, disperse_io.TypesConverter().numpy_to_gt(float), 1)
 
         # Main loop for curvatures computation
         for e in self.get_edges_list():
@@ -4524,8 +4524,8 @@ class GraphMCF(object):
         prop_e_eq = graph_gt.new_edge_property('float')
         prop_e_h = graph_gt.new_edge_property('float')
         prop_e_v = graph_gt.new_edge_property('float')
-        prop_e_h.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=np.float)
-        prop_e_v.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=np.float)
+        prop_e_h.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=float)
+        prop_e_v.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=float)
         prop_w = graph_gt.edge_properties[SGT_EDGE_LENGTH]
         prop_v_id = graph_gt.vertex_properties[DPSTR_CELL]
         prop_key_eq = 'field_value_eq'
@@ -4595,8 +4595,8 @@ class GraphMCF(object):
         prop_e_eq = graph_gt.new_edge_property('float')
         prop_e_h = graph_gt.new_edge_property('float')
         prop_e_v = graph_gt.new_edge_property('float')
-        prop_e_h.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=np.float)
-        prop_e_v.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=np.float)
+        prop_e_h.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=float)
+        prop_e_v.get_array()[:] = np.zeros(shape=graph_gt.num_edges(), dtype=float)
         prop_w = graph_gt.edge_properties[SGT_EDGE_LENGTH]
         prop_v_id = graph_gt.vertex_properties[DPSTR_CELL]
         prop_key_eq = 'field_value_eq'
@@ -4768,7 +4768,7 @@ class GraphMCF(object):
     def to_mask(self, verts=True):
 
         # Initialization
-        mask = np.zeros(shape=self.__density.shape, dtype=np.bool)
+        mask = np.zeros(shape=self.__density.shape, dtype=bool)
 
         if verts:
             for v in self.get_vertices_list():
@@ -4944,7 +4944,7 @@ class GraphMCF(object):
             lut_v = np.zeros(shape=self.get_nid(), dtype=object)
             graph = gt.Graph(directed=False)
             vertices = self.get_vertices_list()
-            pv_arr = np.zeros(shape=len(vertices), dtype=np.int)
+            pv_arr = np.zeros(shape=len(vertices), dtype=int)
             for i, v in enumerate(vertices):
                 v_id = v.get_id()
                 lut_v[v_id] = graph.add_vertex()
@@ -4984,7 +4984,7 @@ class GraphMCF(object):
         hold_graph = copy.deepcopy(self)
 
         # Purging
-        lut_v = np.zeros(shape=self.get_nid(), dtype=np.bool)
+        lut_v = np.zeros(shape=self.get_nid(), dtype=bool)
         for v_id in v_ids:
             lut_v[v_id] = True
         for v in hold_graph.get_vertices_list():
@@ -5161,7 +5161,7 @@ class GraphMCF(object):
             bin_s.append((h_l, rads[i]+thick_h))
         nr = len(bin_s)
         if mask is None:
-            mask = np.ones(shape=self.__density.shape, dtype=np.bool)
+            mask = np.ones(shape=self.__density.shape, dtype=bool)
         if mask.shape != self.__density.shape:
             error_msg = 'Input mask must have the same shape as the input density.'
             raise pexceptions.PySegInputError(expr='graph_rdf (GraphMCF)', msg=error_msg)
@@ -5218,7 +5218,7 @@ class GraphMCF(object):
         gc.collect()
 
         # Computing final results
-        # rdf = np.zeros(shape=nr, dtype=np.float)
+        # rdf = np.zeros(shape=nr, dtype=float)
         # for i in range(nv):
         #     rdf += verts_rdf_mpa[i:i+nr]
         # if norm:
@@ -5351,7 +5351,7 @@ class GraphMCF(object):
                     new_edge = True
                     e_id = edges_n[i].get_id()
                     hold_fv = self.__props_info.get_prop_entry_fast(key_prop_id, e_id,
-                                                                    1, np.float)
+                                                                    1, float)
                     hold_fv = hold_fv[0]
                     for j, n2 in enumerate(p_neighs):
                         n2_id = n2.get_id()
@@ -5359,7 +5359,7 @@ class GraphMCF(object):
                             e2 = p_edges_n[j]
                             hold_fv2 = self.__props_info.get_prop_entry_fast(key_prop_id,
                                                                              e2.get_id(),
-                                                                             1, np.float)
+                                                                             1, float)
                             hold_fv2 = hold_fv2[0]
                             if hold_fv2 < hold_fv:
                                 hold_fv = hold_fv2
@@ -5380,7 +5380,7 @@ class GraphMCF(object):
 
             # Update persistence list
             self.__props_info.set_prop_entry_fast(key_per_id, (per,), pair_id, 1)
-            hold = self.__props_info.get_prop_entry_fast(key_hid_id, pair_id, 1, np.int)
+            hold = self.__props_info.get_prop_entry_fast(key_hid_id, pair_id, 1, int)
             self.__per_lst[hold[0]] = per
 
     # Merges two edges, they must share a local min, the other two will be set as source and
@@ -5417,13 +5417,13 @@ class GraphMCF(object):
         # Check if the both vertices are already neighbours and update the edge field value
         t_e_id = t_edge.get_id()
         s_e_id = s_edge.get_id()
-        hold = self.__props_info.get_prop_entry_fast(key_field_id, t_e_id, 1, np.float)
+        hold = self.__props_info.get_prop_entry_fast(key_field_id, t_e_id, 1, float)
         v2_field = hold[0]
         neighs, edges = self.get_vertex_neighbours(v1_id)
         for i, n in enumerate(neighs):
             e_id = edges[i].get_id()
             if (n.get_id() == v3_id) and (e_id != t_e_id):
-                hold = self.__props_info.get_prop_entry_fast(key_field_id, e_id, 1, np.float)
+                hold = self.__props_info.get_prop_entry_fast(key_field_id, e_id, 1, float)
                 hold_field = hold[0]
                 if hold_field < v2_field:
                     v2_field = hold_field

@@ -480,7 +480,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
 
     # Masking according to distance to the original segmentation
     if mask:
-        tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(tomo.astype(numpy.bool)))
+        tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(tomo.astype(bool)))
         for i in range(tsurf.GetNumberOfCells()):
 
             # Check if all points which made up the polygon are in the mask
@@ -518,7 +518,7 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
         array = tsurf.GetCellData().GetNormals()
 
         # Build membrane mask
-        tomoh = numpy.ones(shape=tomo.shape, dtype=numpy.bool)
+        tomoh = numpy.ones(shape=tomo.shape, dtype=bool)
         tomon = numpy.ones(shape=(tomo.shape[0], tomo.shape[1], tomo.shape[2], 3),
                            dtype=TypesConverter().vtk_to_numpy(array))
         # for i in range(tsurf.GetNumberOfCells()):
@@ -552,9 +552,9 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
                         norm[2] = 0
                         pnorm = (i_x, i_y, 0)
                         p = (x, y, 0)
-                        dprod = dot_norm(numpy.asarray(p, dtype=numpy.float),
-                                         numpy.asarray(pnorm, dtype=numpy.float),
-                                         numpy.asarray(norm, dtype=numpy.float))
+                        dprod = dot_norm(numpy.asarray(p, dtype=float),
+                                         numpy.asarray(pnorm, dtype=float),
+                                         numpy.asarray(norm, dtype=float))
                         tomod[x, y, z] = tomod[x, y, z] * numpy.sign(dprod)
         else:
             for x in range(nx):
@@ -568,9 +568,9 @@ def gen_surface(tomo, lbl=1, mask=True, purge_ratio=1, field=False, mode_2d=Fals
                         # norm[2] = hold_norm[2]
                         pnorm = (i_x, i_y, i_z)
                         p = (x, y, z)
-                        dprod = dot_norm(numpy.asarray(pnorm, dtype=numpy.float),
-                                         numpy.asarray(p, dtype=numpy.float),
-                                         numpy.asarray(norm, dtype=numpy.float))
+                        dprod = dot_norm(numpy.asarray(pnorm, dtype=float),
+                                         numpy.asarray(p, dtype=float),
+                                         numpy.asarray(norm, dtype=float))
                         tomod[x, y, z] = tomod[x, y, z] * numpy.sign(dprod)
 
         if verbose:
@@ -691,7 +691,7 @@ def gen_surface_cloud(tomo, lbl=1, purge_ratio=1, cloud=False, verbose=False):
         print('Rescaled and translated...')
 
     # Masking according to distance to the original segmentation
-    tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(tomo.astype(numpy.bool)))
+    tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(tomo.astype(bool)))
     for i in range(tsurf.GetNumberOfCells()):
 
         # Check if all points which made up the polygon are in the mask
@@ -822,7 +822,7 @@ def signed_dist_cloud(cloud, dims):
         raise pexceptions.PySegInputError(expr='signed_dist_cloud', msg=error_msg)
 
     # Distance measure for the whole tomogram
-    dist_tomo = numpy.zeros(shape=dims, dtype=numpy.float)
+    dist_tomo = numpy.zeros(shape=dims, dtype=float)
     for x in range(dims[0]):
         for y in range(dims[1]):
             for z in range(dims[2]):
@@ -834,7 +834,7 @@ def signed_dist_cloud(cloud, dims):
                 normal = normals.GetTuple(cpoint_id)
                 # Measure distance
                 dist = vtk.vtkPlane.DistanceToPlane(point, normal, cpoint)
-                vect = numpy.zeros(shape=3, dtype=np.float)
+                vect = numpy.zeros(shape=3, dtype=float)
                 vtk.vtkMath.Subtract(point, cpoint, vect)
                 if vtk.vtkMath.Dot(vect, normal) > .0:
                     dist_tomo[x, y, z] = dist
@@ -847,8 +847,8 @@ def signed_dist_cloud(cloud, dims):
 # seg: binary segmentation (ndarray, 1 (or True) is fg)
 def seg_dist_trans(seg):
 
-    if seg.dtype != numpy.bool:
-        tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg.astype(numpy.bool)))
+    if seg.dtype != bool:
+        tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg.astype(bool)))
     else:
         tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg))
 
@@ -1170,7 +1170,7 @@ def find_sign_dist_slice(args):
             normal = normals.GetTuple(cpoint_id)
             # Measure distance
             dist = vtk.vtkPlane.DistanceToPlane(point, normal, cpoint)
-            vect = numpy.zeros(shape=3, dtype=np.float)
+            vect = numpy.zeros(shape=3, dtype=float)
             vtk.vtkMath.Subtract(point, cpoint, vect)
             if vtk.vtkMath.Dot(vect, normal) > .0:
                 tomo[x, y, slice] = dist
@@ -1195,9 +1195,9 @@ class TypesConverter(object):
             error_msg = 'type object required as input.' % din
             raise pexceptions.PySegInputError(expr='numpy_to_vtk_array (TypesConverter)', msg=error_msg)
 
-        if din == numpy.bool:
+        if din == bool:
             return vtk.vtkBitArray()
-        elif din == numpy.int:
+        elif din == int:
             return vtk.vtkIntArray()
         elif din == numpy.int8:
             return vtk.vtkTypeInt8Array()
@@ -1233,9 +1233,9 @@ class TypesConverter(object):
             raise pexceptions.PySegInputError(expr='vtk_to_numpy (TypesConverter)', msg=error_msg)
 
         if isinstance(din, vtk.vtkBitArray):
-            return numpy.bool
+            return bool
         elif isinstance(din, vtk.vtkIntArray) or isinstance(din, vtk.vtkTypeInt32Array):
-            return numpy.int
+            return int
         elif isinstance(din, vtk.vtkTypeInt8Array):
             return numpy.int8
         elif isinstance(din, vtk.vtkTypeInt16Array):
@@ -1270,15 +1270,15 @@ class TypesConverter(object):
                                                     msg=error_msg)
 
         if array is False:
-            if din == numpy.bool:
+            if din == bool:
                 return 'uint8_t'
             elif (din == numpy.int8) or (din == numpy.int16) or (din == numpy.uint8):
                 return 'short'
-            elif (din == numpy.int32) or (din == numpy.int) or (din == numpy.uint16):
+            elif (din == numpy.int32) or (din == int) or (din == numpy.uint16):
                 return 'int'
             elif (din == numpy.int64) or (din == numpy.uint32):
                 return 'long'
-            elif (din == numpy.float) or (din == numpy.float32) or (din == numpy.float64):
+            elif (din == float) or (din == numpy.float32) or (din == numpy.float64):
                 return 'float'
             else:
                 if din.name == 'bool':
@@ -1295,15 +1295,15 @@ class TypesConverter(object):
                     error_msg = 'Numpy type not identified. Objects are not accepted.' % din
                     raise pexceptions.PySegInputError(expr='numpy_to_gt (TypesConverter)', msg=error_msg)
         else:
-            if din == numpy.bool:
+            if din == bool:
                 return 'vector<uint8_t>'
             elif (din == numpy.int8) or (din == numpy.int16) or (din == numpy.uint8):
                 return 'vector<short>'
-            elif (din == numpy.int32) or (din == numpy.int) or (din == numpy.uint16):
+            elif (din == numpy.int32) or (din == int) or (din == numpy.uint16):
                 return 'vector<int>'
             elif (din == numpy.int64) or (din == numpy.uint32):
                 return 'vector<long>'
-            elif (din == numpy.float) or (din == numpy.float32) or (din == numpy.float64):
+            elif (din == float) or (din == numpy.float32) or (din == numpy.float64):
                 return 'vector<float>'
             else:
                 error_msg = 'Numpy type not identified. Objects are not accepted.' % din
@@ -1319,7 +1319,7 @@ class TypesConverter(object):
             raise pexceptions.PySegInputError(expr='gt_to_numpy (TypesConverter)', msg=error_msg)
 
         if (din == 'uint8_t') or (din == 'vector<uint8_t>'):
-            return numpy.bool
+            return bool
         elif (din == 'short') or (din == 'vector<short>'):
             return numpy.int16
         elif (din == 'int') or (din == 'vector<int>'):
@@ -1327,7 +1327,7 @@ class TypesConverter(object):
         elif (din == 'long') or (din == 'vector<long>'):
             return numpy.int64
         elif (din == 'float') or (din == 'vector<float>'):
-            return numpy.float
+            return float
         else:
             error_msg = 'Graph tool alias not identified.' % din
             raise pexceptions.PySegInputError(expr='gt_to_numpy (TypesConverter)', msg=error_msg)

@@ -32,7 +32,7 @@ class SpaceCurve(object):
     # do_geom: if True (default) curve geometric properties are computed during construction, otherwise not (this is
     #          useful for temporary curves)
     def __init__(self, samples, mode=2, do_geom=True):
-        self.__samples = np.asarray(samples, dtype=np.float)
+        self.__samples = np.asarray(samples, dtype=float)
         self.__mode = mode
         self.__apex_id = -1
         self.__ds = None
@@ -277,7 +277,7 @@ class SpaceCurve(object):
         poly_dec = decimator.GetOutput()
         coords = list()
         for i in range(poly_dec.GetNumberOfPoints()):
-            coords.append(np.asarray(poly_dec.GetPoint(i), dtype=np.float))
+            coords.append(np.asarray(poly_dec.GetPoint(i), dtype=float))
         return SpaceCurve(coords)
 
     def compute_point_intersection(self, point):
@@ -502,7 +502,7 @@ class SpaceCurve(object):
 
         # Initialization
         n_points = self.__samples.shape[0]
-        ds = np.zeros(shape=n_points, dtype=np.float)
+        ds = np.zeros(shape=n_points, dtype=float)
 
         # Regular cases
         for i in range(1, n_points):
@@ -511,7 +511,7 @@ class SpaceCurve(object):
         self.__ds = ds
 
     def __compute_lengths(self):
-        self.__lengths = np.zeros(shape=self.__ds.shape, dtype=np.float)
+        self.__lengths = np.zeros(shape=self.__ds.shape, dtype=float)
         for i in range(1, len(self.__ds)):
             self.__lengths[i] = self.__lengths[i-1] + self.__ds[i]
 
@@ -520,7 +520,7 @@ class SpaceCurve(object):
 
         # Initialization
         n_samples = self.__samples.shape[0]
-        usg_k = np.zeros(shape=n_samples, dtype=np.float)
+        usg_k = np.zeros(shape=n_samples, dtype=float)
         if n_samples <= 2:
             self.__usg_k = usg_k
             return
@@ -554,7 +554,7 @@ class SpaceCurve(object):
 
         # Initialization
         n_samples = self.__samples.shape[0]
-        sg_k = np.zeros(shape=n_samples, dtype=np.float)
+        sg_k = np.zeros(shape=n_samples, dtype=float)
         if n_samples <= 2:
             self.__sg_k = sg_k
             return
@@ -585,7 +585,7 @@ class SpaceCurve(object):
 
         # Initialization
         n_samples = self.__samples.shape[0]
-        usg_t = np.zeros(shape=n_samples, dtype=np.float)
+        usg_t = np.zeros(shape=n_samples, dtype=float)
         if n_samples <= 3:
             self.__usg_t = usg_t
             return
@@ -622,7 +622,7 @@ class SpaceCurve(object):
 
         # Initialization
         n_samples = self.__samples.shape[0]
-        sg_t = np.zeros(shape=n_samples, dtype=np.float)
+        sg_t = np.zeros(shape=n_samples, dtype=float)
         if n_samples <= 3:
             self.__sg_t = sg_t
             return
@@ -661,7 +661,7 @@ class SpaceCurve(object):
             return
 
         # Normal accumulation vector
-        n = np.zeros(shape=3, dtype=np.float)
+        n = np.zeros(shape=3, dtype=float)
         for i in range(1, n_samples-1):
             p_0, p_1, p_2 = self.__samples[i-1, :], self.__samples[i, :], self.__samples[i+1, :]
             # Update normal accumulation
@@ -699,7 +699,7 @@ class SpaceCurve(object):
             return
 
         # Normal accumulation vector
-        b = np.zeros(shape=3, dtype=np.float)
+        b = np.zeros(shape=3, dtype=float)
         for i in range(1, n_samples-1):
             p_0, p_1, p_2 = self.__samples[i-1, :], self.__samples[i, :], self.__samples[i+1, :]
             # Compute normal an tangent vectors

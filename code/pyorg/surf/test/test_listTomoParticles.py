@@ -81,7 +81,7 @@ class TestListTomoParticles(TestCase):
         :param shape: 3-tuple with the length of the three rectangle sides
         :return: a binary ndarray object
         """
-        seg = np.zeros(shape=np.asarray(shape) + 1, dtype=np.bool)
+        seg = np.zeros(shape=np.asarray(shape) + 1, dtype=bool)
         seg[1:shape[0], 1:shape[1], 1:shape[2]] = True
         return seg
 
@@ -900,7 +900,7 @@ class TestListTomoParticles(TestCase):
 
         # Initialization
         hold_shape = (TOMO_SHAPE[0], TOMO_SHAPE[1], .33 * TOMO_SHAPE[2])
-        rad, center = max(hold_shape) * .1, np.round(.5 * np.asarray(hold_shape)).astype(np.int)
+        rad, center = max(hold_shape) * .1, np.round(.5 * np.asarray(hold_shape)).astype(int)
         rad_rg = np.arange(SHELL_THICK+1, rad * np.pi, SHELL_THICK)
         voi = self.gen_shell_voi_array(hold_shape, center, rad, VOI_SHELL_THICK)
         disperse_io.save_numpy(voi, OUT_DIR + '/voi_shell.mrc')

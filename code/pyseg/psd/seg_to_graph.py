@@ -142,9 +142,9 @@ for row in range(star.get_nrows()):
         if os.path.splitext(segg_fname)[1] == '.fits':
             segg = segg.swapaxes(0, 1)
         seg = np.zeros(shape=segg.shape, dtype=np.uint16)
-        mic_c = np.asarray((.5*mic.shape[0], .5*mic.shape[1], .5*mic.shape[2]), dtype=np.float)
+        mic_c = np.asarray((.5*mic.shape[0], .5*mic.shape[1], .5*mic.shape[2]), dtype=float)
         for i in range(len(p_ids[0])):
-            point = np.asarray((p_ids[0][i], p_ids[1][i], p_ids[2][i]), dtype=np.float)
+            point = np.asarray((p_ids[0][i], p_ids[1][i], p_ids[2][i]), dtype=float)
             # Segmentation rigid body transformations
             # Centering
             point -= mic_c
@@ -165,7 +165,7 @@ for row in range(star.get_nrows()):
                 offy, offx, offz = graph_star.get_element('_psSegOffX', segg_row), \
                                    graph_star.get_element('_psSegOffY', segg_row), \
                                    graph_star.get_element('_psSegOffZ', segg_row)
-                point -= np.asarray((offx, offy, offz), dtype=np.float)
+                point -= np.asarray((offx, offy, offz), dtype=float)
             except KeyError:
                 pass
             # Assign the label

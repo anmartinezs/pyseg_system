@@ -177,7 +177,7 @@ class Filament(object):
             return None
 
         if img is None:
-            img = np.zeros(self.__geometry.get_size(), np.bool)
+            img = np.zeros(self.__geometry.get_size(), bool)
         else:
             offset = self.__geometry.get_offset()
             size = self.__geometry.get_size()
@@ -195,10 +195,10 @@ class Filament(object):
         if (mode == 'geometry') and (self.__geometry is not None):
             return self.__geometry.get_bound()
         else:
-            xl = np.finfo(np.float).max
+            xl = np.finfo(float).max
             yl = xl
             zl = xl
-            xh = np.finfo(np.float).min
+            xh = np.finfo(float).min
             yh = xh
             zh = xh
             for v in self.get_arc_vertices():
@@ -342,7 +342,7 @@ class NetFilaments(Network):
         self.get_vertices_list(False)
 
         # Counting vertex redundancy
-        lut = np.zeros(shape=self.__arc_graph.get_skel().GetNumberOfPoints(), dtype=np.int)
+        lut = np.zeros(shape=self.__arc_graph.get_skel().GetNumberOfPoints(), dtype=int)
         for v in self.__v_list:
             lut[v.get_id()] += 1
 
@@ -362,7 +362,7 @@ class NetFilaments(Network):
 
         # Points lut
         skel = self.__arc_graph.get_skel()
-        lut = np.zeros(shape=skel.GetNumberOfPoints(), dtype=np.bool)
+        lut = np.zeros(shape=skel.GetNumberOfPoints(), dtype=bool)
         for f in self.__filaments:
             for a in f.get_arcs():
                 for v in a.get_vertices():
@@ -383,7 +383,7 @@ class NetFilaments(Network):
 
     # Returns array with the length of the filaments
     def get_fil_lengths(self):
-        lengths = np.zeros(shape=len(self.__filaments), dtype=np.float)
+        lengths = np.zeros(shape=len(self.__filaments), dtype=float)
         for i, f in enumerate(self.__filaments):
             lengths[i] = f.get_length()
         return lengths
@@ -511,10 +511,10 @@ class NetFilaments(Network):
         else:
             hold_mode = 'topology'
 
-        xhl = np.finfo(np.float).max
+        xhl = np.finfo(float).max
         yhl = xhl
         zhl = xhl
-        xhh = np.finfo(np.float).min
+        xhh = np.finfo(float).min
         yhh = xhh
         zhh = xhh
         for f in self.__filaments:
@@ -549,7 +549,7 @@ class NetFilaments(Network):
             xl, yl, zl, xh, yh, zh = self.get_bound(mode='geometry')
             sz = (int(np.ceil(xh-xl)), int(np.ceil(yh-yl)), int(np.ceil(zh-zl)))
             if img is None:
-                img = np.zeros(shape=sz, dtype=np.bool)
+                img = np.zeros(shape=sz, dtype=bool)
             else:
                 if (img.shape[0] < xh) or (img.shape[1] < yh) or (img.shape[2] < zh):
                     error_msg = 'The input image cannot contain this geometry.'
@@ -564,7 +564,7 @@ class NetFilaments(Network):
         else:
 
             if img is None:
-                img = np.zeros(shape=manifold.shape, dtype=np.bool)
+                img = np.zeros(shape=manifold.shape, dtype=bool)
             else:
                 if (img.shape != manifold.shape) or (img.shape != density.shape):
                     error_msg = 'The input image must be equal than manifold and density files.'
@@ -573,7 +573,7 @@ class NetFilaments(Network):
 
             # Lut for keeping already processed points
             lut = np.ones(shape=self.__arc_graph.get_skel().GetNumberOfPoints(),
-                          dtype=np.bool)
+                          dtype=bool)
             for f in self.__filaments:
                 for v in f.get_arc_vertices():
                     point_id = v.get_id()
@@ -661,10 +661,10 @@ class NetArcGraphs(Network):
         else:
             hold_mode = 'topology'
 
-        xhl = np.finfo(np.float).max
+        xhl = np.finfo(float).max
         yhl = xhl
         zhl = xhl
-        xhh = np.finfo(np.float).min
+        xhh = np.finfo(float).min
         yhh = xhh
         zhh = xhh
         for f in self.__filaments:
@@ -814,7 +814,7 @@ class NetArcGraphs(Network):
             xl, yl, zl, xh, yh, zh = self.get_bound(mode='geometry')
             sz = (int(np.ceil(xh-xl)), int(np.ceil(yh-yl)), int(np.ceil(zh-zl)))
             if img is None:
-                img = np.zeros(shape=sz, dtype=np.int)
+                img = np.zeros(shape=sz, dtype=int)
             else:
                 if (img.shape[0] < xh) or (img.shape[1] < yh) or (img.shape[2] < zh):
                     error_msg = 'The input image cannot contain this geometry.'
@@ -842,7 +842,7 @@ class NetArcGraphs(Network):
         else:
 
             if img is None:
-                img = np.zeros(shape=manifold.shape, dtype=np.int)
+                img = np.zeros(shape=manifold.shape, dtype=int)
             else:
                 if (img.shape != manifold.shape) or (img.shape != density.shape):
                     error_msg = 'The input image must be equal than manifold and density files.'
@@ -867,7 +867,7 @@ class NetArcGraphs(Network):
                         points.append(key=v, value=i)
 
             # Lut for keeping already processed points
-            lut = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=np.bool)
+            lut = np.ones(shape=self.__skel.GetNumberOfPoints(), dtype=bool)
             for i in range(len(points)):
                 v = points.get_key(i)
                 point_id = v.get_id()
@@ -900,7 +900,7 @@ class NetArcGraphs(Network):
         return img
 
     def compute_diameters(self, resolution=1):
-        self.add_graph_property(STR_GRAPH_DIAM, disperse_io.TypesConverter().numpy_to_gt(np.float),
+        self.add_graph_property(STR_GRAPH_DIAM, disperse_io.TypesConverter().numpy_to_gt(float),
                                 ncomp=1, def_value=0)
         for g in self.__arc_graphs:
             g.compute_diameter(type='topo', resolution=resolution)

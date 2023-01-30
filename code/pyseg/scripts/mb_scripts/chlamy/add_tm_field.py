@@ -137,7 +137,7 @@ for in_graph in in_graphs:
 
             print('\t\tLoading input tomograms...')
             scores = ps.disperse_io.load_tomo(in_score)
-            angles = ps.disperse_io.load_tomo(in_angle).astype(np.int)
+            angles = ps.disperse_io.load_tomo(in_angle).astype(int)
             ang_lut = ps.disperse_io.load_tomo(in_ang_lut)
 
             print('\t\tAdding scores in angles (as rotated template normal)...')
