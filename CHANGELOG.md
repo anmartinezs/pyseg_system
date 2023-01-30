@@ -75,4 +75,7 @@
 * **21/07/2022**
     + Adding system installers for Python3 on Ubuntu 20.04	
 * **27/07/2022**
-    + Adding models in MRC format for generating synthetic tomogras in /data/tutorials/synth_sumb/modes	
+    + Adding models in MRC format for generating synthetic tomogras in /data/tutorials/synth_sumb/modes
+* **30/01/2023**
+    + Since numpy_1.24 types like np.int, np.float and np.bool are no longer used, they have been substituted Python native types int, float and bool respectively.
+    + Dockefile with container for Ubuntu 20.04 was added by DimitriosBellos
