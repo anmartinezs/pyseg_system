@@ -34,6 +34,18 @@ Python 3 transition completed and changes for being compatible with [Scipion](ht
 
 A description of the requirements, auxiliary software, installation and functionality testing is available on **docs/manual/manual.pdf** file. 
 
+### BUILDING AND RUNNING WITH DOCKER
+You may also build and run PySeg as docker container.
+To do this you can run:
+```
+docker build . -t pyseg:latest
+```
+And to run it (replace the <> placeholders accordingly, a typical location for the <mount-directory-in-container> is `/mnt`):
+```
+docker run --rm -it -v <data-directory-in-host-machine>:<mount-directory-in-container> pyseg:latest <command> <options>
+```
+For the available commands look at [USAGE](README.md#USAGE).
+
 ### USAGE
 In **docs/tutorials/synth_sumb/synth_sumb.pdf** there is a tutorial for de novo analysis of membrane proteins using self-generated synthetic data, it is strongly recomended to complete this tutorial before starting with your experimental data.
 
