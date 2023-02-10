@@ -120,21 +120,21 @@ class Settings(object):
     mc_zh = None
     mc_halo_z = None
 
-def gen_mask_msome(shape, rad1, rad2):
-    """
-    Generates a microsome mask
-    :param shape: 3-tuple for the output tomogram
-    :param rad1: radius 1 for the microsome
-    :param rad2: radius 2 for the microsome
-    :return: the generated microme
-    """
-    dx, dy, dz = float(shape[0]), float(shape[1]), float(shape[2])
-    dx2, dy2, dz2 = math.floor(.5 * dx), math.floor(.5 * dy), math.floor(.5 * dz)
-    x_l, y_l, z_l = -dx2, -dy2, -dz2
-    x_h, y_h, z_h = -dx2 + dx, -dy2 + dy, -dz2 + dz
-    X, Y, Z = np.meshgrid(np.arange(x_l, x_h), np.arange(y_l, y_h), np.arange(z_l, z_h), indexing='xy')
-    R = X*X + Y*Y + Z*Z
-    return (R >= (rad1*rad1)) & (R <= (rad2*rad2))
+#def gen_mask_msome(shape, rad1, rad2):
+    #"""
+    #Generates a microsome mask
+    #:param shape: 3-tuple for the output tomogram
+    #:param rad1: radius 1 for the microsome
+    #:param rad2: radius 2 for the microsome
+    #:return: the generated microme
+    #"""
+    #dx, dy, dz = float(shape[0]), float(shape[1]), float(shape[2])
+    #dx2, dy2, dz2 = math.floor(.5 * dx), math.floor(.5 * dy), math.floor(.5 * dz)
+    #x_l, y_l, z_l = -dx2, -dy2, -dz2
+    #x_h, y_h, z_h = -dx2 + dx, -dy2 + dy, -dz2 + dz
+    #X, Y, Z = np.meshgrid(np.arange(x_l, x_h), np.arange(y_l, y_h), np.arange(z_l, z_h), indexing='xy')
+    #R = X*X + Y*Y + Z*Z
+    #return (R >= (rad1*rad1)) & (R <= (rad2*rad2))
 
 
 def add_dmb_msome(tomo, mb_val, rad, res, mb_t, mb_s):
@@ -174,7 +174,7 @@ def add_dmb_msome(tomo, mb_val, rad, res, mb_t, mb_s):
     G_l = mb_val * np.exp(-(R-rad2)**2 / g_cte)
 
     # Creating the softmaks for the model structure
-    BW = sp.ndimage.morphology.distance_transform_edt(tomo == 0)
+    BW = sp.ndimage.distance_transform_edt(tomo == 0)
     Ss = 1. - np.exp(-(BW * BW) / g_cte_2)
     G_u = G_u * Ss
     G_l = G_l * Ss
@@ -411,6 +411,9 @@ def insert_particles(tomo, model, cent, cent_v, locs, angs):
 
 def pr_routine(pr_id, tomo_ids, settings):
 
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)  # os.mkdir() can only operate one directory deep
+    
     for i in tomo_ids:
 
         snr = settings.snrs[i]
@@ -421,6 +424,7 @@ def pr_routine(pr_id, tomo_ids, settings):
 
         print('\t\t\t+M[' + str(pr_id) + '/' + str(i) + '] Adding the particles: ')
         hold_locs, tot_locs = None, list()
+        np.random.seed()
         for j, key in enumerate(settings.mc_in_models):
             svol_ref = settings.svol_refs[key]
             npart = settings.nparts[i, j]
@@ -445,6 +449,19 @@ def pr_routine(pr_id, tomo_ids, settings):
                 # pass
             for loc in locs:
                 loc[2] += settings.mc_halo_z
+                
+            # Write coordinates
+            out_coords = os.path.join(out_dir, out_stem + '_tomo_mic_' + str(i) + '_coords.txt')
+            if j==0:
+                write_or_append='w'
+            else:
+                write_or_append='a'
+            with open(out_coords, write_or_append) as f:
+                ###print(f"i {i}, j {j}, key {key}, locs {type(locs)}, angs {len(angs)}, out_coords {out_coords}, write_or_append {write_or_append}")  #### DIAGNOSTIC
+                if j==0 : f.write("# tomo_idx, model_idx, model_name, model_loc_idx, x, y, z, phi, theta, psi\n")
+                for loc_idx, loc in enumerate(locs):
+                    f.write(f"{i}, {j}, {os.path.basename(key)}, {loc_idx}, {', '.join(map( str,['{0:0.2f}'.format(i) for i in loc]) )}, {', '.join(map( str,['{0:0.2f}'.format(i) for i in angs[loc_idx]]) )}\n")
+                
             insert_particles(tomo, svol_ref, settings.cent_p, settings.cent_v, locs, angs)
             tot_locs += locs
             try:
