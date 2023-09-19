@@ -5,6 +5,8 @@
 
 __author__ = 'martinez'
 
+import sys
+
 ################################################################################################
 # Exceptions
 
@@ -23,6 +25,8 @@ class PySegInputError(PySegError):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
+        print(self.expr + ' - ' + self.msg, file=sys.stderr)
+        exit()
 
     def get_message(self):
         return self.expr + ' - ' + self.msg
@@ -60,6 +64,8 @@ class PySegInputWarning(PySegWarning):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
+        print(self.expr + ' - ' + self.msg, file=sys.stderr)
+        exit()
 
     def get_message(self):
         return self.expr + ' - ' + self.msg
