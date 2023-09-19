@@ -16,6 +16,7 @@ from . import disperse_io
 import shutil
 from pyto.io import ImageIO as ImageIO
 from pyseg import pexceptions
+import sys
 try:
     from globals import *
 except:
@@ -144,24 +145,34 @@ class DisPerSe(object):
             if (not force_no_mse) and (not os.path.exists(input_file_skl)):
                 self.mse()
             if not os.path.exists(input_file_skl):
-                error_msg = 'Skeleton file %s not found!' % input_file_skl
+                error_msg = 'ERROR!! Skeleton file %s not found!' % input_file_skl
+                print(f"get_skel (DisPerSe) {error_msg}")
+                exit(2)
                 raise pexceptions.PySegInputError(expr='get_skel (DisPerSe)', msg=error_msg)
             # Converting to VTK data
             skelconv_cmd = ('skelconv', input_file_skl,
                             '-outDir', self.__work_dir,
                             '-smooth', str(self.__smooth),
                             '-to', 'vtp')
+            file_log = open(self.__log_file, 'a')
+            file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(skelconv_cmd) + '\n')
+
             try:
-                file_log = open(self.__log_file, 'a')
-                file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(skelconv_cmd) + '\n')
-                subprocess.call(skelconv_cmd, stdout=file_log, stderr=file_log)
+                ##file_log = open(self.__log_file, 'a')
+                ##file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(skelconv_cmd) + '\n')
+                #return_code = subprocess.call(skelconv_cmd, stdout=file_log, stderr=file_log)
+                return_code = subprocess.call(skelconv_cmd, stdout=file_log)
             except subprocess.CalledProcessError:
                 file_log.close()
                 error_msg = 'Error running command %s. (See %s file for more information)' \
                             % (skelconv_cmd, self.__log_file)
+                print(f"return_code : '{return_code}'")
+                print(error_msg)
                 raise pexceptions.PySegInputError(expr='get_skel DisPerSe', msg=error_msg)
             except IOError:
                 error_msg = 'Log file could not be written %s.' % self.__log_file
+                print(f"return_code : '{return_code}'")
+                print(error_msg)
                 raise pexceptions.PySegInputError(expr='get_skel (DisPerSe)', msg=error_msg)
             file_log.close()
 
@@ -354,19 +365,64 @@ class DisPerSe(object):
         mse_cmd.append(out_dir_opt[1])
 
         # Command calling
+        file_log = open(self.__log_file, 'a')
+        file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(mse_cmd) + '\n')
+        return_code = 8  # will reset upon "success"
+        
+        #### TESTING
+        #print(f'372 Running command: {mse_cmd}')
+        #process_result = subprocess.run(mse_cmd, stdout=file_log, stderr=subprocess.PIPE)
+        #print(f'376 process_result: {process_result}')
+        #exit()
+        
         try:
-            file_log = open(self.__log_file, 'a')
-            file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(mse_cmd) + '\n')
-            subprocess.call(mse_cmd, stdout=file_log, stderr=file_log)
+            # subprocess.call() only returns the return code, whereas subprocess.run() returns a CompletedProcess object, which includes other info too
+            process_result = subprocess.run(mse_cmd, stdout=file_log, stderr=subprocess.PIPE)
+        except FileNotFoundError as e:
+            ###error_msg = 'Error running command %s.' % mse_cmd
+            cmd_string = ' '.join(mse_cmd)
+            print(f'\tError running command: {cmd_string}', file=sys.stderr)
+            print(f"\t\t{e}", file=sys.stderr)
         except subprocess.CalledProcessError:
-            file_log.close()
             error_msg = 'Error running command %s.' % mse_cmd
+            print(error_msg, file=sys.stderr)
             raise pexceptions.PySegInputError(expr='mse DisPerSe', msg=error_msg)
         except IOError:
             error_msg = 'Log file could not be written %s.' % self.__log_file
+            print(error_msg, file=sys.stderr)
             raise pexceptions.PySegInputError(expr='mse DisPerSe', msg=error_msg)
+        
         file_log.close()
+        return_code= process_result.returncode
+        
+        # If program starts & crashes, the try attempt will be considered a success, so we will check the return code
+        if return_code == 127:
+            self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Maybe there are missing libraries?")
+        elif return_code == 255:
+            self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Maybe the input file is missing?")
+        elif return_code != 0:
+            self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Unknown error, seek help")
+        else:
+            print(f"402 process_result {type(process_result)}: '{process_result}'")
+        
+        return return_code
 
+    def printMyError(self, attempted_cmd, return_code, process_stderr, optional_msg=None):
+        """
+        Prints command, return code, and error message.
+        
+        Arguments:
+            attempted_cmd  : Attempted command
+            return_code    : Return code
+            process_stderr : Standard error from subprocess.run()
+        """
+        
+        cmd_string = ' '.join(attempted_cmd)
+        print(f'\tError running command: {cmd_string}', file=sys.stderr)
+        print(f"\t\tReturn code: {return_code}", file=sys.stderr)
+        print(f"\t\t{process_stderr}", file=sys.stderr)
+        if optional_msg : print(f"\t\t{optional_msg}", file=sys.stderr)
+    
     # Clean working directory
     def clean_work_dir(self):
 
