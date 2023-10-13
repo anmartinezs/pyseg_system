@@ -143,19 +143,24 @@ class DisPerSe(object):
         # Commands are only called if the input file does not exist
         if not os.path.exists(input_file_vtp):
             if (not force_no_mse) and (not os.path.exists(input_file_skl)):
-                self.mse()
+                mse_return = self.mse()
+                print(f"147 DisPerSE.mse finished, return code: {mse_return}", file=sys.stdout, flush=True)
+            
+            # Sanity check
             if not os.path.exists(input_file_skl):
-                error_msg = 'ERROR!! Skeleton file %s not found!' % input_file_skl
-                print(f"get_skel (DisPerSe) {error_msg}")
+                ###error_msg = '\n\t[' + time.strftime("%c") + ']ERROR!! Skeleton file %s not found!' % input_file_skl
+                error_msg = f'ERROR!! Skeleton file {input_file_skl} not found!'
+                print(f"\n\t[{time.strftime('%c')}] get_skel (DisPerSe) {error_msg}", file=sys.stdout, flush=True)
                 exit(2)
-                raise pexceptions.PySegInputError(expr='get_skel (DisPerSe)', msg=error_msg)
+                ###raise pexceptions.PySegInputError(expr='get_skel (DisPerSe)', msg=error_msg)
+            
             # Converting to VTK data
             skelconv_cmd = ('skelconv', input_file_skl,
                             '-outDir', self.__work_dir,
                             '-smooth', str(self.__smooth),
                             '-to', 'vtp')
             file_log = open(self.__log_file, 'a')
-            file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(skelconv_cmd) + '\n')
+            file_log.write('\n[' + time.strftime("%c") + '] RUNNING COMMAND:-> ' + ' '.join(skelconv_cmd) + '\n')
 
             try:
                 ##file_log = open(self.__log_file, 'a')
@@ -166,13 +171,13 @@ class DisPerSe(object):
                 file_log.close()
                 error_msg = 'Error running command %s. (See %s file for more information)' \
                             % (skelconv_cmd, self.__log_file)
-                print(f"return_code : '{return_code}'")
+                print(f"return_code : '{return_code}'", file=sys.stdout, flush=True)
                 print(error_msg)
                 raise pexceptions.PySegInputError(expr='get_skel DisPerSe', msg=error_msg)
             except IOError:
                 error_msg = 'Log file could not be written %s.' % self.__log_file
-                print(f"return_code : '{return_code}'")
-                print(error_msg)
+                print(f"return_code : '{return_code}'", file=sys.stdout, flush=True)
+                print(error_msg, file=sys.stdout, flush=True)
                 raise pexceptions.PySegInputError(expr='get_skel (DisPerSe)', msg=error_msg)
             file_log.close()
 
@@ -194,14 +199,15 @@ class DisPerSe(object):
             error_msg = 'dumpManifolds option must be configured.'
             raise pexceptions.PySegInputError(expr='get_manifolds (DisPerSe)', msg=error_msg)
 
+        # Parse input parameters
+        if inv:
+            self.gen_inv()
+            input_file_net = self.__input_inv
+        else:
+            path, filename = os.path.split(self.__input)
+            input_file_net = self.__work_dir + '/' + filename
+        
         if not no_cut:
-            # Parse input parameters
-            if inv:
-                self.gen_inv()
-                input_file_net = self.__input_inv
-            else:
-                path, filename = os.path.split(self.__input)
-                input_file_net = self.__work_dir + '/' + filename
             if (self.__cut is not None) and (self.__cut > 0):
                 if round(self.__cut) == self.__cut:
                     input_file_net += '_c' + str(int(math.floor(self.__cut)))
@@ -212,73 +218,146 @@ class DisPerSe(object):
                     input_file_net += '_s' + str(int(math.floor(self.__nsig)))
                 else:
                     input_file_net += '_s' + str(self.__nsig)
-            input_file_net += '_manifolds_' + self.__dump_manifolds
-            input_file_net += '.NDnet'
-            input_file_vti = input_file_net + '.vti'
+        
+        input_file_net += '_manifolds_' + self.__dump_manifolds
+        input_file_net += '.NDnet'
+        input_file_vti = input_file_net + '.vti'
 
-            # Commands are only called if the input file does not exist
-            if not os.path.exists(input_file_vti):
-                if (not force_no_mse) and (not os.path.exists(input_file_net)):
+        # Commands are only called if the input file does not exist
+        if not os.path.exists(input_file_vti):
+            if (not force_no_mse) and (not os.path.exists(input_file_net)):
+                if not no_cut:
                     self.mse()
-                if not os.path.exists(input_file_net):
-                    error_msg = 'Network file %s not found!' % input_file_net
-                    raise pexceptions.PySegInputError(expr='get_manifolds (DisPerSe)', msg=error_msg)
-                # Converting to VTK data
-                netconv_cmd = ('netconv', input_file_net, '-outDir', self.__work_dir, '-to', 'vtu')
-                try:
-                    file_log = open(self.__log_file, 'a')
-                    file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(netconv_cmd) + '\n')
-                    subprocess.call(netconv_cmd, stdout=file_log, stderr=file_log)
-                except subprocess.CalledProcessError:
-                    file_log.close()
-                    error_msg = 'Error running command %s. (See %s file for more information)' \
-                                % (netconv_cmd, self.__log_file)
-                    raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
-                except IOError:
-                    error_msg = 'Log file could not be written %s.' % self.__log_file
-                    raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
-                file_log.close()
-                # Converting to .vti format
-                input_file_net += '.vtu'
-                disperse_io.manifold3d_from_vtu_to_img(filename=input_file_net, outputdir=self.__work_dir,
-                                                       format='vti', transpose=False, pad=self.__pad)
-        else:
-            # Parse input parameters
-            if inv:
-                self.gen_inv()
-                input_file_net = self.__input_inv
-            else:
-                path, filename = os.path.split(self.__input)
-                input_file_net = self.__work_dir + '/' + filename
-            input_file_net += '_manifolds_' + self.__dump_manifolds
-            input_file_net += '.NDnet'
-            input_file_vti = input_file_net + '.vti'
-            # Commands are only called if the input file does not exist
-            if not os.path.exists(input_file_vti):
-                if (not force_no_mse) and (not os.path.exists(input_file_net)):
+                else:
                     self.mse(no_cut=True, inv=inv)
-                if not os.path.exists(input_file_net):
-                    error_msg = 'Network file %s not found!' % input_file_net
-                    raise pexceptions.PySegInputError(expr='get_manifolds (DisPerSe)', msg=error_msg)
-                # Converting to VTK data
-                netconv_cmd = ('netconv', input_file_net, '-outDir', self.__work_dir, '-to', 'vtu')
-                try:
-                    file_log = open(self.__log_file, 'a')
-                    file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(netconv_cmd) + '\n')
-                    subprocess.call(netconv_cmd, stdout=file_log, stderr=file_log)
-                except subprocess.CalledProcessError:
-                    file_log.close()
-                    error_msg = 'Error running command %s. (See %s file for more information)' \
-                                % (netconv_cmd, self.__log_file)
-                    raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
-                except IOError:
-                    error_msg = 'Log file could not be written %s.' % self.__log_file
-                    raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
-                file_log.close()
-                # Converting to .vti format
-                input_file_net += '.vtu'
-                disperse_io.manifold3d_from_vtu_to_img(filename=input_file_net, outputdir=self.__work_dir,
-                                                       format='vti', transpose=False, pad=self.__pad)
+            
+            if not os.path.exists(input_file_net):
+                error_msg = 'Network file %s not found!' % input_file_net
+                raise pexceptions.PySegInputError(expr='get_manifolds (DisPerSe)', msg=error_msg)
+            
+            # Converting to VTK data
+            netconv_cmd = ('netconv', input_file_net, '-outDir', self.__work_dir, '-to', 'vtu')
+            file_log = open(self.__log_file, 'a')
+            file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(netconv_cmd) + '\n')
+            return_code = 9  # will reset upon "success"
+            
+            try:
+                process_result = subprocess.run(netconv_cmd, stdout=file_log, stderr=subprocess.PIPE)
+            except subprocess.CalledProcessError:
+                error_msg = 'Error running command %s. (See %s file for more information)' \
+                            % (netconv_cmd, self.__log_file)
+                print(error_msg, file=sys.stderr)
+                raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
+            except IOError:
+                error_msg = 'Log file could not be written %s.' % self.__log_file
+                print(error_msg, file=sys.stderr)
+                raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
+            
+            file_log.close()
+            return_code= process_result.returncode
+            ###print(f"252 process_result {type(process_result)}: '{process_result}'", file=sys.stdout, flush=True)  ### TESTING
+            
+            # Converting to .vti format
+            input_file_net += '.vtu'
+            disperse_io.manifold3d_from_vtu_to_img(filename=input_file_net, outputdir=self.__work_dir,
+                                                    format='vti', transpose=False, pad=self.__pad)
+            
+        #if not no_cut:
+            ## Parse input parameters
+            #if inv:
+                #self.gen_inv()
+                #input_file_net = self.__input_inv
+            #else:
+                #path, filename = os.path.split(self.__input)
+                #input_file_net = self.__work_dir + '/' + filename
+            #if (self.__cut is not None) and (self.__cut > 0):
+                #if round(self.__cut) == self.__cut:
+                    #input_file_net += '_c' + str(int(math.floor(self.__cut)))
+                #else:
+                    #input_file_net += '_c' + str(self.__cut)
+            #elif (self.__nsig is not None) and (self.__nsig > 0):
+                #if round(self.__nsig) == self.__nsig:
+                    #input_file_net += '_s' + str(int(math.floor(self.__nsig)))
+                #else:
+                    #input_file_net += '_s' + str(self.__nsig)
+            #input_file_net += '_manifolds_' + self.__dump_manifolds
+            #input_file_net += '.NDnet'
+            #input_file_vti = input_file_net + '.vti'
+
+            ## Commands are only called if the input file does not exist
+            #if not os.path.exists(input_file_vti):
+                #if (not force_no_mse) and (not os.path.exists(input_file_net)):
+                    #self.mse()
+                #if not os.path.exists(input_file_net):
+                    #error_msg = 'Network file %s not found!' % input_file_net
+                    #raise pexceptions.PySegInputError(expr='get_manifolds (DisPerSe)', msg=error_msg)
+                
+                ## Converting to VTK data
+                #netconv_cmd = ('netconv', input_file_net, '-outDir', self.__work_dir, '-to', 'vtu')
+                #file_log = open(self.__log_file, 'a')
+                #file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(netconv_cmd) + '\n')
+                #return_code = 9  # will reset upon "success"
+                
+                #try:
+                    #process_result = subprocess.run(netconv_cmd, stdout=file_log, stderr=subprocess.PIPE)
+                #except subprocess.CalledProcessError:
+                    #error_msg = 'Error running command %s. (See %s file for more information)' \
+                                #% (netconv_cmd, self.__log_file)
+                    #print(error_msg, file=sys.stderr)
+                    #raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
+                #except IOError:
+                    #error_msg = 'Log file could not be written %s.' % self.__log_file
+                    #print(error_msg, file=sys.stderr)
+                    #raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
+                
+                #file_log.close()
+                #return_code= process_result.returncode
+                #print(f"252 process_result {type(process_result)}: '{process_result}'")  ### TESTING
+                
+                ## Converting to .vti format
+                #input_file_net += '.vtu'
+                #disperse_io.manifold3d_from_vtu_to_img(filename=input_file_net, outputdir=self.__work_dir,
+                                                       #format='vti', transpose=False, pad=self.__pad)
+        #else:
+            ## Parse input parameters
+            #if inv:
+                #self.gen_inv()
+                #input_file_net = self.__input_inv
+            #else:
+                #path, filename = os.path.split(self.__input)
+                #input_file_net = self.__work_dir + '/' + filename
+            #input_file_net += '_manifolds_' + self.__dump_manifolds
+            #input_file_net += '.NDnet'
+            #input_file_vti = input_file_net + '.vti'
+            
+            ## Commands are only called if the input file does not exist
+            #if not os.path.exists(input_file_vti):
+                #if (not force_no_mse) and (not os.path.exists(input_file_net)):
+                    #self.mse(no_cut=True, inv=inv)
+                #if not os.path.exists(input_file_net):
+                    #error_msg = 'Network file %s not found!' % input_file_net
+                    #raise pexceptions.PySegInputError(expr='get_manifolds (DisPerSe)', msg=error_msg)
+                
+                ## Converting to VTK data
+                #netconv_cmd = ('netconv', input_file_net, '-outDir', self.__work_dir, '-to', 'vtu')
+                #try:
+                    #file_log = open(self.__log_file, 'a')
+                    #file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(netconv_cmd) + '\n')
+                    #subprocess.call(netconv_cmd, stdout=file_log, stderr=file_log)
+                #except subprocess.CalledProcessError:
+                    #file_log.close()
+                    #error_msg = 'Error running command %s. (See %s file for more information)' \
+                                #% (netconv_cmd, self.__log_file)
+                    #raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
+                #except IOError:
+                    #error_msg = 'Log file could not be written %s.' % self.__log_file
+                    #raise pexceptions.PySegInputError(expr='get_manifolds DisPerSe', msg=error_msg)
+                #file_log.close()
+                
+                ## Converting to .vti format
+                #input_file_net += '.vtu'
+                #disperse_io.manifold3d_from_vtu_to_img(filename=input_file_net, outputdir=self.__work_dir,
+                                                       #format='vti', transpose=False, pad=self.__pad)
 
         # Reading the vti file
         reader = vtk.vtkXMLImageDataReader()
@@ -291,7 +370,7 @@ class DisPerSe(object):
         img[img < 0] = 0
         img[img > np.prod(img.shape)] = 0
 
-        return img.astype(np.int64)
+        return img.astype(np.int64), return_code
 
     def get_working_dir(self):
         return self.__work_dir
@@ -365,22 +444,16 @@ class DisPerSe(object):
         mse_cmd.append(out_dir_opt[1])
 
         # Command calling
+        cmd_string = ' '.join(mse_cmd)
         file_log = open(self.__log_file, 'a')
         file_log.write('\n[' + time.strftime("%c") + ']RUNNING COMMAND:-> ' + ' '.join(mse_cmd) + '\n')
         return_code = 8  # will reset upon "success"
-        
-        #### TESTING
-        #print(f'372 Running command: {mse_cmd}')
-        #process_result = subprocess.run(mse_cmd, stdout=file_log, stderr=subprocess.PIPE)
-        #print(f'376 process_result: {process_result}')
-        #exit()
         
         try:
             # subprocess.call() only returns the return code, whereas subprocess.run() returns a CompletedProcess object, which includes other info too
             process_result = subprocess.run(mse_cmd, stdout=file_log, stderr=subprocess.PIPE)
         except FileNotFoundError as e:
             ###error_msg = 'Error running command %s.' % mse_cmd
-            cmd_string = ' '.join(mse_cmd)
             print(f'\tError running command: {cmd_string}', file=sys.stderr)
             print(f"\t\t{e}", file=sys.stderr)
         except subprocess.CalledProcessError:
@@ -401,13 +474,15 @@ class DisPerSe(object):
         elif return_code == 255:
             self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Maybe the input file is missing?")
         elif return_code != 0:
-            self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Unknown error, seek help")
+            self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Unknown error, seek help", process_result)
+            print("\t\tMaybe you ran out of memory??", file=sys.stdout, flush=True)
         else:
-            print(f"402 process_result {type(process_result)}: '{process_result}'")
+            ###print(f"402 process_result {type(process_result)}: '{process_result}'")
+            print(f'\n\tSuccess running command: {cmd_string}\n', file=sys.stdout, flush=True)
         
         return return_code
 
-    def printMyError(self, attempted_cmd, return_code, process_stderr, optional_msg=None):
+    def printMyError(self, attempted_cmd, return_code, process_stderr, optional_msg=None, completed_proc_obj=None):
         """
         Prints command, return code, and error message.
         
@@ -420,7 +495,11 @@ class DisPerSe(object):
         cmd_string = ' '.join(attempted_cmd)
         print(f'\tError running command: {cmd_string}', file=sys.stderr)
         print(f"\t\tReturn code: {return_code}", file=sys.stderr)
-        print(f"\t\t{process_stderr}", file=sys.stderr)
+        if process_stderr : 
+          print(f"\t\tStderr: {process_stderr}", file=sys.stderr)
+        else:
+          print(f"\t\t{completed_proc_obj}", file=sys.stderr)
+        if completed_proc_obj : print(f"\t\t{completed_proc_obj}", file=sys.stderr)  ### TESTING
         if optional_msg : print(f"\t\t{optional_msg}", file=sys.stderr)
     
     # Clean working directory

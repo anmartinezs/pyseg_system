@@ -11,6 +11,7 @@ import vtk
 import math
 import numpy as np
 from pyseg.globals.utils import angle_2vec_3D, closest_points
+import warnings
 
 ###### Global variables
 PI_2 = .5 * np.pi
@@ -758,7 +759,10 @@ class SpaceCurve(object):
         a_id = np.argmax(dsts)
         self.__apex_id = a_id
 
-        self.__al = dsts[a_id] / v_a_m
+        try:
+            self.__al = dsts[a_id] / v_a_m
+        except RuntimeWarning:
+            print(f"curve.py:765 dsts[a_id] '{dsts[a_id]}', v_a_m '{v_a_m}'")
 
     # Compute curve sinuosity (ratio between geodesic and d(p_start, p_end))
     # Requires previous computation of curve length
