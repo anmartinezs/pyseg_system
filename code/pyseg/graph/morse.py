@@ -4282,6 +4282,7 @@ class GraphMCF(object):
         # Vertices simplification
         v_err = False
         n_tverts = None
+        in_verts = None
         if v_num is not None:
             n_tverts = v_num
         elif v_den is not None:
@@ -4366,7 +4367,7 @@ class GraphMCF(object):
         # Vertices simplification
         v_err = False
         n_tverts = None
-        n_tverts = None
+        n_verts = None
         if v_den is not None:
             # Compute target number of vertices
             n_tverts = int(round(v_den * vol))
@@ -4391,7 +4392,7 @@ class GraphMCF(object):
         n_tedgs = None
         n_edgs = None
         n_tverts = None
-        n_verts = None
+        if not n_verts: n_verts = 0
         if e_den is not None:
             # Compute target number of edges
             n_tedgs = int(round(e_den * vol))
@@ -4410,13 +4411,13 @@ class GraphMCF(object):
                                    fit=fit)
 
         # Raise warnings
+        ###print(f"morse 4413 n_verts : '{n_verts}', n_tverts : '{n_tverts}'")
         if v_err:
             curr_res = n_verts / vol
             error_msg = 'Demanded resolution for vertices could not be reached. \n'
             error_msg += 'Current vertex resolution is ' + str(curr_res) + ' vox/nm^3, '
             error_msg += 'asked ' + str(v_den) + ' vox/nm^3.'
             raise pyseg.pexceptions.PySegInputWarning(expr='graph_density_simp_ref (GraphMCF)', msg=error_msg)
-        ###print(f"morse 4418 n_verts : '{n_verts}', n_tverts : '{n_tverts}'")
         if e_err:
             curr_res = n_edgs / vol
             error_msg = 'Demanded resolution for edges could not be reached. \n'
