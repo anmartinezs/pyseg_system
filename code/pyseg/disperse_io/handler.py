@@ -468,16 +468,17 @@ class DisPerSe(object):
         file_log.close()
         return_code= process_result.returncode
         
-        # If program starts & crashes, the try attempt will be considered a success, so we will check the return code
+        # If program starts & crashes, the try attempt will be considered a success, so let's check the return code
         if return_code == 127:
             self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Maybe there are missing libraries?")
         elif return_code == 255:
             self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Maybe the input file is missing?")
+        elif return_code == -11:
+            self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Maybe you ran out of memory??", process_result)
         elif return_code != 0:
             self.printMyError(mse_cmd, return_code, process_result.stderr.decode('utf-8'), "Unknown error, seek help", process_result)
             print("\t\tMaybe you ran out of memory??", file=sys.stdout, flush=True)
         else:
-            ###print(f"402 process_result {type(process_result)}: '{process_result}'")
             print(f'\n\tSuccess running command: {cmd_string}\n', file=sys.stdout, flush=True)
         
         return return_code
