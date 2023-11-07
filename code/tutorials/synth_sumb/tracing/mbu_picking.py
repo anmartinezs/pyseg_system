@@ -364,4 +364,4 @@ out_star = output_dir + '/' + os.path.splitext(os.path.split(in_star)[1])[0] + '
 print(f'\t{time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime() )} Storing particles STAR file in: ' + out_star, file=sys.stdout, flush=True)
 star_parts.store(out_star)
 
-print(f'Terminated {os.path.basename(__file__)}, (' + time.strftime("%c") + ')', file=sys.stdout, flush=True)
+print(f'Terminated {os.path.basename(__file__)}, ' + time.strftime("%c"), file=sys.stdout, flush=True)
