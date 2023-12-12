@@ -33,7 +33,7 @@ if m == 1
     Izz = diff3d( Iz, 3 );
     Ixy = diff3d( Ix, 2 );
     Ixz = diff3d( Ix, 3 );
-    Iyz = diff3d( Iz, 3 );
+    Iyz = diff3d( Iy, 3 );
 else
     if v
         fprintf( 1, 'Structure tensor...\n' );

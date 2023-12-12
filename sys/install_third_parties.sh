@@ -3,8 +3,10 @@ set -ex
 
 ## Installing third parties packages
 
-# Install DisPerSe (modified version for PySeg v1.0)
-cd install/disperse/0.9.24_pyseg_gcc7
+# Install latest DisPerSe from source
+wget --no-check-certificate https://github.com/thierry-sousbie/DisPerSE/archive/refs/heads/master.tar.gz
+mv master.tar.gz install/disperse/latest/sources/disperse_latest.tar.gz
+cd install/disperse/latest
 chmod u+x install.sh
 ./install.sh
 

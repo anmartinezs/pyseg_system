@@ -36,7 +36,7 @@ except:
 
 ####### Input data
 
-ROOT_PATH = os.path.split(os.path.abspath(__file__))[0] + '/../../../../data/tutorials/exp_ssmb/tracing/mb_single'
+ROOT_PATH = './../../../../data/tutorials/exp_ssmb/tracing/mb_single' # os.path.split(os.path.abspath(__file__))[0] + '/../../../../data/tutorials/exp_ssmb/tracing/mb_single'
 
 # Input STAR file with the GraphMCF pickles
 in_star = ROOT_PATH + '/graph/lumen/in_graph_mb_graph.star' # The outuput of mb_graph.py

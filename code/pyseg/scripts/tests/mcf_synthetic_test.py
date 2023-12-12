@@ -29,8 +29,8 @@ try:
         do_long = False
 except IndexError:
     do_long = False
-ROOT_DIR = os.path.split(os.path.abspath(__file__))[0] + '/../../../tests/'
-MCF_OUT_DIR = ROOT_DIR + '/../../data/synthetic_grid'
+ROOT_DIR = './' # os.path.split(os.path.abspath(__file__))[0] + '/../../../tests/'
+MCF_OUT_DIR = ROOT_DIR + '/../../data/synthetic_grid' # ROOT_DIR + '/../../data/synthetic_grid'
 
 #################################
 

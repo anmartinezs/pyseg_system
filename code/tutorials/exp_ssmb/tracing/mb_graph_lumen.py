@@ -41,7 +41,7 @@ SEG_TAG = '_seg'
 
 ####### Input data
 
-ROOT_PATH = os.path.split(os.path.abspath(__file__))[0] + '/../../../../data/tutorials/exp_ssmb/tracing/mb_single'
+ROOT_PATH = './../../../../data/tutorials/exp_ssmb/tracing/mb_single' # os.path.split(os.path.abspath(__file__))[0] + '/../../../../data/tutorials/exp_ssmb/tracing/mb_single'
 
 # Input STAR file with segmentations
 in_star = ROOT_PATH + '/in/in_graph.star'
