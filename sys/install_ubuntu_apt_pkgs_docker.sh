@@ -2,8 +2,9 @@
 set -ex
 
 ## Installing Ubuntu APT packages (required sudo privileges)
-sudo apt-get update \
-    && sudo apt-get install -y --no-install-recommends \
+export DEBIAN_FRONTEND=noninteractive
+apt-get -yq update \
+    && apt-get install -yq --no-install-recommends \
       "build-essential" \
       "bzip2" \
       "cmake" \
