@@ -2,7 +2,7 @@
 set -ex
 
 ## Installing Anaconda
-if [ -d "sys/soft/minconda3" ] 
+if [ -d "soft/miniconda3" ]
 then
     rm -r soft/miniconda3
 else
