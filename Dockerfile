@@ -18,17 +18,10 @@ FROM ubuntu:22.04
 WORKDIR /usr/local/pyseg_system
 COPY . .
 RUN rm -rf sys/soft
-# COPY sys/*.sh /usr/local/pyseg_system/sys/
 
 RUN cd sys && chmod u+x *.sh && ./install_ubuntu_apt_pkgs_docker.sh && ./install_third_parties.sh  \
     && ./install_miniconda.sh && ./install_conda_pkgs.sh
 RUN cd sys && ./set_bashrc_env.sh
 RUN chmod u+x *.sh && ./clean_out_data.sh
 
-# && ./set_bashrc_env.sh && ./clean_out_data.sh
-
-# RUN cd code/tests/
-# RUN ./tracing_grid.sh
-# RUN ./tracing.sh
-# RUN ./classfication.sh
 
