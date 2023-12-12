@@ -21,7 +21,6 @@ sudo apt-get update \
       "m4" \
       "make" \
       "pkg-config" \
-      "python-cairo-dev" \
       "unzip" \
       "zip" \
       "git" \

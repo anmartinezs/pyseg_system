@@ -6,8 +6,9 @@ This GitHub repository have two branches (git checkout <feature_branch>):
 * **python2**: old Python 2.7 (deprecated).
 * **python3**: branch with the latest modifications and improved.
 
-## What's new from v2.0.0
-Python 3 transition completed and changes for being compatible with [Scipion](https://github.com/scipion-em/scipion-em-pyseg.git)
+## What's new from v2.0.1
+Python 3 transition completed and changes for being compatible with [Scipion](https://github.com/scipion-em/scipion-em-pyseg.git).
+Now PySeg has been ugraded to run Ubunutu 22.04 LTS.
 
 ### CONTENTS
 
@@ -35,12 +36,16 @@ Python 3 transition completed and changes for being compatible with [Scipion](ht
 A description of the requirements, auxiliary software, installation and functionality testing is available on **docs/manual/manual.pdf** file. 
 
 ### BUILDING AND RUNNING WITH DOCKER
-You may also build and run PySeg as docker container.
-To do this you can run:
+You may want to build a docker container to run Pyseg. First, you have build docker image in **Dockerfile**:
 ```
 docker build . -t pyseg:latest
 ```
-And to run it (replace the <> placeholders accordingly, a typical location for the <mount-directory-in-container> is `/mnt`):
+Then you can run a terminal on image by:
+```
+docker run -it pyseg:latest bash
+```
+In this terminal, you can work like in any other Linux terminal having acces to the whole Pyseg funcitionality.
+If you just want to run a specific script then (replace the <> placeholders accordingly, a typical location for the <mount-directory-in-container> is `/mnt`):
 ```
 docker run --rm -it -v <data-directory-in-host-machine>:<mount-directory-in-container> pyseg:latest <command> <options>
 ```
