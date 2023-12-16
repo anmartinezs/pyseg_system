@@ -857,9 +857,11 @@ def signed_dist_cloud(cloud, dims):
 def seg_dist_trans(seg):
 
     if seg.dtype != bool:
-        tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg.astype(bool)))
+        ###tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg.astype(bool)))
+        tomod = scipy.ndimage.distance_transform_edt(numpy.invert(seg.astype(bool)))
     else:
-        tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg))
+        ###tomod = scipy.ndimage.morphology.distance_transform_edt(numpy.invert(seg))
+        tomod = scipy.ndimage.distance_transform_edt(numpy.invert(seg))
 
     return tomod
 

@@ -2571,6 +2571,7 @@ class GraphMCF(object):
             raise pexceptions.PySegInputError('topological_simp (GraphMCF)', error_msg)
 
         # Create a persistence ascend ordered lists with the initial vertices
+        ###print(f"morse 2574 th_per : '{th_per}', n : '{n}'")
         self.__v_lst = self.get_vertices_list()
         key_per_id = self.get_prop_id(STR_V_PER)
         key_pair_id = self.get_prop_id(self.__pair_prop_key)
@@ -2623,6 +2624,7 @@ class GraphMCF(object):
                 if (prop_ref_id is None) or (ref_n_comp != 1):
                     error_msg = 'The graph does not include %s as mask.' % prop_ref
                     raise pexceptions.PySegInputError(expr='topological_simp (GraphMCF)', msg=error_msg)
+                ###print(f"morse 2627 prop_ref_id : '{prop_ref_id}', ref_n_comp : '{ref_n_comp}'")
                 prop_type = self.get_prop_type(key_id=prop_ref_id)
                 prop_type = disperse_io.TypesConverter().gt_to_numpy(prop_type)
                 count = 0
@@ -4280,6 +4282,7 @@ class GraphMCF(object):
         # Vertices simplification
         v_err = False
         n_tverts = None
+        in_verts = None
         if v_num is not None:
             n_tverts = v_num
         elif v_den is not None:
@@ -4357,12 +4360,14 @@ class GraphMCF(object):
                                                 msg=error_msg)
 
         # Add mask property
+        ###print(f"morse 4360 vol : '{vol}'")
         self.add_scalar_field_nn(mask, STR_SIMP_MASK)
         ref_key_id = self.get_prop_id(STR_SIMP_MASK)
 
         # Vertices simplification
         v_err = False
         n_tverts = None
+        n_verts = None
         if v_den is not None:
             # Compute target number of vertices
             n_tverts = int(round(v_den * vol))
@@ -4385,6 +4390,9 @@ class GraphMCF(object):
         # Edges simplification
         e_err = False
         n_tedgs = None
+        n_edgs = None
+        n_tverts = None
+        if not n_verts: n_verts = 0
         if e_den is not None:
             # Compute target number of edges
             n_tedgs = int(round(e_den * vol))
@@ -4403,6 +4411,7 @@ class GraphMCF(object):
                                    fit=fit)
 
         # Raise warnings
+        ###print(f"morse 4413 n_verts : '{n_verts}', n_tverts : '{n_tverts}'")
         if v_err:
             curr_res = n_verts / vol
             error_msg = 'Demanded resolution for vertices could not be reached. \n'
@@ -4415,9 +4424,9 @@ class GraphMCF(object):
             error_msg += 'Current edge resolution is ' + str(curr_res) + ' vox/nm^3, '
             error_msg += 'asked ' + str(e_den) + ' vox/nm^3.'
             raise pyseg.pexceptions.PySegInputWarning(expr='graph_density_simp_ref (GraphMCF) \n', msg=error_msg)
+        ###print(f"morse 4422 n_edgs : '{n_edgs}', n_tedgs : '{n_tedgs}'")
 
-
-    # For al edges computes its total curvatures (as curves in space)
+    # For all edges computes its total curvatures (as curves in space)
     # Returns: properties STR_EDGE_UK, STR_EDGE_K, STR_EDGE_UT and STR_EDGE_T
     def compute_edge_curvatures(self):
 

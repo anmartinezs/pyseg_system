@@ -5,6 +5,8 @@
 
 __author__ = 'martinez'
 
+import sys
+
 ################################################################################################
 # Exceptions
 
@@ -23,6 +25,7 @@ class PySegInputError(PySegError):
     def __init__(self, expr, msg):
         self.expr = expr
         self.msg = msg
+        print('pexceptions 67: ' + self.expr + ' - ' + self.msg, file=sys.stdout, flush=True)
 
     def get_message(self):
         return self.expr + ' - ' + self.msg

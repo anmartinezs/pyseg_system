@@ -342,14 +342,14 @@ def pr_worker(pr_id, ids, q_pkls=None):
             )
         print(f'{time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime() )} Process[{str(pr_id)}] Pickling the graph as: ' + out_pkl, file=sys.stdout, flush=True)
         graph.pickle(out_pkl)
-        # star.set_element('_psGhMCFPickle', row, out_pkl)
-        q_pkls.put((row, out_pkl))
+        star.set_element('_psGhMCFPickle', row, out_pkl)
+        if q_pkls : q_pkls.put((row, out_pkl))
         pkls_dic[row] = out_pkl
     # End ID loop
 
     ###sys.exit(pr_id)
     ##sys.exit(5)
-    if q_pkls : sys.exit(return_code)
+    #sys.exit()
 
 ###def run():
 ########################################################################################
@@ -408,9 +408,10 @@ in_tomo_l = star.get_column_data('_rlnImageName')
 star.add_column('_psGhMCFPickle')
 
 # Loop for processing the input data
-print('Running main loop in parallel: \n', file=sys.stdout, flush=True)
-q_pkls = mp.Queue()
-processes, pr_results = dict(), dict()
+print('Running main loop in series: \n', file=sys.stdout, flush=True)
+###print(f'{time.strftime( "%Y-%m-%d %H:%M:%S", time.localtime() )}', file=sys.stdout, flush=True)
+###q_pkls = mp.Queue()
+#processes, pr_results = dict(), dict()
 spl_ids = np.array_split(list(range(star.get_nrows())), npr)
 
 
@@ -420,14 +421,21 @@ if not shutil.which(ps.globals.variables.DPS_MSE_CMD):
     exit()
 if not os.path.isdir(output_dir) : os.makedirs(output_dir)  # os.mkdir() can only operate one directory deep
 
+#for pr_id in range(npr):
+    #print(f"pr_id : '{pr_id}'")
+    #print(f"spl_ids[pr_id] : '{spl_ids[pr_id]}'")
+    #print(f"q_pkls : '{q_pkls}'")
+    #q_pkls.put((0, 'test'))
+#exit()
 
 for pr_id in range(npr):
-    print(f'\tProcess[{str(pr_id)}] Starting...')
-    pr = mp.Process(target=pr_worker, args=(pr_id, spl_ids[pr_id], q_pkls))
-    pr.start()
-    processes[pr_id] = pr
-    ###print('process ' + str(pr_id) + ', Exit code: [' + str(pr.exitcode) + ']')
-    pr.join()
+    #print(f'\tProcess[{str(pr_id)}] Starting...')
+    #pr = mp.Process(target=pr_worker, args=(pr_id, spl_ids[pr_id], q_pkls))
+    #pr.start()
+    #processes[pr_id] = pr
+    #pr.join()
+    pr_worker(pr_id, spl_ids[pr_id])
+    
     #if pr_id != pr.exitcode:
         #print('ERROR: the process ' + str(pr_id) + ' ended unsuccessfully [' + str(pr.exitcode) + ']')
         #print('Unsuccessfully terminated. (' + time.strftime("%c") + ')')
@@ -440,31 +448,31 @@ for pr_id in range(npr):
     #print(f"333 num_success '{num_success}'")
     #exit(3)
 
-num_success = 0
+#num_success = 0
 
-for pr_id in range(npr):
-    pr = processes[pr_id]
+#for pr_id in range(npr):
+    #pr = processes[pr_id]
     
-    ###if pr_id != pr.exitcode:
-    if pr.exitcode != 0:
-        print(f'\t\tERROR!! Process [{str(pr_id)}] ended unsuccessfully! Exit code: {str(pr.exitcode)}')
-        print(f'\tProcess[{str(pr_id)}] FAILED. ({time.strftime("%c")})')
-        ###exit()
-    else:
-        print(f'\tProcess[{str(pr_id)}] successful, exit code: {str(pr.exitcode)}')
-        num_success += 1
+    ####if pr_id != pr.exitcode:
+    #if pr.exitcode != 0:
+        #print(f'\t\tERROR!! Process [{str(pr_id)}] ended unsuccessfully! Exit code: {str(pr.exitcode)}')
+        #print(f'\tProcess[{str(pr_id)}] FAILED. ({time.strftime("%c")})')
+        ####exit()
+    #else:
+        #print(f'\tProcess[{str(pr_id)}] successful, exit code: {str(pr.exitcode)}')
+        #num_success += 1
 
-###exit(4)
+####exit(4)
 
-###if num_success == 0 : 
-print(f"333 num_success '{num_success}'")
-###exit(3)
+####if num_success == 0 : 
+#print(f"333 num_success '{num_success}'")
+####exit(3)
     
-count, n_rows = 0, star.get_nrows()
-while count < n_rows:
-    hold_out_pkl = q_pkls.get()
-    star.set_element(key='_psGhMCFPickle', row=hold_out_pkl[0], val=hold_out_pkl[1])
-    count += 1
+#count, n_rows = 0, star.get_nrows()
+#while count < n_rows:
+    #hold_out_pkl = q_pkls.get()
+    #star.set_element(key='_psGhMCFPickle', row=hold_out_pkl[0], val=hold_out_pkl[1])
+    #count += 1
 
 out_star = os.path.join(
     output_dir, 
@@ -477,13 +485,6 @@ print('\nTerminated. (' + time.strftime("%c") + ')\n')
 
 #if __name__ == "__main__":
     #run()
-
-
-
-
-
-
-
 
 
 
