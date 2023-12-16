@@ -18,9 +18,17 @@ else
 fi
 
 $install_exe install conda-libmamba-solver --yes \
-  && conda config --set solver libmamba \
-  && $install_exe install --yes --solver=libmamba \
-  --channel conda-forge --channel anaconda python=3.7 \
+  && conda config --set solver libmamba
+  
+status_code=$?
+if [[ $status_code -eq 0 ]] ; then
+  solver_cmd="$install_exe install --yes --solver=libmamba"
+else
+  solver_cmd="$install_exe install --yes"
+fi
+  
+$solver_cmd --channel conda-forge --channel anaconda \
+  python=3.7 \
   opencv=4.2.0 \
   graph-tool=2.29 \
   future=0.18.2=py37_0 \
