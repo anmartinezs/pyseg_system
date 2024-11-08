@@ -66,7 +66,7 @@ Licensed under the Apache License, Version 2.0 (see LICENSE file)
 
 * Template-free particle picking and unsupervised classification (PySeg):
 
-        [1] Martinez-Sanchez et al. "Template-free detection and classification of heterogeneous membrane-bound complexes in cryo-electron tomograms" Nature Methods (2020) doi:10.1038/s41592-019-0687-1
+        [1] Martinez-Sanchez, A., Kochovski, Z., Laugks, U. et al. Template-free detection and classification of membrane-bound complexes in cryo-electron tomograms. Nat Methods 17, 209–216 (2020). https://doi.org/10.1038/s41592-019-0675-5
 
 
 * Membrane segmentation (TomoSegMemTV):
